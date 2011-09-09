@@ -1,7 +1,7 @@
 import MySQLdb
 
 DATABASE_HOST = "localhost"
-DATABASE_USER = "Lena"
+DATABASE_USER = "admin"
 DATABASE_NAME = "testdb"
 DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
