@@ -1,0 +1,28 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<head>
+		<script type="text/javascript" src="jquery/jquery-1.5.2.js"></script>
+		<script type="text/javascript" src="jquery/jquery-ui-1.8.12.custom.min.js"></script> 
+		<link rel="stylesheet" type="text/css" href="styles/jquery-ui-1.8.12.custom.css">
+</head>
+<script type="text/javascript">
+	$(function() {
+		$( "#post" ).button();
+		$( "#post" ).click(function() { 
+			//alert($("#json").val());
+			$.ajax({
+				type: "POST",
+				url: "http://localhost/small_worlds/",
+				data: $("#json").val(),
+				success: function(msg){
+					alert( "Data Saved: " + msg );
+				}
+			});
+		});
+	});
+</script>
+<body>
+<textarea id = "json"></textarea>
+<button id = "post">Post</button>
+</body>
+</html>
