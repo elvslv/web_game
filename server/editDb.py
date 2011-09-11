@@ -1,4 +1,6 @@
 import MySQLdb
+from misc import MAX_USERNAME_LEN
+from misc import MAX_PASSWORD_LEN
 
 DATABASE_HOST = "localhost"
 DATABASE_USER = "admin"
@@ -16,7 +18,8 @@ def sidTable():
 
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			%s(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(25) UNIQUE, Password VARCHAR(10))" % userTable())
+			%s(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%d) UNIQUE, Password VARCHAR(%d))" % 
+                (userTable(), MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			%s(Sid INT PRIMARY KEY AUTO_INCREMENT, UserId INT UNIQUE, Start DATETIME)" % sidTable())
                 
