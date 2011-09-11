@@ -22,7 +22,7 @@ def application(environ, start_response):
         headers = [('Content-type', 'text/plain')]
         start_response(status, headers)
         return str([response_body])
-	else:
+    else:
         response_body = ''
         status = '200 OK'
         headers = [('Content-type', 'text/html'),
