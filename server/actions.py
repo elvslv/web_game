@@ -5,28 +5,29 @@ cursor = editDb.cursor
 db = editDb.db
 
 def doAction(data):
-	try:
-		res = functions[data['action']](data)
-		db.commit()
-		return res
-	except MySQLdb.Error, e:
-		db.rollback()
-		return e
+        try:
+                res = functions[data['action']](data)
+                db.commit()
+                return res
+        except MySQLdb.Error, e:
+                db.rollback()
+                return e
 
 def register(data):
-	if not(('userName' in data) and ('password' in data)):
-		return 'badJson'
+        if not(('userName' in data) and ('password' in data)):
+                return 'badJson'
 		
-	userName = data['userName']
-	passwd = data['password']
-	#when badUserName and badPassword?
-	
-	num = int(cursor.execute("SELECT 1 FROM %s WHERE UserName=%s" % (editDb.userTable(), userName)))
-	if num:
-		return 'userNameTaken'
-	
-	cursor.execute("INSERT INTO %s(UserName, Password) VALUES (%s, %s)" % (editDb.userTable(), userName, passwd))
-	return 'ok'
+        userName = data['userName']
+        passwd = data['password']
+        #when badUserName and badPassword?
+        
+        num = int(cursor.execute("SELECT 1 FROM %s WHERE UserName='%s'" % (editDb.userTable(), userName)))
+
+        if num:
+                return 'userNameTaken'
+
+        cursor.execute("INSERT INTO %s(UserName, Password) VALUES ('%s', '%s')" % (editDb.userTable(), userName, passwd))
+        return 'ok'
 
 def login(data):
 	if not(('userName' in data) and ('password' in data)):
@@ -35,7 +36,7 @@ def login(data):
 	userName = data['userName']
 	passwd = data['password']
 	
-	num = int(cursor.execute("SELECT id FROM %s WHERE UserName=%s AND Password=%s" % 
+	num = int(cursor.execute("SELECT id FROM %s WHERE UserName='%s' AND Password='%s'" % 
 		(editDb.userTable(), userName, passwd)))
 	if num == 0:
 		return 'badUserNameOrPassword'

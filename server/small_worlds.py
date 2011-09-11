@@ -7,25 +7,23 @@ os.chdir(path)
 
 import parseJson
 
-PORT = 8080
-
 def application(environ, start_response):
     if environ['REQUEST_METHOD'] == 'POST':
         try:
             request_body_size = int(environ['CONTENT_LENGTH'])
             request_body = environ['wsgi.input'].read(request_body_size)
         except (TypeError, ValueError):
-            request_body = "0"
+            return 'Cannot read request body'
         try:
             response_body = parseJson.parseInputData(request_body)
         except BaseException, e:
-            response_body = "An error occured %s, request_body: %s" % (e, request_body)
+            response_body = 'An error %s occured while trying parse json: %s' % (e, request_body)
         status = '200 OK'
         headers = [('Content-type', 'text/plain')]
         start_response(status, headers)
         return str([response_body])
-    else:
-        response_body = "Hello, world!"
+	else:
+        response_body = ''
         status = '200 OK'
         headers = [('Content-type', 'text/html'),
                    ('Content-Length', str(len(response_body)))]
