@@ -8,10 +8,6 @@ DATABASE_PORT = 3306
 
 tables = {"Users": "Users", "Sessions": "Sessions"}
 
-db = MySQLdb.connect(host = DATABASE_HOST, user = DATABASE_USER, passwd = DATABASE_PASSWD,
-					port = int(DATABASE_PORT), db = DATABASE_NAME)
-cursor = db.cursor()
-
 def userTable():
 	return tables['Users']
 
@@ -27,3 +23,11 @@ def createTables():
 def clearDb():
 	for t in tables:
 		cursor.execute("DELETE FROM %s" % t)
+		
+
+db = MySQLdb.connect(host = DATABASE_HOST, user = DATABASE_USER, passwd = DATABASE_PASSWD,
+					port = int(DATABASE_PORT))
+cursor = db.cursor()
+cursor.execute("CREATE DATABASE IF NOT EXISTS %s" % DATABASE_NAME)
+cursor.execute("USE %s" % DATABASE_NAME)
+createTables()
