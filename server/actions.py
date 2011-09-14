@@ -29,10 +29,15 @@ def register(data):
 
         username = data['username']
         passwd = data['password']
-
-        if  not re.match(usrnameRegexp, username, re.I):
-				return 'badUsername'
-        if  not re.match(pwdRegexp, passwd, re.I):
+        try:
+                if  not re.match(usrnameRegexp, username, re.I):
+                                        return 'badUsername'
+        except(TypeError, ValueError):
+                return 'badUserName'
+        try:
+                if  not re.match(pwdRegexp, passwd, re.I):
+                        return 'badPassword'
+        except(TypeError, ValueError):
                 return 'badPassword'
         
         num = int(cursor.execute("SELECT 1 FROM %s WHERE username='%s'" % (editDb.userTable(), username)))
@@ -68,7 +73,10 @@ def logout(data):
 		return 'badJson'
 
 	sid = data['sid']
-	num = int(cursor.execute("DELETE FROM %s WHERE Sid=%d" % (editDb.sidTable(), sid)))
+	try:
+                num = int(cursor.execute("DELETE FROM %s WHERE Sid=%d" % (editDb.sidTable(), sid)))
+        except(TypeError, ValueError):
+                return 'badSid'
 	if num == 0:
 		return 'badSid'
 	return 'ok'
@@ -78,6 +86,13 @@ def doSmth(data):
 		return 'badJson'
 
 	sid = data['sid']
-	return int(cursor.execute("SELECT UserId FROM %s WHERE Sid=%d" % (editDb.sidTable(), sid)))
+	try:
+                num = int(cursor.execute("SELECT UserId FROM %s WHERE Sid=%d" % (editDb.sidTable(), sid)))
+        except(TypeError, ValueError):
+                return 'badSid'
+        if num == 0:
+                return 'badSid'
+        else:
+                return 'ok'
 
 functions = { 'register': register, 'login': login, 'logout': logout, 'doSmth': doSmth }

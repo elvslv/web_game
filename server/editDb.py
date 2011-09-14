@@ -25,7 +25,7 @@ def createTables():
                 
 def clearDb():
 	for t in tables:
-		cursor.execute("DELETE FROM %s" % t)
+		cursor.execute("TRUNCATE TABLE %s" % t)
 		
 
 db = MySQLdb.connect(host = DATABASE_HOST, user = DATABASE_USER, passwd = DATABASE_PASSWD,

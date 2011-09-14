@@ -2,8 +2,7 @@ import unittest
 import parseJson
 import editDb
 import os
-
-testNum = 1
+import sys
 
 class TestFromFile(unittest.TestCase):
         def __init__(self, inFile, ansFile):
@@ -23,6 +22,7 @@ def suite():
         suite.addTests(TestFromFile('tests\\test_%d.in' % i, 'tests\\test_%d.ans' % i) for i in range(testNum))
         return suite
 
-if __name__ == '__main__':
+def main(n):
+        global testNum
+        testNum = n
         unittest.TextTestRunner().run(suite())
-

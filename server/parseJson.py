@@ -2,12 +2,20 @@ import json
 import actions 
 
 def parseInputData(data):
-        object = json.loads(data)
-	if not('action' in object):
-		return 'badJson'
-	if not(object['action'] in actions.functions):
-		return 'badAction'
-	return actions.doAction(object)
+        try:
+                object = json.loads(data)
+        except (TypeError, ValueError), e:
+                return ['badJson']
+        result = json.loads('[]')
+        for obj in object:
+                if not('action' in obj):
+                        ans = 'badJson'
+                elif not(obj['action'] in actions.functions):
+                        ans = 'badAction'
+                else:
+                        ans = actions.doAction(obj)
+                result.append(ans)
+        return result
 	
 def parseDataFromFile(fileName):
 	try:
