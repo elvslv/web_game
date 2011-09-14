@@ -24,40 +24,40 @@ def doAction(data):
                 return e
 
 def register(data):
-        if not(('userName' in data) and ('password' in data)):
+        if not(('username' in data) and ('password' in data)):
                 return 'badJson'
 
-        userName = data['userName']
+        username = data['username']
         passwd = data['password']
 
-        if  not re.match(usrnameRegexp, userName, re.I):
+        if  not re.match(usrnameRegexp, username, re.I):
 				return 'badUsername'
         if  not re.match(pwdRegexp, passwd, re.I):
                 return 'badPassword'
         
-        num = int(cursor.execute("SELECT 1 FROM %s WHERE UserName='%s'" % (editDb.userTable(), userName)))
+        num = int(cursor.execute("SELECT 1 FROM %s WHERE username='%s'" % (editDb.userTable(), username)))
 
         if num:
-                return 'userNameTaken'
+                return 'usernameTaken'
 
-        cursor.execute("INSERT INTO %s(UserName, Password) VALUES ('%s', '%s')" % (editDb.userTable(), userName, passwd))
+        cursor.execute("INSERT INTO %s(username, password) VALUES ('%s', '%s')" % (editDb.userTable(), username, passwd))
         return 'ok'
 
 def login(data):
-	if not(('userName' in data) and ('password' in data)):
+	if not(('username' in data) and ('password' in data)):
 		return 'badJson'
 
-	userName = data['userName']
+	username = data['username']
 	passwd = data['password']
 
-	num = int(cursor.execute("SELECT id FROM %s WHERE UserName='%s' AND Password='%s'" % 
-		(editDb.userTable(), userName, passwd)))
+	num = int(cursor.execute("SELECT id FROM %s WHERE username='%s' AND Password='%s'" % 
+		(editDb.userTable(), username, passwd)))
 	if num == 0:
-		return 'badUserNameOrPassword'
+		return 'badUsernameOrPassword'
 	id = cursor.fetchone()[0]
 	num = int(cursor.execute("SELECT Sid FROM %s WHERE UserId=%d" % (editDb.sidTable(), id)))
 	if num > 0:
-		return 'userLogined'
+		return 'userLoggedIn'
 
 	cursor.execute("INSERT INTO %s(UserId) VALUES(%d)" % (editDb.sidTable(), id))
 	sid = db.insert_id()
