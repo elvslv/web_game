@@ -1,1 +1,20 @@
-['badUsername', 'badUsername', 'badPassword', 'badPassword', 'badUsername', 'badPassword']
+[
+	{
+		"result": "badUsername"
+	}, 
+	{
+		"result": "badUsername"
+	}, 
+	{
+		"result": "badPassword"
+	}, 
+	{
+		"result": "badPassword"
+	}, 
+	{
+		"result": "badUsername"
+	}, 
+	{
+		"result": "badPassword"
+	}
+] 

@@ -1,1 +1,8 @@
-['ok', 'ok']
+[
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok"
+	}
+]

@@ -1,20 +1,31 @@
 import json
 import actions 
 
-def parseInputData(data):
+def parseJsonObj(obj):
         try:
-                object = json.loads(data)
-        except (TypeError, ValueError), e:
-                return ['badJson']
-        result = json.loads('[]')
-        for obj in object:
                 if not('action' in obj):
                         ans = 'badJson'
                 elif not(obj['action'] in actions.functions):
                         ans = 'badAction'
                 else:
                         ans = actions.doAction(obj)
-                result.append(ans)
+        except(TypeError, ValueError):
+                return 'badJson'
+        return ans
+
+def parseInputData(data):     
+        try:
+                object = json.loads(data)
+        except (TypeError, ValueError), e:
+                return [{'result': 'badJson'}]
+        
+        result = list()
+        if isinstance(object, list):
+                for obj in object:
+                        result.append({'result': parseJsonObj(obj)})
+        else:
+                result.append({'result': 'badJson'})
+                
         return result
 	
 def parseDataFromFile(fileName):

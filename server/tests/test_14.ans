@@ -1,1 +1,35 @@
-['ok', 'ok', ['ok', 1L], ['ok', 2L], 'ok', 'ok', 'ok', 'ok', 'ok', 'badSid', 'ok']
+[
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": ["ok", 1]
+	}, 
+	{
+		"result": ["ok", 2]
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "badSid"
+	}, 
+	{
+		"result": "ok"
+	}
+]

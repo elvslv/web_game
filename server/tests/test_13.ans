@@ -1,1 +1,8 @@
-['ok', 'usernameTaken']
+[
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "usernameTaken"
+	}
+]

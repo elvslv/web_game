@@ -1,1 +1,8 @@
-['badAction', 'badAction']
+[
+	{
+		"result": "badAction"
+	}, 
+	{
+		"result": "badAction"
+	}
+]

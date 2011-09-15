@@ -1,1 +1,8 @@
-['ok', 'badUsernameOrPassword']
+[
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "badUsernameOrPassword"
+	}
+]

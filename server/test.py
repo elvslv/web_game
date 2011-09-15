@@ -48,14 +48,14 @@ class Test(unittest.TestCase):
 		actions.doAction({"action": "register", "username": "cool_name", "password": "younevergu"})
 		sid = actions.doAction({"action": "login", "username": "cool_name", "password": "younevergu"})[1]
 		res = actions.doAction({"action": "doSmth", "sid": sid})
-		assert actions.doAction({"action": "doSmth", "sid": sid}) == 1
+		assert res == 'ok'
 		
 	def testDoSmthAfterLogout(self):
 		actions.doAction({"action": "register", "username": "JohnDoe", "password": "xse7en"})
 		sid = actions.doAction({"action": "login", "username": "JohnDoe", "password": "xse7en"})[1]
 		actions.doAction({"action": "logout", "sid": sid})
 		res = actions.doAction({"action": "doSmth", "sid": sid})
-		assert actions.doAction({"action": "doSmth", "sid": sid}) == 0
+		assert res == 'badSid'
 		
 if __name__ == '__main__':
     unittest.main()

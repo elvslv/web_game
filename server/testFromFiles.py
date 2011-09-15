@@ -3,6 +3,7 @@ import parseJson
 import editDb
 import os
 import sys
+import json
 
 class TestFromFile(unittest.TestCase):
         def __init__(self, inFile, ansFile):
@@ -15,7 +16,7 @@ class TestFromFile(unittest.TestCase):
                 f = open(self.ansFile)
                 ans = f.read()
                 out = parseJson.parseDataFromFile(self.inFile)
-                self.assertEqual(str(out), ans)
+                self.assertListEqual(out, json.loads(ans))
                 
 def suite():
         suite = unittest.TestSuite()

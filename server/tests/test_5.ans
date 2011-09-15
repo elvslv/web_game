@@ -1,1 +1,5 @@
-['badJson']
+[
+	{
+		"result": "badJson"
+	}
+]
