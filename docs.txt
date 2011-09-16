@@ -50,7 +50,8 @@ Server receives JSON  messages sent via http POST. Typical responses are describ
 TYPICAL RESPONSES
 	Response is a list of JSON objects created in following format:
 		{
-			'result': ans
+			'result': ans,
+			other fileds with parameters 
 		},
 	ans can possess one of the following values:
 		*ok: String or list containing this word in lower case usually means that operation went succesfully. 
@@ -61,9 +62,8 @@ TYPICAL RESPONSES
 		*badUsernameOrPassword: Either user with this username hasn't signed up yet or password differs from one entered during registration.
 		*userLoggedIn: User were trying to log in without loggin' out first. Regrettably, it's not possible.
 		*badSid: User was trying to do something with incorrect session id. Read "Logout" command description to understand what kind of sid you can use.
-		*('ok', <sid>): User logged in succesfully and even got a sid.
-		*<number>: This is your userId. There are many like it, but this one is yours. 
-	
+	For "login" query the second field is 
+		"sid": sid
 BASIC COMMANDS
 	
 	NOTE: Each command must be a list, that contains JSON objects. Each such JSON message should contain "action" field. Otherwise, 'badJson' error's to be expected.

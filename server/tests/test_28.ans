@@ -9,12 +9,15 @@
 		"result": "ok"
 	}, 
 	{
-		"result": ["ok", 1]
+		"result": "ok", 
+		"sid": 1
 	}, 
 	{
-		"result": ["ok", 2]
+		"result": "ok", 
+		"sid": 2
 	}, 
 	{
-		"result": ["ok", 3]
+		"result": "ok", 
+		"sid": 3
 	}
 ]

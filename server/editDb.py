@@ -8,20 +8,14 @@ DATABASE_NAME = "testdb"
 DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
 
-tables = {"Users": "Users", "Sessions": "Sessions"}
-
-def userTable():
-	return tables['Users']
-
-def sidTable():
-	return tables['Sessions']
+tables = ['Users', 'Sessions']
 
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			%s(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%d) UNIQUE, Password VARCHAR(%d))" % 
-                (userTable(), MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
+			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%d) UNIQUE, Password VARCHAR(%d))" % 
+                (MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			%s(Sid INT PRIMARY KEY AUTO_INCREMENT, UserId INT UNIQUE, Start DATETIME)" % sidTable())
+			Sessions(Sid INT PRIMARY KEY AUTO_INCREMENT, UserId INT UNIQUE, Start DATETIME)")
                 
 def clearDb():
 	for t in tables:

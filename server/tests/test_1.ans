@@ -3,6 +3,7 @@
 		"result": "ok"
 	}, 
 	{
-		"result": ["ok", 1]
+		"result": "ok", 
+		"sid": 1
 	}
 ]

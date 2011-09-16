@@ -1,0 +1,2 @@
+1. Add parameters to queries
+5. Fix sid generation

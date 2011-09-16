@@ -3,7 +3,8 @@
 		"result": "ok"
 	}, 
 	{
-		"result": ["ok", 1]
+		"result": "ok", 
+		"sid": 1
 	}, 
 	{
 		"result": "userLoggedIn"
@@ -12,6 +13,7 @@
 		"result": "ok"
 	}, 
 	{
-		"result": ["ok", 2]
+		"result": "ok", 
+		"sid": 2
 	}
 ]
