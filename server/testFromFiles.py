@@ -4,6 +4,9 @@ import editDb
 import os
 import sys
 import json
+import random
+import misc
+import actions
 
 class TestFromFile(unittest.TestCase):
         def __init__(self, inFile, ansFile):
@@ -12,6 +15,7 @@ class TestFromFile(unittest.TestCase):
                 self.ansFile = ansFile
 
         def runTest(self):
+                actions.LAST_SID = misc.X0
                 editDb.clearDb()
                 f = open(self.ansFile)
                 ans = f.read()

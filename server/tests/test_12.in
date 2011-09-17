@@ -11,10 +11,10 @@
 	},
 	{
 		"action": "logout",
-		"sid": 1
+		"sid": 458024697
 	},
 	{
 		"action": "doSmth",
-		"sid": 1
+		"sid": 458024697
 	}
 ]

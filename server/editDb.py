@@ -10,13 +10,11 @@ DATABASE_NAME = "testdb"
 DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
 
-tables = ['Users', 'Sessions', 'Games', 'Players', 'Maps']
+tables = ['Users', 'Games', 'Players', 'Maps']
 
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%d) UNIQUE, Password VARCHAR(%d))" % (MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
-	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			Sessions(Sid INT PRIMARY KEY AUTO_INCREMENT, UserId INT UNIQUE, Start DATETIME)")
+			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%d) UNIQUE, Password VARCHAR(%d), Sid BIGINT)" % (MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Games(GameId INT UNSIGNED PRIMARY KEY, GameName VARCHAR(%d), MapId INT UNSIGNED, PlayersNum INT UNSIGNED, State TINYINT)" % MAX_GAMENAME_LEN)
 	cursor.execute("CREATE TABLE IF NOT EXISTS \

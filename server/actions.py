@@ -6,6 +6,10 @@ from misc import MAX_USERNAME_LEN
 from misc import MAX_PASSWORD_LEN
 from misc import MIN_USERNAME_LEN
 from misc import MIN_PASSWORD_LEN
+from misc import X0
+from misc import A
+from misc import C
+from misc import M
 
 cursor = editDb.cursor
 db = editDb.db
@@ -13,9 +17,14 @@ db = editDb.db
 usrnameRegexp = r'^[a-z]+[\w_-]{%d,%d}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^\w{%d,%d}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
+def generateSid():
+	global LAST_SID
+	LAST_SID = (A * LAST_SID + C) % M
+	return LAST_SID
+
 def act_register(data):
 	if not(('username' in data) and ('password' in data)):
-			return {"result": "badJson"}
+		return {"result": "badJson"}
 
 	username = data['username']
 	passwd = data['password']
@@ -35,7 +44,7 @@ def act_register(data):
 	if num:
 		return {"result": "usernameTaken"}
 
-	cursor.execute("INSERT INTO Users(username, password) VALUES (%s, %s)",(username, passwd))
+	cursor.execute("INSERT INTO Users(username, password, sid) VALUES (%s, %s, 0)",(username, passwd))
 	return {"result": "ok"}
 
 def act_login(data):
@@ -45,21 +54,21 @@ def act_login(data):
 	username = data['username']
 	passwd = data['password']
 
-	num = int(cursor.execute("SELECT id FROM Users WHERE Username=%s AND Password=%s",
+	num = int(cursor.execute("SELECT Sid FROM Users WHERE Username=%s AND Password=%s",
 		(username, passwd)))
 
 	if num == 0:
 		return {"result": "badUsernameOrPassword"}
-	id = int(cursor.fetchone()[0])
 	try:
-		num = int(cursor.execute("SELECT Sid FROM Sessions WHERE UserId=%s", id))
+		sid = int(cursor.fetchone()[0])
+
+		if sid > 0:
+			return {"result": "userLoggedIn"}
+	
+		sid = generateSid()
+		cursor.execute("UPDATE Users SET Sid=%s WHERE Username=%s", (sid, username))
 	except (TypeError, ValueError), e:
 		return e
-	if num > 0:
-		return {"result": "userLoggedIn"}
-
-	cursor.execute("INSERT INTO Sessions(UserId) VALUES(%s)", id)
-	sid = db.insert_id()
 	return {"result": "ok", "sid": sid}
 
 def act_logout(data):
@@ -68,7 +77,7 @@ def act_logout(data):
 
 	sid = data['sid']
 	try:
-		num = int(cursor.execute("DELETE FROM Sessions WHERE Sid=%s", sid))
+		num = int(cursor.execute("UPDATE Users SET Sid=0 WHERE Sid=%s", sid))
 	except(TypeError, ValueError):
 		return {"result": "badSid"}
 	if num == 0:
@@ -81,7 +90,7 @@ def act_doSmth(data):
 
 	sid = data['sid']
 	try:
-		num = int(cursor.execute("SELECT UserId FROM Sessions WHERE Sid=%s", sid))
+		num = int(cursor.execute("SELECT id FROM Users WHERE Sid=%s", sid))
 	except(TypeError, ValueError):
 		return {"result": "badSid"}
 	if num == 0:
