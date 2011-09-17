@@ -10,7 +10,7 @@ DATABASE_NAME = "testdb"
 DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
 
-tables = ['Users', 'Games', 'Players', 'Maps']
+tables = ['Users', 'Games', 'Players', 'Maps', 'Chat']
 
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
@@ -22,6 +22,8 @@ def createTables():
 			DeclineRace TINYINT UNSIGNED, Coins TINYINT UNSIGNED)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Maps(MapId INT UNSIGNED PRIMARY KEY, MapName VARCHAR(%d))" % MAX_MAPNAME_LEN)
+	cursor.execute("CREATE TABLE IF NOT EXISTS \
+		Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time REAL)")
                 
 def clearDb():
 	for t in tables:

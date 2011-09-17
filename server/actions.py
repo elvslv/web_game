@@ -1,6 +1,7 @@
 import MySQLdb
 import editDb
 import re
+import time
 
 from misc import MAX_USERNAME_LEN
 from misc import MAX_PASSWORD_LEN
@@ -98,6 +99,40 @@ def act_doSmth(data):
 	else:
 		return {"result": "ok"}
 
+def act_sendMessage(data):
+	if not(('userid' in data) and ('message' in data)):
+			return {"result": "badJson"}
+		
+	userId = data['userid']
+	message = data['message']
+	mesTime = time.time();
+	try:
+		num = int(cursor.execute("SELECT 1 FROM Users WHERE UserId=%s", userId))   
+	except (TypeError, ValueError):
+		return {"result": "badUserId"}
+	if num == 0:
+		return {"result": "badUserId"}
+	
+	cursor.execute("INSERT INTO Chat(userid, message, time) VALUES (%s, %s, %s)",(userId, message, mesTime)) 
+	return {"result": "ok", "mesTime": mesTime}
+
+
+def act_getMessages(data):
+	if not('since' in data):
+		return {"result": "badJson"}
+	try:
+		cursor.execute("SELECT UserId, Message, Time FROM Chat WHERE Time > %s ORDER BY Time", since)
+	except (TypeError, ValueError), e:
+		return {"result": "badTime"}
+	records =  cursor.fetchall()
+	records = records[-100:]
+	mesArray = []
+	for rec in records:
+		user_id, message, mes_time = rec
+		mesArray.append({"userid": userId, "message": message, "mes_time": mesTime})
+                
+	return {"result": "ok", "mesArray": mesArray}
+		
 def doAction(data):
 	try:
 		func = 'act_%s' % data['action']
