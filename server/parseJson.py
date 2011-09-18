@@ -7,7 +7,6 @@ def parseJsonObj(obj):
 			ans = {"result": "badJson"}
 		else:
 			ans = actions.doAction(obj)
-
 	except(TypeError, ValueError):
 		return {"result": "badJson"}
 	return ans
@@ -28,21 +27,28 @@ def parseDataFromFile(fileName):
 		file = open(fileName, 'r')
 	except:
 		return 'Cannot open file %s' % fileName
-
+	description = ''
 	try:
 		object = json.loads(file.read())
-	except (TypeError, ValueError), e:
-		return [{"result": "badJson"}]
+	except (TypeError, ValueError):
+		return {'result': [{"result": "badJson"}], 'description': description}
+
+        if not ('test' in object):
+                return {'result': [{'result': 'badTest'}], 'description': description}
+
+        if 'description' in object:
+                description = object['description']
 	
+        object = object['test']
 	result = list()
 	if isinstance(object, list):
 		for obj in object:
 			result.append(parseJsonObj(obj))
 	else:
-		return [parseJsonObj(object)]
+		return {'result': [parseJsonObj(object)], 'description': description}
 
-	return result
+	return {'result': result, 'description': description}
 	
-if __name__ == "__main__":
-    import sys
-    parseDataFromFile(str(sys.argv[1]))
+#if __name__ == "__main__":
+#    import sys
+#    parseDataFromFile(str(sys.argv[1]))

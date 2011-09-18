@@ -1,7 +1,10 @@
-[
-	{
-		"action": "register",
-		"username": "123",
-		"password": [135, 315, 5666],
-	}
-]
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "123",
+			"password": [135, 315, 5666],
+		}
+	]
+}

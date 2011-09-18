@@ -1,6 +1,9 @@
-[
-	{
-		"action": "logout",
-		"sid": "fsagjkgjsk"
-	}
-]
+{
+	"test":
+	[
+		{
+			"action": "logout",
+			"sid": "fsagjkgjsk"
+		}
+	]
+}

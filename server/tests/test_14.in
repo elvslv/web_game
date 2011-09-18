@@ -1,50 +1,53 @@
-[
-	{
-		"action": "register",
-		"username": "rewtgh",
-		"password": "wqtewy"
-	},
-	{
-		"action": "register",
-		"username": "rewtgh555",
-		"password": "365757"
-	},
-	{
-		"action": "login",
-		"username": "rewtgh",
-		"password": "wqtewy"
-	},
-	{
-		"action": "login",
-		"username": "rewtgh555",
-		"password": "365757"
-	},
-	{
-		"action": "doSmth",
-		"sid": 458024697
-	},
-	{
-		"action": "doSmth",
-		"sid": 458024697
-	},
-	{
-		"action": "doSmth",
-		"sid": 5390812924
-	},
-	{
-		"action": "logout",
-		"sid": 5390812924
-	},
-	{
-		"action": "doSmth",
-		"sid": 458024697
-	},
-	{
-		"action": "doSmth",
-		"sid": 5390812924
-	},
-	{
-		"action": "logout",
-		"sid": 458024697
-	}
-]
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh555",
+			"password": "365757"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh555",
+			"password": "365757"
+		},
+		{
+			"action": "doSmth",
+			"sid": 1
+		},
+		{
+			"action": "doSmth",
+			"sid": 1
+		},
+		{
+			"action": "doSmth",
+			"sid": 2
+		},
+		{
+			"action": "logout",
+			"sid": 2
+		},
+		{
+			"action": "doSmth",
+			"sid": 1
+		},
+		{
+			"action": "doSmth",
+			"sid": 2
+		},
+		{
+			"action": "logout",
+			"sid": 1
+		}
+	]
+}

@@ -1,16 +1,19 @@
-[
-	{
-		"action": "register",
-		"username": "rewtgh",
-		"password": "wqtewy"
-	},
-	{
-		"action": "login",
-		"username": "rewtgh",
-		"password": "wqtewy"
-	},
-	{
-		"action": "doSmth",
-		"sid": 458024697
-	}
-]
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "doSmth",
+			"sid": 1
+		}
+	]
+}

@@ -4,16 +4,17 @@
 	}, 
 	{
 		"result": "ok", 
-		"sid": 458024697
+		"sid": 1
 	}, 
 	{
-		"result": "userLoggedIn"
+		"result": "ok",
+		"sid": 2
 	}, 
 	{
 		"result": "ok"
 	}, 
 	{
 		"result": "ok", 
-		"sid": 5390812924
+		"sid": 3
 	}
 ]

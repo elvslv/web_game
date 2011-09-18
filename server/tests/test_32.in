@@ -1,0 +1,121 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "register",
+			"username": "user3",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user3",
+			"password": "fhjdgj"
+		},
+				{
+			"action": "register",
+			"username": "user4",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user4",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "register",
+			"username": "user5",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user5",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 1,
+			"playersNum": 2
+		},
+		{
+			"action": "createGame",
+			"sid": 3,
+			"gameName": "game2",
+			"mapId": 2,
+			"playersNum": 3
+		},
+		{
+			"action": "joinGame",
+			"sid": 3,
+			"gameId": 1			
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1		
+		},
+		{
+			"action": "joinGame",
+			"sid": 4,
+			"gameId": 1		
+		},
+		{
+			"action": "leaveGame",
+			"sid": 4
+		},
+		{
+			"action": "leaveGame",
+			"sid": 2
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 4,
+			"status": 1
+		},
+		{
+			"action": "joinGame",
+			"sid": 4,
+			"gameId": 1	
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 4,
+			"status": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"status": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"status": 0
+		},
+		{
+			"action": "getGameList"
+		}
+	],
+	"description": "test leave and join game"
+}

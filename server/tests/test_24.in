@@ -1,5 +1,8 @@
 {
-	"action": "register",
-	"username": "rewtgh",
-	"password": "wqtewy"
+	"test":
+	{
+		"action": "register",
+		"username": "rewtgh",
+		"password": "wqtewy"
+	}
 }

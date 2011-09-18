@@ -1,10 +1,13 @@
-[
-	{
-		"action": "register",
-		"username": "rewtgh"
-	},
-	{
-		"action": "login",
-		"password": "wqtewy"
-	}
-]
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "rewtgh"
+		},
+		{
+			"action": "login",
+			"password": "wqtewy"
+		}
+	]
+}

@@ -1,0 +1,26 @@
+{
+	"test": 
+	[
+		{
+			"action": "uploadMap",
+			"mapName": "map2",
+			"playersNum": 2
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map3",
+			"playersNum": 3
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map4",
+			"playersNum": 4
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map5",
+			"playersNum": 5
+		}
+	],
+	"description": "Upload maps"
+}
