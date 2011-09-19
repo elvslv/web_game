@@ -9,7 +9,7 @@
 		"result": "badPassword"
 	}, 
 	{
-		"result": "badPassword"
+		"result": "ok"
 	}, 
 	{
 		"result": "badUsername"
