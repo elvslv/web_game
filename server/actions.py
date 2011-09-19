@@ -20,7 +20,18 @@ cursor = editDb.cursor
 db = editDb.db
 
 usrnameRegexp = r'^[a-z]+[\w_-]{%d,%d}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
-pwdRegexp = r'^\w{%d,%d}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
+pwdRegexp = r'^.{%d,%d}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
+
+userStages = {
+			'notPlaying': 1, 
+			'waitingTurn': 2, 
+			'choosingRace': 3, 
+			'firstAttack' : 4, 
+			'Redeploying' : 5, 
+			'finishedMove' : 6, 
+			'notFirstAttack' : 7,
+}
+			
 
 def act_register(data):
 	if not(('username' in data) and ('password' in data)):
@@ -42,7 +53,7 @@ def act_register(data):
 	num = int(cursor.execute("SELECT 1 FROM Users WHERE Username=%s", username))
 	if num:
 		return {"result": "usernameTaken"}
-	cursor.execute("INSERT INTO Users(username, password) VALUES (%s, %s)",(username, passwd))
+	cursor.execute("INSERT INTO Users(username, password, stage) VALUES (%s, %s, %s)",(username, passwd, userStages['notPlaying']))
 	return {"result": "ok"}
 
 def act_login(data):
@@ -188,8 +199,8 @@ def act_createGame(data):
 		return {'result': 'badGameDescription'}
 	
 	try:
-		cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) VALUES(%s, %s, %s, %s, %s)", 
-			(name, descr, mapId, 1, gameStates['waiting']))
+		cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State, ActivePlayer) VALUES(%s, %s, %s, %s, %s)", 
+			(name, descr, mapId, 1, gameStates['waiting'], sid))
 		gameId = db.insert_id()
 		cursor.execute("UPDATE Users SET GameId=%s, Readiness=0 WHERE sid=%s", (gameId, sid))
 		return {'result': 'ok', 'gameId': gameId}
@@ -284,6 +295,8 @@ def act_leaveGame(data):
 	except(TypeError, ValueError):
 		return {'result': 'badSid'}
 
+
+		
 def act_setReadinessStatus(data):
 	if not(('sid' in data) and ('status' in data)):
 		return {'result': 'badJson'}
@@ -309,15 +322,98 @@ def act_setReadinessStatus(data):
 		cursor.execute('SELECT Maps.PlayersNum FROM Games, Maps WHERE Games.GameId=%s AND Games.MapId=Maps.MapId', 
 			gameId)
 		maxPlayersNum = cursor.fetchone()[0]
-		cursor.execute('SELECT COUNT(*) FROM Users WHERE GameId=%s and Readiness=1', gameId)
+		cursor.execute('SELECT COUNT(*) FROM Users WHERE GameId=%s AND Readiness=1', gameId)
 		readyPlayersNum = cursor.fetchone()[0]
 		if maxPlayersNum == readyPlayersNum:
-			cursor.execute('UPDATE Games SET State=%s WHERE gameId=%s', (gameStates['processing'], gameId))
+			cursor.execute('UPDATE Users SET Coins=5, Stage=%d, TokensInHand=0 WHERE GameId=%d AND Readiness=1', 
+				(userStages['waitingTurn'], gameId))
+			cursor.execute('UPDATE Games SET State=%s, Turn=0, ActivePlayer=%d WHERE gameId=%d', 
+				(gameStates['processing'], sid, gameId))
+			cursor.execute('UPDATE Users SET Stage=%d WHERE Sid=%d', (userStages['choosingRace'], sid)) 
 		return {'result': 'ok'}
 	except(TypeError, ValueError), e:
 		return {'result': 'badSid'}
+		
 	
 
+def act_selectRace(data):
+	if not(('sid' in data) and ('raceId' in data)):
+		return {'result': 'badJson'}
+	sid = data['sid']
+	raceId = data['raceId']
+	try:
+		cursor.execute('SELECT Stage, Coins FROM Users WHERE Sid=%s', sid)
+		row = cursor.fetchone()
+		if not row: return {'result': 'badSid'}
+		stage, coins = row
+		if stage != userStages['choosingRace']:	return {'result': 'badStage'}
+		cursor.execute('SELECT InitialNum, FarFromStack, BonusId, bonusMoney FROM Races WHERE RaceId=%d', raceId)
+		row = cursor.fetchone()
+		if row[1] == -1 : return {'result': 'badChoice'}
+		num, farFromStack, bonusId, bonusMoney = row
+		if bonusMoney == 0:
+				cursor.execute('SELECT COUNT(*) From Races WHERE FarFromStack<%d AND BonusMoney=0', farFromStack)
+				price = cursor.fetchone()[0]
+				if coins < price : return {'result' : 'badMoneyAmount'}
+		cursor.execute('UPDATE Users SET CurrentRace=%d, Coins=Coins-%d+%d, Bonus=%d, Stage=%s, TokensInHand=%d WHERE Sid=%d', 
+			(raceId, price, bonusMoney, bonusId, userStages['firstAttack'], num, sid))
+		cursor.execute('UPDATE Races SET FarFromStack=-1, BonusMoney=0 WHERE RaceId=%d', raceId)
+		cursor.execute('UPDATE Races SET FarFromStack=FarFromStack+1 WHERE FarFromStack >-1 AND FarFromStack<%d', farFromStack)
+		cursor.execute('UPDATE Races SET BonusMoney=BonusMoney+1 WHERE FarFromStack > %d', farFromStack)
+		cursor.execute('SELECT RaceId FROM Races WHERE FarFromStack=-1')
+		newRaceId = cursor.fetchone()[0];
+		cursor.execute('UPDATE Races SET FarFromStack=0 WHERE RaceId=%d', newRaceId)
+		return {'result': 'ok'}
+	except(TypeError, ValueError):
+		return {'result': 'badSid'}
+	
+
+		
+def act_conquer(data):
+	if not(('sid' in data) and ('RegionId' in data)):
+		return {'result': 'badJson'} 
+	regionId = data['raceId']
+	sid = data['sid']
+	try:
+		cursor.execute('SELECT Stage, TokensInHand FROM Users WHERE Sid=%s', sid)
+		row = cursor.fetchone()
+		if not row: return {'result': 'badSid'}
+		stage, unitsNum = row
+		if not (stage == userStages['firstAttack'] or stage == userStages['notFirstAttack']):
+				return {'result': 'badStage'}
+		cursor.execute('SELECT MapId, OwnerId, RaceId, TokenNum, Bordeline, Highland, \
+			Coastal, Seaside FROM Regions WHERE RegionId=%d', regionId)
+		regInfo = cursor.fetchone()
+		mapId = regInfo[0]
+		cursor.execute('SELECT Users.GameId, Games.MapId From Users, Maps WHERE Users.Sid=%d AND Users.GameId=Games.GameId', sid)
+		rightMapId = cursor.fetchone()[1]
+		if mapId != rightMapId : return {'result': 'badRegionId'}
+		ownerId = regInfo[1]
+		if ownerId == sid: return {'result': 'badRegion'}
+		if stage == userStages['firstAttack']:
+			borderline, coastal = regInfo[4], regInfo[6]
+			if not (borderline or coastal) : return  {'result': 'badRegion'}
+		else:
+			cursor.execute('SELECT RegionId FROM Regions WHERE OwnerId=%d', sid)
+			playerRegions = cursor.fetchall()
+			playerBorderline = 0
+			for plRegion in playerRegions:
+				cursor.execute('SELECT Adjacent FROM AdjacentRegions WHERE FirstRegionId=%d AND SecondRegionId=%d', 
+					plRegion[0], regionId)
+				if row and row[0] == 1: 
+					playerBorderline = 1
+					break
+			
+			if playerBorderline == 0: return {'result': 'badRegion'}
+		
+		unitPrice = 2 + regInfo[3] + regInfo[5]
+		if unitsNum < unitsPrice : return  {'result': 'notEnoughTokensInTheHand'}
+		cursor.execute('UPDATE Users SET TokensInHand=TokensInHand-%d WHERE sid=%d', (unitPrice, sid))
+		cursor.execute('UPDATE Regions SET OwnerId=%d, TokenNum=%d WHERE RegionId=%d', (sid, unitPrice, regionId)) 
+		return {'result': 'ok'}
+	except(TypeError, ValueError):
+		return {'result': 'badSid'}
+		
 def doAction(data):
 	try:
 		func = 'act_%s' % data['action'] 
