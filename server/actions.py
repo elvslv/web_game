@@ -199,7 +199,7 @@ def act_createGame(data):
 		return {'result': 'badGameDescription'}
 	
 	try:
-		cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) VALUES(%s, %s, %s, %s, %s)", 
+		cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State, ActivePlayer) VALUES(%s, %s, %s, %s, %s)", 
 			(name, descr, mapId, 1, gameStates['waiting'], sid))
 		gameId = db.insert_id()
 		cursor.execute("UPDATE Users SET GameId=%s, Readiness=0 WHERE sid=%s", (gameId, sid))
