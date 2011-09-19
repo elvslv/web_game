@@ -39,3 +39,5 @@ def main(a, b):
         start = a
         end = b
         unittest.TextTestRunner().run(suite())
+if __name__=='__main__':
+	main(0, 33)
