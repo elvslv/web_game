@@ -2,4 +2,3 @@
 2. Add description to tests
 3. Add tests for chat
 4. Add tests for creating games and getting game info
-5. Change password regexp 

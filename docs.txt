@@ -1,4 +1,4 @@
-SMALLWORLDS - ALPHA EDITION
+SMALLWORLD - ALPHA EDITION
 Version 0.001
 Readme File
 September 15, 2011
@@ -26,7 +26,7 @@ for additional help on answering questions about the program and solving technic
 
 I. INTRODUCTION
 -----------------------
-SMALLWORLDS is JSON-based client-server application. Details are yet to be revealed.
+SMALLWORLD is JSON-based client-server application. Details are yet to be revealed.
 
 II. UNDOCUMENTED FEATURES
 ----------------------------
@@ -77,7 +77,7 @@ BASIC COMMANDS
 			}
 			<name> is a 3-16 characters string starting from latin letter. It may contain latin letters, numbers, underlines, hyphens and nothing else
 			
-			<password> is a 6-18 characters string starting from latin letter or number. It may omly contain latin letters and numbers.
+			<password> is a 6-18 characters string. It may contain any ASCII character you like.
 		
 		Success:
 			'ok'

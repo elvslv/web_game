@@ -18,7 +18,7 @@ def createTables():
 			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%s) UNIQUE, Password VARCHAR(%s), Sid BIGINT UNIQUE,\
 			GameId INT UNSIGNED, Readiness TINYINT(1), CurrentRace TINYINT UNSIGNED, DeclineRace TINYINT UNSIGNED,\
 			Coins TINYINT UNSIGNED, Stage TINYINT UNSIGNED, TokensInHand INT UNSIGNED, \
-			Bonus TINYINT UNSIGNED)", (MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
+			Bonus TINYINT UNSIGNED, Priority TINYINT UNSIGNED)", (MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Games(GameId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, GameName VARCHAR(%s), \
 			GameDescr VARCHAR(%s), PlayersNum INT UNSIGNED, State INT UNSIGNED, MapId INT UNSIGNED, \
@@ -28,7 +28,7 @@ def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Regions(MapId INT UNSIGNED, RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,  \
 			RaceId INT UNSIGNED, TokenNum INT UNSIGNED, OwnerId INT UNSIGNED, \
-			Borderline BOOL, Highland BOOL,	Coastal BOOL, Seaside BOOL)")
+			Borderline BOOL, Highland BOOL,	Coastal BOOL, Seaside BOOL, InDecline BOOL)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED, Adjacent BOOL)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \

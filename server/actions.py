@@ -22,14 +22,16 @@ db = editDb.db
 usrnameRegexp = r'^[a-z]+[\w_-]{%d,%d}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%d,%d}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
+#should make up better names
+
 userStages = {
 			'notPlaying': 1, 
 			'waitingTurn': 2, 
 			'choosingRace': 3, 
 			'firstAttack' : 4, 
-			'Redeploying' : 5, 
-			'finishedMove' : 6, 
-			'notFirstAttack' : 7,
+			'notFirstAttack' : 5,
+			'declined' : 7,
+	
 }
 			
 
@@ -200,9 +202,9 @@ def act_createGame(data):
 	
 	try:
 		cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) VALUES(%s, %s, %s, %s, %s)", 
-			(name, descr, mapId, 1, gameStates['waiting'], sid))
+			(name, descr, mapId, 1, gameStates['waiting']))
 		gameId = db.insert_id()
-		cursor.execute("UPDATE Users SET GameId=%s, Readiness=0 WHERE sid=%s", (gameId, sid))
+		cursor.execute("UPDATE Users SET GameId=%s, Readiness=0, Priority=1 WHERE sid=%s", (gameId, sid))
 		return {'result': 'ok', 'gameId': gameId}
 	except(TypeError, ValueError), e:
 		return {'result': 'badGameDescription'}
@@ -269,7 +271,9 @@ def act_joinGame(data):
 	except(TypeError, ValueError), e:
 		return {'result': 'badGameId'}
 	
-	cursor.execute('UPDATE Users SET GameId=%s, Readiness=0 WHERE Sid=%s', (gameId, sid))
+	cursor.execute('SELECT MAX(Priority) FROM Users')
+	priority = cursor.fetchone()[0] + 1
+	cursor.execute('UPDATE Users SET GameId=%s, Readiness=0, Priority=%d WHERE Sid=%s', (gameId, priority, sid))
 	cursor.execute('UPDATE Games SET PlayersNum=PlayersNum+1 WHERE GameId=%s', gameId)
 	return {'result': 'ok'}
 	
@@ -279,13 +283,14 @@ def act_leaveGame(data):
 	
 	sid = data['sid']
 	try:
-		cursor.execute('SELECT GameId FROM Users WHERE Sid=%s', sid)
-		gameId = cursor.fetchone()[0]
+		cursor.execute('SELECT GameId, Id FROM Users WHERE Sid=%s', sid)
+		gameId, userId = cursor.fetchone()
 		if not gameId:
 			return {'result': 'notInGame'}
 		cursor.execute('SELECT PlayersNum FROM Games WHERE GameId=%s', gameId)
 		curPlayersNum = cursor.fetchone()[0]
-		cursor.execute('UPDATE Users SET GameId=NULL, Readiness=NULL WHERE Sid=%s', sid)
+		cursor.execute('UPDATE Users SET GameId=NULL, Readiness=NULL, Priority=NULL, WHERE Sid=%s', sid)
+		cursor.execute('UPDATE Regions SET OwnerId=NULL WHERE OwnerId=%d', userId)
 		if curPlayersNum > 1: 
 			cursor.execute('UPDATE Games SET PlayersNum=PlayersNum-1 WHERE GameId=%s', gameId)
 		else:
@@ -325,11 +330,13 @@ def act_setReadinessStatus(data):
 		cursor.execute('SELECT COUNT(*) FROM Users WHERE GameId=%s AND Readiness=1', gameId)
 		readyPlayersNum = cursor.fetchone()[0]
 		if maxPlayersNum == readyPlayersNum:
-			cursor.execute('UPDATE Users SET Coins=5, Stage=%d, TokensInHand=0 WHERE GameId=%d AND Readiness=1', 
-				(userStages['waitingTurn'], gameId))
+			cursor.execute('UPDATE Users SET Coins=5, Stage=%d, TokensInHand=0, CurrentRace=NULL, \
+				DeclineRace=NULL, Bonus=NULL WHERE GameId=%d AND Readiness=1', (userStages['waitingTurn'], gameId))
+			cursor.execute('SELECT Id FROM Users WHERE Priority=(SELECT MIN(Priority) FROM Users)')
+			actPlayer = cursor.fetchone()[0]
 			cursor.execute('UPDATE Games SET State=%s, Turn=0, ActivePlayer=%d WHERE gameId=%d', 
-				(gameStates['processing'], sid, gameId))
-			cursor.execute('UPDATE Users SET Stage=%d WHERE Sid=%d', (userStages['choosingRace'], sid)) 
+				(gameStates['processing'], actPlayer, gameId))
+			cursor.execute('UPDATE Users SET Stage=%d WHERE Id=%d', (userStages['choosingRace'], actPlayer)) 
 		return {'result': 'ok'}
 	except(TypeError, ValueError), e:
 		return {'result': 'badSid'}
@@ -375,21 +382,22 @@ def act_conquer(data):
 	regionId = data['raceId']
 	sid = data['sid']
 	try:
-		cursor.execute('SELECT Stage, TokensInHand FROM Users WHERE Sid=%s', sid)
+		cursor.execute('SELECT Id, Stage, TokensInHand FROM Users WHERE Sid=%s', sid)
 		row = cursor.fetchone()
 		if not row: return {'result': 'badSid'}
-		stage, unitsNum = row
-		if not (stage == userStages['firstAttack'] or stage == userStages['notFirstAttack']):
-				return {'result': 'badStage'}
+		id, stage, unitsNum = row
+		if not stage in userStages['firstAtack' : 'notFirstAttack']:
+			return {'result': 'badStage'}
 		cursor.execute('SELECT MapId, OwnerId, RaceId, TokenNum, Bordeline, Highland, \
-			Coastal, Seaside FROM Regions WHERE RegionId=%d', regionId)
+			Coastal, Seaside, inDecline FROM Regions WHERE RegionId=%d', regionId)
 		regInfo = cursor.fetchone()
 		mapId = regInfo[0]
 		cursor.execute('SELECT Users.GameId, Games.MapId From Users, Maps WHERE Users.Sid=%d AND Users.GameId=Games.GameId', sid)
 		rightMapId = cursor.fetchone()[1]
 		if mapId != rightMapId : return {'result': 'badRegionId'}
 		ownerId = regInfo[1]
-		if ownerId == sid: return {'result': 'badRegion'}
+		inDecline = regInfo[8]
+		if ownerId == id and not inDecline: return {'result': 'badRegion'}
 		if stage == userStages['firstAttack']:
 			borderline, coastal = regInfo[4], regInfo[6]
 			if not (borderline or coastal) : return  {'result': 'badRegion'}
@@ -409,11 +417,67 @@ def act_conquer(data):
 		unitPrice = 2 + regInfo[3] + regInfo[5]
 		if unitsNum < unitsPrice : return  {'result': 'notEnoughTokensInTheHand'}
 		cursor.execute('UPDATE Users SET TokensInHand=TokensInHand-%d WHERE sid=%d', (unitPrice, sid))
-		cursor.execute('UPDATE Regions SET OwnerId=%d, TokenNum=%d WHERE RegionId=%d', (sid, unitPrice, regionId)) 
+		cursor.execute('UPDATE Regions SET OwnerId=%d, TokenNum=%d, inDecline=0 WHERE RegionId=%d', (id, unitPrice, regionId)) 
 		return {'result': 'ok'}
 	except(TypeError, ValueError):
 		return {'result': 'badSid'}
 		
+def act_decline(data):
+	if not ('sid' in data):
+		return {'result': 'badJson'} 
+	sid = data['sid']
+	try:
+		cursor.execute('SELECT Id, Stage, TokensInHand, race FROM Users WHERE Sid=%s', sid)
+		row = cursor.fetchone()
+		if not row: return {'result': 'badSid'}
+		id, stage, freeUnits, race = row
+		if stage != userStages['notFirstAttack']: return {'result': 'badStage'}
+		if freeUnits > 0 : return {'result': 'SomeUnitsAreFree'}
+		cursor.execute('UPDATE Regions SET OwnerId=NULL WHERE OwnerId=%d AND InDecline=1', id)
+		cursor.execute('UPDATE Regions SET InDecline=1 WHERE OwnerId=%d', id)
+		cursor.execute('UPDATE Users SET DeclineRace=%d, CurrentRace=NULL, Stage=%d WHERE Sid=%d', 
+			(race, userStages['choosingRace'], sid))
+		return {'result': 'ok'}
+	except(TypeError, ValueError):
+		return {'result': 'badSid'}
+		
+def act_finishTurn(data):
+	if not ('sid' in data):
+		return {'result': 'badJson'} 
+	sid = data['sid']
+	try:
+		cursor.execute('SELECT Id, GameId, Stage, TokensInHand, Priority FROM Users WHERE Sid=%s', sid)
+		row = cursor.fetchone()
+		if not row: return {'result': 'badSid'}
+		userId, gameId, stage, freeUnits, priority = row
+		if not stage in userStages['firstAtack' : 'declining']:
+			return {'result': 'badStage'}
+		if freeUnits > 0 : return {'result': 'SomeUnitsAreFree'}
+		cursor.execute('SELECT COUNT(*) FROM Regions WHERE OwnerId=%d', userId)
+		income = cursor.fetchone()[0]
+		cursor.execute('UPDATE Users SET Stage=%d, Coins=Conis+%d WHERE Sid=%d', 
+			(userStages['waitingTurn'], income, sid))
+		cursor.execute('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Priority>%d FROM Users)',
+				priority)
+		row = cursor.fetchone()
+		if not row:
+			cursor.execute('SELECT Id, CurrentRace,  FROM \
+				Users WHERE Priority=(SELECT MIN(Priority) FROM Users)')
+			cursor.execute('UPDATE Games SET Turn=Turn+1 WHERE GameId=%d', gameId)
+			# Last Turn?
+			row = cursor.fetchone()
+		newActPlayer, race, tokensInHand = row
+		newPlayerStage = userStages['choosingRace'] if not race else (userStages['firstAttack'] if 
+			tokensInHand == 0 else userStages['notFirstAttack'])
+		cursor.execute('UPDATE Games SET ActivePlayer=%d WHERE gameId=%d', (newActPlayer, gameId))
+		cursor.execute('UPDATE Users SET Stage=%d WHERE UserId=%d', (newPlayerStage, newActPlayer))
+		return {'result': 'ok'}
+	except(TypeError, ValueError):
+		return {'result': 'badSid'}
+		
+		
+	
+
 def doAction(data):
 	try:
 		func = 'act_%s' % data['action'] 
