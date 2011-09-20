@@ -30,7 +30,7 @@ userStages = {
 			'choosingRace': 3, 
 			'firstAttack' : 4, 
 			'notFirstAttack' : 5,
-			'declined' : 7,
+			'declined' : 6,
 	
 }
 			
