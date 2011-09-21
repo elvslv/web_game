@@ -2,6 +2,9 @@
 	"test":
 	[
 		{
+			"action": "createDefaultMaps"
+		},
+		{
 			"action": "register",
 			"username": "user1",
 			"password": "fhjdgj"
@@ -31,7 +34,7 @@
 			"username": "user3",
 			"password": "fhjdgj"
 		},
-				{
+		{
 			"action": "register",
 			"username": "user4",
 			"password": "fhjdgj"

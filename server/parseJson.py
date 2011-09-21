@@ -7,7 +7,8 @@ def parseJsonObj(obj):
 			ans = {"result": "badJson"}
 		else:
 			ans = actions.doAction(obj)
-	except(TypeError, ValueError):
+	except(TypeError, ValueError), e:
+                print e
 		return {"result": "badJson"}
 	return ans
 
@@ -15,9 +16,11 @@ def parseInputData(data):
 	try:
 		object = json.loads(data)
 	except (TypeError, ValueError), e:
+                print e
 		return {"result": "badJson"}
 	
 	if isinstance(object, list):
+                print 'dsgkjskhjk'
 		return {"result": "badJson"}
 	else:
 		return parseJsonObj(object)

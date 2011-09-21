@@ -2,6 +2,9 @@
 	"test":
 	[
 		{
+			"action": "createDefaultMaps"
+		},
+		{
 			"action": "register",
 			"username": "user1",
 			"password": "fhjdgj"
