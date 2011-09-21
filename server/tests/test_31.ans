@@ -10,10 +10,10 @@
 		"sid": 1
 	},
 	{
-		"result": "badMap"
+		"result": "badMapId"
 	},
 	{
-		"result": "badNumberOfPlayers"
+		"result": "badPlayersNum"
 	},
 	{
 		"result": "badGameName"

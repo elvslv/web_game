@@ -56,8 +56,8 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
 	'sendMessage': [
-		{'name': 'username', 'type': unicode, 'mandatory': True}, 
-		{'name': 'password', 'type': unicode, 'mandatory': True}
+		{'name': 'userId', 'type': int, 'mandatory': True}, 
+		{'name': 'message', 'type': unicode, 'mandatory': True}
 	],
 	'getMessages': [
 		{'name': 'since', 'type': float, 'mandatory': True}
@@ -87,7 +87,7 @@ actionFields = {
 	],
 	'setReadinessStatus': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'status', 'type': int, 'mandatory': True}
+		{'name': 'readinessStatus', 'type': int, 'mandatory': True}
 	],
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 

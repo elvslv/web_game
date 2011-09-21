@@ -127,13 +127,13 @@ def act_createGame(data):
 	#validate mapId
 	mapId = data['mapId']
 	if not int(cursor.execute("SELECT PlayersNum FROM Maps WHERE MapId=%s", mapId)):
-		return {'result': 'badMap'}
+		return {'result': 'badMapId'}
 		
 	mapPlayersNum = int(cursor.fetchone()[0])
 	if 'playersNum' in data:
 		playersNum = data['playersNum']
 		if playersNum != mapPlayersNum:
-			return {'result': 'badNumberOfPlayers'}
+			return {'result': 'badPlayersNum'}
 		
 	#validate name and description
 	name = data['gameName']
@@ -193,15 +193,15 @@ def act_getGameList(data):
 
 def act_joinGame(data):
 	sid = data['sid']
-	cursor.execute('SELECT GameId, Id FROM Users WHERE sid=%s', sid)
+	if not int(cursor.execute('SELECT GameId, Id FROM Users WHERE sid=%s', sid)):
+		return {'result': 'badSid'}
 	row = cursor.fetchone()
 	userId = row[1]
 	if row[0]:
 		return {'result': 'alreadyInGame'}
 	
 	gameId = data['gameId']
-	num = int(cursor.execute('SELECT PlayersNum, MapId, State FROM Games WHERE GameId=%s', gameId))
-	if num == 0:
+	if not int(cursor.execute('SELECT PlayersNum, MapId, State FROM Games WHERE GameId=%s', gameId)):
 		return {'result': 'badGameId'}
 	row = cursor.fetchone()
 	if row[2] != misc.gameStates['waiting']:
@@ -219,7 +219,9 @@ def act_joinGame(data):
 	
 def act_leaveGame(data):
 	sid = data['sid']
-	cursor.execute('SELECT GameId, Id FROM Users WHERE Sid=%s', sid)
+	if not int(cursor.execute('SELECT GameId, Id FROM Users WHERE Sid=%s', sid)):
+		return {'result': 'badSid'}
+
 	gameId, userId = cursor.fetchone()
 	if not gameId:
 		return {'result': 'notInGame'}
@@ -236,6 +238,9 @@ def act_leaveGame(data):
 
 def act_setReadinessStatus(data):
 	sid = data['sid']
+	if not cursor.execute('SELECT 1 FROM Users WHERE Sid=%s', sid):
+		return {'result': 'badSid'}
+
 	cursor.execute("SELECT Users.GameId, Games.State FROM Users, Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId", sid)
 	row = cursor.fetchone()
 	if not (row and row[0]):
@@ -244,7 +249,7 @@ def act_setReadinessStatus(data):
 	if gameState != misc.gameStates['waiting']:
 		return {'result': 'badGameState'}
 		
-	status = data['status']
+	status = data['readinessStatus']
 	if not(status == 0 or status == 1):
 		return {'result': 'badReadinessStatus'}
 	cursor.execute('UPDATE Users SET Readiness=%s WHERE sid=%s', (status, sid))

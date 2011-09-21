@@ -2,25 +2,19 @@ import json
 import actions 
 
 def parseJsonObj(obj):
-	try:
-		if not('action' in obj):
-			ans = {"result": "badJson"}
-		else:
-			ans = actions.doAction(obj)
-	except(TypeError, ValueError), e:
-                print e
-		return {"result": "badJson"}
+	if not('action' in obj):
+		ans = {"result": "badJson"}
+	else:
+		ans = actions.doAction(obj)
 	return ans
 
 def parseInputData(data):     
 	try:
 		object = json.loads(data)
 	except (TypeError, ValueError), e:
-                print e
 		return {"result": "badJson"}
 	
 	if isinstance(object, list):
-                print 'dsgkjskhjk'
 		return {"result": "badJson"}
 	else:
 		return parseJsonObj(object)
