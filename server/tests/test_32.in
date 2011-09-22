@@ -2,6 +2,9 @@
 	"test":
 	[
 		{
+			"action": "createDefaultMaps"
+		},
+		{
 			"action": "register",
 			"username": "user1",
 			"password": "fhjdgj"
@@ -31,7 +34,7 @@
 			"username": "user3",
 			"password": "fhjdgj"
 		},
-				{
+		{
 			"action": "register",
 			"username": "user4",
 			"password": "fhjdgj"
@@ -91,7 +94,7 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 4,
-			"status": 1
+			"readinessStatus": 1
 		},
 		{
 			"action": "joinGame",
@@ -101,17 +104,17 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 4,
-			"status": 1
+			"readinessStatus": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"status": 1
+			"readinessStatus": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"status": 0
+			"readinessStatus": 0
 		},
 		{
 			"action": "getGameList"

@@ -30,3 +30,86 @@ def generateSids(n):
 	LAST_SID = X0
 	for i in range(n):
 		print generateSid()
+
+userStages = {
+	'notPlaying': 1, 
+	'waitingTurn': 2, 
+	'choosingRace': 3, 
+	'firstAttack' : 4, 
+	'notFirstAttack' : 5,
+	'declined' : 6,
+}
+
+actionFields = {
+	'register': [
+		{'name': 'username', 'type': unicode, 'mandatory': True}, 
+		{'name': 'password', 'type': unicode, 'mandatory': True}
+	],
+	'login': [
+		{'name': 'username', 'type': unicode, 'mandatory': True}, 
+		{'name': 'password', 'type': unicode, 'mandatory': True}
+	],
+	'logout': [
+		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'doSmth': [
+		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'sendMessage': [
+		{'name': 'userId', 'type': int, 'mandatory': True}, 
+		{'name': 'message', 'type': unicode, 'mandatory': True}
+	],
+	'getMessages': [
+		{'name': 'since', 'type': float, 'mandatory': True}
+	],
+	'createDefaultMaps': [
+		{'name': 'sid', 'type': int, 'mandatory': False}
+	],
+	'uploadMap': [
+		{'name': 'mapName', 'type': unicode, 'mandatory': True}, 
+		{'name': 'playersNum', 'type': int, 'mandatory': True}
+	],
+	'createGame': [
+		{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'gameName', 'type': unicode, 'mandatory': True},
+		{'name': 'mapId', 'type': int, 'mandatory': True},
+		{'name': 'gameDescr', 'type': unicode, 'mandatory': False}
+	],
+	'getGameList': [
+		{'name': 'sid', 'type': int, 'mandatory': False}
+	],
+	'joinGame': [
+		{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'gameId', 'type': int, 'mandatory': True}
+	],
+	'leaveGame': [
+		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'setReadinessStatus': [
+		{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'readinessStatus', 'type': int, 'mandatory': True}
+	],
+	'selectRace': [
+		{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'raceId', 'type': int, 'mandatory': True}
+	],
+	'conquer': [
+		{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'regionId', 'type': int, 'mandatory': True}
+	],
+	'decline':[
+		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'finishTurn': [
+		{'name': 'sid', 'type': int, 'mandatory': True}
+	]
+}
+
+defaultMaps = [
+	{'mapName': 'defaultMap1', 'playersNum': 2}, 
+	{'mapName': 'defaultMap2', 'playersNum': 3},
+	{'mapName': 'defaultMap3', 'playersNum': 4},
+	{'mapName': 'defaultMap4', 'playersNum': 5}
+]
+
+gameStates = {'waiting': 1, 'processing': 2, 'ended': 3}

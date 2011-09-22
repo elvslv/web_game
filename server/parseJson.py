@@ -2,13 +2,10 @@ import json
 import actions 
 
 def parseJsonObj(obj):
-	try:
-		if not('action' in obj):
-			ans = {"result": "badJson"}
-		else:
-			ans = actions.doAction(obj)
-	except(TypeError, ValueError):
-		return {"result": "badJson"}
+	if not('action' in obj):
+		ans = {"result": "badJson"}
+	else:
+		ans = actions.doAction(obj)
 	return ans
 
 def parseInputData(data):     
