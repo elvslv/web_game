@@ -30,18 +30,24 @@ class TestFromFile(unittest.TestCase):
 		self.assertListEqual(out['result'], json.loads(ans))
                 
 def suite():
-	suite = unittest.TestSuite()
-        suite.addTests(TestFromFile('tests\\test_%d.in' % i, 'tests\\test_%d.ans' % i) for i in range(start, end))
-        return suite
+                suite = unittest.TestSuite()
+                suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
+                return suite
 
-def main(a, b):
-        global start
+def main(a, b, c):
+        global begin
         global end
-        start = a
+        global testDir
+        begin = a
         end = b
+	testDir = c
         unittest.TextTestRunner().run(suite())
 		
 if __name__=='__main__':
-        if len(sys.argv) != 3:             
-                sys.exit("Need two numbers as the first and the last test numbers")
-	main(int(sys.argv[1]), int(sys.argv[2]))
+        argc = len(sys.argv)
+        if argc < 2:             
+                sys.exit("Format: python TestFromFiles.py [begin] end [directory]")
+        fin = int(sys.argv[1]) if argc == 2 else int(sys.argv[2])
+	start =  int (sys.argv[1]) if argc >= 3 else 0
+	directory = sys.argv[3] if argc == 4 else "tests"
+        main(start, fin, directory)
