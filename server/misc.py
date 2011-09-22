@@ -38,8 +38,8 @@ userStages = {
 	'notPlaying': 1, 
 	'waitingTurn': 2, 
 	'choosingRace': 3, 
-	'firstAttack' : 4, 
-	'notFirstAttack' : 5,
+	'invading' : 4, 
+	'attacking' : 5,
 	'declined' : 6,
 }
 
@@ -118,7 +118,7 @@ defaultMaps = [
 	{'mapName': 'defaultMap4', 'playersNum': 5},
 	{
 		'mapName': 'defaultMap5', 
-		'playersNum': 5, 
+		'playersNum': 2, 
 		'regions' : 
 		[
 			{
@@ -127,20 +127,23 @@ defaultMaps = [
 				'seaside'    : 0,
 				'highland'   : 1,
 				'coastal'    : 0,
+				'adjacent' : [3, 4] 
 			},
 			{
-				'population' : 3,
+				'population' : 1,
 				'seaside'    : 1,
 				'borderline' : 0,
 				'highland'   : 0,
 				'coastal'    : 0,
+				'adjacent' : [1, 4] 
 			},
 			{
-				'population' : 2,
+				'population' : 0,
 				'seaside'    : 0,
 				'borderline' : 1,
-				'highland'   : 0,
+				'highland'   : 1,
 				'coastal'    : 0,
+				'adjacent' : [1] 
 			},
 			{
 				'population' : 0,
@@ -148,6 +151,7 @@ defaultMaps = [
 				'seaside'    : 0,
 				'highland'   : 0,
 				'coastal'    : 1,
+				'adjacent' : [1, 2] 
 			},
 		]
 	}	
@@ -157,7 +161,12 @@ defaultMaps = [
 defaultRaces = [
 	{'raceName': 'caucasian', 'initialNum': 5},
 	{'raceName': 'negroid', 'initialNum': 2},
-				
+	{'raceName': 'tyranids', 'initialNum': 7},
+	{'raceName': 'half-orks', 'initialNum': 15},
+	{'raceName': 'ogres', 'initialNum': 90},
+	{'raceName': 'drow', 'initialNum': 10},
+	{'raceName': 'baatezu', 'initialNum': 10},
+	
 ]
 
 gameStates = {'waiting': 1, 'processing': 2, 'ended': 3}

@@ -22,6 +22,7 @@ class TestFromFile(unittest.TestCase):
 	def runTest(self):
 		misc.LAST_SID = 0
 		editDb.clearDb()
+		actions.createDefaultRaces()
 		f = open(self.ansFile)
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
@@ -29,8 +30,7 @@ class TestFromFile(unittest.TestCase):
 		self.assertListEqual(out['result'], json.loads(ans))
                 
 def suite():
-	actions.createDefaultRaces()
-        suite = unittest.TestSuite()
+	suite = unittest.TestSuite()
         suite.addTests(TestFromFile('tests\\test_%d.in' % i, 'tests\\test_%d.ans' % i) for i in range(start, end))
         return suite
 

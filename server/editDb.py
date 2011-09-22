@@ -31,7 +31,7 @@ def createTables():
 			RaceId INT UNSIGNED, TokenNum INT UNSIGNED, OwnerId INT UNSIGNED, \
 			Borderline BOOL, Highland BOOL,	Coastal BOOL, Seaside BOOL, InDecline BOOL)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED, Adjacent BOOL)")
+			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Races(RaceId TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, RaceName VARCHAR(%s) UNIQUE, \
 			InitialNum INT UNSIGNED, BonusID INT UNSIGNED, \
