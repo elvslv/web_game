@@ -22,6 +22,7 @@ class TestFromFile(unittest.TestCase):
 	def runTest(self):
 		misc.LAST_SID = 0
 		editDb.clearDb()
+		actions.createDefaultRaces()
 		f = open(self.ansFile)
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
@@ -29,17 +30,18 @@ class TestFromFile(unittest.TestCase):
 		self.assertListEqual(out['result'], json.loads(ans))
                 
 def suite():
-        suite = unittest.TestSuite()
-        suite.addTests(TestFromFile('%s\\test_%d.in' % (diri, i), '%s\\test_%d.ans' % (diri, i)) for i in range(start, end))
+	suite = unittest.TestSuite()
+        suite.addTests(TestFromFile('tests\\test_%d.in' % i, 'tests\\test_%d.ans' % i) for i in range(start, end))
         return suite
 
-def main(a, b, c):
+def main(a, b):
         global start
         global end
-        global diri
         start = a
         end = b
-        diri = c
         unittest.TextTestRunner().run(suite())
+		
 if __name__=='__main__':
-	main(0, 43, "simple_protocol_tests")
+        if len(sys.argv) != 3:             
+                sys.exit("Need two numbers as the first and the last test numbers")
+	main(int(sys.argv[1]), int(sys.argv[2]))

@@ -4,6 +4,7 @@ from misc import MAX_PASSWORD_LEN
 from misc import MAX_GAMENAME_LEN
 from misc import MAX_GAMEDESCR_LEN
 from misc import MAX_MAPNAME_LEN
+from misc import MAX_RACENAME_LEN
 
 DATABASE_HOST = "localhost"
 DATABASE_USER = "admin"
@@ -30,10 +31,11 @@ def createTables():
 			RaceId INT UNSIGNED, TokenNum INT UNSIGNED, OwnerId INT UNSIGNED, \
 			Borderline BOOL, Highland BOOL,	Coastal BOOL, Seaside BOOL, InDecline BOOL)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED, Adjacent BOOL)")
+			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)")
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			Races(RaceId TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, InitialNum INT UNSIGNED, BonusID INT UNSIGNED, \
-			FarFromStack TINYINT, BonusMoney TINYINT)")
+			Races(RaceId TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, RaceName VARCHAR(%s) UNIQUE, \
+			InitialNum INT UNSIGNED, BonusID INT UNSIGNED, \
+			FarFromStack TINYINT, BonusMoney TINYINT)", MAX_RACENAME_LEN)
 			
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time REAL)")

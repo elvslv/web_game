@@ -8,6 +8,7 @@ MIN_PLAYERS_NUM = 2
 MAX_PLAYERS_NUM = 5
 MIN_GAMENAME_LEN = 1
 MAX_GAMENAME_LEN = 50
+MAX_RACENAME_LEN = 20
 MAX_GAMEDESCR_LEN = 300
 X0 = 5363478883
 A = 9995326
@@ -30,13 +31,15 @@ def generateSids(n):
 	LAST_SID = X0
 	for i in range(n):
 		print generateSid()
+		
+		
 
 userStages = {
 	'notPlaying': 1, 
 	'waitingTurn': 2, 
 	'choosingRace': 3, 
-	'firstAttack' : 4, 
-	'notFirstAttack' : 5,
+	'invading' : 4, 
+	'attacking' : 5,
 	'declined' : 6,
 }
 
@@ -57,19 +60,19 @@ actionFields = {
 	],
 	'sendMessage': [
 		{'name': 'userId', 'type': int, 'mandatory': True}, 
-		{'name': 'message', 'type': unicode, 'mandatory': True},
-		{'name': 'noTime', 'type': unicode, 'mandatory': False}
+		{'name': 'message', 'type': unicode, 'mandatory': True}
 	],
 	'getMessages': [
-		{'name': 'since', 'type': float, 'mandatory': True},
-		{'name': 'noTime', 'type': unicode, 'mandatory': False}
+		{'name': 'since', 'type': float, 'mandatory': True}
 	],
 	'createDefaultMaps': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
 	],
+	
 	'uploadMap': [
 		{'name': 'mapName', 'type': unicode, 'mandatory': True}, 
-		{'name': 'playersNum', 'type': int, 'mandatory': True}
+		{'name': 'playersNum', 'type': int, 'mandatory': True},
+		{'name': 'regions', 'type': list, 'mandatory': False}
 	],
 	'createGame': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -106,12 +109,64 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	]
 }
-
+ 
+			
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3},
 	{'mapName': 'defaultMap3', 'playersNum': 4},
-	{'mapName': 'defaultMap4', 'playersNum': 5}
+	{'mapName': 'defaultMap4', 'playersNum': 5},
+	{
+		'mapName': 'defaultMap5', 
+		'playersNum': 2, 
+		'regions' : 
+		[
+			{
+				'population' : 1,
+				'borderline' : 0,
+				'seaside'    : 0,
+				'highland'   : 1,
+				'coastal'    : 0,
+				'adjacent' : [3, 4] 
+			},
+			{
+				'population' : 1,
+				'seaside'    : 1,
+				'borderline' : 0,
+				'highland'   : 0,
+				'coastal'    : 0,
+				'adjacent' : [1, 4] 
+			},
+			{
+				'population' : 0,
+				'seaside'    : 0,
+				'borderline' : 1,
+				'highland'   : 1,
+				'coastal'    : 0,
+				'adjacent' : [1] 
+			},
+			{
+				'population' : 0,
+				'borderline' : 0,
+				'seaside'    : 0,
+				'highland'   : 0,
+				'coastal'    : 1,
+				'adjacent' : [1, 2] 
+			},
+		]
+	}	
+			
+]
+
+defaultRaces = [
+	{'raceName': 'caucasian', 'initialNum': 5},
+	{'raceName': 'negroid', 'initialNum': 2},
+	{'raceName': 'tyranids', 'initialNum': 7},
+	{'raceName': 'half-orks', 'initialNum': 15},
+	{'raceName': 'ogres', 'initialNum': 90},
+	{'raceName': 'drow', 'initialNum': 10},
+	{'raceName': 'baatezu', 'initialNum': 10},
+	
 ]
 
 gameStates = {'waiting': 1, 'processing': 2, 'ended': 3}
