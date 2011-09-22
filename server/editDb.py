@@ -14,6 +14,24 @@ DATABASE_PORT = 3306
 
 tables = ['Users', 'Games', 'Chat', 'Maps', 'Races', 'Regions', 'AdjacentRegions']
 
+def fetchone():
+	return cursor.fetchone()
+
+def fetchall():
+	return cursor.fetchall()
+
+def lastId():
+	return db.insert_id()
+
+def query(qstring, *args):
+    return int(cursor.execute(qstring, args))	
+
+def commit():
+	db.commit()
+
+def rollback():
+	db.rollback()
+
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%s) UNIQUE, Password VARCHAR(%s), Sid BIGINT UNIQUE,\

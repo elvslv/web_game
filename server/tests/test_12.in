@@ -3,21 +3,20 @@
 	[
 		{
 			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
 			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
-			"action": "logout",
-			"sid": 1
-		},
-		{
-			"action": "doSmth",
-			"sid": 1
+			"action": "sendMessage",
+			"userId": 6,
+			"message": "hello!",
+			"noTime": "noTime"
 		}
-	]
+	],
+	"description": "sending message with wrong userId"
 }

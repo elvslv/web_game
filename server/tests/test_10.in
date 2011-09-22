@@ -1,1 +1,20 @@
-fsdkgjkdhjfks
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 1
+		}
+	],
+	"description": "sending message without message"
+}

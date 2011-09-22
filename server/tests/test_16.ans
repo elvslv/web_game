@@ -1,8 +1,26 @@
 [
 	{
 		"result": "ok"
-	}, 
+	},
 	{
-		"result": "badUsernameOrPassword"
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok" 
+	},
+	{
+		"result": "ok" 
+	},
+	{
+		"result": "ok",
+		"mesArray": [{"userId": 1, "message": "hello user2!"}, {"userId": 2, "message": "hello user1!"}]
 	}
 ]

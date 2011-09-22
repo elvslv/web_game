@@ -3,13 +3,41 @@
 	[
 		{
 			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
 			"action": "login",
-			"username": "rewtgh",
-			"password": "3q536"
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 1,
+			"message": "hello user2!",
+			"noTime": "noTime"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 2,
+			"message": "hello user1!",
+			"noTime": "noTime"
+		},
+		{
+			"action": "getMessages",
+			"since": 0.0,
+			"noTime": "noTime"
 		}
-	]
+	],
+	"description": "get 2 messages from 2 users"
 }

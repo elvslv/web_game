@@ -31,8 +31,6 @@ def generateSids(n):
 	LAST_SID = X0
 	for i in range(n):
 		print generateSid()
-		
-		
 
 userStages = {
 	'notPlaying': 1, 
@@ -59,18 +57,17 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
 	'sendMessage': [
-	         {'name': 'userId', 'type': int, 'mandatory': True}, 
-                 {'name': 'message', 'type': unicode, 'mandatory': True},
-                 {'name': 'noTime', 'type': unicode, 'mandatory': False}
-       ],
-       'getMessages': [
-                     {'name': 'since', 'type': float, 'mandatory': True},
-                     {'name': 'noTime', 'type': unicode, 'mandatory': False}
-       ],
+		{'name': 'userId', 'type': int, 'mandatory': True}, 
+		{'name': 'message', 'type': unicode, 'mandatory': True},
+		{'name': 'noTime', 'type': unicode, 'mandatory': False}
+	],
+	'getMessages': [
+		{'name': 'since', 'type': float, 'mandatory': True},
+		{'name': 'noTime', 'type': unicode, 'mandatory': False}
+	],
 	'createDefaultMaps': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
 	],
-	
 	'uploadMap': [
 		{'name': 'mapName', 'type': unicode, 'mandatory': True}, 
 		{'name': 'playersNum', 'type': int, 'mandatory': True},
@@ -80,7 +77,8 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
 		{'name': 'gameName', 'type': unicode, 'mandatory': True},
 		{'name': 'mapId', 'type': int, 'mandatory': True},
-		{'name': 'gameDescr', 'type': unicode, 'mandatory': False}
+		{'name': 'gameDescr', 'type': unicode, 'mandatory': False},
+		{'name': 'playersNum', 'type': int, 'mandatory': False}
 	],
 	'getGameList': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
@@ -111,8 +109,7 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	]
 }
- 
-			
+
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3},

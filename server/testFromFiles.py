@@ -17,7 +17,7 @@ class TestFromFile(unittest.TestCase):
 		self.maxDiff = None
 
 	def tearDown(self):
-		print "Test %s description:%s " % (self.inFile, self.testDescr)
+		print "Test %s description: %s" % (self.inFile, self.testDescr)
 		
 	def runTest(self):
 		misc.LAST_SID = 0
@@ -30,24 +30,24 @@ class TestFromFile(unittest.TestCase):
 		self.assertListEqual(out['result'], json.loads(ans))
                 
 def suite():
-                suite = unittest.TestSuite()
-                suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
-                return suite
+	suite = unittest.TestSuite()
+	suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
+	return suite
 
 def main(a, b, c):
-        global begin
-        global end
-        global testDir
-        begin = a
-        end = b
+	global begin
+	global end
+	global testDir
+	begin = a
+	end = b
 	testDir = c
-        unittest.TextTestRunner().run(suite())
+	unittest.TextTestRunner().run(suite())
 		
 if __name__=='__main__':
-        argc = len(sys.argv)
-        if argc < 2:             
-                sys.exit("Format: python TestFromFiles.py [begin] end [directory]")
-        fin = int(sys.argv[1]) if argc == 2 else int(sys.argv[2])
+	argc = len(sys.argv)
+	if argc < 2:             
+		sys.exit("Format: python TestFromFiles.py [begin] end [directory]")
+	fin = int(sys.argv[1]) if argc == 2 else int(sys.argv[2])
 	start =  int (sys.argv[1]) if argc >= 3 else 0
 	directory = sys.argv[3] if argc == 4 else "tests"
-        main(start, fin, directory)
+	main(start, fin, directory)

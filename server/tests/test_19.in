@@ -3,16 +3,36 @@
 	[
 		{
 			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
 			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
-			"action": "logout"
+			"action": "sendMessage",
+			"userId": 1,
+			"message": "hello!",
+			"noTime": "noTime"
+		},
+		{
+			"action": "getMessages",
+			"since": 0.0,
+			"noTime": "noTime"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 1,
+			"message": "hello again!",
+			"noTime": "noTime"
+		},
+		{
+			"action": "getMessages",
+			"since": 0.0,
+			"noTime": "noTime"
 		}
-	]
+	],
+	"description": "send and get"
 }
