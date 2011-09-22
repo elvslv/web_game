@@ -57,10 +57,12 @@ actionFields = {
 	],
 	'sendMessage': [
 		{'name': 'userId', 'type': int, 'mandatory': True}, 
-		{'name': 'message', 'type': unicode, 'mandatory': True}
+		{'name': 'message', 'type': unicode, 'mandatory': True},
+		{'name': 'noTime', 'type': unicode, 'mandatory': False}
 	],
 	'getMessages': [
-		{'name': 'since', 'type': float, 'mandatory': True}
+		{'name': 'since', 'type': float, 'mandatory': True},
+		{'name': 'noTime', 'type': unicode, 'mandatory': False}
 	],
 	'createDefaultMaps': [
 		{'name': 'sid', 'type': int, 'mandatory': False}

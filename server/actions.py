@@ -78,22 +78,29 @@ def act_doSmth(data):
 
 def act_sendMessage(data):
 	userId = data['userId']
+
 	message = data['message']
 	mesTime = time.time();
-	if not int(cursor.execute("SELECT 1 FROM Users WHERE UserId=%s", userId)):
+	if not int(cursor.execute("SELECT 1 FROM Users WHERE Id=%s", userId)):
 		return {"result": "badUserId"}
 	
 	cursor.execute("INSERT INTO Chat(UserId, Message, Time) VALUES (%s, %s, %s)",(userId, message, mesTime)) 
+	if 'noTime' in data:
+                return {"result": "ok"}
 	return {"result": "ok", "mesTime": mesTime}
 
 def act_getMessages(data):
+	since = data['since']
 	cursor.execute("SELECT UserId, Message, Time FROM Chat WHERE Time > %s ORDER BY Time", since)
 	records =  cursor.fetchall()
 	records = records[-100:]
 	mesArray = []
 	for rec in records:
 		userId, message, mesTime = rec
-		mesArray.append({"userId": userId, "message": message, "mesTime": mesTime})
+		if 'noTime' in data:
+                        mesArray.append({"userId": userId, "message": message})
+                else:
+                        mesArray.append({"userId": userId, "message": message, "mesTime": mesTime})
                 
 	return {"result": "ok", "mesArray": mesArray}
 

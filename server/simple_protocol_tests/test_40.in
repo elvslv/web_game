@@ -1,0 +1,27 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 1,
+			"message": "hello!",
+			"noTime": "noTime"
+		},
+		{
+			"action": "getMessages",
+			"since": 2316606618.421,
+			"noTime": "noTime"
+		}
+	],
+	"description": "too hight since"
+}

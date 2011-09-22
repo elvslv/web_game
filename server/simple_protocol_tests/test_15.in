@@ -1,0 +1,10 @@
+{
+	"test":
+	[
+		{
+			"action": "login",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		}
+	]
+}

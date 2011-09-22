@@ -1,0 +1,13 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "rewtgh"
+		},
+		{
+			"action": "login",
+			"password": "wqtewy"
+		}
+	]
+}

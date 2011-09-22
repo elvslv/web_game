@@ -30,14 +30,16 @@ class TestFromFile(unittest.TestCase):
                 
 def suite():
         suite = unittest.TestSuite()
-        suite.addTests(TestFromFile('tests\\test_%d.in' % i, 'tests\\test_%d.ans' % i) for i in range(start, end))
+        suite.addTests(TestFromFile('%s\\test_%d.in' % (diri, i), '%s\\test_%d.ans' % (diri, i)) for i in range(start, end))
         return suite
 
-def main(a, b):
+def main(a, b, c):
         global start
         global end
+        global diri
         start = a
         end = b
+        diri = c
         unittest.TextTestRunner().run(suite())
 if __name__=='__main__':
-	main(0, 33)
+	main(0, 43, "simple_protocol_tests")
