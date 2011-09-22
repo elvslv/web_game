@@ -18,7 +18,7 @@ from misc import MAX_GAMEDESCR_LEN
 cursor = editDb.cursor
 db = editDb.db
 
-usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
+usrnameRegexp = r'^[a-z][\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 	
 def checkFieldsCorrectness(data):
@@ -29,12 +29,25 @@ def checkFieldsCorrectness(data):
 		if not field['name'] in data:
 			if field['mandatory']:
 				return {'result': 'badJson'}
-			return {'result': 'ok'}
+			continue
 		if not isinstance(data[field['name']], field['type']):
 			return {'result': 'bad' + field['name'].title()}
 		
 	return {'result': 'ok'}
-			
+	
+def createDefaultRaces(): 
+	racesOnDesk = 0
+	nextRacePosition = 0
+	for race in misc.defaultRaces:
+		cursor.execute('INSERT INTO Races(RaceName, InitialNum, FarFromStack, BonusMoney) \
+			VALUES(%s, %s, %s, 0)', (race['raceName'], race['initialNum'], nextRacePosition))
+		if racesOnDesk < 6:
+			racesOnDesk += 1
+			nextRacePosition += 1
+		else:
+			nextRacePosition = -1
+		
+		
 def act_register(data):
 	username = data['username']
 	passwd = data['password']
@@ -102,6 +115,11 @@ def act_createDefaultMaps(data):
 		act_uploadMap(map)
 	return {'result': 'ok'}
 	
+def act_createDefaultMaps(data):
+	for map in misc.defaultMaps:
+		act_uploadMap(map)
+	return {'result': 'ok'}
+	
 def act_uploadMap(data):
 	name = data['mapName']
 	if int(cursor.execute('SELECT 1 FROM Maps WHERE MapName=%s', name)):
@@ -112,6 +130,18 @@ def act_uploadMap(data):
 		return {'result': 'badPlayersNum'}
 	cursor.execute('INSERT INTO Maps(MapName, PlayersNum) VALUES(%s, %s)', (name, players))
 	mapId = db.insert_id()
+	try:
+		regions = data['regions']
+	except KeyError, e:
+		return {'result': 'ok', 'mapId': mapId}
+	for region in regions:
+		try:
+			cursor.execute('INSERT INTO Regions(MapId, TokenNum, Borderline,\
+				Highland, Coastal, Seaside) VALUES(%s, %s, %s, %s, %s, %s)', 
+				(mapId, region['population'], region['borderline'], region['highland'],
+					region['coastal'], region['seaside']))	
+		except KeyError, e:
+			return {'result': 'badRegion'}
 	return {'result': 'ok', 'mapId': mapId}
 	
 def act_createGame(data):
@@ -146,7 +176,6 @@ def act_createGame(data):
 	if 'gameDescr' in data:
 		descr = data['gameDescr']
 	if descr and len(descr) > MAX_GAMEDESCR_LEN:
->>>>>>> upstream/master
 		return {'result': 'badGameDescription'}
 	cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) VALUES(%s, %s, %s, %s, %s)", 
 		(name, descr, mapId, 1, misc.gameStates['waiting']))
@@ -248,7 +277,6 @@ def act_setReadinessStatus(data):
 	gameId, gameState = row
 	if gameState != misc.gameStates['waiting']:
 		return {'result': 'badGameState'}
-		
 	status = data['readinessStatus']
 	if not(status == 0 or status == 1):
 		return {'result': 'badReadinessStatus'}
@@ -322,8 +350,8 @@ def act_conquer(data):
 	if ownerId == userId and not inDecline: 
 		return {'result': 'badRegion'}
 	if stage == misc.userStages['firstAttack']:
-		borderline, coastal = regInfo[4], regInfo[6]
-		if not (borderline or coastal) : 
+		borderline, coastal, seaside = regInfo[4], regInfo[6], regInfo[7]
+		if not (borderline or coastal) or  coastal: 
 			return  {'result': 'badRegion'}
 	else:
 		cursor.execute('SELECT RegionId FROM Regions WHERE OwnerId=%s', userId)

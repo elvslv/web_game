@@ -29,6 +29,7 @@ class TestFromFile(unittest.TestCase):
 		self.assertListEqual(out['result'], json.loads(ans))
                 
 def suite():
+	actions.createDefaultRaces()
         suite = unittest.TestSuite()
         suite.addTests(TestFromFile('tests\\test_%d.in' % i, 'tests\\test_%d.ans' % i) for i in range(start, end))
         return suite
@@ -39,5 +40,8 @@ def main(a, b):
         start = a
         end = b
         unittest.TextTestRunner().run(suite())
+		
 if __name__=='__main__':
-	main(0, 33)
+        if len(sys.argv) != 3:             
+                sys.exit("Need two numbers as the first and the last test numbers")
+	main(int(sys.argv[1]), int(sys.argv[2]))

@@ -8,6 +8,7 @@ MIN_PLAYERS_NUM = 2
 MAX_PLAYERS_NUM = 5
 MIN_GAMENAME_LEN = 1
 MAX_GAMENAME_LEN = 50
+MAX_RACENAME_LEN = 20
 MAX_GAMEDESCR_LEN = 300
 X0 = 5363478883
 A = 9995326
@@ -30,6 +31,8 @@ def generateSids(n):
 	LAST_SID = X0
 	for i in range(n):
 		print generateSid()
+		
+		
 
 userStages = {
 	'notPlaying': 1, 
@@ -65,9 +68,11 @@ actionFields = {
 	'createDefaultMaps': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
 	],
+	
 	'uploadMap': [
 		{'name': 'mapName', 'type': unicode, 'mandatory': True}, 
-		{'name': 'playersNum', 'type': int, 'mandatory': True}
+		{'name': 'playersNum', 'type': int, 'mandatory': True},
+		{'name': 'regions', 'type': list, 'mandatory': False}
 	],
 	'createGame': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -104,12 +109,55 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	]
 }
-
+ 
+			
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3},
 	{'mapName': 'defaultMap3', 'playersNum': 4},
-	{'mapName': 'defaultMap4', 'playersNum': 5}
+	{'mapName': 'defaultMap4', 'playersNum': 5},
+	{
+		'mapName': 'defaultMap5', 
+		'playersNum': 5, 
+		'regions' : 
+		[
+			{
+				'population' : 1,
+				'borderline' : 0,
+				'seaside'    : 0,
+				'highland'   : 1,
+				'coastal'    : 0,
+			},
+			{
+				'population' : 3,
+				'seaside'    : 1,
+				'borderline' : 0,
+				'highland'   : 0,
+				'coastal'    : 0,
+			},
+			{
+				'population' : 2,
+				'seaside'    : 0,
+				'borderline' : 1,
+				'highland'   : 0,
+				'coastal'    : 0,
+			},
+			{
+				'population' : 0,
+				'borderline' : 0,
+				'seaside'    : 0,
+				'highland'   : 0,
+				'coastal'    : 1,
+			},
+		]
+	}	
+			
+]
+
+defaultRaces = [
+	{'raceName': 'caucasian', 'initialNum': 5},
+	{'raceName': 'negroid', 'initialNum': 2},
+				
 ]
 
 gameStates = {'waiting': 1, 'processing': 2, 'ended': 3}
