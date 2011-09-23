@@ -165,7 +165,7 @@ def act_getGameList(data):
 	gameRowNames = ['gameId', 'gameName', 'gameDescr', 'playersNum', 'state', 'turn', 
 		'activePlayer']
 	mapRowNames = ['mapId', 'mapName', 'playersNum']
-	playerRowNames = ['userId', 'username', 'state', 'sid', 'priority']
+	playerRowNames = ['userId', 'username', 'state', 'sid']
 
 	for game in games:
 		curGame = dict()
@@ -183,14 +183,17 @@ def act_getGameList(data):
 		for i in range(len(mapRowNames)):
 			curGame['map'][mapRowNames[i]] = map[i]
 
-		query('SELECT Id, Username, IsReady, Sid, Priority FROM Users WHERE GameId=%s', 
+		query('SELECT Id, Username, IsReady, Sid FROM Users WHERE GameId=%s ORDER BY Priority ASC', 
 			gameId)
 		players = fetchall()
 		resPlayers = list()
+		priority = 0
 		for player in players:
 			curPlayer = dict()
 			for i in range(len(playerRowNames)):
 				curPlayer[playerRowNames[i]] = player[i]
+			priority += 1	
+			curPlayer['priority'] = priority
 			resPlayers.append(curPlayer)
 		curGame['players'] = resPlayers
 		result['games'].append(curGame)
