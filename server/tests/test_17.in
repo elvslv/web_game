@@ -13,13 +13,13 @@
 		},
 		{
 			"action": "sendMessage",
-			"userId": 1,
-			"message": "hello!",
+			"sid": 1,
+			"text": "hello!",
 			"noTime": "noTime"
 		},
 		{
 			"action": "getMessages",
-			"since": 2316606618.421,
+			"since": 2147483645,
 			"noTime": "noTime"
 		}
 	],

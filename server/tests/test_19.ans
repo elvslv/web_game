@@ -11,13 +11,13 @@
 	},
 	{
 		"result": "ok",
-		"mesArray": [{"userId": 1, "message": "hello!"}]
+		"messages": [{"userId": 1, "text": "hello!"}]
 	},
 	{
 		"result": "ok" 
 	},
 	{
 		"result": "ok",
-		"mesArray": [{"userId": 1, "message": "hello!"}, {"userId": 1, "message": "hello again!"}]
+		"messages": [{"userId": 1, "text": "hello!"}, {"userId": 1, "text": "hello again!"}]
 	}
 ]

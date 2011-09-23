@@ -13,8 +13,8 @@
 		},
 		{
 			"action": "sendMessage",
-			"userId": 1,
-			"message": "hello!",
+			"sid": 1,
+			"text": "hello!",
 			"noTime": "noTime"
 		}
 	],

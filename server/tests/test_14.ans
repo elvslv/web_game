@@ -11,6 +11,6 @@
 	},
 	{
 		"result": "ok",
-		"mesArray": [{"userId": 1, "message": "hello!"}]
+		"messages": [{"userId": 1, "text": "hello!"}]
 	}
 ]

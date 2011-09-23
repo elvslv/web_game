@@ -1,11 +1,15 @@
 import json
 import actions 
+from gameExceptions import BadFieldException
 
 def parseJsonObj(obj):
-	if not('action' in obj):
-		ans = {"result": "badJson"}
-	else:
-		ans = actions.doAction(obj)
+	try:
+		if not('action' in obj):
+			raise BadFieldException('badJson')
+		else:
+			ans = actions.doAction(obj)
+	except BadFieldException, e:
+		return {'result': e.value}
 	return ans
 
 def parseInputData(data):     
@@ -27,16 +31,16 @@ def parseDataFromFile(fileName):
 	description = ''
 	try:
 		object = json.loads(file.read())
-	except (TypeError, ValueError), e:
+	except (TypeError, ValueError):
 		return {'result': [{"result": "badJson"}], 'description': description}
 
-        if not ('test' in object):
-                return {'result': [{'result': 'badTest'}], 'description': description}
+	if not ('test' in object):
+		return {'result': [{'result': 'badTest'}], 'description': description}
 
-        if 'description' in object:
-                description = object['description']
+	if 'description' in object:
+		description = object['description']
 	
-        object = object['test']
+	object = object['test']
 	result = list()
 	if isinstance(object, list):
 		for obj in object:

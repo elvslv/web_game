@@ -9,12 +9,20 @@ MAX_PLAYERS_NUM = 5
 MIN_GAMENAME_LEN = 1
 MAX_GAMENAME_LEN = 50
 MAX_RACENAME_LEN = 20
+MAX_SKILLNAME_LEN = 20
 MAX_GAMEDESCR_LEN = 300
+VISIBLE_RACES_NUM = 6
+RACE_NUM = 14
+SKILL_NUM = 20
+
 X0 = 5363478883
 A = 9995326
 C = 235286786
 M = 7486379941
 global LAST_SID
+
+usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
+pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
 def generateSid():
 	global LAST_SID
@@ -43,42 +51,83 @@ userStages = {
 
 actionFields = {
 	'register': [
-		{'name': 'username', 'type': unicode, 'mandatory': True}, 
-		{'name': 'password', 'type': unicode, 'mandatory': True}
+		{
+			'name': 'username', 
+			'type': unicode, 
+			'mandatory': True,
+			'min': MIN_USERNAME_LEN,
+			'max': MAX_USERNAME_LEN
+		}, 
+		{
+			'name': 'password', 
+			'type': unicode, 
+			'mandatory': True,
+			'min': MIN_PASSWORD_LEN,
+			'max': MAX_PASSWORD_LEN
+		}
 	],
 	'login': [
-		{'name': 'username', 'type': unicode, 'mandatory': True}, 
-		{'name': 'password', 'type': unicode, 'mandatory': True}
+		{
+			'name': 'username', 
+			'type': unicode, 
+			'mandatory': True,
+			'min': MIN_USERNAME_LEN,
+			'max': MAX_USERNAME_LEN
+		}, 
+		{
+			'name': 'password', 
+			'type': unicode, 
+			'mandatory': True,
+			'min': MIN_PASSWORD_LEN,
+			'max': MAX_PASSWORD_LEN			
+		}
 	],
 	'logout': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
-	'doSmth': [
-		{'name': 'sid', 'type': int, 'mandatory': True}
-	],
 	'sendMessage': [
-		{'name': 'userId', 'type': int, 'mandatory': True}, 
-		{'name': 'message', 'type': unicode, 'mandatory': True},
+		{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'text', 'type': unicode, 'mandatory': True},
 		{'name': 'noTime', 'type': unicode, 'mandatory': False}
 	],
 	'getMessages': [
-		{'name': 'since', 'type': float, 'mandatory': True},
-		{'name': 'noTime', 'type': unicode, 'mandatory': False}
+		{'name': 'since', 'type': int, 'mandatory': True}
 	],
 	'createDefaultMaps': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
 	],
 	'uploadMap': [
-		{'name': 'mapName', 'type': unicode, 'mandatory': True}, 
-		{'name': 'playersNum', 'type': int, 'mandatory': True},
+		{
+			'name': 'mapName', 
+			'type': unicode, 
+			'mandatory': True,
+			'max': MAX_MAPNAME_LEN
+		}, 
+		{
+			'name': 'playersNum', 
+			'type': int, 
+			'mandatory': True,
+			'min': MIN_PLAYERS_NUM,
+			'max': MAX_PLAYERS_NUM
+		},
 		{'name': 'regions', 'type': list, 'mandatory': False}
 	],
 	'createGame': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'gameName', 'type': unicode, 'mandatory': True},
+		{
+			'name': 'gameName', 
+			'type': unicode, 
+			'mandatory': True,
+			'min': MIN_GAMENAME_LEN,
+			'max': MAX_GAMENAME_LEN
+		},
 		{'name': 'mapId', 'type': int, 'mandatory': True},
-		{'name': 'gameDescr', 'type': unicode, 'mandatory': False},
-		{'name': 'playersNum', 'type': int, 'mandatory': False}
+		{
+			'name': 'gameDescr', 
+			'type': unicode, 
+			'mandatory': False,
+			'max': MAX_GAMEDESCR_LEN	
+		}
 	],
 	'getGameList': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
@@ -92,7 +141,13 @@ actionFields = {
 	],
 	'setReadinessStatus': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'readinessStatus', 'type': int, 'mandatory': True}
+		{
+			'name': 'isReady', 
+			'type': int, 
+			'mandatory': True,
+			'min': 0,
+			'max': 1
+		}
 	],
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -106,6 +161,9 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
 	'finishTurn': [
+		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'doSmth': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	]
 }

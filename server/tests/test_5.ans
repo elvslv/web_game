@@ -13,9 +13,6 @@
 		"result": "badMapId"
 	},
 	{
-		"result": "badPlayersNum"
-	},
-	{
 		"result": "badGameName"
 	},
 	{
@@ -33,7 +30,7 @@
 		"sid": 2
 	},
 	{
-		"result": "badGameDescription"
+		"result": "badGameDescr"
 	},
 	{
 		"result": "badGameName"

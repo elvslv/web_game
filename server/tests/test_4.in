@@ -6,7 +6,7 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 5,
-			"readinessStatus": 0
+			"isReady": 0
 		},
 		{	
 			"action": "register",
@@ -47,17 +47,17 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": -10
+			"isReady": -10
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": "adsjgk"
+			"isReady": "adsjgk"
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": [0, 1]
+			"isReady": [0, 1]
 		},
 		{
 			"action": "joinGame",
@@ -67,47 +67,47 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 0
+			"isReady": 0
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 0
+			"isReady": 0
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 2,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 2,
-			"readinessStatus": 0
+			"isReady": 0
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 2,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 0
+			"isReady": 0
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 3,
-			"readinessStatus": 0
+			"isReady": 0
 		}
 	],
 	"description": "test setReadinessStatus function"

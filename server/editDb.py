@@ -5,6 +5,7 @@ from misc import MAX_GAMENAME_LEN
 from misc import MAX_GAMEDESCR_LEN
 from misc import MAX_MAPNAME_LEN
 from misc import MAX_RACENAME_LEN
+from misc import MAX_SKILLNAME_LEN
 
 DATABASE_HOST = "localhost"
 DATABASE_USER = "admin"
@@ -35,7 +36,7 @@ def rollback():
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%s) UNIQUE, Password VARCHAR(%s), Sid BIGINT UNIQUE,\
-			GameId INT UNSIGNED, Readiness TINYINT(1), CurrentRace TINYINT UNSIGNED, DeclineRace TINYINT UNSIGNED,\
+			GameId INT UNSIGNED, IsReady TINYINT(1), CurrentRace TINYINT UNSIGNED, DeclineRace TINYINT UNSIGNED,\
 			Coins TINYINT UNSIGNED, Stage TINYINT UNSIGNED, TokensInHand INT UNSIGNED, \
 			Bonus TINYINT UNSIGNED, Priority INT UNSIGNED)", (MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
@@ -48,13 +49,15 @@ def createTables():
 			Regions(MapId INT UNSIGNED, RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,  \
 			RaceId INT UNSIGNED, TokenNum INT UNSIGNED, OwnerId INT UNSIGNED, \
 			Borderline BOOL, Highland BOOL,	Coastal BOOL, Seaside BOOL, InDecline BOOL)")
-	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)")
-	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			Races(RaceId TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, RaceName VARCHAR(%s) UNIQUE, \
-			InitialNum INT UNSIGNED, BonusID INT UNSIGNED, \
-			FarFromStack TINYINT, BonusMoney TINYINT)", MAX_RACENAME_LEN)
-			
+	cursor.execute("""CREATE TABLE IF NOT EXISTS AdjacentRegions (FirstRegionId INT UNSIGNED, 
+			SecondRegionId INT UNSIGNED)""")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS Races(RaceId TINYINT UNSIGNED PRIMARY KEY 
+			AUTO_INCREMENT, RaceName VARCHAR(%s) UNIQUE, InitialNum INT UNSIGNED, 
+			BonusID INT UNSIGNED, FarFromStack TINYINT, BonusMoney TINYINT, 
+			RaceIndex INT UNSIGNED)""", MAX_RACENAME_LEN)
+	cursor.execute("""CREATE TABLE IF NOT EXISTS Skills(SkillId TINYINT UNSIGNED 
+			PRIMARY KEY AUTO_INCREMENT, SkillName VARCHAR(%s) UNIQUE, 
+			SkillIndex INT UNSIGNED UNIQUE)""", MAX_SKILLNAME_LEN)		
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time REAL)")
                 
