@@ -4,24 +4,13 @@ import time
 import misc
 import MySQLdb
 
-from misc import MAX_USERNAME_LEN
-from misc import MAX_PASSWORD_LEN
-from misc import MIN_USERNAME_LEN
-from misc import MIN_PASSWORD_LEN
-from misc import DEFAULT_PLAYERS_NUM
-from misc import MIN_PLAYERS_NUM
-from misc import MAX_PLAYERS_NUM
-from misc import MIN_GAMENAME_LEN
-from misc import MAX_GAMENAME_LEN
-from misc import MAX_GAMEDESCR_LEN
-from misc import MAX_MAPNAME_LEN
+from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MIN_USERNAME_LEN, MIN_PASSWORD_LEN
+from misc import MAX_PLAYERS_NUM, MIN_PLAYERS_NUM
+from misc import MIN_GAMENAME_LEN, MAX_GAMENAME_LEN
+from misc import MAX_GAMEDESCR_LEN, MAX_MAPNAME_LEN
+from misc import BASIC_CONQUER_COST, INIT_COINS_NUM, MAX_VISIBLE_RACES
 
-from editDb import query
-from editDb import fetchall
-from editDb import fetchone
-from editDb import lastId
-from editDb import commit
-from editDb import rollback
+from editDb import query, fetchall, fetchone, lastId, commit, rollback
 
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
@@ -41,16 +30,8 @@ def checkFieldsCorrectness(data):
 	return {'result': 'ok'}
 	
 def createDefaultRaces(): 
-	racesOnDesk = 0
-	nextRacePosition = 0
 	for race in misc.defaultRaces:
-		if racesOnDesk < 6:
-			racesOnDesk += 1
-			nextRacePosition += 1
-		else:
-			nextRacePosition = -1
-		query('INSERT INTO Races(RaceName, InitialNum, FarFromStack, BonusMoney) \
-			VALUES(%s, %s, %s, 0)', race['raceName'], race['initialNum'], nextRacePosition)
+		query('INSERT INTO Races(RaceName, InitialNum) VALUES(%s, %s)', race['raceName'], race['initialNum'])
 		
 def act_register(data):
 	username = data['username']
@@ -62,8 +43,7 @@ def act_register(data):
 
 	if query("SELECT 1 FROM Users WHERE Username=%s", username):
 		return {"result": "usernameTaken"}
-	query("INSERT INTO Users(Username, Password, Stage) VALUES (%s, %s, %s)",
-		username, passwd, misc.userStages['notPlaying'])
+	query("INSERT INTO Users(Username, Password) VALUES (%s, %s)", username, passwd)
 	return {"result": "ok"}
 
 def act_login(data):
@@ -141,7 +121,7 @@ def act_uploadMap(data):
 		regions = data['regions']
 		for region in regions:
 			try:
-				query('INSERT INTO Regions(MapId, TokenNum, Borderline,\
+				query('INSERT INTO Regions(MapId, TokensNum, Borderline,\
 					Highland, Coastal, Seaside) VALUES(%s, %s, %s, %s, %s, %s)', 
 					mapId, region['population'], region['borderline'], region['highland'],
 						region['coastal'], region['seaside'])	
@@ -152,7 +132,7 @@ def act_uploadMap(data):
 						id, n)
 					query('INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) VALUES(%s, %s)', 
 						n, id)
-			except KeyError, e:
+			except KeyError:
 				return {'result': 'badRegion'}
 	return {'result': 'ok', 'mapId': mapId}
 	
@@ -301,56 +281,66 @@ def act_setReadinessStatus(data):
 	query('SELECT COUNT(*) FROM Users WHERE GameId=%s AND Readiness=1', gameId)
 	readyPlayersNum = fetchone()[0]
 	if maxPlayersNum == readyPlayersNum:
-		query('UPDATE Users SET Coins=5, Stage=%s, TokensInHand=0, CurrentRace=NULL, \
-			DeclineRace=NULL, Bonus=NULL WHERE GameId=%s', misc.userStages['waitingTurn'], gameId)
-		query('SELECT Id FROM Users WHERE Priority=(SELECT MIN(Priority) FROM Users WHERE gameId=%s) \
-			AND GameId=%s', gameId, gameId)
+		# Starting
+		query('UPDATE Users SET Coins=%s, TokensInHand=0, CurrentRace=NULL, \
+			DeclineRace=NULL, Bonus=NULL WHERE GameId=%s', INIT_COINS_NUM, gameId)
+		query('SELECT Id FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
 		actPlayer = fetchone()[0]
 		query('UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s WHERE GameId=%s', 
 			misc.gameStates['processing'], actPlayer, gameId)
-		query('UPDATE Users SET Stage=%s WHERE Id=%s', misc.userStages['choosingRace'], actPlayer) 
+
+		query('SELECT RaceId FROM Races ORDER BY(RaceId)')		#Don't know how to rephrase it
+		races = fetchall()
+		currRacesNum = 1
+		for race in races:
+			currRacesNum += 1
+			query('INSERT INTO TokenBadges(RaceId, FarFromStack, BonusMoney) VALUES(%s, %s, 0)', 
+				race[0], (-1 if currRacesNum > MAX_VISIBLE_RACES else currRacesNum))
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
 	sid = data['sid']
 	raceId = data['raceId']
-	query('SELECT Stage, Coins, Id FROM Users WHERE Sid=%s', sid)
+	query('SELECT CurrentRace, Coins, Id FROM Users WHERE Sid=%s', sid)
 	row = fetchone()
 	if not row: 
 		return {'result': 'badSid'}
-	stage, coins, userId = row
-	if stage != misc.userStages['choosingRace']:	
+	curRace, coins, userId = row
+	query('SELECT Users.GameId, Games.ActivePlayer From Users, Games\
+		 WHERE Users.Sid=%s AND Users.Id=Games.ActivePlayer', sid)
+	if curRace or not fetchone():	
 		return {'result': 'badStage'}
-	query('SELECT InitialNum, FarFromStack, BonusId, BonusMoney FROM Races WHERE RaceId=%s', raceId)
-	row = fetchone()
-	if row[1] == -1 : 
+	query('SELECT FarFromStack, BonusMoney FROM TokenBadges WHERE RaceId=%s', raceId)
+	farFromStack, bonusMoney = fetchone()
+	if farFromStack == -1 : 				# Token badge is currently located inside of stack
 		return {'result': 'badChoice'}
-	num, farFromStack, bonusId, bonusMoney = row
-	query('SELECT COUNT(*) From Races WHERE FarFromStack>%s', farFromStack)
+	query('SELECT InitialNum, BonusId FROM Races WHERE RaceId=%s', raceId)
+	num,  bonusId = fetchone()
+	query('SELECT COUNT(*) From TokenBadges WHERE FarFromStack>%s', farFromStack)
 	price = fetchone()[0]
 	if coins < price : 
 		return {'result' : 'badMoneyAmount'}
-	query('UPDATE Users SET CurrentRace=%s, Coins=Coins-%s+%s, Bonus=%s, Stage=%s, TokensInHand=%s WHERE Sid=%s', 
-		raceId, price, bonusMoney, bonusId, misc.userStages['invading'], num, sid)
-	query('UPDATE Races SET FarFromStack=-1, BonusMoney=0 WHERE RaceId=%s', raceId)
-	query('UPDATE Races SET FarFromStack=FarFromStack+1 WHERE FarFromStack >-1 AND FarFromStack<%s', farFromStack)
-	query('UPDATE Races SET BonusMoney=BonusMoney+1 WHERE FarFromStack > %s', farFromStack)
-	query('SELECT RaceId FROM Races WHERE FarFromStack=-1')
+	query('UPDATE Users SET CurrentRace=%s, Coins=Coins-%s+%s, Bonus=%s, TokensInHand=%s WHERE Sid=%s', 
+		raceId, price, bonusMoney, bonusId, num, sid)
+	query('UPDATE TokenBadges SET FarFromStack=-1, BonusMoney=0 WHERE RaceId=%s', raceId)
+	query('UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack >-1 AND FarFromStack<%s', farFromStack)
+	query('UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s', farFromStack)
+	query('SELECT RaceId FROM TokenBadges WHERE FarFromStack=-1')
 	newRaceId = fetchone()[0];
-	query('UPDATE Races SET FarFromStack=0 WHERE RaceId=%s', newRaceId)
+	query('UPDATE TokenBadges SET FarFromStack=0 WHERE RaceId=%s', newRaceId)
 	return {'result': 'ok'}
 	
 def act_conquer(data):
 	regionId = data['regionId']
 	sid = data['sid']
-	query('SELECT Id, Stage, TokensInHand FROM Users WHERE Sid=%s', sid)
+	query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Sid=%s', sid)
 	row = fetchone()
 	if not row: 
 		return {'result': 'badSid'}
-	userId, stage, unitsNum = row
-	if not (stage == misc.userStages['invading'] or stage == misc.userStages['attacking']):
-		return {'result': 'badStage'}
-	query('SELECT MapId, OwnerId, RaceId, TokenNum, Borderline, Highland, \
+	userId, race, unitsNum = row
+	if not race:
+		return {'result' : 'badStage'}
+	query('SELECT MapId, OwnerId, RaceId, TokensNum, Borderline, Highland, \
 		Coastal, Seaside, inDecline FROM Regions WHERE RegionId=%s', regionId)
 	regInfo = fetchone()
 	if not regInfo:
@@ -358,14 +348,15 @@ def act_conquer(data):
 	mapId = regInfo[0]
 	query('SELECT Users.GameId, Games.MapId From Users, Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId', sid)
 	rightMapId = fetchone()[1]
-	if mapId != rightMapId :  ###?!!!
+	if mapId != rightMapId :  		#The region player wanted to attack is located on another map
 		return {'result': 'badRegionId'}
 	ownerId = regInfo[1]
 	inDecline = regInfo[8]
 	if ownerId == userId and not inDecline: 
 		return {'result': 'badRegion'}
 	seaside = False
-	if stage == misc.userStages['invading']:
+	query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s', userId)
+	if not fetchone()[0]:			#Player doesn't own any territories yet
 		borderline, coastal, seaside = regInfo[4], regInfo[6], regInfo[7]
 		if not (borderline or coastal) or  seaside: 
 			return  {'result': 'badRegion'}
@@ -374,7 +365,7 @@ def act_conquer(data):
 		playerRegions = fetchall()
 		playerBorderline = False
 		for plRegion in playerRegions:
-			query('SELECT Adjacent FROM AdjacentRegions WHERE FirstRegionId=%s AND SecondRegionId=%s', plRegion[0], regionId)
+			query('SELECT COUNT(*) FROM AdjacentRegions WHERE FirstRegionId=%s AND SecondRegionId=%s', plRegion[0], regionId)
 			if fetchone():
 				playerBorderline = True
 				break
@@ -382,57 +373,57 @@ def act_conquer(data):
 		if playerBorderline == False or  seaside: 
 			return {'result': 'badRegion'}
 	
-	unitPrice = 2 + regInfo[3] + regInfo[5]
-	#tossing the dice?
+	unitPrice = BASIC_CONQUER_COST + regInfo[3] + regInfo[5]
+	#	Tossing the dice?
 	if unitsNum < unitPrice : 
 		return  {'result': 'badTokensNum'}
-	query('UPDATE Users SET TokensInHand=TokensInHand-%s, stage=%s WHERE sid=%s', unitPrice, misc.userStages['attacking'], sid)
-	query('UPDATE Regions SET OwnerId=%s, TokenNum=%s, InDecline=0 WHERE RegionId=%s', userId, unitPrice, regionId) 
+	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE sid=%s', unitPrice, sid)
+	query('UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=0 WHERE RegionId=%s', userId, unitPrice, regionId) 
+	#	Defending?
 	return {'result': 'ok'}
 		
 def act_decline(data):
 	sid = data['sid']
-	query('SELECT Id, Stage, TokensInHand, CurrentRace FROM Users WHERE Sid=%s', sid)
+	query('SELECT Id, TokensInHand, CurrentRace FROM Users WHERE Sid=%s', sid)
 	row = fetchone()
 	if not row: 
 		return {'result': 'badSid'}
-	id, stage, freeUnits, race = row
-	if stage != misc.userStages['attacking']: ##
+	userId, freeUnits, race = row
+	query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s', userId)
+	if not race or not fetchone()[0]:	#Player doesn't own any territories or has no race to go in decline
 		return {'result': 'badStage'}
-	query('UPDATE Regions SET OwnerId=NULL, InDecline=0 WHERE OwnerId=%s AND InDecline=1', id)
-	query('UPDATE Regions SET InDecline=1, TokensNum=0 WHERE OwnerId=%s', id) ###
-	query('UPDATE Users SET DeclineRace=%s, CurrentRace=NULL, TokensInHand=0, Stage=%s WHERE Sid=%s', 
-		(race, misc.userStages['choosingRace'], sid))
+	query('UPDATE Regions SET OwnerId=NULL, InDecline=0 WHERE OwnerId=%s AND InDecline=1', userId)
+	query('UPDATE Regions SET InDecline=1, TokensNum=1 WHERE OwnerId=%s', id) ###
+	query('UPDATE Users SET DeclineRace=%s, CurrentRace=NULL, TokensInHand=0 WHERE Sid=%s', race, sid)
 	return {'result': 'ok'}
 		
 def act_finishTurn(data):
 	sid = data['sid']
-	query('SELECT Id, GameId, Stage, TokensInHand, Priority FROM Users WHERE Sid=%s', sid)
+	query('SELECT Id, GameId, CurrentRace, TokensInHand, Priority FROM Users WHERE Sid=%s', sid)
 	row = fetchone()
 	if not row: 
 		return {'result': 'badSid'}
-	userId, gameId, stage, freeUnits, priority = row
-	if not (stage == misc.userStages['invading'] or 
-			stage == misc.userStages['attacking'] or stage == misc.userStages['declined']):
-		return {'result': 'badStage'}
+	userId, gameId, race, freeUnits, priority = row
 	query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s', userId)
 	income = fetchone()[0]
-	query('UPDATE Users SET Stage=%s, Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s', 
-		(misc.userStages['waitingTurn'], income, sid))
-	query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Priority>%s AND GameId=%s',
-			priority, gameId)
+	if not race or not income:
+		return {'result': 'badStage'}
+	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
+	query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Priority>%s AND GameId=%s', priority, gameId)
 	row = fetchone()
 	if not row:
-		query('SELECT Id, CurrentRace  FROM Users WHERE Priority=\
-			(SELECT MIN(Priority) FROM Users WHERE GameId=%s) AND GameId=%s', gameId, gameId)
-		query('UPDATE Games SET Turn=Turn+1 WHERE GameId=%s', gameId)
-		# Last Turn?
+		query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
 		row = fetchone()
+		query('UPDATE Games SET Turn=Turn+1 WHERE GameId=%s', gameId)
+	#	Last Turn?
 	newActPlayer, race, tokensInHand = row
-	newPlayerStage = misc.userStages['choosingRace'] if not race else (misc.userStages['invading'] if 
-		tokensInHand == 0 else misc.userStages['attacking'])
-	query('UPDATE Games SET ActivePlayer=%s WHERE gameId=%s', newActPlayer, gameId)
-	query('UPDATE Users SET Stage=%s WHERE Id=%s', newPlayerStage, newActPlayer)
+	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)
+	query('SELECT SUM(TokensNum), COUNT(*) FROM Regions WHERE OwnerId=%s', newActPlayer)
+	unitsNum, regionsNum = fetchone()
+	if not unitsNum: unitsNum = 0
+	#	Gathering troops
+	query('UPDATE Users SET TokensInHand=%s WHERE Id=%s', unitsNum - regionsNum,  newActPlayer)
+	query('UPDATE Regions SET TokensNum=1 WHERE OwnerId=%s', newActPlayer)
 	return {'result': 'ok', 'nextPlayer' : newActPlayer}
 
 def doAction(data):

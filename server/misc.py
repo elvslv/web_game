@@ -10,6 +10,10 @@ MIN_GAMENAME_LEN = 1
 MAX_GAMENAME_LEN = 50
 MAX_RACENAME_LEN = 20
 MAX_GAMEDESCR_LEN = 300
+MAX_VISIBLE_RACES = 6
+
+INIT_COINS_NUM = 5
+BASIC_CONQUER_COST = 2
 X0 = 5363478883
 A = 9995326
 C = 235286786
@@ -31,15 +35,6 @@ def generateSids(n):
 	LAST_SID = X0
 	for i in range(n):
 		print generateSid()
-
-userStages = {
-	'notPlaying': 1, 
-	'waitingTurn': 2, 
-	'choosingRace': 3, 
-	'invading' : 4, 
-	'attacking' : 5,
-	'declined' : 6,
-}
 
 actionFields = {
 	'register': [
