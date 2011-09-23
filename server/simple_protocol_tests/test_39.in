@@ -1,0 +1,42 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"sid": 1,
+			"message": "hello user2!",
+			"simpletime": true
+		},
+		{
+			"action": "sendMessage",
+			"sid": 2,
+			"message": "hello user1!",
+			"simpletime": true
+		},
+		{
+			"action": "getMessages",
+			"since": 0
+		}
+	],
+	"description": "get 2 messages from 2 users"
+}

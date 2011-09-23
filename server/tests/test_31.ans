@@ -3,14 +3,17 @@
 		"result": "ok"
 	},
 	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
 		"sid": 1
 	},
 	{
-		"result": "badMap"
+		"result": "badMapId"
 	},
 	{
-		"result": "badNumberOfPlayers"
+		"result": "badPlayersNum"
 	},
 	{
 		"result": "badGameName"

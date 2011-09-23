@@ -1,0 +1,32 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"sid": 1,
+			"message": "hello!",
+			"simpletime": true
+		},
+		{
+			"action": "sendMessage",
+			"sid": 1,
+			"message": "hello again!",
+			"simpletime": true
+		},
+		{
+			"action": "getMessages",
+			"since": 0
+		}
+	],
+	"description": "get 2 messages"
+}

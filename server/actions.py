@@ -1,491 +1,440 @@
-import MySQLdb
 import editDb
 import re
 import time
+import math
 import misc
-import actions
+import MySQLdb
 
-from misc import MAX_USERNAME_LEN
-from misc import MAX_PASSWORD_LEN
-from misc import MIN_USERNAME_LEN
-from misc import MIN_PASSWORD_LEN
-from misc import DEFAULT_PLAYERS_NUM
-from misc import MIN_PLAYERS_NUM
-from misc import MAX_PLAYERS_NUM
-from misc import MIN_GAMENAME_LEN
-from misc import MAX_GAMENAME_LEN
-from misc import MAX_GAMEDESCR_LEN
+from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MIN_USERNAME_LEN, MIN_PASSWORD_LEN
+from misc import MAX_PLAYERS_NUM, MIN_PLAYERS_NUM
+from misc import MIN_GAMENAME_LEN, MAX_GAMENAME_LEN
+from misc import MAX_GAMEDESCR_LEN, MAX_MAPNAME_LEN
+from misc import BASIC_CONQUER_COST, INIT_COINS_NUM, MAX_VISIBLE_RACES
 
-cursor = editDb.cursor
-db = editDb.db
+from editDb import query, fetchall, fetchone, lastId, commit, rollback
 
-usrnameRegexp = r'^[a-z]+[\w_-]{%d,%d}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
-pwdRegexp = r'^.{%d,%d}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
+usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
+pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
-#should make up better names
-
-userStages = {
-			'notPlaying': 1, 
-			'waitingTurn': 2, 
-			'choosingRace': 3, 
-			'firstAttack' : 4, 
-			'notFirstAttack' : 5,
-			'declined' : 6,
+def checkFieldsCorrectness(data):
+	fields = misc.actionFields[data['action']]
+	if not fields:
+		return {'result': 'actionDoesntExist'}
+	for field in fields:
+		if not field['name'] in data:
+			if field['mandatory']:
+				return {'result': 'badJson'}
+			continue
+		if not isinstance(data[field['name']], field['type']):
+			return {'result': 'bad' + field['name'][0].upper() + field['name'][1:]}
+		
+	return {'result': 'ok'}
 	
-}
-			
-
+def createDefaultRaces(): 
+	for race in misc.defaultRaces:
+		query('INSERT INTO Races(RaceName, InitialNum) VALUES(%s, %s)', race['raceName'], race['initialNum'])
+		
 def act_register(data):
-	if not(('username' in data) and ('password' in data)):
-		return {"result": "badJson"}
-
 	username = data['username']
 	passwd = data['password']
-	try:
-		if  not re.match(usrnameRegexp, username, re.I):
-			return {"result": "badUsername"}
-	except(TypeError, ValueError):
+	if  not re.match(usrnameRegexp, username, re.I):
 		return {"result": "badUsername"}
-	try:
-		if  not re.match(pwdRegexp, passwd, re.I):
-			return {"result": "badPassword"}
-	except(TypeError, ValueError):
+	if  not re.match(pwdRegexp, passwd, re.I):
 		return {"result": "badPassword"}
 
-	num = int(cursor.execute("SELECT 1 FROM Users WHERE Username=%s", username))
-	if num:
+	if query("SELECT 1 FROM Users WHERE Username=%s", username):
 		return {"result": "usernameTaken"}
-	cursor.execute("INSERT INTO Users(username, password, stage) VALUES (%s, %s, %s)",(username, passwd, userStages['notPlaying']))
+	query("INSERT INTO Users(Username, Password) VALUES (%s, %s)", username, passwd)
 	return {"result": "ok"}
 
 def act_login(data):
-	if not(('username' in data) and ('password' in data)):
-		return {"result": "badJson"}
 	username = data['username']
 	passwd = data['password']
-	try:
-			if not int(cursor.execute("SELECT 1 FROM Users WHERE Username=%s AND Password=%s",
-					(username, passwd))):
-					return {'result': 'badUsernameOrPassword'}
-	except(TypeError, ValueError), e:
-			return {'result': 'badUsernameOrPassword'}
+	if not query("SELECT 1 FROM Users WHERE Username=%s AND Password=%s", username, passwd):
+		return {'result': 'badUsernameOrPassword'}
 
 	while 1:
-			sid = misc.generateSidForTest()
-			if not int(cursor.execute("SELECT 1 FROM Users WHERE Sid=%s", sid)):
-					break
+		sid = misc.generateSidForTest()
+		if not query("SELECT 1 FROM Users WHERE Sid=%s", sid):
+				break
 			
-	cursor.execute("UPDATE Users SET Sid=%s WHERE Username=%s", (sid, username))
+	query("UPDATE Users SET Sid=%s WHERE Username=%s", sid, username)
 	return {"result": "ok", "sid": long(sid)}
 
 def act_logout(data):
-	if not('sid' in data):
-		return {"result": "badJson"}
-
 	sid = data['sid']
-	try:
-		if not int(cursor.execute("UPDATE Users SET Sid=NULL WHERE Sid=%s", sid)):
-			return {"result": "badSid"}
-		return {"result": "ok"}
-	except(TypeError, ValueError):
+	if not query("UPDATE Users SET Sid=NULL WHERE Sid=%s", sid):
 		return {"result": "badSid"}
+	return {"result": "ok"}
 
 def act_doSmth(data):
-	if not('sid' in data):
-		return {"result": "badJson"}
-
 	sid = data['sid']
-	try:
-		if not int(cursor.execute("SELECT id FROM Users WHERE Sid=%s", sid)):
-			return {"result": "badSid"}
-		return {"result": "ok"}
-	except(TypeError, ValueError):
+	if not query("SELECT id FROM Users WHERE Sid=%s", sid):
 		return {"result": "badSid"}
+	return {"result": "ok"}
 
 def act_sendMessage(data):
-	if not(('userid' in data) and ('message' in data)):
-			return {"result": "badJson"}
-		
-	userId = data['userid']
+	sid = data['sid']
 	message = data['message']
-	mesTime = time.time();
-	try:
-		if not int(cursor.execute("SELECT 1 FROM Users WHERE UserId=%s", userId)):
-			return {"result": "badUserId"}
-	except (TypeError, ValueError):
-		return {"result": "badUserId"}
-	
-	cursor.execute("INSERT INTO Chat(userid, message, time) VALUES (%s, %s, %s)",(userId, message, mesTime)) 
-	return {"result": "ok", "mesTime": mesTime}
+	if 'simpletime' in data:
+                msgTime = misc.generateTimeForTest()
+        else:
+                msgTime = math.trunc(time.time())
+	if not query("SELECT UserName FROM Users WHERE sid=%s", sid):
+		return {"result": "badSid"}
+	row = fetchone()
+	userName = row[0]
+	query("INSERT INTO Chat(UserName, Message, Time) VALUES (%s, %s, %s)", userName, message, msgTime) 
+	return {"result": "ok", "time": msgTime}
 
 def act_getMessages(data):
-	if not('since' in data):
-		return {"result": "badJson"}
-	try:
-		cursor.execute("SELECT UserId, Message, Time FROM Chat WHERE Time > %s ORDER BY Time", since)
-	except (TypeError, ValueError), e:
-		return {"result": "badTime"}
-	records =  cursor.fetchall()
+	since = data['since']
+	query("SELECT UserName, Message, Time FROM Chat WHERE Time > %s ORDER BY Time", since)
+	records =  fetchall()
 	records = records[-100:]
-	mesArray = []
+	msgArray = []
 	for rec in records:
-		user_id, message, mes_time = rec
-		mesArray.append({"userid": userId, "message": message, "mesTime": mesTime})
-                
-	return {"result": "ok", "mesArray": mesArray}
+		userName, message, msgTime = rec
+                msgArray.append({"username": userName, "message": message, "time": msgTime})
+	return {"result": "ok", "messages": msgArray}
 
-def act_uploadMap(data):
-	if not(('mapName' in data) and ('playersNum' in data)):
-		return {'result': 'badJson'}
+def act_createDefaultMaps(data):
+	for map in misc.defaultMaps:
+		act_uploadMap(map)
+	return {'result': 'ok'}
 	
+def act_uploadMap(data):
 	name = data['mapName']
-	try:
-		if int(cursor.execute('SELECT 1 FROM Maps WHERE MapName=%s', name)):
-			return {'result': 'badMapName'}
-	except (TypeError, ValueError):
+	if len(name) > MAX_MAPNAME_LEN:
+		return {'result': 'badMapName'}
+	if query('SELECT 1 FROM Maps WHERE MapName=%s', name):
 		return {'result': 'badMapName'}
 	
-	try:
-		players = int(data['playersNum'])
-		if not ((players >= 2) and (players <= 5)):
-			return {'result': 'badPlayersNum'}
-		cursor.execute('INSERT INTO Maps(MapName, PlayersNum) VALUES(%s, %s)', (name, players))
-		mapId = db.insert_id()
-		return {'result': 'ok', 'mapId': mapId}
-	except(TypeError, ValueError):
+	players = int(data['playersNum'])
+	if not ((players >= MIN_PLAYERS_NUM) and (players <= MAX_PLAYERS_NUM)):
 		return {'result': 'badPlayersNum'}
-	
-gameStates = {'waiting': 1, 'processing': 2, 'ended': 3}
+	query('INSERT INTO Maps(MapName, PlayersNum) VALUES(%s, %s)', name, players)
+	mapId = lastId()
+	if 'regions' in data:
+		regions = data['regions']
+		for region in regions:
+			try:
+				query('INSERT INTO Regions(MapId, TokensNum, Borderline,\
+					Highland, Coastal, Seaside) VALUES(%s, %s, %s, %s, %s, %s)', 
+					mapId, region['population'], region['borderline'], region['highland'],
+						region['coastal'], region['seaside'])	
+				id = lastId()
+				adjacent = region['adjacent']
+				for n in adjacent:
+					query('INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) VALUES(%s, %s)', 
+						id, n)
+					query('INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) VALUES(%s, %s)', 
+						n, id)
+			except KeyError:
+				return {'result': 'badRegion'}
+	return {'result': 'ok', 'mapId': mapId}
 	
 def act_createGame(data):
-	if not(('sid' in data) and ('gameName' in data) and ('mapId' in data)):
-		return {'result': 'badJson'}
 	#validate sid
 	sid = data['sid']
-	try:
-		if not int(cursor.execute("SELECT GameId FROM Users WHERE Sid=%s", sid)):
-			return {'result': 'badSid'}
-		if cursor.fetchone()[0]:
-			return {'result': 'alreadyInGame'}
-	except (TypeError, ValueError), e:
-		return {"result": "badSid"}
+	if not query("SELECT GameId, Id FROM Users WHERE Sid=%s", sid):
+		return {'result': 'badSid'}
+	row = fetchone()
+	if row[0]:
+		return {'result': 'alreadyInGame'}
+	userId = row[1]
 		
 	#validate mapId
 	mapId = data['mapId']
-	try:
-		if not int(cursor.execute("SELECT PlayersNum FROM Maps WHERE MapId=%s", mapId)):
-			return {'result': 'badMap'}
-	except (TypeError, ValueError), e:
-		return {'result': 'badMap'}
+	if not query("SELECT PlayersNum FROM Maps WHERE MapId=%s", mapId):
+		return {'result': 'badMapId'}
 		
-	mapPlayersNum = int(cursor.fetchone()[0])
+	mapPlayersNum = int(fetchone()[0])
 	if 'playersNum' in data:
 		playersNum = data['playersNum']
 		if playersNum != mapPlayersNum:
-			return {'result': 'badNumberOfPlayers'}
+			return {'result': 'badPlayersNum'}
 		
 	#validate name and description
 	name = data['gameName']
 	if len(name) < MIN_GAMENAME_LEN or len(name) > MAX_GAMENAME_LEN:
 		return {'result': 'badGameName'}
-	try:
-		if int(cursor.execute("SELECT 1 FROM Games WHERE GameName=%s", name)):
-			return {'result': 'badGameName'}
-	except(TypeError, ValueError), e:
+	if query("SELECT 1 FROM Games WHERE GameName=%s", name):
 		return {'result': 'badGameName'}
 
-	descr = 'Default description'
+	descr = None
 	if 'gameDescr' in data:
 		descr = data['gameDescr']
-	if len(descr) > MAX_GAMEDESCR_LEN:
+	if descr and len(descr) > MAX_GAMEDESCR_LEN:
 		return {'result': 'badGameDescription'}
-	
-	try:
-		cursor.execute("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) VALUES(%s, %s, %s, %s, %s)", 
-			(name, descr, mapId, 1, gameStates['waiting']))
-		gameId = db.insert_id()
-		cursor.execute("UPDATE Users SET GameId=%s, Readiness=0, Priority=1 WHERE sid=%s", (gameId, sid))
-		return {'result': 'ok', 'gameId': gameId}
-	except(TypeError, ValueError), e:
-		return {'result': 'badGameDescription'}
+	query("INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) VALUES(%s, %s, %s, %s, %s)", 
+		name, descr, mapId, 1, misc.gameStates['waiting'])
+	gameId = lastId()
+	query("UPDATE Users SET GameId=%s, Readiness=0, Priority=1 WHERE Id=%s", gameId, userId)
+	return {'result': 'ok', 'gameId': gameId}
 	
 def act_getGameList(data):
-	try:
-		result = {'result': 'ok'}
-		cursor.execute('SELECT * FROM Games')
-		games = cursor.fetchall()
-		result['games'] = list()
-		gameRowNames = ['gameId', 'gameName', 'gameDescr', 'playersNum', 'state']
-		mapRowNames = ['mapId', 'mapName', 'playersNum']
-		playerRowNames = ['userId', 'username', 'state', 'sid']
-		for game in games:
-			curGame = dict()
-			for i in range(len(gameRowNames)):
-				if not (gameRowNames[i] == 'gameDescr' and game[i] == 'Default description'):
-					curGame[gameRowNames[i]] = game[i]
-			gameId = game[0]
-			mapId = game[len(game) - 1]
-			cursor.execute('SELECT * FROM Maps WHERE MapId=%s', mapId)
-			map = cursor.fetchone()
-			curGame['map'] = dict()
-			for i in range(len(mapRowNames)):
-				curGame['map'][mapRowNames[i]] = map[i]
-			cursor.execute('SELECT Id, UserName, Readiness, Sid FROM Users WHERE GameId=%s', gameId)
-			players = cursor.fetchall()
-			resPlayers = list()
-			for player in players:
-				curPlayer = dict()
-				for i in range(len(playerRowNames)):
-					curPlayer[playerRowNames[i]] = player[i]
-				resPlayers.append(curPlayer)
-			curGame['players'] = resPlayers
-			result['games'].append(curGame)
-		return result
-	except BaseException, e:
-		return {'result': 'unknown'}
+	result = {'result': 'ok'}
+	query('SELECT * FROM Games')
+	games = fetchall()
+	result['games'] = list()
+
+	gameRowNames = ['gameId', 'gameName', 'gameDescr', 'playersNum', 'state', 'turn', 'activePlayer']
+	mapRowNames = ['mapId', 'mapName', 'playersNum']
+	playerRowNames = ['userId', 'username', 'state', 'sid', 'priority']
+
+	for game in games:
+		curGame = dict()
+
+		for i in range(len(gameRowNames)):
+			if not (gameRowNames[i] == 'gameDescr' and not game[i]):
+				curGame[gameRowNames[i]] = game[i]
+
+		gameId = game[0]
+		mapId = game[len(game) - 1]
+
+		query('SELECT * FROM Maps WHERE MapId=%s', mapId)
+		map = fetchone()
+		curGame['map'] = dict()
+		for i in range(len(mapRowNames)):
+			curGame['map'][mapRowNames[i]] = map[i]
+
+		query('SELECT Id, Username, Readiness, Sid, Priority FROM Users WHERE GameId=%s', gameId)
+		players = fetchall()
+		resPlayers = list()
+		for player in players:
+			curPlayer = dict()
+			for i in range(len(playerRowNames)):
+				curPlayer[playerRowNames[i]] = player[i]
+			resPlayers.append(curPlayer)
+		curGame['players'] = resPlayers
+		result['games'].append(curGame)
+	return result
 
 def act_joinGame(data):
-	if not(('sid' in data) and('gameId' in data)):
-		return {'result': 'badJson'}
-	
 	sid = data['sid']
-	try:
-		cursor.execute('SELECT GameId FROM Users WHERE sid=%s', sid)
-		if cursor.fetchone()[0]:
-			return {'result': 'alreadyInGame'}
-	except (TypeError, ValueError):
+	if not query('SELECT GameId, Id FROM Users WHERE sid=%s', sid):
 		return {'result': 'badSid'}
+	row = fetchone()
+	userId = row[1]
+	if row[0]:
+		return {'result': 'alreadyInGame'}
 	
 	gameId = data['gameId']
-	try:
-		num = int(cursor.execute('SELECT PlayersNum, MapId, State FROM Games WHERE GameId=%s', gameId))
-		if num == 0:
-			return {'result': 'badGameId'}
-		row = cursor.fetchone()
-		if row[2] != gameStates['waiting']:
-			return{'result': 'badGameState'}
-		cursor.execute('SELECT PlayersNum From Maps WHERE MapId=%s', row[1])
-		maxPlayersNum = cursor.fetchone()[0]
-		if row[0] >= maxPlayersNum:
-			return {'result': 'tooManyPlayers'}
-	except(TypeError, ValueError), e:
+	if not query('SELECT PlayersNum, MapId, State FROM Games WHERE GameId=%s', gameId):
 		return {'result': 'badGameId'}
-	
-	cursor.execute('SELECT MAX(Priority) FROM Users')
-	priority = cursor.fetchone()[0] + 1
-	cursor.execute('UPDATE Users SET GameId=%s, Readiness=0, Priority=%d WHERE Sid=%s', (gameId, priority, sid))
-	cursor.execute('UPDATE Games SET PlayersNum=PlayersNum+1 WHERE GameId=%s', gameId)
+	row = fetchone()
+	if row[2] != misc.gameStates['waiting']:
+		return{'result': 'badGameState'}
+	query('SELECT PlayersNum From Maps WHERE MapId=%s', row[1])
+	maxPlayersNum = fetchone()[0]
+	if row[0] >= maxPlayersNum:
+		return {'result': 'tooManyPlayers'}
+
+	query('SELECT MAX(Priority) FROM Users WHERE GameId=%s', gameId)
+	priority = fetchone()[0] + 1
+	query('UPDATE Users SET GameId=%s, Readiness=0, Priority=%s WHERE Id=%s', gameId, priority, userId)
+	query('UPDATE Games SET PlayersNum=PlayersNum+1 WHERE GameId=%s', gameId)
 	return {'result': 'ok'}
 	
 def act_leaveGame(data):
-	if not ('sid' in data):
-		return {'result': 'badJson'}
-	
 	sid = data['sid']
-	try:
-		cursor.execute('SELECT GameId, Id FROM Users WHERE Sid=%s', sid)
-		gameId, userId = cursor.fetchone()
-		if not gameId:
-			return {'result': 'notInGame'}
-		cursor.execute('SELECT PlayersNum FROM Games WHERE GameId=%s', gameId)
-		curPlayersNum = cursor.fetchone()[0]
-		cursor.execute('UPDATE Users SET GameId=NULL, Readiness=NULL, Priority=NULL, WHERE Sid=%s', sid)
-		cursor.execute('UPDATE Regions SET OwnerId=NULL WHERE OwnerId=%d', userId)
-		if curPlayersNum > 1: 
-			cursor.execute('UPDATE Games SET PlayersNum=PlayersNum-1 WHERE GameId=%s', gameId)
-		else:
-			cursor.execute('UPDATE Games SET PlayersNum=0, State=%s WHERE GameId=%s', 
-				(gameStates['ended'], gameId))
-		return {'result': 'ok'}
-	except(TypeError, ValueError):
+	if not query('SELECT GameId, Id FROM Users WHERE Sid=%s', sid):
 		return {'result': 'badSid'}
 
+	gameId, userId = fetchone()
+	if not gameId:
+		return {'result': 'notInGame'}
+	query('SELECT PlayersNum FROM Games WHERE GameId=%s', gameId)
+	curPlayersNum = fetchone()[0]
+	query('UPDATE Users SET GameId=NULL, Readiness=NULL, Priority=NULL WHERE Id=%s', userId)
+	query('UPDATE Regions SET OwnerId=NULL WHERE OwnerId=%s', userId)
+	if curPlayersNum > 1: 
+		query('UPDATE Games SET PlayersNum=PlayersNum-1 WHERE GameId=%s', gameId)
+	else:
+		query('UPDATE Games SET PlayersNum=0, State=%s WHERE GameId=%s', misc.gameStates['ended'], gameId)
+	return {'result': 'ok'}
 
-		
 def act_setReadinessStatus(data):
-	if not(('sid' in data) and ('status' in data)):
-		return {'result': 'badJson'}
-	
 	sid = data['sid']
-	try:
-		cursor.execute("SELECT Users.GameId, Games.State FROM Users, Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId", sid)
-		row = cursor.fetchone()
-		if not row:
-			return {'result': 'notInGame'}
-		gameId = row[0]
-		if not gameId:
-			return {'result': 'notInGame'}
-			
-		gameState = row[1]
-		if gameState != gameStates['waiting']:
-			return {'result': 'badGameState'}
-			
-		status = data['status']
-		if not(status == 0 or status == 1):
-			return {'result': 'badReadinessStatus'}
-		cursor.execute('UPDATE Users SET Readiness=%s WHERE sid=%s', (status, sid))
-		cursor.execute('SELECT Maps.PlayersNum FROM Games, Maps WHERE Games.GameId=%s AND Games.MapId=Maps.MapId', 
-			gameId)
-		maxPlayersNum = cursor.fetchone()[0]
-		cursor.execute('SELECT COUNT(*) FROM Users WHERE GameId=%s AND Readiness=1', gameId)
-		readyPlayersNum = cursor.fetchone()[0]
-		if maxPlayersNum == readyPlayersNum:
-			cursor.execute('UPDATE Users SET Coins=5, Stage=%d, TokensInHand=0, CurrentRace=NULL, \
-				DeclineRace=NULL, Bonus=NULL WHERE GameId=%d AND Readiness=1', (userStages['waitingTurn'], gameId))
-			cursor.execute('SELECT Id FROM Users WHERE Priority=(SELECT MIN(Priority) FROM Users)')
-			actPlayer = cursor.fetchone()[0]
-			cursor.execute('UPDATE Games SET State=%s, Turn=0, ActivePlayer=%d WHERE gameId=%d', 
-				(gameStates['processing'], actPlayer, gameId))
-			cursor.execute('UPDATE Users SET Stage=%d WHERE Id=%d', (userStages['choosingRace'], actPlayer)) 
-		return {'result': 'ok'}
-	except(TypeError, ValueError), e:
+	if not query('SELECT 1 FROM Users WHERE Sid=%s', sid):
 		return {'result': 'badSid'}
-		
-	
 
+	query("SELECT Users.GameId, Games.State FROM Users, Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId", sid)
+
+	row = fetchone()
+	if not (row and row[0]):
+		return {'result': 'notInGame'}
+
+	gameId, gameState = row
+	if gameState != misc.gameStates['waiting']:
+		return {'result': 'badGameState'}
+
+	status = data['readinessStatus']
+	if not(status == 0 or status == 1):
+		return {'result': 'badReadinessStatus'}
+	query('UPDATE Users SET Readiness=%s WHERE sid=%s', status, sid)
+	query('SELECT Maps.PlayersNum FROM Games, Maps WHERE Games.GameId=%s AND Games.MapId=Maps.MapId', gameId)
+	maxPlayersNum = fetchone()[0]
+	query('SELECT COUNT(*) FROM Users WHERE GameId=%s AND Readiness=1', gameId)
+	readyPlayersNum = fetchone()[0]
+	if maxPlayersNum == readyPlayersNum:
+		# Starting
+		query('UPDATE Users SET Coins=%s, TokensInHand=0, CurrentRace=NULL, \
+			DeclineRace=NULL, Bonus=NULL WHERE GameId=%s', INIT_COINS_NUM, gameId)
+		query('SELECT Id FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
+		actPlayer = fetchone()[0]
+		query('UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s WHERE GameId=%s', 
+			misc.gameStates['processing'], actPlayer, gameId)
+
+		query('SELECT RaceId FROM Races ORDER BY(RaceId)')		#Don't know how to rephrase it
+		races = fetchall()
+		currRacesNum = 1
+		for race in races:
+			currRacesNum += 1
+			query('INSERT INTO TokenBadges(RaceId, FarFromStack, BonusMoney) VALUES(%s, %s, 0)', 
+				race[0], (-1 if currRacesNum > MAX_VISIBLE_RACES else currRacesNum))
+	return {'result': 'ok'}
+	
 def act_selectRace(data):
-	if not(('sid' in data) and ('raceId' in data)):
-		return {'result': 'badJson'}
 	sid = data['sid']
 	raceId = data['raceId']
-	try:
-		cursor.execute('SELECT Stage, Coins FROM Users WHERE Sid=%s', sid)
-		row = cursor.fetchone()
-		if not row: return {'result': 'badSid'}
-		stage, coins = row
-		if stage != userStages['choosingRace']:	return {'result': 'badStage'}
-		cursor.execute('SELECT InitialNum, FarFromStack, BonusId, bonusMoney FROM Races WHERE RaceId=%d', raceId)
-		row = cursor.fetchone()
-		if row[1] == -1 : return {'result': 'badChoice'}
-		num, farFromStack, bonusId, bonusMoney = row
-		if bonusMoney == 0:
-				cursor.execute('SELECT COUNT(*) From Races WHERE FarFromStack<%d AND BonusMoney=0', farFromStack)
-				price = cursor.fetchone()[0]
-				if coins < price : return {'result' : 'badMoneyAmount'}
-		cursor.execute('UPDATE Users SET CurrentRace=%d, Coins=Coins-%d+%d, Bonus=%d, Stage=%s, TokensInHand=%d WHERE Sid=%d', 
-			(raceId, price, bonusMoney, bonusId, userStages['firstAttack'], num, sid))
-		cursor.execute('UPDATE Races SET FarFromStack=-1, BonusMoney=0 WHERE RaceId=%d', raceId)
-		cursor.execute('UPDATE Races SET FarFromStack=FarFromStack+1 WHERE FarFromStack >-1 AND FarFromStack<%d', farFromStack)
-		cursor.execute('UPDATE Races SET BonusMoney=BonusMoney+1 WHERE FarFromStack > %d', farFromStack)
-		cursor.execute('SELECT RaceId FROM Races WHERE FarFromStack=-1')
-		newRaceId = cursor.fetchone()[0];
-		cursor.execute('UPDATE Races SET FarFromStack=0 WHERE RaceId=%d', newRaceId)
-		return {'result': 'ok'}
-	except(TypeError, ValueError):
+	query('SELECT CurrentRace, Coins, Id FROM Users WHERE Sid=%s', sid)
+	row = fetchone()
+	if not row: 
 		return {'result': 'badSid'}
+	curRace, coins, userId = row
+	query('SELECT Users.GameId, Games.ActivePlayer From Users, Games\
+		 WHERE Users.Sid=%s AND Users.Id=Games.ActivePlayer', sid)
+	if curRace or not fetchone():	
+		return {'result': 'badStage'}
+	query('SELECT FarFromStack, BonusMoney FROM TokenBadges WHERE RaceId=%s', raceId)
+	farFromStack, bonusMoney = fetchone()
+	if farFromStack == -1 : 				# Token badge is currently located inside of stack
+		return {'result': 'badChoice'}
+	query('SELECT InitialNum, BonusId FROM Races WHERE RaceId=%s', raceId)
+	num,  bonusId = fetchone()
+	query('SELECT COUNT(*) From TokenBadges WHERE FarFromStack>%s', farFromStack)
+	price = fetchone()[0]
+	if coins < price : 
+		return {'result' : 'badMoneyAmount'}
+	query('UPDATE Users SET CurrentRace=%s, Coins=Coins-%s+%s, Bonus=%s, TokensInHand=%s WHERE Sid=%s', 
+		raceId, price, bonusMoney, bonusId, num, sid)
+	query('UPDATE TokenBadges SET FarFromStack=-1, BonusMoney=0 WHERE RaceId=%s', raceId)
+	query('UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack >-1 AND FarFromStack<%s', farFromStack)
+	query('UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s', farFromStack)
+	query('SELECT RaceId FROM TokenBadges WHERE FarFromStack=-1')
+	newRaceId = fetchone()[0];
+	query('UPDATE TokenBadges SET FarFromStack=0 WHERE RaceId=%s', newRaceId)
+	return {'result': 'ok'}
 	
-
-		
 def act_conquer(data):
-	if not(('sid' in data) and ('RegionId' in data)):
-		return {'result': 'badJson'} 
-	regionId = data['raceId']
+	regionId = data['regionId']
 	sid = data['sid']
-	try:
-		cursor.execute('SELECT Id, Stage, TokensInHand FROM Users WHERE Sid=%s', sid)
-		row = cursor.fetchone()
-		if not row: return {'result': 'badSid'}
-		id, stage, unitsNum = row
-		if not stage in userStages['firstAtack' : 'notFirstAttack']:
-			return {'result': 'badStage'}
-		cursor.execute('SELECT MapId, OwnerId, RaceId, TokenNum, Bordeline, Highland, \
-			Coastal, Seaside, inDecline FROM Regions WHERE RegionId=%d', regionId)
-		regInfo = cursor.fetchone()
-		mapId = regInfo[0]
-		cursor.execute('SELECT Users.GameId, Games.MapId From Users, Maps WHERE Users.Sid=%d AND Users.GameId=Games.GameId', sid)
-		rightMapId = cursor.fetchone()[1]
-		if mapId != rightMapId : return {'result': 'badRegionId'}
-		ownerId = regInfo[1]
-		inDecline = regInfo[8]
-		if ownerId == id and not inDecline: return {'result': 'badRegion'}
-		if stage == userStages['firstAttack']:
-			borderline, coastal = regInfo[4], regInfo[6]
-			if not (borderline or coastal) : return  {'result': 'badRegion'}
-		else:
-			cursor.execute('SELECT RegionId FROM Regions WHERE OwnerId=%d', sid)
-			playerRegions = cursor.fetchall()
-			playerBorderline = 0
-			for plRegion in playerRegions:
-				cursor.execute('SELECT Adjacent FROM AdjacentRegions WHERE FirstRegionId=%d AND SecondRegionId=%d', 
-					plRegion[0], regionId)
-				if row and row[0] == 1: 
-					playerBorderline = 1
-					break
-			
-			if playerBorderline == 0: return {'result': 'badRegion'}
-		
-		unitPrice = 2 + regInfo[3] + regInfo[5]
-		if unitsNum < unitsPrice : return  {'result': 'notEnoughTokensInTheHand'}
-		cursor.execute('UPDATE Users SET TokensInHand=TokensInHand-%d WHERE sid=%d', (unitPrice, sid))
-		cursor.execute('UPDATE Regions SET OwnerId=%d, TokenNum=%d, inDecline=0 WHERE RegionId=%d', (id, unitPrice, regionId)) 
-		return {'result': 'ok'}
-	except(TypeError, ValueError):
+	query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Sid=%s', sid)
+	row = fetchone()
+	if not row: 
 		return {'result': 'badSid'}
+	userId, race, unitsNum = row
+	if not race:
+		return {'result' : 'badStage'}
+	query('SELECT MapId, OwnerId, RaceId, TokensNum, Borderline, Highland, \
+		Coastal, Seaside, inDecline FROM Regions WHERE RegionId=%s', regionId)
+	regInfo = fetchone()
+	if not regInfo:
+		return {'result': 'badRegion'}
+	mapId = regInfo[0]
+	query('SELECT Users.GameId, Games.MapId From Users, Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId', sid)
+	rightMapId = fetchone()[1]
+	if mapId != rightMapId :  		#The region player wanted to attack is located on another map
+		return {'result': 'badRegionId'}
+	ownerId = regInfo[1]
+	inDecline = regInfo[8]
+	if ownerId == userId and not inDecline: 
+		return {'result': 'badRegion'}
+	seaside = False
+	query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s', userId)
+	if not fetchone()[0]:			#Player doesn't own any territories yet
+		borderline, coastal, seaside = regInfo[4], regInfo[6], regInfo[7]
+		if not (borderline or coastal) or  seaside: 
+			return  {'result': 'badRegion'}
+	else:
+		query('SELECT RegionId FROM Regions WHERE OwnerId=%s', userId)
+		playerRegions = fetchall()
+		playerBorderline = False
+		for plRegion in playerRegions:
+			query('SELECT COUNT(*) FROM AdjacentRegions WHERE FirstRegionId=%s AND SecondRegionId=%s', plRegion[0], regionId)
+			if fetchone():
+				playerBorderline = True
+				break
+		
+		if playerBorderline == False or  seaside: 
+			return {'result': 'badRegion'}
+	
+	unitPrice = BASIC_CONQUER_COST + regInfo[3] + regInfo[5]
+	#	Tossing the dice?
+	if unitsNum < unitPrice : 
+		return  {'result': 'badTokensNum'}
+	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE sid=%s', unitPrice, sid)
+	query('UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=0 WHERE RegionId=%s', userId, unitPrice, regionId) 
+	#	Defending?
+	return {'result': 'ok'}
 		
 def act_decline(data):
-	if not ('sid' in data):
-		return {'result': 'badJson'} 
 	sid = data['sid']
-	try:
-		cursor.execute('SELECT Id, Stage, TokensInHand, race FROM Users WHERE Sid=%s', sid)
-		row = cursor.fetchone()
-		if not row: return {'result': 'badSid'}
-		id, stage, freeUnits, race = row
-		if stage != userStages['notFirstAttack']: return {'result': 'badStage'}
-		if freeUnits > 0 : return {'result': 'SomeUnitsAreFree'}
-		cursor.execute('UPDATE Regions SET OwnerId=NULL WHERE OwnerId=%d AND InDecline=1', id)
-		cursor.execute('UPDATE Regions SET InDecline=1 WHERE OwnerId=%d', id)
-		cursor.execute('UPDATE Users SET DeclineRace=%d, CurrentRace=NULL, Stage=%d WHERE Sid=%d', 
-			(race, userStages['choosingRace'], sid))
-		return {'result': 'ok'}
-	except(TypeError, ValueError):
+	query('SELECT Id, TokensInHand, CurrentRace FROM Users WHERE Sid=%s', sid)
+	row = fetchone()
+	if not row: 
 		return {'result': 'badSid'}
+	userId, freeUnits, race = row
+	query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s', userId)
+	if not race or not fetchone()[0]:	#Player doesn't own any territories or has no race to go in decline
+		return {'result': 'badStage'}
+	query('UPDATE Regions SET OwnerId=NULL, InDecline=0 WHERE OwnerId=%s AND InDecline=1', userId)
+	query('UPDATE Regions SET InDecline=1, TokensNum=1 WHERE OwnerId=%s', id) ###
+	query('UPDATE Users SET DeclineRace=%s, CurrentRace=NULL, TokensInHand=0 WHERE Sid=%s', race, sid)
+	return {'result': 'ok'}
 		
 def act_finishTurn(data):
-	if not ('sid' in data):
-		return {'result': 'badJson'} 
 	sid = data['sid']
-	try:
-		cursor.execute('SELECT Id, GameId, Stage, TokensInHand, Priority FROM Users WHERE Sid=%s', sid)
-		row = cursor.fetchone()
-		if not row: return {'result': 'badSid'}
-		userId, gameId, stage, freeUnits, priority = row
-		if not stage in userStages['firstAtack' : 'declining']:
-			return {'result': 'badStage'}
-		if freeUnits > 0 : return {'result': 'SomeUnitsAreFree'}
-		cursor.execute('SELECT COUNT(*) FROM Regions WHERE OwnerId=%d', userId)
-		income = cursor.fetchone()[0]
-		cursor.execute('UPDATE Users SET Stage=%d, Coins=Conis+%d WHERE Sid=%d', 
-			(userStages['waitingTurn'], income, sid))
-		cursor.execute('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Priority>%d FROM Users)',
-				priority)
-		row = cursor.fetchone()
-		if not row:
-			cursor.execute('SELECT Id, CurrentRace,  FROM \
-				Users WHERE Priority=(SELECT MIN(Priority) FROM Users)')
-			cursor.execute('UPDATE Games SET Turn=Turn+1 WHERE GameId=%d', gameId)
-			# Last Turn?
-			row = cursor.fetchone()
-		newActPlayer, race, tokensInHand = row
-		newPlayerStage = userStages['choosingRace'] if not race else (userStages['firstAttack'] if 
-			tokensInHand == 0 else userStages['notFirstAttack'])
-		cursor.execute('UPDATE Games SET ActivePlayer=%d WHERE gameId=%d', (newActPlayer, gameId))
-		cursor.execute('UPDATE Users SET Stage=%d WHERE UserId=%d', (newPlayerStage, newActPlayer))
-		return {'result': 'ok'}
-	except(TypeError, ValueError):
+	query('SELECT Id, GameId, CurrentRace, TokensInHand, Priority FROM Users WHERE Sid=%s', sid)
+	row = fetchone()
+	if not row: 
 		return {'result': 'badSid'}
-		
-		
-	
+	userId, gameId, race, freeUnits, priority = row
+	query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s', userId)
+	income = fetchone()[0]
+	if not race or not income:
+		return {'result': 'badStage'}
+	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
+	query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE Priority>%s AND GameId=%s', priority, gameId)
+	row = fetchone()
+	if not row:
+		query('SELECT Id, CurrentRace, TokensInHand FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
+		row = fetchone()
+		query('UPDATE Games SET Turn=Turn+1 WHERE GameId=%s', gameId)
+	#	Last Turn?
+	newActPlayer, race, tokensInHand = row
+	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)
+	query('SELECT SUM(TokensNum), COUNT(*) FROM Regions WHERE OwnerId=%s', newActPlayer)
+	unitsNum, regionsNum = fetchone()
+	if not unitsNum: unitsNum = 0
+	#	Gathering troops
+	query('UPDATE Users SET TokensInHand=%s WHERE Id=%s', unitsNum - regionsNum,  newActPlayer)
+	query('UPDATE Regions SET TokensNum=1 WHERE OwnerId=%s', newActPlayer)
+	return {'result': 'ok', 'nextPlayer' : newActPlayer}
 
 def doAction(data):
 	try:
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			return {'result': 'badAction'}
+		correctness = checkFieldsCorrectness(data);
+		if correctness['result'] != 'ok':
+			return correctness
 		res = globals()[func](data)
-		db.commit()
+		commit()
 		return res
 	except MySQLdb.Error, e:
-		db.rollback()
+		rollback()
 		return e

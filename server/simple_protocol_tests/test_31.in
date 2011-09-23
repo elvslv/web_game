@@ -1,0 +1,28 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"userid": 1,
+			"message": "hello!",
+			"notime": "notime"
+		},
+		{
+			"action": "sendMessage",
+			"userid": 1,
+			"message": "hello again!",
+			"notime": "notime"
+		}
+	],
+	"description": "sending 2 messages"
+}

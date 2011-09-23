@@ -3,6 +3,9 @@
 		"result": "ok"
 	},
 	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
 		"sid": 1
 	},
@@ -77,6 +80,7 @@
 		"games": 
 		[
 			{
+				"activePlayer": 1,
 				"gameId": 1,
 				"gameName": "game1",
 				"players":
@@ -85,25 +89,29 @@
 						"userId": 1,
 						"username": "user1",
 						"state": 1,
-						"sid": 1
+						"sid": 1,
+						"priority": 1
 					},
 					{
 						"userId": 4,
 						"username": "user4",
 						"state": 1,
-						"sid": 4
+						"sid": 4,
+						"priority": 2
 					}
 				],
 				"map":
 				{
 					"mapId": 1,
-					"mapName": "map2",
+					"mapName": "defaultMap1",
 					"playersNum": 2
 				},
 				"playersNum": 2,
-				"state": 2
+				"state": 2,
+				"turn": 0
 			},
 			{
+				"activePlayer": null,
 				"gameId": 2,
 				"gameName": "game2",
 				"players":
@@ -112,17 +120,19 @@
 						"userId": 3,
 						"username": "user3",
 						"state": 0,
-						"sid": 3
+						"sid": 3,
+						"priority": 1
 					}
 				],
 				"map":
 				{
 					"mapId": 2,
-					"mapName": "map3",
+					"mapName": "defaultMap2",
 					"playersNum": 3
 				},
 				"playersNum": 1,
-				"state": 1
+				"state": 1,
+				"turn": null
 			}
 		]
 	
