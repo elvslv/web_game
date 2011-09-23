@@ -392,7 +392,7 @@ def act_finishTurn(data):
 
 def act_doSmth(data):
 	userId = getIdBySid(data['sid'])[0]
-	return {"result": "ok"}
+	return {'result': 'ok'}
 
 def doAction(data):
 	try:
