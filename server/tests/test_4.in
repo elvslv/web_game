@@ -1,35 +1,114 @@
 {
-	"test":
-	[
+	"test":[
 		{
-			"action": "register",
-			"username": "%^%&^)000",
-			"password": "wqtewy"
+			"action": "createDefaultMaps"
 		},
 		{
+			"action": "setReadinessStatus",
+			"sid": 5,
+			"readinessStatus": 0
+		},
+		{	
 			"action": "register",
-			"username": "a",
-			"password": "wqtewy"
+			"username": "user1", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "login",
+			"username": "user1", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "register",
+			"username": "user2", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "login",
+			"username": "user2", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "register",
+			"username": "user3", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "login",
+			"username": "user3", 
+			"password": "pswd55"
 		},
 		{
-			"action": "register",
-			"username": "aetyer",
-			"password": "aa"
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 5
 		},
 		{
-			"action": "register",
-			"username": "trdaHFJHGJ",
-			"password": "&nksgj"
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": -10
 		},
 		{
-			"action": "register",
-			"username": "",
-			"password": "dsakgjks"
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": "adsjgk"
 		},
 		{
-			"action": "register",
-			"username": "wte4yyy",
-			"password": ""
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": [0, 1]
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"readinessStatus": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"readinessStatus": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"readinessStatus": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"readinessStatus": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 3,
+			"readinessStatus": 0
 		}
-	]
+	],
+	"description": "test setReadinessStatus function"
 }

@@ -13,15 +13,15 @@
 		},
 		{
 			"action": "sendMessage",
-			"userid": 1,
+			"sid": 1,
 			"message": "hello!",
-			"notime": "notime"
+			"simpletime": true
 		},
 		{
 			"action": "sendMessage",
-			"userid": 1,
+			"sid": 1,
 			"message": "hello again!",
-			"notime": "notime"
+			"simpletime": true
 		}
 	],
 	"description": "sending 2 messages"

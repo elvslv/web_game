@@ -27,7 +27,7 @@ def parseDataFromFile(fileName):
 	description = ''
 	try:
 		object = json.loads(file.read())
-	except (TypeError, ValueError):
+	except (TypeError, ValueError), e:
 		return {'result': [{"result": "badJson"}], 'description': description}
 
         if not ('test' in object):

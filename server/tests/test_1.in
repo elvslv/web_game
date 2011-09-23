@@ -1,16 +1,49 @@
 {
-	"test":
-	[
+	"test": [
 		{
-			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"action": "uploadMap",
+			"mapName": "fgjajjsfhjksjhkljhkljgdfkhldklgdkhjskhjk"
 		},
 		{
-			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"action": "uploadMap",
+			"mapName": "fgjajjsfhjksjhkldsagshrtutydsaagsdhghdfjjjfgkitrigfshhdgdttttttttttjhkljgdfkhldklgdkhjskhjk",
+			"playersNum": 2
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map1",
+			"playersNum": 1
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map1",
+			"playersNum": "fdskgkjk"
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map1",
+			"playersNum": -5
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map1",
+			"playersNum": 6
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map1",
+			"playersNum": 2
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map2",
+			"playersNum": 2
+		},
+		{
+			"action": "uploadMap",
+			"mapName": "map1",
+			"playersNum": 3
 		}
 	],
-	"description": "test desctiption"
+	"description": "test uploadMap function"
 }

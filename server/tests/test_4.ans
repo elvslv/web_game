@@ -1,20 +1,72 @@
 [
 	{
-		"result": "badUsername"
-	}, 
+		"result": "ok"
+	},
 	{
-		"result": "badUsername"
-	}, 
-	{
-		"result": "badPassword"
-	}, 
+		"result": "badSid"
+	},
 	{
 		"result": "ok"
-	}, 
+	},
 	{
-		"result": "badUsername"
-	}, 
+		"result": "ok",
+		"sid": 1
+	},
 	{
-		"result": "badPassword"
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 3
+	},
+	{
+		"result": "ok", 
+		"gameId": 1
+	},
+	{
+		"result": "badReadinessStatus"
+	},
+	{
+		"result": "badReadinessStatus"
+	},
+	{
+		"result": "badReadinessStatus"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badGameState"
+	},
+	{
+		"result": "badGameState"
+	},
+	{
+		"result": "notInGame"
 	}
-] 
+]

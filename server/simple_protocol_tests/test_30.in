@@ -13,9 +13,9 @@
 		},
 		{
 			"action": "sendMessage",
-			"userid": 1,
+			"sid": 1,
 			"message": "hello!",
-			"notime": "notime"
+			"simpletime": true
 		}
 	],
 	"description": "sending 1 message"

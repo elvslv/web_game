@@ -2,19 +2,8 @@
 	"test":
 	[
 		{
-			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
-		},
-		{
-			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
-		},
-		{
-			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"action": "getMessages"
 		}
-	]
+	],
+	"description": "get messages without since"
 }

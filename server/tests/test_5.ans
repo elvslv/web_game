@@ -1,5 +1,41 @@
 [
 	{
-		"result": "badJson"
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "badMapId"
+	},
+	{
+		"result": "badPlayersNum"
+	},
+	{
+		"result": "badGameName"
+	},
+	{
+		"result": "ok",
+		"gameId": 1
+	},
+	{
+		"result": "alreadyInGame"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "badGameDescription"
+	},
+	{
+		"result": "badGameName"
 	}
 ]

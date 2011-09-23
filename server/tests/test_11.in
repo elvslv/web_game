@@ -3,17 +3,18 @@
 	[
 		{
 			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
 			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
-			"action": "logout",
-			"sid": 1
+			"action": "sendMessage",
+			"message": "hello!"
 		}
-	]
+	],
+	"description": "sending message without userId"
 }

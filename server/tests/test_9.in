@@ -2,14 +2,37 @@
 	"test":
 	[
 		{
-			"action": "rewetywyugister",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
-			"action": "",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 1,
+			"message": "hello user2!",
+			"noTime": "noTime"
+		},
+		{
+			"action": "sendMessage",
+			"userId": 2,
+			"message": "hello user1!",
+			"noTime": "noTime"
 		}
-	]
+	],
+	"description": "sending 2 messages from 2 users"
 }

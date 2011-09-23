@@ -1,9 +1,31 @@
 [
 	{
-		"result": "ok"
-	}, 
+		"result": "badJson"
+	},
+	{
+		"result": "badMapName"
+	},
+	{
+		"result": "badPlayersNum"
+	},
+	{
+		"result": "badPlayersNum"
+	},
+	{
+		"result": "badPlayersNum"
+	},
+	{
+		"result": "badPlayersNum"
+	},
 	{
 		"result": "ok", 
-		"sid": 1
+		"mapId": 1
+	},
+	{
+		"result": "ok",
+		"mapId": 2
+	},
+	{
+		"result": "badMapName"
 	}
 ]

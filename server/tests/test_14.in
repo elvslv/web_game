@@ -3,51 +3,25 @@
 	[
 		{
 			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
-		},
-		{
-			"action": "register",
-			"username": "rewtgh555",
-			"password": "365757"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
 			"action": "login",
-			"username": "rewtgh",
-			"password": "wqtewy"
+			"username": "user1",
+			"password": "fhjdgj"
 		},
 		{
-			"action": "login",
-			"username": "rewtgh555",
-			"password": "365757"
+			"action": "sendMessage",
+			"userId": 1,
+			"message": "hello!",
+			"noTime": "noTime"
 		},
 		{
-			"action": "doSmth",
-			"sid": 1
-		},
-		{
-			"action": "doSmth",
-			"sid": 1
-		},
-		{
-			"action": "doSmth",
-			"sid": 2
-		},
-		{
-			"action": "logout",
-			"sid": 2
-		},
-		{
-			"action": "doSmth",
-			"sid": 1
-		},
-		{
-			"action": "doSmth",
-			"sid": 2
-		},
-		{
-			"action": "logout",
-			"sid": 1
+			"action": "getMessages",
+			"since": 0.0,
+			"noTime": "noTime"
 		}
-	]
+	],
+	"description": "get 1 message"
 }

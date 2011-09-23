@@ -1,37 +1,16 @@
 [
 	{
 		"result": "ok"
-	}, 
+	},
 	{
-		"result": "ok"
-	}, 
-	{
-		"result": "ok", 
+		"result": "ok",
 		"sid": 1
-	}, 
-	{
-		"result": "ok", 
-		"sid": 2
-	}, 
+	},
 	{
 		"result": "ok"
-	}, 
+	},
 	{
-		"result": "ok"
-	}, 
-	{
-		"result": "ok"
-	}, 
-	{
-		"result": "ok"
-	}, 
-	{
-		"result": "ok"
-	}, 
-	{
-		"result": "badSid"
-	}, 
-	{
-		"result": "ok"
+		"result": "ok",
+		"mesArray": [{"userId": 1, "message": "hello!"}]
 	}
 ]

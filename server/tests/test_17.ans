@@ -1,12 +1,16 @@
 [
 	{
 		"result": "ok"
-	}, 
+	},
 	{
 		"result": "ok",
 		"sid": 1
-	}, 
+	},
 	{
-		"result": "badUsernameOrPassword"
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"mesArray": []
 	}
 ]

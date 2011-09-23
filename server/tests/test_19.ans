@@ -1,12 +1,23 @@
 [
 	{
 		"result": "ok"
-	}, 
+	},
 	{
 		"result": "ok",
 		"sid": 1
-	}, 
+	},
 	{
-		"result": "badJson"
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"mesArray": [{"userId": 1, "message": "hello!"}]
+	},
+	{
+		"result": "ok" 
+	},
+	{
+		"result": "ok",
+		"mesArray": [{"userId": 1, "message": "hello!"}, {"userId": 1, "message": "hello again!"}]
 	}
 ]

@@ -16,5 +16,5 @@
 			"message": "hello!"
 		}
 	],
-	"description": "sending message without userid"
+	"description": "sending message without sid"
 }

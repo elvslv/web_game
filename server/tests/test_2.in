@@ -1,10 +1,72 @@
 {
-	"test":
-	[
+	"test":[
+		{
+			"action": "createDefaultMaps"
+		},
 		{
 			"action": "register",
-			"username": 123,
-			"password": [135, 315, 5666],
+			"username": "user1",
+			"password": "pswd44"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "pswd44"
+		},
+		{
+			"action": "joinGame",
+			"gameId": 1,
+			"sid": 1
+		},
+		{
+			"action": "leaveGame",
+			"sid": 5
+		},
+		{
+			"action": "leaveGame",
+			"sid": 1
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 1
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game2",
+			"mapId": 1
+		},
+		{
+			"action": "joinGame",
+			"sid": 1,
+			"gameId": 1
+		},
+		{
+			"action": "leaveGame",
+			"sid": 1
+		},
+		{
+			"action": "leaveGame",
+			"sid": 1
+		},
+		{
+			"action": "joinGame",
+			"sid": 1,
+			"gameId": 1
+		},
+		{
+			"action": "createGame",
+			"gameName": "game2",
+			"sid": 1,
+			"mapId": 5
+		},
+		{
+			"action": "joinGame",
+			"sid": 1,
+			"gameId": 2
 		}
-	]
+	],
+	"description": "test leave and join game with one user"
 }

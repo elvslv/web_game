@@ -2,14 +2,9 @@
 	"test":
 	[
 		{
-			"action": "register",
-			"username": "rewtgh",
-			"password": "wqtewy"
-		},
-		{
-			"action": "register",
-			"username": "rewtgh",
-			"password": "365757"
+			"action": "getMessages",
+			"since": 0.0
 		}
-	]
+	],
+	"description": "get messages without sending"
 }

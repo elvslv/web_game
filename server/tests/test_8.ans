@@ -1,8 +1,15 @@
 [
 	{
-		"result": "badUsername"
-	}, 
+		"result": "ok"
+	},
 	{
-		"result": "badPassword"
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok" 
 	}
 ]

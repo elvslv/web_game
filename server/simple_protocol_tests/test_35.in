@@ -13,10 +13,10 @@
 		},
 		{
 			"action": "sendMessage",
-			"userid": 6,
+			"sid": 6,
 			"message": "hello!",
-			"notime": "notime"
+			"simpletime": true
 		}
 	],
-	"description": "sending message with wrong userid"
+	"description": "sending message with wrong sid"
 }

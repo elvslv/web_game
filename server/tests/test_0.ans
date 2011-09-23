@@ -1,5 +1,72 @@
 [
 	{
 		"result": "ok"
+	},
+	{
+		"result": "ok", 
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok", 
+		"sid": 2
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok", 
+		"sid": 3
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok", 
+		"sid": 4
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok", 
+		"sid": 5
+	},
+	{
+		"result": "badSid"		
+	},
+	{
+		"result": "badMapId"		
+	},
+	{
+		"result": "badJson"		
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badGameName"
+	},
+	{
+		"result": "badPlayersNum"
+	},
+	{
+		"result": "ok",
+		"gameId": 1
+	},
+	{
+		"result": "badGameName"
+	},
+	{
+		"result": "alreadyInGame"
+	},
+	{
+		"result": "ok",
+		"gameId": 2
+	},
+	{
+		"result": "alreadyInGame"
 	}
 ]

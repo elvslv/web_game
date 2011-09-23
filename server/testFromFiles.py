@@ -17,11 +17,13 @@ class TestFromFile(unittest.TestCase):
 		self.maxDiff = None
 
 	def tearDown(self):
-		print "Test %s description:%s " % (self.inFile, self.testDescr)
+		print "Test %s description: %s" % (self.inFile, self.testDescr)
 		
 	def runTest(self):
 		misc.LAST_SID = 0
+		misc.LAST_TIME = 0
 		editDb.clearDb()
+		actions.createDefaultRaces()
 		f = open(self.ansFile)
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
@@ -29,17 +31,24 @@ class TestFromFile(unittest.TestCase):
 		self.assertListEqual(out['result'], json.loads(ans))
                 
 def suite():
-        suite = unittest.TestSuite()
-        suite.addTests(TestFromFile('%s\\test_%d.in' % (diri, i), '%s\\test_%d.ans' % (diri, i)) for i in range(start, end))
-        return suite
+	suite = unittest.TestSuite()
+	suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
+	return suite
 
 def main(a, b, c):
-        global start
-        global end
-        global diri
-        start = a
-        end = b
-        diri = c
-        unittest.TextTestRunner().run(suite())
+	global begin
+	global end
+	global testDir
+	begin = a
+	end = b
+	testDir = c
+	unittest.TextTestRunner().run(suite())
+		
 if __name__=='__main__':
-	main(0, 43, "simple_protocol_tests")
+	argc = len(sys.argv)
+	if argc < 2:             
+		sys.exit("Format: python TestFromFiles.py [begin] end [directory]")
+	fin = int(sys.argv[1]) if argc == 2 else int(sys.argv[2])
+	start =  int (sys.argv[1]) if argc >= 3 else 0
+	directory = sys.argv[3] if argc == 4 else "tests"
+	main(start, fin, directory)
