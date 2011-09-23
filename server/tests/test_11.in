@@ -13,7 +13,7 @@
 		},
 		{
 			"action": "sendMessage",
-			"message": "hello!"
+			"text": "hello!"
 		}
 	],
 	"description": "sending message without userId"

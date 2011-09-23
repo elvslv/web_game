@@ -94,7 +94,7 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 4,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "joinGame",
@@ -104,17 +104,17 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 4,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 1
+			"isReady": 1
 		},
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
-			"readinessStatus": 0
+			"isReady": 0
 		},
 		{
 			"action": "getGameList"

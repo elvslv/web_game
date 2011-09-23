@@ -13,7 +13,7 @@
 		},
 		{
 			"action": "sendMessage",
-			"userId": 1
+			"sid": 1
 		}
 	],
 	"description": "sending message without message"

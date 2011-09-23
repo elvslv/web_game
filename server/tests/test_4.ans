@@ -31,13 +31,13 @@
 		"gameId": 1
 	},
 	{
-		"result": "badReadinessStatus"
+		"result": "badIsReady"
 	},
 	{
-		"result": "badReadinessStatus"
+		"result": "badIsReady"
 	},
 	{
-		"result": "badReadinessStatus"
+		"result": "badIsReady"
 	},
 	{
 		"result": "ok"

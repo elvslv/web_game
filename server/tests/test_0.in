@@ -82,43 +82,31 @@
 			"action": "createGame", 
 			"sid": 1,
 			"gameName": "game1",
-			"mapId": 1,
-			"playersNum": 3
-		},
-		{
-			"action": "createGame", 
-			"sid": 1,
-			"gameName": "game1",
-			"mapId": 1,
-			"playersNum": 2
+			"mapId": 1
 		},
 		{
 			"action": "createGame", 
 			"sid": 2,
 			"gameName": "game1",
-			"mapId": 1,
-			"playersNum": 2
+			"mapId": 1
 		},
 		{
 			"action": "createGame", 
 			"sid": 1,
 			"gameName": "game2",
-			"mapId": 2,
-			"playersNum": 3
+			"mapId": 2
+		},
+		{
+			"action": "createGame", 
+			"sid": 3,
+			"gameName": "game2",
+			"mapId": 2
 		},
 		{
 			"action": "createGame", 
 			"sid": 3,
 			"gameName": "game2",
 			"mapId": 2,
-			"playersNum": 3
-		},
-		{
-			"action": "createGame", 
-			"sid": 3,
-			"gameName": "game2",
-			"mapId": 2,
-			"playersNum": 3,
 			"gameDescr": "game description"
 		}
 	], 

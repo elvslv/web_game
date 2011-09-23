@@ -50,9 +50,6 @@
 		"result": "badGameName"
 	},
 	{
-		"result": "badPlayersNum"
-	},
-	{
 		"result": "ok",
 		"gameId": 1
 	},

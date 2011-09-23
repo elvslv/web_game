@@ -24,13 +24,6 @@
 		{
 			"action": "createGame",
 			"sid": 1,
-			"gameName": "game1",
-			"mapId": 1,
-			"playersNum": 3
-		},
-		{
-			"action": "createGame",
-			"sid": 1,
 			"gameName": "",
 			"mapId": 1,
 			"playersNum": 2
