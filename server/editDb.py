@@ -58,7 +58,8 @@ def createTables():
 	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(TokenBadgeId INT UNSIGNED
 			PRIMARY KEY AUTO_INCREMENT, RaceId TINYINT UNSIGNED, GameId INT UNSIGNED,
 			FarFromStack TINYINT, BonusMoney TINYINT)""")
-	cursor.execute("CREATE TABLE IF NOT EXISTS Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time REAL)")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, 
+			Message TEXT, Time INT)""")
                 
 def clearDb():
 	for t in tables:
