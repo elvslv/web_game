@@ -53,14 +53,12 @@ def createTables():
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Skills(SkillId TINYINT UNSIGNED 
 			PRIMARY KEY AUTO_INCREMENT, SkillName VARCHAR(%s) UNIQUE, 
 			SkillIndex INT UNSIGNED UNIQUE)""", MAX_SKILLNAME_LEN)		
-	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)")
-	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			Races(RaceId TINYINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, RaceName VARCHAR(%s) UNIQUE, \
-			InitialNum INT UNSIGNED, BonusID INT UNSIGNED)", MAX_RACENAME_LEN)
-	cursor.execute("CREATE TABLE IF NOT EXISTS TokenBadges(RaceId TINYINT UNSIGNED, FarFromStack TINYINT, BonusMoney TINYINT)")
-			
-	cursor.execute("CREATE TABLE IF NOT EXISTS 	Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time REAL)")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS 
+			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)""")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(TokenBadgeId INT UNSIGNED
+			PRIMARY KEY AUTO_INCREMENT, RaceId TINYINT UNSIGNED, GameId INT UNSIGNED,
+			FarFromStack TINYINT, BonusMoney TINYINT)""")
+	cursor.execute("CREATE TABLE IF NOT EXISTS Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time REAL)")
                 
 def clearDb():
 	for t in tables:
