@@ -1,0 +1,28 @@
+[
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok",
+		"time": 1 
+	},
+	{
+		"result": "ok",
+		"time": 2 
+	},
+	{
+		"result": "ok",
+		"messages": [{"username": "user1", "message": "hello user2!", "time": 1}, {"username": "user2", "message": "hello user1!", "time": 2}]
+	}
+]

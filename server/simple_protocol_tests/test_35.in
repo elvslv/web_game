@@ -1,0 +1,22 @@
+{
+	"test":
+	[
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"sid": 6,
+			"message": "hello!",
+			"simpletime": true
+		}
+	],
+	"description": "sending message with wrong sid"
+}
