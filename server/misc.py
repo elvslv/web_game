@@ -3,7 +3,6 @@ MIN_PASSWORD_LEN = 6
 MAX_USERNAME_LEN = 16
 MAX_PASSWORD_LEN = 18
 MAX_MAPNAME_LEN = 15
-DEFAULT_PLAYERS_NUM = 5
 MIN_PLAYERS_NUM = 2
 MAX_PLAYERS_NUM = 5
 MIN_GAMENAME_LEN = 1
@@ -11,10 +10,13 @@ MAX_GAMENAME_LEN = 50
 MAX_RACENAME_LEN = 20
 MAX_SKILLNAME_LEN = 20
 MAX_GAMEDESCR_LEN = 300
-VISIBLE_RACES = 6
 
+VISIBLE_RACES = 6
 INIT_COINS_NUM = 5
 BASIC_CONQUER_COST = 2
+RACE_NUM = 14
+BONUS_NUM = 20
+
 X0 = 5363478883
 A = 9995326
 C = 235286786
@@ -105,7 +107,24 @@ actionFields = {
 			'min': MIN_PLAYERS_NUM,
 			'max': MAX_PLAYERS_NUM
 		},
-		{'name': 'regions', 'type': list, 'mandatory': False}
+		{
+			'name': 'regions', 
+			'type': list, 
+			'mandatory': False,
+			'possibleRegionValues': [
+				'border', 
+				'coast',
+				'sea',
+				'mountain',
+				'mine',
+				'farmland',
+				'magic',
+				'forest',
+				'hill',
+				'swamp',
+				'underworld'
+			]
+		}
 	],
 	'createGame': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -146,7 +165,13 @@ actionFields = {
 	],
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'raceId', 'type': int, 'mandatory': True}
+		{
+			'name': 'farFromStack', 
+			'type': int, 
+			'mandatory': True,
+			'main': 0,
+			'max': VISIBLE_RACE_NUM
+		}
 	],
 	'conquer': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 

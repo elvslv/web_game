@@ -5,6 +5,9 @@ import math
 import misc
 import MySQLdb
 import sys
+import random
+import races
+
 from gameExceptions import BadFieldException
 
 from editDb import query, fetchall, fetchone, lastId, commit, rollback
@@ -231,6 +234,26 @@ def act_leaveGame(data):
 			misc.gameStates['ended'], gameId)
 	return {'result': 'ok'}
 
+def getNextRaceFromStack(gameId):
+	racesInStack = range(0, RACE_NUM)
+	query('SELECT RaceId FROM TokenBadges WHERE GameId=%s', gameId)
+	row = fetchall()
+	for race in row:
+		racesInStack.remove(race[0])
+	raceId = random.choise(racesInStack)
+	return raceId
+
+def showNextRace(gameId, lastIndex):
+	raceId = getNextRaceFromStack(gameId)
+	query("""UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack<%s AND GameId=%s""", lastIndex, gameId)
+	query("""INSERT INTO TokenBadges(RaceId, GameId, FarFromStack, BonusMoney) 
+		VALUES(%s, %s, 0, 0)""", raceId, gameId)
+	
+def updateRacesOnDesk(gameId, farFromStack):
+	query('UPDATE TokenBadges SET FarFromStack=NULL WHERE GameId=%s AND FarFromStack=%s', gameId, farFromStack)
+	query('UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s AND GameId=%s', farFromStack, gameId)
+	showNextRace(gameId, farFromStack)
+
 def act_setReadinessStatus(data):
 	sid = checkParamPresence('Users', 'Sid', data['sid'], 'badSid', True)[0]
 	query('SELECT Users.GameId, Games.State FROM Users, Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId', sid)
@@ -258,43 +281,31 @@ def act_setReadinessStatus(data):
 		query('UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s WHERE GameId=%s', 
 			misc.gameStates['processing'], actPlayer, gameId)
 
-		query('SELECT RaceId FROM Races ORDER BY(RaceId)')		#Don't know how to rephrase it
-		races = fetchall()
-		currRacesNum = 1
-		for race in races:
-			currRacesNum += 1
-			query('INSERT INTO TokenBadges(RaceId, FarFromStack, BonusMoney) VALUES(%s, %s, 0)', 
-				race[0], (-1 if currRacesNum > misc.VISIBLE_RACES else currRacesNum))
+		#generate first 6 races
+		for i in range(misc.VISIBLE_RACE_NUM):
+			showNextRace(gameId, misc.VISIBLE_RACE_NUM - 1)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
-	sid, curRace, coins, userId = checkParamPresence('Users', 'Sid', data['sid'], 
-		'badSid', True, ['CurrentRace', 'Coins', 'Id'])
-	query('SELECT Users.GameId, Games.ActivePlayer From Users, Games\
-		 WHERE Users.Sid=%s AND Users.Id=Games.ActivePlayer', sid)
+	sid, curRace, coins, userId, gameId = checkParamPresence('Users', 'Sid', data['sid'], 
+		'badSid', True, ['CurrentRace', 'Coins', 'Id', 'GameId'])
+	query('SELECT 1 From Games WHERE ActivePlayer=%s  AND GameId=%s', userId, gameId)
 	if curRace or not fetchone():	
 		raise BadFieldException('badStage')
+	
+	farFromStack, raceId, tokenBadgeId, bonusMoney = checkParamPresence('TokenBadges', 'FarFromStack', 
+		data['farFromStack'], 'badChoice', True, ['RaceId', 'TokenBadgeId', 'BonusMoney'])
 
-	raceId, farFromStack, bonusMoney = checkParamPresence('TokenBadges', 'RaceId', 
-		data['raceId'], 'badRaceId', True, ['FarFromStack', 'BonusMoney'])
-	if farFromStack == -1 : 				# Token badge is currently located inside of stack
-		raise BadFieldException('badChoice')
-
-	query('SELECT InitialNum, BonusId FROM Races WHERE RaceId=%s', raceId)
-	num,  bonusId = fetchone()
 	query('SELECT COUNT(*) From TokenBadges WHERE FarFromStack>%s', farFromStack)
 	price = fetchone()[0]
 	if coins < price : 
 		raise BadFieldException('badMoneyAmount')
 
-	query('UPDATE Users SET CurrentRace=%s, Coins=Coins-%s+%s, Bonus=%s, TokensInHand=%s WHERE Sid=%s', 
-		raceId, price, bonusMoney, bonusId, num, sid)
-	query('UPDATE TokenBadges SET FarFromStack=-1, BonusMoney=0 WHERE RaceId=%s', raceId)
-	query('UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack >-1 AND FarFromStack<%s', farFromStack)
-	query('UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s', farFromStack)
-	query('SELECT RaceId FROM TokenBadges WHERE FarFromStack=-1')
-	newRaceId = fetchone()[0];
-	query('UPDATE TokenBadges SET FarFromStack=0 WHERE RaceId=%s', newRaceId)
+	tokensNum = races.raceDescription[raceId]['initialNum']
+	query('UPDATE Users SET CurrentRace=%s, Coins=Coins-%s+%s, TokensInHand=%s WHERE Sid=%s', 
+		tokenBadgeId, price, bonusMoney, tokensNum, sid)
+		
+	updateRacesOnDesk(gameId, farFromStack)
 	return {'result': 'ok'}
 	
 def act_conquer(data):
@@ -313,7 +324,6 @@ def act_conquer(data):
 	rightMapId = fetchone()[0]
 	if mapId != rightMapId :
 		raise BadFieldException('badRegionId')
-	regionId = data['regionId']
 
 	if ownerId == userId and not inDecline: 
 		raise BadFieldException('badRegion')

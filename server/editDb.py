@@ -31,7 +31,7 @@ def rollback():
 def createTables():
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%s) UNIQUE, Password VARCHAR(%s), Sid BIGINT UNIQUE,\
-			GameId INT UNSIGNED, IsReady TINYINT(1), CurrentRace TINYINT UNSIGNED, DeclineRace TINYINT UNSIGNED,\
+			GameId INT UNSIGNED, IsReady TINYINT(1), CurrentRace INT UNSIGNED, DeclineRace TINYINT UNSIGNED,\
 			Coins TINYINT UNSIGNED, TokensInHand INT UNSIGNED, Bonus TINYINT UNSIGNED, Priority INT UNSIGNED)",
 				(MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
@@ -40,10 +40,11 @@ def createTables():
 			ActivePlayer INT UNSIGNED, MapId INT UNSIGNED)", (MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN))
 	cursor.execute("CREATE TABLE IF NOT EXISTS \
 			Maps(MapId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, MapName VARCHAR(%s), PlayersNum INT UNSIGNED)" % MAX_MAPNAME_LEN)
-	cursor.execute("CREATE TABLE IF NOT EXISTS \
-			Regions(MapId INT UNSIGNED, RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,  \
-			RaceId INT UNSIGNED, TokensNum INT UNSIGNED, OwnerId INT UNSIGNED, \
-			Borderline BOOL, Highland BOOL,	Coastal BOOL, Seaside BOOL, InDecline BOOL)")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS Regions(MapId INT UNSIGNED, 
+			RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, RaceId INT UNSIGNED, 
+			TokensNum INT UNSIGNED, OwnerId INT UNSIGNED, Border BOOL, Coast BOOL,
+			Mountain BOOL, Sea BOOL, Mine BOOL, Farmland BOOL, Magic BOOL, Forest BOOL,
+			Hill BOOL, Swamp BOOL, Underworld BOOL, InDecline BOOL)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS AdjacentRegions (FirstRegionId INT UNSIGNED, 
 			SecondRegionId INT UNSIGNED)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Races(RaceId TINYINT UNSIGNED PRIMARY KEY 
