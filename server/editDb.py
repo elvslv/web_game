@@ -60,7 +60,7 @@ def createTables():
 			InitialNum INT UNSIGNED, BonusID INT UNSIGNED)", MAX_RACENAME_LEN)
 	cursor.execute("CREATE TABLE IF NOT EXISTS TokenBadges(RaceId TINYINT UNSIGNED, FarFromStack TINYINT, BonusMoney TINYINT)")
 			
-	cursor.execute("CREATE TABLE IF NOT EXISTS 	Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%s), Message TEXT, Time INT)", MAX_USERNAME_LEN)
+	cursor.execute("CREATE TABLE IF NOT EXISTS 	Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, Message TEXT, Time INT)")
                 
 def clearDb():
 	for t in tables:

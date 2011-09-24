@@ -23,6 +23,6 @@
 	},
 	{
 		"result": "ok",
-		"messages": [{"username": "user1", "message": "hello user2!", "time": 1}, {"username": "user2", "message": "hello user1!", "time": 2}]
+		"messages": [{"userid": 1, "message": "hello user2!", "time": 1}, {"userid": 2, "message": "hello user1!", "time": 2}]
 	}
 ]

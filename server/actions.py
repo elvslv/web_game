@@ -91,22 +91,20 @@ def act_sendMessage(data):
                 msgTime = misc.generateTimeForTest()
         else:
                 msgTime = math.trunc(time.time())
-	if not query("SELECT UserName FROM Users WHERE sid=%s", sid):
-		return {"result": "badSid"}
-	row = fetchone()
-	userName = row[0]
-	query("INSERT INTO Chat(UserName, Message, Time) VALUES (%s, %s, %s)", userName, message, msgTime) 
+	row = getIdBySid(sid)
+	userId = row[0]
+	query("INSERT INTO Chat(UserId, Message, Time) VALUES (%s, %s, %s)", userId, message, msgTime) 
 	return {"result": "ok", "time": msgTime}
 
 def act_getMessages(data):
 	since = data['since']
-	query("SELECT UserName, Message, Time FROM Chat WHERE Time > %s ORDER BY Time", since)
+	query("SELECT UserId, Message, Time FROM Chat WHERE Time > %s ORDER BY Time", since)
 	records =  fetchall()
 	records = records[-100:]
 	msgArray = []
 	for rec in records:
-		userName, message, msgTime = rec
-                msgArray.append({"username": userName, "message": message, "time": msgTime})
+		userId, message, msgTime = rec
+                msgArray.append({"userid": userId, "message": message, "time": msgTime})
 	return {"result": "ok", "messages": msgArray}
 
 def act_createDefaultMaps(data):
