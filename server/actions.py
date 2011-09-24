@@ -1,6 +1,7 @@
 import editDb
 import re
 import time
+import math
 import misc
 import MySQLdb
 import sys
@@ -84,16 +85,16 @@ def act_logout(data):
 	return {'result': 'ok'}
 
 def act_sendMessage(data):
-	userId = getIdBySid(data['sid'])[0]
-
-	message = data['text']
-	mesTime = time.time()
+	userId = getIdBySid(data['sid'])[0]	
+	if 'simpletime' in data:
+		msgTime = misc.generateTimeForTest()
+	else:
+		msgTime = math.trunc(time.time())
 	
+	text = data['text']
 	query('INSERT INTO Chat(UserId, Message, Time) VALUES (%s, %s, %s)', 
-		userId, message, mesTime) 
-	if 'noTime' in data:
-		return {'result': 'ok'}
-	return {'result': 'ok', 'time': mesTime}
+		userId, text, msgTime) 
+	return {'result': 'ok', 'time': msgTime}
 
 def act_getMessages(data):
 	since = data['since']
@@ -102,12 +103,8 @@ def act_getMessages(data):
 	records = records[-100:]
 	messages = []
 	for rec in records:
-		userId, message, mesTime = rec
-		if 'noTime' in data:
-			messages.append({'userId': userId, 'text': message})
-		else:
-			messages.append({'userId': userId, 'text': message, 'time': mesTime})
-                
+		userId, text, msgTime = rec
+		messages.append({'userId': userId, 'text': text, 'time': msgTime})
 	return {'result': 'ok', 'messages': messages}
 
 def act_createDefaultMaps(data):

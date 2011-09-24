@@ -19,7 +19,7 @@ X0 = 5363478883
 A = 9995326
 C = 235286786
 M = 7486379941
-global LAST_SID
+global LAST_SID, LAST_TIME
 
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
@@ -39,6 +39,11 @@ def generateSids(n):
 	LAST_SID = X0
 	for i in range(n):
 		print generateSid()
+
+def generateTimeForTest():
+	global LAST_TIME
+	LAST_TIME = LAST_TIME + 1
+	return LAST_TIME
 
 actionFields = {
 	'register': [
@@ -78,8 +83,7 @@ actionFields = {
 	],
 	'sendMessage': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'text', 'type': unicode, 'mandatory': True},
-		{'name': 'noTime', 'type': unicode, 'mandatory': False}
+		{'name': 'text', 'type': unicode, 'mandatory': True}
 	],
 	'getMessages': [
 		{'name': 'since', 'type': int, 'mandatory': True}

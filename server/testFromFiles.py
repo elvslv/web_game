@@ -21,6 +21,7 @@ class TestFromFile(unittest.TestCase):
 		
 	def runTest(self):
 		misc.LAST_SID = 0
+		misc.LAST_TIME = 0
 		editDb.clearDb()
 		actions.createDefaultRaces()
 		f = open(self.ansFile)
