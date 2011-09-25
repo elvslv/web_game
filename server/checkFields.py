@@ -44,7 +44,7 @@ def checkParamPresence(tableName, tableField, param, msg, pres, selectFields = [
 	return [param, fetchone()]
 
 def checkRegionCorrectness(data):
-	checkListCorrectness(data, 'landDescripton', str)
+	checkListCorrectness(data, 'landDescription', str)
 	checkListCorrectness(data, 'adjacent', int)
 	if not 'population' in data:
 		data['population'] = 0
@@ -52,7 +52,7 @@ def checkRegionCorrectness(data):
 	queryStr = 'INSERT INTO Regions(MapId, TokensNum'
 	num = 0
 	for descr in data['landDescription']:
-		if not descr in possibleLandDescription:
+		if not descr in misc.possibleLandDescription:
 			raise BadFieldException('unknownLandDescription')
 		queryStr += ', ' + descr.title()
 		num += 1

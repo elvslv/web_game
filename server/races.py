@@ -1,27 +1,36 @@
+from editDb import query
+
 class BaseRace:
+	@staticmethod
 	def tryToAttackByDeclinedRace():
 		raise BadFieldException('badAttackinRace')
-
+	
+	@staticmethod
 	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
 		if not(border or coast):
 			raise BadFieldException('badRegion')
-
+	
+	@staticmethod
 	def countAdditionalConquerPrice(self, userId, regionId):
 		return 0
+	
+	@staticmethod
+	def setRegionsInDecline(self, userId):
+		query('UPDATE Regions SET InDecline=1, TokensNum=1 WHERE OwnerId=%s', userId)
 
-	def setRegionsDeclined(self, userId):
-		query('UPDATE Regions SET InDecline=1, TokensNum=1 WHERE OwnerId=%s', 
-			userId)
-
+	@staticmethod
 	def tryToRedeploymentDeclinedRace(self):
 		raise BadFieldException('badRace') 
-
+	
+	@staticmethod
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		pass
-
+	
+	@staticmethod
 	def countAdditionalCoins(self, userId, gameId):
 		return 0
-
+	
+	@staticmethod
 	def countAdditionalDefendingTokens(self, tokensBadgeId):
 		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
 			TokenBadgeId=%s""", tokensBadgeId)
@@ -36,7 +45,7 @@ class RaceGhouls(BaseRace):
 	def tryToAttackByDeclinedRace():
 		pass
 
-	def setRegionsDeclined(self, userId):
+	def setRegionsInDecline(self, userId):
 		query('UPDATE Regions SET InDecline=1 WHERE OwnerId=%s', userId)
 
 	def tryToRedeploymentDeclinedRace(self):

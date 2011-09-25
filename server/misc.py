@@ -163,7 +163,7 @@ actionFields = {
 			'name': 'farFromStack', 
 			'type': int, 
 			'mandatory': True,
-			'main': 0,
+			'min': 0,
 			'max': VISIBLE_RACES
 		}
 	],
@@ -206,46 +206,34 @@ defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5},
 	{'mapName': 'defaultMap3', 'playersNum': 4, 'turnsNum': 5},
-	 {'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5},
+	{'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5},
 	{
 		'mapName': 'defaultMap5', 
 		'playersNum': 2, 
-		'turnsNum': 5
-	# 	'regions' : 
-	# 	[
-	# 		{
-	# 			'population' : 1,
-	# 			'borderline' : 0,
-	# 			'seaside'    : 0,
-	# 			'highland'   : 1,
-	# 			'coastal'    : 0,
-	# 			'adjacent' : [3, 4] 
-	# 		},
-	# 		{
-	# 			'population' : 1,
-	# 			'seaside'    : 1,
-	# 			'borderline' : 0,
-	# 			'highland'   : 0,
-	# 			'coastal'    : 0,
-	# 			'adjacent' : [1, 4] 
-	# 		},
-	# 		{
-	# 			'population' : 0,
-	# 			'seaside'    : 0,
-	# 			'borderline' : 1,
-	# 			'highland'   : 1,
-	# 			'coastal'    : 0,
-	# 			'adjacent' : [1] 
-	# 		},
-	# 		{
-	# 			'population' : 0,
-	# 			'borderline' : 0,
-	# 			'seaside'    : 0,
-	# 			'highland'   : 0,
-	# 			'coastal'    : 1,
-	# 			'adjacent' : [1, 2] 
-	# 		},
-	# 	]
+		'turnsNum': 5,
+	 	'regions' : 
+	 	[
+	 		{
+	 			'population' : 1,
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [3, 4] 
+	 		},
+	 		{
+	 			'population' : 1,
+	 			'landDescription' : ['sea'],
+	 			'adjacent' : [1, 4] 
+	 		},
+	 		{
+	 			'population' : 1,
+	 			'landDescription' : ['border', 'mountain'],
+	 			'adjacent' : [1] 
+	 		},
+	 		{
+	 			'population' : 1,
+	 			'landDescription' : ['coast'],
+	 			'adjacent' : [1, 2] 
+	 		}
+	 	]
 	}	
 			
 ]

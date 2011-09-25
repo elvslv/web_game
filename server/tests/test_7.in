@@ -1,0 +1,106 @@
+{
+	"test":
+	[
+		{
+			"action": "createDefaultMaps"
+		},
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "111111"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "111111"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 5,
+			"playersNum": 2
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1		
+		},
+		
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 1
+		},
+		
+		
+	
+		{	
+			"action": "selectRace",
+			"sid": 2,
+			"farFromStack" : 1
+		},
+		
+		
+		
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"farFromStack" : 6
+		},
+		
+		
+
+		
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"farFromStack" : 1
+		},
+		
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"farFromStack" : 2
+		},
+		
+		{
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 1
+		}
+		
+
+		
+	
+		
+	],
+	"description": "testing basic game mechanics on the first turn"
+}
+
+
+
+
+
+
+
+
+
+
+
+
