@@ -104,7 +104,8 @@
 				{
 					"mapId": 1,
 					"mapName": "defaultMap1",
-					"playersNum": 2
+					"playersNum": 2,
+					"turnsNum": 5
 				},
 				"playersNum": 2,
 				"state": 2,
@@ -128,7 +129,8 @@
 				{
 					"mapId": 2,
 					"mapName": "defaultMap2",
-					"playersNum": 3
+					"playersNum": 3,
+					"turnsNum": 5
 				},
 				"playersNum": 1,
 				"state": 1,

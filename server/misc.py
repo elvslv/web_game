@@ -111,19 +111,13 @@ actionFields = {
 			'name': 'regions', 
 			'type': list, 
 			'mandatory': False,
-			'possibleRegionValues': [
-				'border', 
-				'coast',
-				'sea',
-				'mountain',
-				'mine',
-				'farmland',
-				'magic',
-				'forest',
-				'hill',
-				'swamp',
-				'underworld'
-			]
+		},
+		{
+			'name': 'turnsNum',
+			'mandatory': True,
+			'type': int,
+			'min': 5,
+			'max': 10
 		}
 	],
 	'createGame': [
@@ -170,12 +164,13 @@ actionFields = {
 			'type': int, 
 			'mandatory': True,
 			'main': 0,
-			'max': VISIBLE_RACE_NUM
+			'max': VISIBLE_RACES
 		}
 	],
 	'conquer': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'regionId', 'type': int, 'mandatory': True}
+		{'name': 'regionId', 'type': int, 'mandatory': True},
+		{'name': 'raceId', 'type': int, 'min': 0, 'max': RACE_NUM, 'mandatory': False}
 	],
 	'decline':[
 		{'name': 'sid', 'type': int, 'mandatory': True}
@@ -185,65 +180,83 @@ actionFields = {
 	],
 	'doSmth': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'redeployment': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'raceId', 'type': int, 'mandatory': False},
+		{'name': 'regions', 'type': list, 'mandatory': True}
 	]
 }
 
+possibleLandDescription = {
+	'border', 
+	'coast',
+	'sea',
+	'mountain',
+	'mine',
+	'farmland',
+	'magic',
+	'forest',
+	'hill',
+	'swamp',
+	'cavern'
+}
+
 defaultMaps = [
-	{'mapName': 'defaultMap1', 'playersNum': 2}, 
-	{'mapName': 'defaultMap2', 'playersNum': 3},
-	{'mapName': 'defaultMap3', 'playersNum': 4},
-	{'mapName': 'defaultMap4', 'playersNum': 5},
+	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5}, 
+	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5},
+	{'mapName': 'defaultMap3', 'playersNum': 4, 'turnsNum': 5},
+	 {'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5},
 	{
 		'mapName': 'defaultMap5', 
 		'playersNum': 2, 
-		'regions' : 
-		[
-			{
-				'population' : 1,
-				'borderline' : 0,
-				'seaside'    : 0,
-				'highland'   : 1,
-				'coastal'    : 0,
-				'adjacent' : [3, 4] 
-			},
-			{
-				'population' : 1,
-				'seaside'    : 1,
-				'borderline' : 0,
-				'highland'   : 0,
-				'coastal'    : 0,
-				'adjacent' : [1, 4] 
-			},
-			{
-				'population' : 0,
-				'seaside'    : 0,
-				'borderline' : 1,
-				'highland'   : 1,
-				'coastal'    : 0,
-				'adjacent' : [1] 
-			},
-			{
-				'population' : 0,
-				'borderline' : 0,
-				'seaside'    : 0,
-				'highland'   : 0,
-				'coastal'    : 1,
-				'adjacent' : [1, 2] 
-			},
-		]
+		'turnsNum': 5
+	# 	'regions' : 
+	# 	[
+	# 		{
+	# 			'population' : 1,
+	# 			'borderline' : 0,
+	# 			'seaside'    : 0,
+	# 			'highland'   : 1,
+	# 			'coastal'    : 0,
+	# 			'adjacent' : [3, 4] 
+	# 		},
+	# 		{
+	# 			'population' : 1,
+	# 			'seaside'    : 1,
+	# 			'borderline' : 0,
+	# 			'highland'   : 0,
+	# 			'coastal'    : 0,
+	# 			'adjacent' : [1, 4] 
+	# 		},
+	# 		{
+	# 			'population' : 0,
+	# 			'seaside'    : 0,
+	# 			'borderline' : 1,
+	# 			'highland'   : 1,
+	# 			'coastal'    : 0,
+	# 			'adjacent' : [1] 
+	# 		},
+	# 		{
+	# 			'population' : 0,
+	# 			'borderline' : 0,
+	# 			'seaside'    : 0,
+	# 			'highland'   : 0,
+	# 			'coastal'    : 1,
+	# 			'adjacent' : [1, 2] 
+	# 		},
+	# 	]
 	}	
 			
 ]
 
-defaultRaces = [
-	{'raceName': 'caucasian', 'initialNum': 5},
-	{'raceName': 'negroid', 'initialNum': 2},
-	{'raceName': 'tyranids', 'initialNum': 7},
-	{'raceName': 'half-orks', 'initialNum': 15},
-	{'raceName': 'ogres', 'initialNum': 90},
-	{'raceName': 'drow', 'initialNum': 10},
-	{'raceName': 'baatezu', 'initialNum': 10},
-	
-]
-
-gameStates = {'waiting': 1, 'processing': 2, 'ended': 3}
+gameStates = {
+	'waiting': 1, 
+	'processing': 2, 
+	'ended': 3, 
+	'finishTurn': 4, 
+	'selectRace': 5,
+	'conquer': 6, 
+	'decline': 7,
+	'redeployment': 8
+}
