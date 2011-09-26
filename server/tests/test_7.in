@@ -83,9 +83,25 @@
 			"action": "conquer",
 			"sid": 2,
 			"regionId" : 1
-		}
+		},
 		
-
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 5
+		},
+		
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+		
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 4
+		}
 		
 	
 		

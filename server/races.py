@@ -1,60 +1,67 @@
 from editDb import query
+from gameExceptions import BadFieldException
 
 class BaseRace:
-	@staticmethod
-	def tryToAttackByDeclinedRace():
+	def __init__(self, name, initialNum, maxNum):
+		self.name = name
+		self.initialNum = initialNum
+		self.maxNum = maxNum
+
+	def tryToAttackByRaceInDecline():
 		raise BadFieldException('badAttackinRace')
 	
-	@staticmethod
 	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
 		if not(border or coast):
 			raise BadFieldException('badRegion')
 	
-	@staticmethod
-	def countAdditionalConquerPrice(self, userId, regionId):
+	def countAdditionalConquerPrice(self, userId, regionId, regionInfo, race):
 		return 0
 	
-	@staticmethod
 	def setRegionsInDecline(self, userId):
 		query('UPDATE Regions SET InDecline=1, TokensNum=1 WHERE OwnerId=%s', userId)
 
-	@staticmethod
-	def tryToRedeploymentDeclinedRace(self):
+	def tryToRedeployDeclinedRace(self):
 		raise BadFieldException('badRace') 
 	
-	@staticmethod
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		pass
 	
-	@staticmethod
 	def countAdditionalCoins(self, userId, gameId):
 		return 0
-	
-	@staticmethod
+
 	def countAdditionalDefendingTokens(self, tokensBadgeId):
 		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
 			TokenBadgeId=%s""", tokensBadgeId)
 		return 0
 	
 class RaceHalflings(BaseRace):
-	def tryToConquerNotAdjacentRegion(self, border, coast):
+	def __init__(self):
+		BaseRace.__init__(self, 'Halflings', 6, 11)
+	
+	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
 		if regions:
 			raise BadFieldException('badRegion')
 
 class RaceGhouls(BaseRace):
-	def tryToAttackByDeclinedRace():
+	def __init__(self):
+		BaseRace.__init__(self, 'Ghouls', 5, 10)
+
+	def tryToAttackByRaceInDecline():
 		pass
 
 	def setRegionsInDecline(self, userId):
 		query('UPDATE Regions SET InDecline=1 WHERE OwnerId=%s', userId)
 
-	def tryToRedeploymentDeclinedRace(self):
+	def tryToRedeployDeclinedRace(self):
 		pass
 
 	def tryToFinishTurnOfDeclinedRace(self):
 		pass
 
 class RaceGiants(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Giants', 6, 11)
+
 	def countAdditionalConquerPrice(self, userId, regionId, regionInfo, race):
 		res = 0
 		query('SELECT RegionId, Mountain FROM Regions WHERE OwnerId=%s AND RaceId=%s', 
@@ -68,22 +75,34 @@ class RaceGiants(BaseRace):
 		return res
 
 class RaceTritons(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Tritons', 6, 11)
+
 	def countAdditionalConquerPrice(self, userId, regionId, regionInfo, race):
 		return -1 if regionInfo[1] else 0
 
 class RaceDwarves(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Dwarves', 3, 8)
+
 	def countAdditionalCoins(self, userId, gameId):
 		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=1 AND Mine=1""", 
 			userId)
 		return fetchone()[0]
 
 class RaceHumans(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Humans', 5, 10)
+
 	def countAdditionalCoins(self, userId, gameId):
 		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=6 AND Farmland=1""", 
 			userId)
 		return fetchone()[0]
 
 class RaceOrcs(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Orcs', 5, 10)
+
 	def countAdditionalCoins(self, userId, gameId):
 		query('SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND RaceId=7', userId)
 		if fetchone()[0]:
@@ -92,12 +111,18 @@ class RaceOrcs(BaseRace):
 		return fetchone()[0]
 
 class RaceWizards(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Wizards', 5, 10)
+
 	def countAdditionalCoins(self, userId, gameId):
 		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=13 AND Magic=1""", 
 			userId)
 		return fetchone()[0]
 		
 class RaceAmazons(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Amazons', 6, 15)
+
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
@@ -111,6 +136,9 @@ class RaceAmazons(BaseRace):
 			raise BadFieldException('badStage')
 
 class RaceSkeletons(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Skeletons', 5, 18)
+
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
@@ -126,78 +154,111 @@ class RaceSkeletons(BaseRace):
 			raise BadFieldException('badStage')
 
 class RaceElves(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Elves', 6, 11)
+
 	def countAdditionalDefendingTokens(self):
 		return 1
 
-raceDescription = [
-	{
-		'name': 'Amazons',
-		'initialNum': 6,
-		'maxNum': 15
-	},
-	{
-		'name': 'Dwarves',
-		'initialNum': 3,
-		'maxNum': 8		
-	},
-	{
-		'name': 'Elves',
-		'initialNum': 6,
-		'maxNum': 11
-	},
-	{
-		'name': 'Ghouls',
-		'initialNum': 5,
-		'maxNum': 10
-	},
-	{
-		'name': 'Giants',
-		'initialNum': 6,
-		'maxNum': 11
-	},
-	{
-		'name': 'Halflings',
-		'initialNum': 6,
-		'maxNum': 11
-	},
-	{
-		'name': 'Humans',
-		'initialNum': 5,
-		'maxNum': 10
-	},
-	{
-		'name': 'Orcs',
-		'initialNum': 5,
-		'maxNum': 10
-	},
-	{
-		'name': 'Ratmen',
-		'initialNum': 8,
-		'maxNum': 13
-	},
-	{
-		'name': 'Skeletons',
-		'initialNum': 6,
-		'maxNum': 20
-	},
-	{
-		'name': 'Sorcerers',
-		'initialNum': 5,
-		'maxNum': 18
-	},
-	{
-		'name': 'Tritons',
-		'initialNum': 6,
-		'maxNum': 11
-	},
-	{
-		'name': 'Trolls',
-		'initialNum': 5	,
-		'maxNum': 10	
-	},
-	{
-		'name': 'Wizards',
-		'initialNum': 5,
-		'maxNum': 10
-	}		
+class RaceRatmen(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Ratmen', 8, 13)
+
+class RaceTrolls(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Trolls', 5, 10)
+
+class RaceSorcerers(BaseRace):
+	def __init__(self):
+		BaseRace.__init__(self, 'Sorcerers', 5, 18)
+
+
+racesList = [
+	RaceAmazons(),
+	RaceDwarves(),
+	RaceElves(),
+	RaceGhouls(),
+	RaceGiants(),
+	RaceHalflings(),
+	RaceHumans(),
+	RaceOrcs(),
+	RaceRatmen(),
+	RaceSkeletons(),
+	RaceSorcerers(),
+	RaceTritons(),
+	RaceTrolls(),
+	RaceWizards(),
 ]
+
+#raceDescription =	[
+#	{
+#		'name': 'Amazons',
+#		'initialNum': 6,
+#		'maxNum': 15
+#	},
+#	{
+#		'name': 'Dwarves',
+#		'initialNum': 3,
+#		'maxNum': 8		
+#	},
+#	{
+#		'name': 'Elves',
+#		'initialNum': 6,
+#		'maxNum': 11
+#	},
+#	{
+#		'name': 'Ghouls',
+#		'initialNum': 5,
+#		'maxNum': 10
+#	},
+#	{
+#		'name': 'Giants',
+#		'initialNum': 6,
+#		'maxNum': 11
+#	},
+#	{
+#		'name': 'Halflings',
+#		'initialNum': 6,
+#		'maxNum': 11
+#	},
+#	{
+#		'name': 'Humans',
+#		'initialNum': 5,
+#		'maxNum': 10
+#	},
+#	{
+#		'name': 'Orcs',
+#		'initialNum': 5,
+#		'maxNum': 10
+#	},
+#	{
+#		'name': 'Ratmen',
+#		'initialNum': 8,
+#		'maxNum': 13
+#	},
+#	{
+#		'name': 'Skeletons',
+#		'initialNum': 6,
+#		'maxNum': 20
+#	},
+#	{
+#		'name': 'Sorcerers',
+#		'initialNum': 5,
+#		'maxNum': 18
+#	},
+#	{
+#		'name': 'Tritons',
+#		'initialNum': 6,
+#		'maxNum': 11
+#	},
+#	{
+#		'name': 'Trolls',
+#		'initialNum': 5	,
+#		'maxNum': 10	
+#	},
+#	{
+#		'name': 'Wizards',
+#		'initialNum': 5,
+#		'maxNum': 10
+#	}		
+#]

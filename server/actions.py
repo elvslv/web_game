@@ -258,9 +258,8 @@ def checkForDefendingPlayer(gameId):
 		raise BadFieldException('badStage') ##better message?
 
 def act_selectRace(data):
-	sid = data['sid']
-	tokenBadgeId, coins, userId, gameId = checkParamPresence('Users', 'Sid', sid, 
-		'badSid', True, ['CurrentRace', 'Coins', 'Id', 'GameId'])[1]
+	sid, (tokenBadgeId, coins, userId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 
+		'badSid', True, ['CurrentRace', 'Coins', 'Id', 'GameId'])
 	query('SELECT 1 From Games WHERE ActivePlayer=%s  AND GameId=%s', userId, gameId)
 	if tokenBadgeId or not fetchone():	
 		raise BadFieldException('badStage')
@@ -276,7 +275,7 @@ def act_selectRace(data):
 	if coins < price : 
 		raise BadFieldException('badMoneyAmount')
 
-	tokensNum = races.raceDescription[raceId]['initialNum']
+	tokensNum = races.racesList[raceId].initialNum
 	query('UPDATE Users SET CurrentRace=%s, Coins=Coins-%s+%s, TokensInHand=%s WHERE Sid=%s', 
 		tokenBadgeId, price, bonusMoney, tokensNum, sid)
 	query('UPDATE TokenBadges SET OwnerId=%s, InDecline=False WHERE TokenBadgeId=%s', 
@@ -285,47 +284,47 @@ def act_selectRace(data):
 	updateRacesOnDesk(gameId, farFromStack)
 	return {'result': 'ok'}
 
-def callRaceMethod(race, methodName, *args):
-	raceClass = getattr(races, 'Race%s' % races.raceDescription[race]['name'])
-	return getattr(raceClass, methodName)(raceClass, *args) if args else getattr(raceClass, methodName)(raceClass)
+def callRaceMethod(raceId, methodName, *args):
+	race = races.racesList[raceId]
+	return getattr(race, methodName)(*args)
 
 def getRaceIdByTokenBadge(tokenBadge):
 	query('SELECT RaceId FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadge)
 	return fetchone()[0]
 	
 def act_conquer(data):
-	sid = data['sid']
-	userId, tokenBadgeId, gameId = checkParamPresence('Users', 'Sid', sid, 
-		'badSid', True, ['Id', 'CurrentRace', 'GameId'])[1]
+	sid, (userId, tokenBadgeId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 
+		'badSid', True, ['Id', 'CurrentRace', 'GameId'])
+	if not tokenBadgeId: 
+		raise BadFieldException('badStage')
 	race = getRaceIdByTokenBadge(tokenBadgeId)
 	checkForDefendingPlayer(gameId)	
-	query('SELECT Games.MapId From Games WHERE Users.Sid=%s AND Users.GameId=Games.GameId', sid)
+	reqRegionFields = ['OwnerId', 'TokensNum', 'RaceId']
+	reqRegionFields.extend(misc.possibleLandDescription)	
+	reqRegionFields.append('inDecline')						# Yeah, extend doesn't return any values and neither does append
+	regionId, regInfo = checkParamPresence('Regions', 
+		'RegionId', data['regionId'], 'badRegionId', True, reqRegionFields)
+	query('SELECT MapId From Regions WHERE RegionId=%s', regionId)
+	mapId = fetchone()[0]
+	query('SELECT Games.MapId From Games, Users WHERE Users.Sid=%s AND Users.GameId=Games.GameId', sid)
 	rightMapId = fetchone()[0]
 	if mapId != rightMapId :
 		raise BadFieldException('badRegionId')
-
+	
 	#check the attacking race
 	if 'raceId' in data:
 		race = data['raceId']
 		if not query('SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND RaceId=%s', 
 			userId, raceId):
 			raise BadFieldException('badRaceId')
-		InDecline = fetchone()
-		if InDecline:
-			callRaceMethod(race, 'tryToAttackByInDeclineRace')
-
-	if not race:
-		raise BadFieldException('badStage')
-
-	reqRegionFields = ['OwnerId', 'TokenNum', 'RaceId'].extend(possibleLandDescription).append(
-		'inDecline')
-	regionId, ownerId, tokenNum, attackedRace, regInfo = checkParamPresence('Regions', 
-		'RegionId', data['regionId'], True, 'badRegionId', reqRegionFields)
-
+		inDecline = fetchone()
+		if inDecline:
+			callRaceMethod(race, 'tryToAttackByRaceInDecline')
+	ownerId = regInfo[0]		
 	if ownerId == userId and not inDecline: 
 		raise BadFieldException('badRegion')
 
-	query('SELECT RegionId FROM Regions WHERE OwnerId=%s', userId)
+	query('SELECT RegionId FROM Regions WHERE OwnerId=%s', ownerId)
 	playerRegions = fetchall()
 	playerBorderline = False	
 	for plRegion in playerRegions:
@@ -336,33 +335,33 @@ def act_conquer(data):
 			break
 	#need case fo flying!!!
 	if not playerBorderline: 
-		callRaceMethod('tryToConquerNotAdjacentRegion', playerRegions, 
-			regInfo[0], regInfo[1])
-
-	unitPrice = max(BASIC_CONQUER_COST + tokenNum + mountain + 
-		raceClass().countAdditionalConquerPrice(userId, regionId, regInfo, raceId), 1)
-	query('SELECT TokensInHand FROM Users WHERE UserId=%s', usersId)
+		callRaceMethod(race, 'tryToConquerNotAdjacentRegion', playerRegions, 
+			regInfo[3], regInfo[4])
+	tokensNum, attackedRace, mountain = regInfo[1], regInfo[2], regInfo[6]
+	unitPrice = max(misc.BASIC_CONQUER_COST + tokensNum + mountain + 
+		callRaceMethod(race, 'countAdditionalConquerPrice', userId, regionId, regInfo, attackedRace), 1)
+	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
 	if unitsNum < unitPrice : 
 		dice = random.randint(1, 6)
 		if dice > 3:
 			dice = 0
-		if unitsNum + dice < unitPrice:
+		unitPrice -= dice
+		if unitsNum < unitPrice:
 			raise BadFieldException('badTokensNum')
 
-	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE userId=%s', unitPrice, userId)
+	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, userId)
 	query('UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=0, RaceId=%s WHERE RegionId=%s', 
 		userId, unitPrice, regionId, race) 
 	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=CounqueredRegionsNum+1,
 		NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, PrevState=%s, 
-		ConqueredRegion=%s, AttackedRace=%s""", ownerId, 1 if tokenNum else 0, 
+		ConqueredRegion=%s, AttackedRace=%s""", ownerId, 1 if tokensNum else 0, 
 		misc.gameStates['conquer'], regionId, attackedRace)
 	return {'result': 'ok'}
 		
 def act_decline(data):
-	sid = data['sid']
-	userId, freeUnits, race, gameId = checkParamPresence('Users', 
-		'Sid', sid, 'badSid', True, ['Id', 'TokensInHand', 'CurrentRace', 'GameId'])[1]
+	sid, (userId, freeUnits, race, gameId) = checkParamPresence('Users', 
+		'Sid', data['sid'], 'badSid', True, ['Id', 'TokensInHand', 'CurrentRace', 'GameId'])
 	
 	checkForDefendingPlayer(gameId)
 

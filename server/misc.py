@@ -188,7 +188,7 @@ actionFields = {
 	]
 }
 
-possibleLandDescription = {
+possibleLandDescription = [
 	'border', 
 	'coast',
 	'sea',
@@ -200,7 +200,7 @@ possibleLandDescription = {
 	'hill',
 	'swamp',
 	'cavern'
-}
+]
 
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5}, 

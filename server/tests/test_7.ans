@@ -52,7 +52,23 @@
 	
 	{
 		"result" : "badStage"
+	},
+	
+		
+	{
+		"result" : "badRegionId"
+	},
+	
+	{
+		"result" : "badRegion"
+	},
+	
+	{
+		"result" : "ok"
 	}
+	
+
+	
 	
 	
 		
