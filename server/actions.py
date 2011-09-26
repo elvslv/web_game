@@ -145,7 +145,6 @@ def act_getGameList(data):
 
 		query('SELECT * FROM Maps WHERE MapId=%s', mapId)
 		map = fetchone()
-		print map
 		curGame['map'] = dict()
 		for i in range(len(mapRowNames)):
 			curGame['map'][mapRowNames[i]] = map[i]
@@ -202,28 +201,34 @@ def act_leaveGame(data):
 			misc.gameStates['ended'], gameId)
 	return {'result': 'ok'}
 
-def getNextRaceFromStack(gameId):
+def getNextRaceAndPowerFromStack(gameId):
 	racesInStack = range(0, misc.RACE_NUM)
-	query('SELECT RaceId FROM TokenBadges WHERE GameId=%s', gameId)
+	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
+	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
 	row = fetchall()
-	for race in row:
-		racesInStack.remove(race[0])
-	raceId = random.choice(racesInStack)
-	return raceId
+	for rec in row:
+		racesInStack.remove(rec[0])
+		specialPowersInStack.remove(rec[1])
+	raceId = racesInStack[0]#random.choice(racesInStack)
+	specialPowerId = specialPowersInStack[0]#random.choice(specialPowersInStack)
+	return raceId, specialPowerId
 
 def showNextRace(gameId, lastIndex):
-	raceId = getNextRaceFromStack(gameId)
-	query("""UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack<%s AND GameId=%s""", lastIndex, gameId)
-	query("""INSERT INTO TokenBadges(RaceId, GameId, FarFromStack, BonusMoney) 
-		VALUES(%s, %s, 0, 0)""", raceId, gameId)
+	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId)
+	query("""UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack<%s 
+		AND GameId=%s""", lastIndex, gameId)
+	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, FarFromStack, BonusMoney) 
+		VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
 	
 def updateRacesOnDesk(gameId, farFromStack):
 	query('UPDATE TokenBadges SET FarFromStack=NULL WHERE GameId=%s AND FarFromStack=%s', gameId, farFromStack)
-	query('UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s AND GameId=%s', farFromStack, gameId)
+	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s AND 
+		GameId=%s""", farFromStack, gameId)
 	showNextRace(gameId, farFromStack)
 
 def act_setReadinessStatus(data):
-	sid, (userId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 'badSid', True, ['Id', 'GameId'])
+	sid, (userId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 'badSid', True, 
+		['Id', 'GameId'])
 	if not query('SELECT State FROM Games WHERE GameId=%s', gameId):
 		raise BadFieldException('notInGame')
 	gameState = fetchone()[0]
@@ -240,7 +245,7 @@ def act_setReadinessStatus(data):
 	if maxPlayersNum == readyPlayersNum:
 		# Starting
 		query('UPDATE Users SET Coins=%s, TokensInHand=0, CurrentRace=NULL, \
-			DeclineRace=NULL, Bonus=NULL WHERE GameId=%s', misc.INIT_COINS_NUM, gameId)
+			DeclinedRace=NULL, Bonus=NULL WHERE GameId=%s', misc.INIT_COINS_NUM, gameId)
 		query('SELECT Id FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
 		actPlayer = fetchone()[0]
 		query("""UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s, PrevState=%s WHERE 
@@ -258,8 +263,8 @@ def checkForDefendingPlayer(gameId):
 		raise BadFieldException('badStage') ##better message?
 
 def act_selectRace(data):
-	sid, (tokenBadgeId, coins, userId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 
-		'badSid', True, ['CurrentRace', 'Coins', 'Id', 'GameId'])
+	sid, (tokenBadgeId, coins, userId, gameId) = checkParamPresence('Users', 'Sid', 
+		data['sid'], 'badSid', True, ['CurrentRace', 'Coins', 'Id', 'GameId'])
 	query('SELECT 1 From Games WHERE ActivePlayer=%s  AND GameId=%s', userId, gameId)
 	if tokenBadgeId or not fetchone():	
 		raise BadFieldException('badStage')
@@ -288,43 +293,52 @@ def callRaceMethod(raceId, methodName, *args):
 	race = races.racesList[raceId]
 	return getattr(race, methodName)(*args)
 
-def getRaceIdByTokenBadge(tokenBadge):
-	query('SELECT RaceId FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadge)
-	return fetchone()[0]
+def callSpecialPowerMethod(specialPowerId, methodName, *args):
+	specialPower = races.specialPowerList[specialPowerId]
+	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
+
+def getRaceAndPowerIdByTokenBadge(tokenBadge):
+	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadge)
+	return fetchone()
 	
 def act_conquer(data):
 	sid, (userId, tokenBadgeId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 
 		'badSid', True, ['Id', 'CurrentRace', 'GameId'])
 	if not tokenBadgeId: 
 		raise BadFieldException('badStage')
-	race = getRaceIdByTokenBadge(tokenBadgeId)
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+
 	checkForDefendingPlayer(gameId)	
+
 	reqRegionFields = ['OwnerId', 'TokensNum', 'RaceId']
 	reqRegionFields.extend(misc.possibleLandDescription)	
 	reqRegionFields.append('inDecline')						# Yeah, extend doesn't return any values and neither does append
 	regionId, regInfo = checkParamPresence('Regions', 
 		'RegionId', data['regionId'], 'badRegionId', True, reqRegionFields)
+
 	query('SELECT MapId From Regions WHERE RegionId=%s', regionId)
 	mapId = fetchone()[0]
-	query('SELECT Games.MapId From Games, Users WHERE Users.Sid=%s AND Users.GameId=Games.GameId', sid)
+	query("""SELECT Games.MapId From Games, Users WHERE Users.Sid=%s AND 
+		Users.GameId=Games.GameId""", sid)
 	rightMapId = fetchone()[0]
 	if mapId != rightMapId :
 		raise BadFieldException('badRegionId')
-	
+
+	inDecline = 0
 	#check the attacking race
 	if 'raceId' in data:
-		race = data['raceId']
+		raceId = data['raceId']
 		if not query('SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND RaceId=%s', 
 			userId, raceId):
 			raise BadFieldException('badRaceId')
 		inDecline = fetchone()
 		if inDecline:
-			callRaceMethod(race, 'tryToAttackByRaceInDecline')
+			callRaceMethod(raceId, 'tryToAttackByRaceInDecline')
 	ownerId = regInfo[0]		
 	if ownerId == userId and not inDecline: 
 		raise BadFieldException('badRegion')
 
-	query('SELECT RegionId FROM Regions WHERE OwnerId=%s', ownerId)
+	query('SELECT RegionId FROM Regions WHERE OwnerId=%s AND RaceId=%s', ownerId, raceId)
 	playerRegions = fetchall()
 	playerBorderline = False	
 	for plRegion in playerRegions:
@@ -333,13 +347,25 @@ def act_conquer(data):
 		if fetchone():
 			playerBorderline = True
 			break
-	#need case fo flying!!!
+	if playerBorderline: #case for flying and seafaring
+		if not callSpecialPowerMethod(specialPowerId, 'tryToConquerAdjacentRegion', 
+			playerRegions, regInfo[3], regInfo[4], regInfo[5]):
+			raise('badRegion')
+
 	if not playerBorderline: 
-		callRaceMethod(race, 'tryToConquerNotAdjacentRegion', playerRegions, 
-			regInfo[3], regInfo[4])
+		f1 = callRaceMethod(raceId, 'tryToConquerNotAdjacentRegion', playerRegions, 
+				regInfo[3], regInfo[4])
+		f2 = callSpecialPowerMethod(specialPowerId, 'tryToConquerNotAdjacentRegion', 
+				playerRegions, regInfo[3], regInfo[4])
+		if not (f1 or f2):
+			raise BadFieldException('badRegion')
 	tokensNum, attackedRace, mountain = regInfo[1], regInfo[2], regInfo[6]
-	unitPrice = max(misc.BASIC_CONQUER_COST + tokensNum + mountain + 
-		callRaceMethod(race, 'countAdditionalConquerPrice', userId, regionId, regInfo, attackedRace), 1)
+	additionalTokensNum = 0
+	if attackedRace:
+		additionalTokensNum = callRaceMethod(attackedRace, 'countAdditionalConquerPrice')
+	unitPrice = max(misc.BASIC_CONQUER_COST + tokensNum + mountain + additionalTokensNum + 
+		callRaceMethod(raceId, 'countConquerBonus', userId, regionId, regInfo, attackedRace) + 
+		callSpecialPowerMethod(raceId, 'countConquerBonus', userId, regionId, regInfo, attackedRace), 1)
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
 	if unitsNum < unitPrice : 
@@ -351,8 +377,8 @@ def act_conquer(data):
 			raise BadFieldException('badTokensNum')
 
 	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, userId)
-	query('UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=0, RaceId=%s WHERE RegionId=%s', 
-		userId, unitPrice, regionId, race) 
+	query("""UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=%s, RaceId=%s 
+		WHERE RegionId=%s""", userId, unitPrice, inDecline, regionId, raceId) 
 	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=CounqueredRegionsNum+1,
 		NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, PrevState=%s, 
 		ConqueredRegion=%s, AttackedRace=%s""", ownerId, 1 if tokensNum else 0, 
@@ -360,18 +386,19 @@ def act_conquer(data):
 	return {'result': 'ok'}
 		
 def act_decline(data):
-	sid, (userId, freeUnits, race, gameId) = checkParamPresence('Users', 
+	sid, (userId, freeUnits, tokenBadgeId, gameId) = checkParamPresence('Users', 
 		'Sid', data['sid'], 'badSid', True, ['Id', 'TokensInHand', 'CurrentRace', 'GameId'])
 	
 	checkForDefendingPlayer(gameId)
-
-	if not race:
+	if not tokenBadgeId:
 		raise BadFieldException('badStage')
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+	callSpecialPowerMethod(specialPowerId, 'tryToGoInDecline')
 	query('UPDATE Regions SET OwnerId=NULL, InDecline=0, RaceId=NULL WHERE OwnerId=%s AND InDecline=1', 
 		userId)
 	
-	callRaceMethod(race, 'setRegionsInDecline', userId)	
-	query("""UPDATE Users SET DeclineRace=%s, CurrentRace=NULL, TokensInHand=0 WHERE Sid=%s""", race, sid)
+	callRaceMethod(raceId, 'setRegionsInDecline', userId)	
+	query("""UPDATE Users SET DeclinedRace=%s, CurrentRace=NULL, TokensInHand=0 WHERE Sid=%s""", race, sid)
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['decline'])
 
 	return {'result': 'ok'}
@@ -379,30 +406,30 @@ def act_decline(data):
 def act_redeployment(data):
 	sid, userId, tokensBadgeId, gameId = checkParamPresence('Users', 'Sid', data['sid'], 
 		'badSid', True, ['Id', 'CurrentRace', 'GameId'])
-	race = getRaceByTokenBadge(tokenBadgeId)
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	checkForDefendingPlayer(gameId)
-	InDecline = False
+	inDecline = False
 	if 'raceId' in data:
-		race = data['raceId']
+		raceId = data['raceId']
 		if not query('SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND RaceId=%s', 
 			userId, raceId):
 			raise BadFieldException('badRaceId')
-		InDecline = fetchone()[0]
-		if InDecline:
-			callRaceMethod(race, 'tryToRedeploymentInDeclineRace')
+		inDecline = fetchone()[0]
+		if inDecline:
+			callRaceMethod(raceId, 'tryToRedeploymentInDeclineRace')
 
-	if not race:
+	if not raceId:
 		raise BadFieldException('badStage')
 	
-	callRaceMethod(race, 'countAdditionalRedeploymentUnits', userId, gameId)
-	query('SELECT TotalTokensNum FROM TokensBadges WHERE OwnerId=%s AND RaceId=%s', userId, race)
+	callRaceMethod(raceId, 'countAdditionalRedeploymentUnits', userId, gameId)
+	query('SELECT TotalTokensNum FROM TokensBadges WHERE OwnerId=%s AND RaceId=%s', userId, raceId)
 	unitsNum = fetchone()[0]
 	if not unitsNum:
 		raise BadFieldException('noTokensForRedeployment')
 
 	if not data['regions']:
 		if not query('SELECT RegionId FROM Regions WHERE OwnerId=%s AND RaceId=%s', 
-			userId, race):
+			userId, raceId):
 			raise BadFieldException('userHasNotRegions') ##better comment?
 		regionId = fetchone()[0]
 
@@ -442,11 +469,12 @@ def act_finishTurn(data):
 		raise BadFieldException('badStage')
 
 	additionalCoins = 0
-	query('SELECT RaceId FROM TokenBadges WHERE OwnerId=%s', userId)
+	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE OwnerId=%s', userId)
 	races = fetchall()
-	for race in races:
-		income += callRaceMethod(race[0], 'countAdditionalCoins', userId, gameId)
-	
+	for rec in races:
+		income += callRaceMethod(rec[0], 'countAdditionalCoins', userId, gameId)
+		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, gameId, rec[0])
+
 	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
 
 	#check for the end of game		
@@ -466,7 +494,7 @@ def act_finishTurn(data):
 		row = fetchone()
 		query('UPDATE Games SET Turn=Turn+1 WHERE GameId=%s', gameId)
 
-	newActPlayer, race, tokensInHand = row
+	newActPlayer, raceId, tokensInHand = row
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)
 	query("""SELECT TokenBadges.TotalTokensNum, COUNT(*) FROM Regions, TokenBadges 
 		WHERE Regions.OwnerId=%s""", newActPlayer)
@@ -489,7 +517,7 @@ def act_defend(data):
 		raise BadFieldException('badStage') ##better comment?
 	
 	raceId, regionId, tokensNum = fetchone()[0]
-	tokensNum += callRaceMethod(raceId, 'countAdditionalDefendingTokens', tokensBadgeId)
+	tokensNum += callRaceMethod(raceId, 'updateAttackedTokensNum', tokensBadgeId)
 	if not 'regions' in data:
 		raise BadFieldException('badJson')
 

@@ -32,15 +32,16 @@ def createTables():
 	cursor.execute("""CREATE TABLE IF NOT EXISTS 
 			Users(Id INT PRIMARY KEY AUTO_INCREMENT, UserName VARCHAR(%s) UNIQUE, 
 			Password VARCHAR(%s), Sid BIGINT UNIQUE,GameId INT UNSIGNED, IsReady TINYINT(1), 
-			CurrentRace INT UNSIGNED, DeclineRace TINYINT UNSIGNED, Coins TINYINT UNSIGNED, 
-			TokensInHand INT UNSIGNED, Bonus TINYINT UNSIGNED, Priority INT UNSIGNED)""",
+			CurrentRace INT UNSIGNED, DeclinedRace INT UNSIGNED, ScndDeclinedRace INT 
+			UNSIGNED, Coins TINYINT UNSIGNED, TokensInHand INT UNSIGNED, Bonus TINYINT 
+			UNSIGNED, Priority INT UNSIGNED)""",
 			(MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Games(GameId INT UNSIGNED PRIMARY KEY
 			AUTO_INCREMENT, GameName VARCHAR(%s), GameDescr VARCHAR(%s), PlayersNum 
 			INT UNSIGNED, State INT UNSIGNED, Turn TINYINT UNSIGNED, ActivePlayer INT UNSIGNED,
 			DefendingPlayer INT UNSIGNED, CounqueredRegionsNum INT UNSIGNED, 
 			NonEmptyCounqueredRegionsNum INT UNSIGNED, PrevState INT UNSIGNED,
-			ConqueredRegion INT UNSIGNED, AttackedRace INT UNSIGNED, AttackeTokensNum INT 
+			ConqueredRegion INT UNSIGNED, AttackedRace INT UNSIGNED, AttackedTokensNum INT 
 			UNSIGNED, MapId INT UNSIGNED)""", 
 			(MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN))
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Maps(MapId INT UNSIGNED PRIMARY KEY 
@@ -53,14 +54,11 @@ def createTables():
 			Mine BOOL DEFAULT FALSE, Farmland BOOL DEFAULT FALSE, Magic BOOL DEFAULT FALSE, 
 			Forest BOOL DEFAULT FALSE, Hill BOOL DEFAULT FALSE, Swamp BOOL DEFAULT FALSE, 
 			Cavern BOOL DEFAULT FALSE, InDecline BOOL)""")
-	cursor.execute("""CREATE TABLE IF NOT EXISTS Skills(SkillId TINYINT UNSIGNED 
-			PRIMARY KEY AUTO_INCREMENT, SkillName VARCHAR(%s) UNIQUE, 
-			SkillIndex INT UNSIGNED UNIQUE)""", MAX_SKILLNAME_LEN)		
 	cursor.execute("""CREATE TABLE IF NOT EXISTS 
 			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(TokenBadgeId INT UNSIGNED
-			PRIMARY KEY AUTO_INCREMENT, RaceId TINYINT UNSIGNED, GameId INT UNSIGNED,
-			FarFromStack TINYINT, BonusMoney TINYINT, OwnerId INT UNSIGNED, InDecline BOOL, 
+			PRIMARY KEY AUTO_INCREMENT, RaceId TINYINT UNSIGNED, SpecialPowerId INT UNSIGNED,
+			GameId INT UNSIGNED, FarFromStack TINYINT, BonusMoney TINYINT, OwnerId INT UNSIGNED, InDecline BOOL, 
 			TotalTokensNum INT UNSIGNED)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Chat(Id INT PRIMARY KEY AUTO_INCREMENT, UserId INT, 
 			Message TEXT, Time INT)""")

@@ -1,4 +1,4 @@
-from editDb import query
+from editDb import query, fetchall
 from gameExceptions import BadFieldException
 
 class BaseRace:
@@ -14,10 +14,9 @@ class BaseRace:
 		raise BadFieldException('badAttackingRace')
 	
 	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
-		if not(border or coast):
-			raise BadFieldException('badRegion')
+		return not regions and (border or coast)
 	
-	def countAdditionalConquerPrice(self, userId, regionId, regionInfo, race):
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
 		return 0
 	
 	def setRegionsInDecline(self, userId):
@@ -32,10 +31,16 @@ class BaseRace:
 	def countAdditionalCoins(self, userId, gameId):
 		return 0
 
-	def countAdditionalDefendingTokens(self, tokensBadgeId):
+	def updateAttackedTokensNum(self, tokensBadgeId):
 		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
 			TokenBadgeId=%s""", tokensBadgeId)
+		return -1
+
+	def countAdditionalConquerPrice(self):
 		return 0
+
+	def tryToConquerAdjacentRegion(self, regions, border, coast):
+		return True	
 	
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -43,7 +48,7 @@ class RaceHalflings(BaseRace):
 	
 	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
 		if regions:
-			raise BadFieldException('badRegion')
+			return False
 
 class RaceGhouls(BaseRace):
 	def __init__(self):
@@ -65,7 +70,7 @@ class RaceGiants(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Giants', 6, 11)
 
-	def countAdditionalConquerPrice(self, userId, regionId, regionInfo, race):
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
 		res = 0
 		query('SELECT RegionId, Mountain FROM Regions WHERE OwnerId=%s AND RaceId=%s', 
 			userId, race)
@@ -81,7 +86,7 @@ class RaceTritons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
-	def countAdditionalConquerPrice(self, userId, regionId, regionInfo, race):
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
 		return -1 if regionInfo[1] else 0
 
 class RaceDwarves(BaseRace):
@@ -162,8 +167,8 @@ class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
-	def countAdditionalDefendingTokens(self):
-		return 1
+	def updateAttackedTokensNum(self):
+		return 0
 
 class RaceRatmen(BaseRace):
 	def __init__(self):
@@ -172,6 +177,9 @@ class RaceRatmen(BaseRace):
 class RaceTrolls(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Trolls', 5, 10)
+
+	def countAdditionalConquerPrice(self):
+		return 1
 
 class RaceSorcerers(BaseRace):
 	def __init__(self):
@@ -205,9 +213,29 @@ class BaseSpecialPower:
 	def setId(self, id):
 		self.specialPowerId = id
 
+	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
+		return not regions and (border or coast)
+
+	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
+		return not sea	
+	
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
+		return 0
+
+	def countAdditionalCoins(self, userId, gameId, raceId):
+		return 0
+
+	def tryToGoInDecline(self, gameId):
+		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
+		if fetchone()[0] != misc.gameStates['finishTurn']:
+			raise BadFieldException('badStage')
+
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
+
+	def countAdditionalCoins(self, userId, gameId, raceId):
+		return 2
 
 class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
@@ -221,6 +249,9 @@ class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)
 
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
+		return -1
+
 class SpecialPowerDiplomat(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Diplomat', 5)
@@ -233,9 +264,20 @@ class SpecialPowerFlying(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
+	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
+		return True
+
+	def tryToConquerAdjacentRegion(self, regions, border, coast):
+		return False
+
 class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Forest', 4)
+
+	def countAdditionalCoins(self, userId, gameId, raceId):
+		query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s AND Forest=1', 
+			userId, raceId)
+		return fetchone()[0]
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
@@ -245,21 +287,43 @@ class SpecialPowerHill(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
+	def countAdditionalCoins(self, userId, gameId, raceId):
+		query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s AND Hill=1', 
+			userId, raceId)
+		return fetchone()[0]
+
 class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
+
+	def countAdditionalCoins(self, userId, gameId, raceId): ###
+		query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s', 
+			userId, raceId)
+		return fetchone()[0]
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Mounted', 5) 
 
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
+		return -1 if regionInfo[8] or regionInfo[11] else 0
+
+
 class SpecialPowerPillaging(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Pillaging', 5) 
+		BaseSpecialPower.__init__(self, 'Pillaging', 5)
+	
+	def countAdditionalCoins(self, userId, gameId, raceId): ###
+		query('SELECT NonEmptyCounqueredRegionsNum FROM Games WHERE GameId=%s', 
+			gameId)
+		return fetchone()[0] 
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
+	
+	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
+		return True	
 
 class SpecialPowerSpirit(BaseSpecialPower):
 	def __init__(self):
@@ -269,14 +333,33 @@ class SpecialPowerStout(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Stout', 4) 
 
+	def tryToGoInDecline(self, gameId):
+		pass
+
 class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
+	
+	def countAdditionalCoins(self, userId, gameId, raceId): ###
+		query('SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s AND Swamp=1', 
+			userId, raceId)
+		return fetchone()[0] 
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Underworld', 5) 
 
+	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, attackingRegion):
+		query("""SELECT a.Cavern, b.Cavern FROM Regions a, Regions b WHERE a.RegionId=%s 
+			AND b.RegionId=%s""", attackedRegion, attackingRegion)
+		cavern1, cavern2 = fetchone()
+		if not (cavern1 and cavern2):
+			return False
+		
+	def countConquerBonus(self, userId, regionId, regionInfo, race):
+		if regionInfo[13]: ##cavern
+			return -1
+	
 class SpecialPowerWealthy(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Wealthy', 4) 

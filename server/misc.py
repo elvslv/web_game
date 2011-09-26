@@ -15,7 +15,7 @@ VISIBLE_RACES = 6
 INIT_COINS_NUM = 5
 BASIC_CONQUER_COST = 2
 RACE_NUM = 14
-BONUS_NUM = 20
+SPECIAL_POWER_NUM = 20
 
 X0 = 5363478883
 A = 9995326
@@ -189,17 +189,17 @@ actionFields = {
 }
 
 possibleLandDescription = [
-	'border', 
-	'coast',
-	'sea',
-	'mountain',
-	'mine',
-	'farmland',
-	'magic',
-	'forest',
-	'hill',
-	'swamp',
-	'cavern'
+	'border', #3
+	'coast',#4
+	'sea',#5
+	'mountain',#6
+	'mine',#7
+	'farmland',#8
+	'magic',#9
+	'forest',#10
+	'hill',#11
+	'swamp',#12
+	'cavern' #13
 ]
 
 defaultMaps = [
