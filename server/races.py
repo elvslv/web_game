@@ -196,3 +196,112 @@ racesList = [
 
 for i in range(len(racesList)):
 	racesList[i].setId(i)
+
+class BaseSpecialPower:
+	def __init__(self, name, tokensNum):
+		self.name = name
+		self.tokensNum = tokensNum
+
+	def setId(self, id):
+		self.specialPowerId = id
+
+class SpecialPowerAlchemist(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Alchemist', 4)
+
+class SpecialPowerBerserk(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Berserk', 4)
+
+class SpecialPowerBivouacking(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Bivouacking', 5)
+
+class SpecialPowerCommando(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Commando', 4)
+
+class SpecialPowerDiplomat(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Diplomat', 5)
+
+class SpecialPowerDragonMaster(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Dragon master', 5)
+
+class SpecialPowerFlying(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Flying', 5)
+
+class SpecialPowerForest(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Forest', 4)
+
+class SpecialPowerHeroic(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Heroic', 5)
+
+class SpecialPowerHill(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Hill', 4)
+
+class SpecialPowerMerchant(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Merchant', 2) 
+
+class SpecialPowerMounted(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Mounted', 5) 
+
+class SpecialPowerPillaging(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Pillaging', 5) 
+
+class SpecialPowerSeafaring(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
+
+class SpecialPowerSpirit(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Spirit', 5) 
+
+class SpecialPowerStout(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Stout', 4) 
+
+class SpecialPowerSwamp(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Swamp', 4) 
+
+class SpecialPowerUnderworld(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Underworld', 5) 
+
+class SpecialPowerWealthy(BaseSpecialPower):
+	def __init__(self):
+		BaseSpecialPower.__init__(self, 'Wealthy', 4) 
+
+specialPowerList = [
+	SpecialPowerAlchemist(),
+	SpecialPowerBerserk(),
+ 	SpecialPowerBivouacking(),
+	SpecialPowerCommando(),
+	SpecialPowerDiplomat(),
+	SpecialPowerDragonMaster(),
+	SpecialPowerFlying(),
+	SpecialPowerForest(),
+	SpecialPowerHeroic(),
+	SpecialPowerHill(),
+	SpecialPowerMerchant(),
+	SpecialPowerMounted(),
+	SpecialPowerPillaging(),
+	SpecialPowerSeafaring(), 
+	SpecialPowerSpirit(),
+	SpecialPowerStout(),
+	SpecialPowerSwamp(),
+	SpecialPowerUnderworld(),
+	SpecialPowerWealthy()
+]
+
+for i in range(len(specialPowerList)):
+	specialPowerList[i].setId(i)
