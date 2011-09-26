@@ -7,8 +7,11 @@ class BaseRace:
 		self.initialNum = initialNum
 		self.maxNum = maxNum
 
+	def setId(self, id):
+		self.raceId = id
+
 	def tryToAttackByRaceInDecline():
-		raise BadFieldException('badAttackinRace')
+		raise BadFieldException('badAttackingRace')
 	
 	def tryToConquerNotAdjacentRegion(self, regions, border, coast):
 		if not(border or coast):
@@ -86,8 +89,8 @@ class RaceDwarves(BaseRace):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
 	def countAdditionalCoins(self, userId, gameId):
-		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=1 AND Mine=1""", 
-			userId)
+		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s AND Mine=1""", 
+			userId, self.raceId)
 		return fetchone()[0]
 
 class RaceHumans(BaseRace):
@@ -95,8 +98,8 @@ class RaceHumans(BaseRace):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
 	def countAdditionalCoins(self, userId, gameId):
-		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=6 AND Farmland=1""", 
-			userId)
+		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s AND Farmland=1""", 
+			userId, self.raceId)
 		return fetchone()[0]
 
 class RaceOrcs(BaseRace):
@@ -104,7 +107,8 @@ class RaceOrcs(BaseRace):
 		BaseRace.__init__(self, 'Orcs', 5, 10)
 
 	def countAdditionalCoins(self, userId, gameId):
-		query('SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND RaceId=7', userId)
+		query('SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND RaceId=%s', userId, 
+			self.raceId)
 		if fetchone()[0]:
 			return 0
 		query('SELECT NonEmptyCounqueredRegionsNum FROM Games WHERE GameId=%s', gameId)
@@ -115,8 +119,8 @@ class RaceWizards(BaseRace):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
 	def countAdditionalCoins(self, userId, gameId):
-		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=13 AND Magic=1""", 
-			userId)
+		query("""SELECT COUNT(*) FROM Regions WHERE OwnerId=%s AND RaceId=%s AND Magic=1""", 
+			userId, self.raceId)
 		return fetchone()[0]
 		
 class RaceAmazons(BaseRace):
@@ -128,10 +132,10 @@ class RaceAmazons(BaseRace):
 		prevState = fetchone()[0]
 		if prevState == misc.gameStates['finishTurn']:
 			query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+4 WHERE 
-				OwnerId=%s AND RaceId=0""")
+				OwnerId=%s AND RaceId=%s""", self.raceId)
 		elif prevState == misc.gameStates['conquer']:
 			query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-4 WHERE 
-				OwnerId=%s AND RaceId=0""")
+				OwnerId=%s AND RaceId=%s""", self.raceId)
 		else:
 			raise BadFieldException('badStage')
 
@@ -149,7 +153,8 @@ class RaceSkeletons(BaseRace):
 				gameId)
 			regionsNum = fetchone()[0]
 			query("""UPDATE TokenBadges SET TotalTokensNum=LEAST(TotalTokensNum+%s, %s) 
-				WHERE OwnerId=%s AND RaceId=9""", regionsNum, raceDescription[9], userId)
+				WHERE OwnerId=%s AND RaceId=%s""", regionsNum, self.maxNum, userId, 
+				self.raceId)
 		else:
 			raise BadFieldException('badStage')
 
@@ -172,7 +177,6 @@ class RaceSorcerers(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
-
 racesList = [
 	RaceAmazons(),
 	RaceDwarves(),
@@ -190,75 +194,5 @@ racesList = [
 	RaceWizards(),
 ]
 
-#raceDescription =	[
-#	{
-#		'name': 'Amazons',
-#		'initialNum': 6,
-#		'maxNum': 15
-#	},
-#	{
-#		'name': 'Dwarves',
-#		'initialNum': 3,
-#		'maxNum': 8		
-#	},
-#	{
-#		'name': 'Elves',
-#		'initialNum': 6,
-#		'maxNum': 11
-#	},
-#	{
-#		'name': 'Ghouls',
-#		'initialNum': 5,
-#		'maxNum': 10
-#	},
-#	{
-#		'name': 'Giants',
-#		'initialNum': 6,
-#		'maxNum': 11
-#	},
-#	{
-#		'name': 'Halflings',
-#		'initialNum': 6,
-#		'maxNum': 11
-#	},
-#	{
-#		'name': 'Humans',
-#		'initialNum': 5,
-#		'maxNum': 10
-#	},
-#	{
-#		'name': 'Orcs',
-#		'initialNum': 5,
-#		'maxNum': 10
-#	},
-#	{
-#		'name': 'Ratmen',
-#		'initialNum': 8,
-#		'maxNum': 13
-#	},
-#	{
-#		'name': 'Skeletons',
-#		'initialNum': 6,
-#		'maxNum': 20
-#	},
-#	{
-#		'name': 'Sorcerers',
-#		'initialNum': 5,
-#		'maxNum': 18
-#	},
-#	{
-#		'name': 'Tritons',
-#		'initialNum': 6,
-#		'maxNum': 11
-#	},
-#	{
-#		'name': 'Trolls',
-#		'initialNum': 5	,
-#		'maxNum': 10	
-#	},
-#	{
-#		'name': 'Wizards',
-#		'initialNum': 5,
-#		'maxNum': 10
-#	}		
-#]
+for i in range(len(racesList)):
+	racesList[i].setId(i)
