@@ -97,9 +97,9 @@ def act_uploadMap(data):
 				#add links in graph
 				id = lastId()
 				for n in region['adjacent']:
-					query("""INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
+					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
 						VALUES(%s, %s)""", id, n)
-					query("""INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
+					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
 						VALUES(%s, %s)""", n, id)
 			except KeyError:
 				raise BadFieldException('badRegion')
@@ -209,7 +209,7 @@ def getNextRaceAndPowerFromStack(gameId):
 	for rec in row:
 		racesInStack.remove(rec[0])
 		specialPowersInStack.remove(rec[1])
-	raceId = racesInStack[0]#random.choice(racesInStack)
+	raceId = racesInStack[1]#random.choice(racesInStack)
 	specialPowerId = specialPowersInStack[0]#random.choice(specialPowersInStack)
 	return raceId, specialPowerId
 
@@ -312,7 +312,7 @@ def act_conquer(data):
 
 	reqRegionFields = ['OwnerId', 'TokensNum', 'RaceId']
 	reqRegionFields.extend(misc.possibleLandDescription)	
-	reqRegionFields.append('inDecline')						# Yeah, extend doesn't return any values and neither does append
+	reqRegionFields.append('inDecline')						
 	regionId, regInfo = checkParamPresence('Regions', 
 		'RegionId', data['regionId'], 'badRegionId', True, reqRegionFields)
 
@@ -335,10 +335,10 @@ def act_conquer(data):
 		if inDecline:
 			callRaceMethod(raceId, 'tryToAttackByRaceInDecline')
 	ownerId = regInfo[0]		
-	if ownerId == userId and not inDecline: 
+	if ownerId == userId and not inDecline:
 		raise BadFieldException('badRegion')
 
-	query('SELECT RegionId FROM Regions WHERE OwnerId=%s AND RaceId=%s', ownerId, raceId)
+	query('SELECT RegionId FROM Regions WHERE OwnerId=%s AND RaceId=%s', userId, raceId)
 	playerRegions = fetchall()
 	playerBorderline = False	
 	for plRegion in playerRegions:
@@ -378,7 +378,7 @@ def act_conquer(data):
 
 	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, userId)
 	query("""UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=%s, RaceId=%s 
-		WHERE RegionId=%s""", userId, unitPrice, inDecline, regionId, raceId) 
+		WHERE RegionId=%s""", userId, unitPrice, inDecline, raceId, regionId) 
 	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=CounqueredRegionsNum+1,
 		NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, PrevState=%s, 
 		ConqueredRegion=%s, AttackedRace=%s""", ownerId, 1 if tokensNum else 0, 
@@ -403,8 +403,8 @@ def act_decline(data):
 
 	return {'result': 'ok'}
 
-def act_redeployment(data):
-	sid, userId, tokensBadgeId, gameId = checkParamPresence('Users', 'Sid', data['sid'], 
+def act_redeploy(data):
+	sid, (userId, tokenBadgeId, gameId) = checkParamPresence('Users', 'Sid', data['sid'], 
 		'badSid', True, ['Id', 'CurrentRace', 'GameId'])
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	checkForDefendingPlayer(gameId)
@@ -416,13 +416,13 @@ def act_redeployment(data):
 			raise BadFieldException('badRaceId')
 		inDecline = fetchone()[0]
 		if inDecline:
-			callRaceMethod(raceId, 'tryToRedeploymentInDeclineRace')
+			callRaceMethod(raceId, 'tryToRedeployDeclineRace')
 
 	if not raceId:
 		raise BadFieldException('badStage')
 	
 	callRaceMethod(raceId, 'countAdditionalRedeploymentUnits', userId, gameId)
-	query('SELECT TotalTokensNum FROM TokensBadges WHERE OwnerId=%s AND RaceId=%s', userId, raceId)
+	query('SELECT TotalTokensNum FROM TokenBadges WHERE OwnerId=%s AND RaceId=%s', userId, raceId)
 	unitsNum = fetchone()[0]
 	if not unitsNum:
 		raise BadFieldException('noTokensForRedeployment')
@@ -430,7 +430,7 @@ def act_redeployment(data):
 	if not data['regions']:
 		if not query('SELECT RegionId FROM Regions WHERE OwnerId=%s AND RaceId=%s', 
 			userId, raceId):
-			raise BadFieldException('userHasNotRegions') ##better comment?
+			raise BadFieldException('userHasNoRegions') ##better comment?
 		regionId = fetchone()[0]
 
 	for region in data['regions']:
@@ -447,19 +447,19 @@ def act_redeployment(data):
 			regiondId, tokensNum):
 			raise BadFieldException('badRegion')
 		if tokensNum > unitsNum:
-			raise BadFieldException('notEnoughTokensForRedeployment')
+			raise BadFieldException('notEnoughTokensForredeploy')
 
 		query('UPDATE Regions SET TokensNum=%s WHERE RegionId=%s', tokensNum, regionId)
 		unitsNum -= tokensNum
 
 	if unitsNum:
-		query('UPDATE Regions SET TokensNum=%s WHERE RegionId=%s', tokensNum, regionId)
+		query('UPDATE Regions SET TokensNum=TokensNum+%s WHERE RegionId=%s', tokensNum, regionId)
 	
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['redeployment'])
+	query('UPDATE Games SET PrevState=%s', misc.gameStates['redeploy'])
 	return {'result': 'ok'}
 		
 def act_finishTurn(data):
-	sid, userId, gameId, freeUnits, priority = checkParamPresence('Users', 
+	sid, (userId, gameId, freeUnits, priority) = checkParamPresence('Users', 
 		'Sid', data['sid'], 'badSid', True, ['Id', 'GameId', 'TokensInHand', 'Priority'])
 
 	checkForDefendingPlayer(gameId)

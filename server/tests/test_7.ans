@@ -65,18 +65,24 @@
 	
 	{
 		"result" : "ok"
+	},
+	
+	{
+		"result" : "badRegion"
+	},
+	
+	{
+		"result" : "badTokensNum"
+	},
+	
+	{
+		"result" : "badStage"
+	},
+	
+	{
+		"result" : "ok",
+		"nextPlayer" : 2
 	}
-	
-
-	
-	
-	
-		
-
-
-	
-
-	
 	
 		
 ]

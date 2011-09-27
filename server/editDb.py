@@ -55,7 +55,7 @@ def createTables():
 			Forest BOOL DEFAULT FALSE, Hill BOOL DEFAULT FALSE, Swamp BOOL DEFAULT FALSE, 
 			Cavern BOOL DEFAULT FALSE, InDecline BOOL)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS 
-			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED)""")
+			AdjacentRegions (FirstRegionId INT UNSIGNED, SecondRegionId INT UNSIGNED, UNIQUE(FirstRegionId, SecondRegionId))""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(TokenBadgeId INT UNSIGNED
 			PRIMARY KEY AUTO_INCREMENT, RaceId TINYINT UNSIGNED, SpecialPowerId INT UNSIGNED,
 			GameId INT UNSIGNED, FarFromStack TINYINT, BonusMoney TINYINT, OwnerId INT UNSIGNED, InDecline BOOL, 

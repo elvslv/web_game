@@ -181,7 +181,7 @@ actionFields = {
 	'doSmth': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
-	'redeployment': [
+	'redeploy': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},
 		{'name': 'regions', 'type': list, 'mandatory': True}
@@ -214,7 +214,7 @@ defaultMaps = [
 	 	'regions' : 
 	 	[
 	 		{
-	 			'population' : 1,
+	 			'population' : 0,
 	 			'landDescription' : ['mountain'],
 	 			'adjacent' : [3, 4] 
 	 		},

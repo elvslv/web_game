@@ -1,5 +1,6 @@
-from editDb import query, fetchall
+from editDb import query, fetchall, fetchone
 from gameExceptions import BadFieldException
+import sys
 
 class BaseRace:
 	def __init__(self, name, initialNum, maxNum):
@@ -69,15 +70,15 @@ class RaceGhouls(BaseRace):
 class RaceGiants(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Giants', 6, 11)
-
+		
 	def countConquerBonus(self, userId, regionId, regionInfo, race):
 		res = 0
 		query('SELECT RegionId, Mountain FROM Regions WHERE OwnerId=%s AND RaceId=%s', 
-			userId, race)
+			userId, self.raceId)
 		row = fetchall()
 		for region in row:
 			if query("""SELECT 1 FROM AdjacentRegions WHERE FirstRegionId=%s AND 
-				SeconRegionId=%s""", regionId, row[0]) and row[1]:
+				SecondRegionId=%s""", regionId, region[0]) and region[1]:
 					res = -1
 					break
 		return res
@@ -86,7 +87,7 @@ class RaceTritons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
-	def countConquerBonus(self, userId, regionId, regionInfo, race):
+	def countConquerBonus(self, userId, regionId, regionInfo):
 		return -1 if regionInfo[1] else 0
 
 class RaceDwarves(BaseRace):
