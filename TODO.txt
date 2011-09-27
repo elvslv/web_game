@@ -1,5 +1,13 @@
-1. Document generation of sids, getMessages, sendMessage, createGame, getGameList, ...
-2. Add description to tests
-3. Add tests for chat
-4. Add tests for creating games and getting game info
-5. Change password regexp 
+1. Add functionality for the
+	following races:
+		Sorcerers
+	
+	following special powers:
+		Berserk,
+		Bivouacking,
+		Fortifield,
+		Diplomat,
+		Dragon master,
+		Heroic
+		
+2. Send requests to server from testFromFiles
