@@ -1,4 +1,4 @@
-from editDb import query, fetchall
+from editDb import query, fetchall, fetchone
 from gameExceptions import BadFieldException
 from misc_game import getTokenBadgeIdByRaceAndUser
 
@@ -46,9 +46,6 @@ class BaseRace:
 	def getInitBonusNum(self):
 		return 0
 
-	def goInDecline(self):
-		pass
-
 	def declineRegion(self, regionId):
 		pass
 	
@@ -57,7 +54,7 @@ class BaseRace:
 
 	def conquered(self, regionId, tokenBadgeId):
 		pass
-
+	
 class RaceHalflings(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Halflings', 6, 11)
@@ -105,11 +102,12 @@ class RaceGiants(BaseRace):
 
 	def countConquerBonus(self, regionId, tokenBadgeId):
 		res = 0
-		query('SELECT RegionId, Mountain FROM Regions WHERE TokenBadgeId=%s', tokenBadgeId)
+		query('SELECT RegionId, Mountain FROM Regions WHERE OwnerId=%s AND TokenBadgeId=%s', 
+			userId, tokenBadgeId)
 		row = fetchall()
 		for region in row:
 			if query("""SELECT 1 FROM AdjacentRegions WHERE FirstRegionId=%s AND 
-				SeconRegionId=%s""", regionId, row[0]) and row[1]:
+				SecondRegionId=%s""", regionId, region[0]) and region[1]:
 					res = -1
 					break
 		return res
@@ -310,7 +308,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	
 	def getInitBonusNum(self):
 		return 5
-	
+
 	def clearRegion(self, tokenBadgeId, regionId):
 		query('SELECT OwnerId FROM TokenBadges WHERE TokenBadgeId=%s', 
 			tokenBadgeId)
@@ -432,7 +430,7 @@ class SpecialPowerMerchant(BaseSpecialPower):
 	def countAdditionalCoins(self, userId, gameId, raceId):
 		query('SELECT COUNT(*) FROM Regions WHERE TokenBadgeId=%s', 
 			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return fetchone()[0]
+		return int(fetchone()[0])
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
@@ -449,7 +447,7 @@ class SpecialPowerPillaging(BaseSpecialPower):
 	def countAdditionalCoins(self, userId, gameId, raceId): ###
 		query('SELECT NonEmptyCounqueredRegionsNum FROM Games WHERE GameId=%s', 
 			gameId)
-		return fetchone()[0] 
+		return int(fetchone()[0]) 
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
@@ -473,10 +471,10 @@ class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
-	def countAdditionalCoins(self, userId, gameId, raceId): ###
+	def countAdditionalCoins(self, userId, gameId, TokenBadgeId): ###
 		query('SELECT COUNT(*) FROM Regions WHERE TokenBadgeId=%s AND Swamp=1', 
 			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return fetchone()[0] 
+		return int(fetchone()[0]) 
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
@@ -500,7 +498,7 @@ class SpecialPowerWealthy(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 1
 
-	def updateBonusStateAtTheAndOfTurn(self, tokenBadgeId):
+	def countAdditionalCoins(self, userId, gameId, TokenBadgeId):
 		query('SELECT SpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadgeId)
 		if not fetchone()[0]:
 			return

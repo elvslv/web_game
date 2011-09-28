@@ -80,7 +80,7 @@ def act_createDefaultMaps(data):
 	return {'result': 'ok'}
 
 def act_uploadMap(data):
-	name = checkParamPresence('Maps', 'MapName', data['mapName'], 'badMapName', False)[0]
+	name = extractValues('Maps', 'MapName', data['mapName'], 'badMapName', False)[0]
 	players = int(data['playersNum'])
 	query('INSERT INTO Maps(MapName, PlayersNum, TurnsNum) VALUES(%s, %s, %s)', name, 
 		players, data['turnsNum'])
@@ -94,9 +94,9 @@ def act_uploadMap(data):
 				#add links in graph
 				id = lastId()
 				for n in region['adjacent']:
-					query("""INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
+					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
 						VALUES(%s, %s)""", id, n)
-					query("""INSERT INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
+					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
 						VALUES(%s, %s)""", n, id)
 			except KeyError:
 				raise BadFieldException('badRegion')
@@ -106,8 +106,8 @@ def act_createGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
 
-	mapId, name = checkParamPresence('Maps', 'MapId', data['mapId'], 'badMapId', True)
-	name = checkParamPresence('Games', 'GameName', data['gameName'], 'badGameName', False)[0]
+	mapId, name = extractValues('Maps', 'MapId', data['mapId'], 'badMapId', True)
+	name = extractValues('Games', 'GameName', data['gameName'], 'badGameName', False)[0]
 
 	descr = None
 	if 'gameDescr' in data:
@@ -166,7 +166,7 @@ def act_joinGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
 
-	gameId, (playersNum, mapId, state) = checkParamPresence(
+	gameId, (playersNum, mapId, state) = extractValues(
 		'Games', 'GameId', data['gameId'], 'badGameId', True, ['PlayersNum', 'MapId', 
 		'State'])
 	if state != misc.gameStates['waiting']:

@@ -6,6 +6,7 @@ from gameExceptions import BadFieldException
 def getTokenBadgeIdByRaceAndUser(raceId, userId):
 	query('SELECT TokenBadgeId From TokenBadges WHERE RaceId=%s AND OwnerId=%s', 
 		raceId, userId)
+	return fetchone()[0]
 	
 def getRaceAndPowerIdByTokenBadge(tokenBadge):
 	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE TokenBadgeId=%s', 
@@ -14,7 +15,7 @@ def getRaceAndPowerIdByTokenBadge(tokenBadge):
 
 def clearRegionFromRace(regionId, tokenBadgeId):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	callSpecialPowerMethod(specialPowerId, 'clearRegion', regionId, tokenBadgeId)
+	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, regionId)
 	query("""UPDATE Regions SET Encampment = 0, Fortress=FALSE, Dragon=FALSE, 
 	HoleInTheGround=FALSE, Hero = FALSE WHERE RegionId=%s""", 
 		regionId)
@@ -39,16 +40,16 @@ def getNextRaceAndPowerFromStack(gameId):
 
 def showNextRace(gameId, lastIndex):
 	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId)
-	query("""UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack<%s 
+	query("""UPDATE TokenBadges SET Position=Position+1 WHERE Position<%s 
 		AND GameId=%s""", lastIndex, gameId)
-	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, FarFromStack, BonusMoney) 
+	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, BonusMoney) 
 		VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
 	
-def updateRacesOnDesk(gameId, farFromStack):
-	query('UPDATE TokenBadges SET FarFromStack=NULL WHERE GameId=%s AND FarFromStack=%s', gameId, farFromStack)
-	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s AND 
-		GameId=%s""", farFromStack, gameId)
-	showNextRace(gameId, farFromStack)
+def updateRacesOnDesk(gameId, position):
+	query('UPDATE TokenBadges SET Position=NULL WHERE GameId=%s AND Position=%s', gameId, position)
+	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE Position>%s AND 
+		GameId=%s""", position, gameId)
+	showNextRace(gameId, position)
 
 def getNextRaceAndPowerFromStack(gameId):
 	racesInStack = range(0, misc.RACE_NUM)
@@ -64,16 +65,16 @@ def getNextRaceAndPowerFromStack(gameId):
 
 def showNextRace(gameId, lastIndex):
 	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId)
-	query("""UPDATE TokenBadges SET FarFromStack=FarFromStack+1 WHERE FarFromStack<%s 
+	query("""UPDATE TokenBadges SET Position=Position+1 WHERE Position<%s 
 		AND GameId=%s""", lastIndex, gameId)
-	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, FarFromStack, BonusMoney) 
+	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, BonusMoney) 
 		VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
 	
-def updateRacesOnDesk(gameId, farFromStack):
-	query('UPDATE TokenBadges SET FarFromStack=NULL WHERE GameId=%s AND FarFromStack=%s', gameId, farFromStack)
-	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE FarFromStack>%s AND 
-		GameId=%s""", farFromStack, gameId)
-	showNextRace(gameId, farFromStack)
+def updateRacesOnDesk(gameId, position):
+	query('UPDATE TokenBadges SET Position=NULL WHERE GameId=%s AND Position=%s', gameId, position)
+	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE Position>%s AND 
+		GameId=%s""", position, gameId)
+	showNextRace(gameId, position)
 
 def callRaceMethod(raceId, methodName, *args):
 	race = races.racesList[raceId]

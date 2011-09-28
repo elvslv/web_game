@@ -47,100 +47,52 @@
 			"sid": 2,
 			"isReady": 1
 		},
-		
-		
-	
-		{	
-			"action": "selectRace",
-			"sid": 2,
-			"position" : 1
-		},
-		
-		
-		
-		{
-			"action": "selectRace",
-			"sid": 1,
-			"position" : 6
-		},
-		
-		
-
-		
 		{
 			"action": "selectRace",
 			"sid": 1,
 			"position" : 2
 		},
-		
+
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 3
+		},
+
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions" : 
+			[ 
+				{
+					"RegionId" : 1,
+					"TokensNum" : 1
+				}
+			]
+		},
+
+		{
+			"action": "finishTurn",
+			"sid" : 1
+			
+		},
+
 		{
 			"action": "selectRace",
-			"sid": 1,
-			"position" : 5
-		},
-		
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId" : 1
-		},
-		
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 5
-		},
-		
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 1
-		},
-		
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 3
-		},
-		
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 3
-		},
-		
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 1
-		},
-		
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		
-		{
-			"action": "finishTurn",
-			"sid": 1
-		}
-		
-	
+			"sid" : 2,
+			"position" : 2
+		}			
 				
-		
 			
 	],
-	"description": "testing basic game mechanics on the first turn"
+	"description": "testing game mechanics"
 }
-
-
-
-
-
-
-
-
-
 
 
 

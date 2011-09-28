@@ -160,7 +160,7 @@ actionFields = {
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
 		{
-			'name': 'farFromStack', 
+			'name': 'position', 
 			'type': int, 
 			'mandatory': True,
 			'min': 0,
@@ -181,7 +181,7 @@ actionFields = {
 	'doSmth': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
-	'redeployment': [
+	'redeploy': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},
 		{'name': 'regions', 'type': list, 'mandatory': True}

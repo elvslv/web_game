@@ -41,7 +41,6 @@ def createTables():
 			ScndDeclinedTokenBadge INT UNSIGNED, 
 			Coins TINYINT UNSIGNED, 
 			TokensInHand INT UNSIGNED, 
-			Bonus TINYINT UNSIGNED, 
 			Priority INT UNSIGNED)""",
 			(MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Games(
@@ -93,13 +92,14 @@ def createTables():
 	cursor.execute("""CREATE TABLE IF NOT EXISTS 
 			AdjacentRegions (
 			FirstRegionId INT UNSIGNED REFERENCES Regions(RegionId), 
-			SecondRegionId INT UNSIGNED REFERENCES Regions(RegionId))""")
+			SecondRegionId INT UNSIGNED REFERENCES Regions(RegionId),
+			UNIQUE(FirstRegionId, SecondRegionId))""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(
 			TokenBadgeId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
 			RaceId INT UNSIGNED, 
 			SpecialPowerId INT UNSIGNED,
 			GameId INT UNSIGNED REFERENCES Games(GameId), 
-			FarFromStack TINYINT, 
+			Position TINYINT, 
 			BonusMoney TINYINT, 
 			OwnerId INT UNSIGNED, 
 			InDecline BOOL, 
@@ -113,7 +113,7 @@ def createTables():
 			Message TEXT, 
 			Time INT)""")
                 
-def clearDb():
+def clearDb():		
 	for t in tables:
 		cursor.execute("TRUNCATE TABLE %s" % t)
 		

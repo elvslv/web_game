@@ -34,7 +34,7 @@ def checkFieldsCorrectness(data):
 		if not minValue <= value <= maxValue:
 			raise BadFieldException(msg)
 
-def checkParamPresence(tableName, tableField, param, msg, pres, selectFields = ['1']):
+def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
 	queryStr = 'SELECT '
 	for field in selectFields:
 		queryStr += field + (', ' if field != selectFields[len(selectFields) - 1] else ' ')
