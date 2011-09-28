@@ -74,8 +74,8 @@ def act_conquer(data):
 	reqRegionFields = ['OwnerId', 'TokensNum', 'TokenBadgeId']
 	reqRegionFields.extend(misc.possibleLandDescription_)	
 	reqRegionFields.append('inDecline')						# Yeah, extend doesn't return any values and neither does append
-	regionId, regInfo = extractValues('Regions', 
-		'RegionId', data['regionId'], 'badRegionId', True, reqRegionFields)
+	regionId, regInfo = extractValues('Regions', 'RegionId', data['regionId'], 
+		'badRegionId', True, reqRegionFields)
 	ownerId, attackedTokensNum, attackedTokenBadgeId = regInfo[:3]
 	regInfo = regInfo[3:]
 	query('SELECT MapId From Regions WHERE RegionId=%s', regionId)
@@ -144,10 +144,14 @@ def act_conquer(data):
 	
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
+	query('SELECT Dice FROM Games WHERE GameId=%s', gameId)
+	dice = fetchone()[0]
+	if dice:
+		callSpecialPowerMethod(specialPowerId, 'thrownDice')
+		unitsNum += dice
+
 	if unitsNum < unitPrice : 
-		dice = random.randint(1, 6)
-		if dice > 3:
-			dice = 0
+		dice = throwDice()
 		unitPrice -= dice
 		if unitsNum < unitPrice:
 			raise BadFieldException('badTokensNum')
@@ -157,7 +161,11 @@ def act_conquer(data):
 		clearRegionFromRace(regionId, attackedTokenBadgeId)
 	query("""UPDATE Regions SET OwnerId=%s, TokensNum=%s, InDecline=%s, TokenBadgeId=%s	
 		WHERE RegionId=%s""", userId, unitPrice, inDecline, tokenBadgeId, regionId) 
-	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=CounqueredRegionsNum+1, NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, PrevState=%s, ConqueredRegion=%s, AttackedTokenBadgeId=%s, AttackedTokensNum=%s""", ownerId, 1 if attackedTokensNum else 0, misc.gameStates['conquer'], regionId, 	attackedTokenBadgeId, attackedTokensNum)
+	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=
+		CounqueredRegionsNum+1, NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, 
+		PrevState=%s, ConqueredRegion=%s, AttackedTokenBadgeId=%s, AttackedTokensNum=%s, 
+		Dice=NULL""", ownerId, 1 if attackedTokensNum else 0, misc.gameStates['conquer'], 
+		regionId, attackedTokenBadgeId, attackedTokensNum)
 
 	callRaceMethod(raceId, 'conquered', regionId, tokenBadgeId)
 	return {'result': 'ok'}
@@ -348,6 +356,7 @@ def act_dragonAttack(data):
 	sid, (userId, gameId, tokenBadgeId)= extractValues('Users', 'Sid', data['sid'], 
 		'badSid', ['Id', 'GameId', 'CurrentTokenBadge'])
 	
+	checkForDefendingPlayer(gameId)
 	checkActivePlayer(gameId, userId)
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(specialPowerId, 'dragonAttack', tokenBadgeId, data['regionId'], 
@@ -360,9 +369,45 @@ def act_enchant(data):
 	sid, (userId, gameId, tokenBadgeId)= extractValues('Users', 'Sid', data['sid'], 
 		'badSid', ['Id', 'GameId', 'CurrentTokenBadge'])
 
+	checkForDefendingPlayer(gameId)
 	checkActivePlayer(gameId, userId)
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(raceId, 'enchant', tokenBadgeId, data['regionId'])
 
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['conquer'])
 	return {'result': 'ok'}	
+
+def act_breakEncampment(data):
+	sid, (userId, gameId, tokenBadgeId)= extractValues('Users', 'Sid', data['sid'], 
+		'badSid', ['Id', 'GameId', 'CurrentTokenBadge'])
+
+	checkForDefendingPlayer(gameId)
+	checkActivePlayer(gameId, userId)
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+	callSpecialPowerMethod(specialPowerId, 'breakEncampment', tokenBadgeId, 
+		data['regionId'], data['encampmentsNum'])
+
+	return {'result': 'ok'}	
+
+def act_setEncampment(data):
+	sid, (userId, gameId, tokenBadgeId)= extractValues('Users', 'Sid', data['sid'], 
+		'badSid', ['Id', 'GameId', 'CurrentTokenBadge'])
+	
+	checkForDefendingPlayer(gameId)
+	checkActivePlayer(gameId, userId)
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+	callSpecialPowerMethod(specialPowerId, 'setEncampment', tokenBadgeId, 
+		data['regionId'], data['encampmentsNum'])
+
+	return {'result': 'ok'}	
+
+def act_throwDice(data):
+	sid, (userId, gameId, tokenBadgeId)= extractValues('Users', 'Sid', data['sid'], 
+		'badSid', ['Id', 'GameId', 'CurrentTokenBadge'])
+	
+	checkForDefendingPlayer(gameId)
+	checkActivePlayer(gameId, userId)
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+	dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
+	query('UPDATE Games SET Dice WHERE GameId=%s', gameId)
+	return {'result': 'ok', 'dice': dice}	

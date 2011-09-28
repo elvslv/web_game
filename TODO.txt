@@ -1,7 +1,5 @@
 1. Add functionality for the
 	following special powers:
-		Berserk,
-		Bivouacking, !!!
 		Fortifield,
 		Diplomat,
 		Heroic

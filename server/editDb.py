@@ -58,6 +58,7 @@ def createTables():
 			ConqueredRegion INT UNSIGNED, 
 			AttackedTokenBadgeId INT UNSIGNED, 
 			AttackedTokensNum INT UNSIGNED, 
+			Dice INT UNSIGNED,
 			MapId INT UNSIGNED REFERENCES Maps(MapId))""", 
 			(MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN))
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Maps(

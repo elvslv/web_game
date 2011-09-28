@@ -21,15 +21,13 @@ X0 = 5363478883
 A = 9995326
 C = 235286786
 M = 7486379941
+global TEST_MODE, TEST_RANDSEED
+TEST_MODE=False
+TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
-
-def generateSid():
-	global LAST_SID
-	LAST_SID = (A * LAST_SID + C) % M
-	return LAST_SID
 
 def generateSidForTest():
 	global LAST_SID

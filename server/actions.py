@@ -38,7 +38,7 @@ def act_login(data):
 		raise BadFieldException('badUsernameOrPassword')
 
 	while 1:
-		sid = misc.generateSidForTest()
+		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
 		if not query('SELECT 1 FROM Users WHERE Sid=%s', sid):
 			break
 			
@@ -53,7 +53,7 @@ def act_logout(data):
 
 def act_sendMessage(data):
 	userId = getIdBySid(data['sid'])[0]	
-	if 'simpletime' in data:
+	if misc.TEST_MODE:
 		msgTime = misc.generateTimeForTest()
 	else:
 		msgTime = math.trunc(time.time())

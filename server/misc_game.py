@@ -106,3 +106,9 @@ def checkRegionIsCorrect(regionId, tokenBadgeId):
 		AND Users.GameId=Games.GameId AND Games.MapId=Regions.MapId AND 
 		Regions.RegionId=%s""", tokenBadgeId, regionId):
 		return BadFieldException('badRegion')
+
+def throwDice():
+	dice = random.randint(1, 6)
+	if dice > 3:
+		dice = 0
+	return dice

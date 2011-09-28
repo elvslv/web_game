@@ -247,7 +247,7 @@ class RaceSorcerers(BaseRace):
 		query("""UPDATE Regions SET Encampment = 0, Fortress=FALSE, Dragon=FALSE, 
 			HoleInTheGround=FALSE, Hero = FALSE, TokenBadgeId=%s WHERE RegionId=%s""", 
 			regionId, tokenBadgeId) 
-			
+
 racesList = [
 	RaceAmazons(),
 	RaceDwarves(),
@@ -308,6 +308,18 @@ class BaseSpecialPower:
 	def clearRegion(self, tokenBadgeId, regionId):
 		pass
 
+	def setEncampment(self, tokenBadgeId, regionId, encampmentsNum):
+		raise BadFieldException('badAction')
+
+	def breakEncampment(self, tokenBadgeId, regionId, encampmentsNum):
+		raise BadFieldException('badAction')
+
+	def throwDice(self):
+		raise BadFieldException('badAction')
+
+	def thrownDice(self):
+		raise BadFieldException('badSpecialPower')
+
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
@@ -318,6 +330,13 @@ class SpecialPowerAlchemist(BaseSpecialPower):
 class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Berserk', 4)
+
+	def throwDice(self):
+		return throwDice()
+
+	def thrownDice(self):
+		pass
+		
 
 class SpecialPowerBivouacking(BaseSpecialPower):
 	def __init__(self):
@@ -334,6 +353,30 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		encampment = fetchone()[0]
 		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=min(%s, 
 			SpecialPowerBonusNum+%s)""", self.getInitBonusNum(), encampment)
+		
+	def setEncampment(self, tokenBadgeId, regionId, encampmentsNum):
+		if not query("""SELECT 1 FROM Regions WHERE RegionId=%s AND 
+			TokenBadgeId=%s""", regionId, tokenBadgeId):
+			raise BadFieldException('badRegion')
+		query("""SELECT SpecialPowerBonusNum FROM TokenBadges WHERE 
+			TokenBadgeId=%s""", tokenBadgeId)
+		if fetchone()[0] < encampmentsNum:
+			raise BadFieldException('notEnoughEncampments')
+		query('UPDATE Regions SET Encampment=Encampment+%s WHERE RegionId=%s',
+			encampmentsNum, regionId)
+		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=SpecialPowerBonusNum-%s 
+			WHERE TokenBadgeId=%s""", encampmentsNum, tokenBadgeId)
+
+	def breakEncampment(self, tokenBadgeId, regionId, encampmentsNum):
+		if not query("""SELECT Encampments FROM Regions WHERE RegionId=%s AND 
+			TokenBadgeId=%s""", regionId, tokenBadgeId):
+			raise BadFieldException('badRegion')
+		if fetchone()[0] < encampmentsNum:
+			raise BadFieldException('tooManyEncampmentsToBreak')
+		query('UPDATE Regions SET Encampment=Encampment-%s WHERE RegionId=%s',
+			encampmentsNum, regionId)
+		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=SpecialPowerBonusNum+%s 
+			WHERE TokenBadgeId=%s""", encampmentsNum, tokenBadgeId)
 
 class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):

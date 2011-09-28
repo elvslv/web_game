@@ -39,7 +39,10 @@ def parseDataFromFile(fileName):
 
 	if 'description' in object:
 		description = object['description']
-	
+	if 'randseed' in object:
+		misc.TEST_RANDSEED = object['randseed']
+		random.seed(misc.TEST_RANDSEED)
+		
 	object = object['test']
 	result = list()
 	if isinstance(object, list):

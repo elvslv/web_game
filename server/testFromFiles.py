@@ -17,11 +17,13 @@ class TestFromFile(unittest.TestCase):
 		self.maxDiff = None
 
 	def tearDown(self):
-		print "Test %s description: %s" % (self.inFile, self.testDescr)
+		print "Test %s description: %s\n" % (self.inFile, self.testDescr)
+		misc.TEST_MODE = False
 		
 	def runTest(self):
 		misc.LAST_SID = 0
 		misc.LAST_TIME = 0
+		misc.TEST_MODE = True
 		editDb.clearDb()
 		actions.createDefaultRaces()
 		f = open(self.ansFile)
