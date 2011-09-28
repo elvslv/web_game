@@ -1,7 +1,4 @@
 1. Add functionality for the
-	following races:
-		Sorcerers
-	
 	following special powers:
 		Berserk,
 		Bivouacking, !!!

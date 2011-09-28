@@ -20,7 +20,6 @@ def clearRegionFromRace(regionId, tokenBadgeId):
 	HoleInTheGround=FALSE, Hero = FALSE WHERE RegionId=%s""", 
 		regionId)
 
-
 def getIdBySid(sid):
 	if not query('SELECT Id, GameId FROM Users WHERE Sid=%s', sid):
 		raise BadFieldException('badSid')
@@ -87,6 +86,23 @@ def callSpecialPowerMethod(specialPowerId, methodName, *args):
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
 
 def checkForDefendingPlayer(gameId):
-	query('SELECT DefendingPlayer FROM Games WHERE gameId=%s', gameId)
+	query('SELECT DefendingPlayer FROM Games WHERE GameId=%s', gameId)
 	if fetchone()[0]:
 		raise BadFieldException('badStage') ##better message?
+
+def checkActivePlayer(gameId, userId):
+	if not query("""SELECT 1 FROM Games, Users WHERE Games.GameId=%s AND 
+		Games.ActivePlayer=Users.Id AND Users.Id=%s""", gameId, userId):
+		raise BadFieldException('badStage') ##better message?
+
+def checkRegionIsImmune(regionId):
+	query('SELECT HoleInTheGround, Dragon, Hero FROM Regions WHERE RegionId=%s', regionId)
+	row = fetchone()
+	if row[0] or row[1] or row[2]:
+		raise BadFieldException('regionIsImmune')
+
+def checkRegionIsCorrect(regionId, tokenBadgeId):
+	if not query("""SELECT 1 FROM Users, Games, Regions WHERE Users.TokenBadgeId=%s 
+		AND Users.GameId=Games.GameId AND Games.MapId=Regions.MapId AND 
+		Regions.RegionId=%s""", tokenBadgeId, regionId):
+		return BadFieldException('badRegion')

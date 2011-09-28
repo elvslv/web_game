@@ -54,6 +54,9 @@ class BaseRace:
 
 	def conquered(self, regionId, tokenBadgeId):
 		pass
+
+	def enchant(self, tokenBadgeId, regionId):
+		return BadFieldException('badRace')
 	
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -216,21 +219,35 @@ class RaceSorcerers(BaseRace):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
 	def updateBonusStateAtTheAndOfTurn(self, tokenBadgeId):
-		query('UPDATE TokenBadges SET RaceBonusNum=1 WHERE TokenBadgeId=%s', tokenBadgeId)
-	# def useBonus(self, actionName, data, tokenBadgeId, regionId):
-	# 	if actionName == 'finishTurn':
-	# 		
-	# 	elif actionName == 'conquer':
-	# 		if not query("""SELECT 1 FROM Regions a, Regions b 
-	# 			WHERE a.RegionId=%s AND b.TokenBadgeId=%s AND 
-	# 			EXISTS(SELECT 1 FROM AdjacentUsers WHERE FirstRegionId=a.RegionId AND 
-	# 			SecondRegionId=b.RegionId)""", regionId, tokenBadgeId):
-	# 			raise()
-	# 		query('SELECT RaceBonusNum, TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadgeId)
-	# 		row = fetchone()
-	# 		if not row[0] or row[1] == self.maxNum:
-	# 			raise BadFieldException('cannotUseBonus')
+		query('UPDATE TokenBadges SET RaceBonusNum=1 WHERE TokenBadgeId=%s', 
+			tokenBadgeId)
+	
+	def enchant(self, tokenBadgeId, regionId):
+		checkRegionIsImmune(regionId)
+		checkRegionIsCorrect(regionId, tokenBadgeId)
+		query('SELECT Encampment, TokensNum, TokenBadgeId FROM Regions WHERE RegionId=%s', 
+			regionId)
+		row = fetchone()
+		if row[0] == tokenBadgeId:
+			raise BadFieldException('badAttackedRace')
+		if row[1]:
+			raise BadFieldException('regionIsImmune')
+		if not row[2]:
+			raise BadFieldException('nothingToEnchant')
+		if row[2] > 1:
+			raise BadFieldException('cannotEnchantMoreThanOneToken')
 
+		query('SELECT TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', 
+			tokenBadgeId)
+		if fetchone()[0] == self.maxNum:
+			raise BadFieldException('noMoreTokensInStorageTray')
+
+		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
+			TokenBadgeId=%s""", row[0])
+		query("""UPDATE Regions SET Encampment = 0, Fortress=FALSE, Dragon=FALSE, 
+			HoleInTheGround=FALSE, Hero = FALSE, TokenBadgeId=%s WHERE RegionId=%s""", 
+			regionId, tokenBadgeId) 
+			
 racesList = [
 	RaceAmazons(),
 	RaceDwarves(),
@@ -341,6 +358,9 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			self.getInitBonusNum(), tokenBadgeId)
 
 	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
+		checkRegionIsImmune(regionId)
+		checkRegionIsCorrect(regionId, tokenBadgeId)
+
 		query("""SELECT Games.PrevState FROM Games, Users WHERE 
 			Users.TokenBadgeId=%s AND Users.GameId=Games.GameId""", tokenBadgeId)
 		prevState = fetchone()[0]
