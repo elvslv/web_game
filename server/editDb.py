@@ -105,7 +105,8 @@ def createTables():
 			InDecline BOOL, 
 			TotalTokensNum INT UNSIGNED,
 			RaceBonusNum INT UNSIGNED,
-			SpecialPowerBonusNum INT UNSIGNED)""")
+			SpecialPowerBonusNum INT UNSIGNED,
+			TotalSpecialPowerBonusNum INT UNSIGNED)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Chat(
 			Id INT PRIMARY KEY AUTO_INCREMENT, 
 			UserId INT REFERENCES Users(Id), 
@@ -123,10 +124,3 @@ cursor = db.cursor()
 cursor.execute("CREATE DATABASE IF NOT EXISTS %s" % DATABASE_NAME)
 cursor.execute("USE %s" % DATABASE_NAME)
 createTables()
-
-def getTokenBadgeIdByRaceAndUser(raceId, userId):
-	query('SELECT TokenBadgeId From TokenBadges WHERE RaceId=%s AND OwnerId=%s', raceId, userId)
-	
-def getRaceAndPowerIdByTokenBadge(tokenBadge):
-	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadge)
-	return fetchone()

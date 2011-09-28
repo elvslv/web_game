@@ -4,10 +4,9 @@
 	
 	following special powers:
 		Berserk,
-		Bivouacking,
+		Bivouacking, !!!
 		Fortifield,
 		Diplomat,
-		Dragon master,
 		Heroic
 		
 2. Send requests to server from testFromFiles
