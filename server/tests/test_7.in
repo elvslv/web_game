@@ -53,7 +53,7 @@
 		{	
 			"action": "selectRace",
 			"sid": 2,
-			"farFromStack" : 1
+			"position" : 1
 		},
 		
 		
@@ -61,7 +61,7 @@
 		{
 			"action": "selectRace",
 			"sid": 1,
-			"farFromStack" : 6
+			"position" : 6
 		},
 		
 		
@@ -70,13 +70,13 @@
 		{
 			"action": "selectRace",
 			"sid": 1,
-			"farFromStack" : 5
+			"position" : 2
 		},
 		
 		{
 			"action": "selectRace",
 			"sid": 1,
-			"farFromStack" : 2
+			"position" : 5
 		},
 		
 		{
@@ -100,13 +100,13 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId" : 4
+			"regionId" : 3
 		},
 		
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId" : 4
+			"regionId" : 3
 		},
 		
 		{

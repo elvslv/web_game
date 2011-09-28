@@ -48,8 +48,16 @@
 	
 	{
 		"result": "noTokensForRedeployment"
+	},
+	
+	{
+		"result": "ok",
+		"nextPlayer" : 2
+	},
+	
+	{
+		"result": "ok"
 	}
-	
-	
+		
 	
 ]

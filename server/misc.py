@@ -160,7 +160,7 @@ actionFields = {
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
 		{
-			'name': 'farFromStack', 
+			'name': 'position', 
 			'type': int, 
 			'mandatory': True,
 			'min': 0,
@@ -188,18 +188,43 @@ actionFields = {
 	]
 }
 
-possibleLandDescription = [
-	'border', #3
-	'coast',#4
-	'sea',#5
-	'mountain',#6
-	'mine',#7
-	'farmland',#8
-	'magic',#9
-	'forest',#10
-	'hill',#11
-	'swamp',#12
-	'cavern' #13
+possibleLandDescription = {
+	'border': 0,
+	'coast': 1,
+	'sea': 2,
+	'mountain': 3,
+	'mine': 4,
+	'farmland': 5,
+	'magic': 6,
+	'forest': 7,
+	'hill': 8,
+	'swamp': 9,
+	'cavern': 10,
+	'holeInTheGround': 11,
+	'encampment': 12, 
+	'dragon': 13, 
+	'fortress': 14,
+	'hero': 15
+}
+
+##must be rewritten!!!
+possibleLandDescription_ = [
+	'border',
+	'coast',
+	'sea',
+	'mountain',
+	'mine',
+	'farmland',
+	'magic',
+	'forest',
+	'hill',
+	'swamp',
+	'cavern',
+	'holeInTheGround',
+	'encampment', 
+	'dragon', 
+	'fortress',
+	'hero'
 ]
 
 defaultMaps = [
@@ -214,7 +239,7 @@ defaultMaps = [
 	 	'regions' : 
 	 	[
 	 		{
-	 			'population' : 0,
+	 			'population' : 1,
 	 			'landDescription' : ['mountain'],
 	 			'adjacent' : [3, 4] 
 	 		},
