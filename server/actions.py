@@ -87,17 +87,20 @@ def act_uploadMap(data):
 	mapId = lastId()
 	if 'regions' in data:
 		regions = data['regions']
+		query('SELECT MAX(RegionId) FROM Regions')
+		maxId = fetchone()[0]
+		if not maxId: maxId = 0
+		curRegion = maxId
 		for region in regions:
-			try:
-				#add land description
+			try:	
 				query(checkRegionCorrectness(region), mapId, region['population'])
 				#add links in graph
-				id = lastId()
 				for n in region['adjacent']:
 					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
-						VALUES(%s, %s)""", id, n)
+						VALUES(%s, %s)""", curRegion, n + maxId)
 					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
-						VALUES(%s, %s)""", n, id)
+						VALUES(%s, %s)""", n + maxId, curRegion)
+				curRegion += 1
 			except KeyError:
 				raise BadFieldException('badRegion')
 	return {'result': 'ok', 'mapId': mapId}
