@@ -1,6 +1,7 @@
 from editDb import query, fetchall, fetchone
 from gameExceptions import BadFieldException
 from misc_game import getTokenBadgeIdByRaceAndUser
+import misc
 
 class BaseRace:
 	def __init__(self, name, initialNum, maxNum):
