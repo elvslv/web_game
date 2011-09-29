@@ -63,7 +63,16 @@
 		"result": "ok"
 	},
 	{
+		"result": "badRegion"
+	},
+	{
+		"result": "badStage"
+	},
+	{
 		"result": "ok"
+	},
+	{
+		"result": "badStage"
 	}
 		
 	

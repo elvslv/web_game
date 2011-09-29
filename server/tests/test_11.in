@@ -75,8 +75,38 @@
 			"regions" : 
 			[ 
 				{
-					"regionId" : 1,
+					"regionId" : 2,
 					"tokensNum" : 1
+				}
+			]
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions" : 
+			[ 
+				{
+					"regionId" : 1,
+					"tokensNum" : 3
+				},
+				{
+					"regionId" : 3,
+					"tokensNum" : 4
+				},
+				{
+					"regionId" : 1,
+					"tokensNum" : 2
+				}
+			]
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions" : 
+			[ 
+				{
+					"regionId" : 1,
+					"tokensNum" : 3
 				}
 			]
 		}

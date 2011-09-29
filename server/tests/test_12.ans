@@ -36,7 +36,7 @@
 		"result": "ok",
 		"tokenBadgeId": 4
 	},
-	
+
 	{
 		"result": "ok"
 	},
@@ -48,18 +48,23 @@
 		"result": "ok",
 		"tokenBadgeId": 5
 	},
+	{
+		"result": "badStage"
+	},
 	
 	{
 		"result": "ok"
 	},
-		{
+	{
 		"result": "ok",
 		"nextPlayer" : 1
 	},
 	
 	{
 		"result": "ok"
+	},
+	{
+		"result": "badStage"
 	}
-
 	
 ]
