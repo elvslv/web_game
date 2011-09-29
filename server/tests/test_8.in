@@ -71,8 +71,8 @@
 			"regions" : 
 			[ 
 				{
-					"RegionId" : 1,
-					"TokensNum" : 1
+					"regionId" : 1,
+					"tokensNum" : 1
 				}
 			]
 		},

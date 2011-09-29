@@ -116,7 +116,7 @@ class RaceGiants(BaseRace):
 		res = 0
 		query("""SELECT Regions.RegionId, Regions.Mountain FROM CurrentRegionState, 
 			Regions WHERE CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId""", userId, tokenBadgeId)
+			CurrentRegionState.RegionId=Regions.RegionId""", tokenBadgeId)
 		row = fetchall()
 		for region in row:
 			if query("""SELECT 1 FROM AdjacentRegions, CurrentRegionState 
@@ -339,6 +339,9 @@ class BaseSpecialPower:
 
 	def thrownDice(self):
 		raise BadFieldException('badSpecialPower')
+
+	def declineRegion(self, currentRegionId):
+		pass
 
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
