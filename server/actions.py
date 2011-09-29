@@ -85,6 +85,7 @@ def act_uploadMap(data):
 	query('INSERT INTO Maps(MapName, PlayersNum, TurnsNum) VALUES(%s, %s, %s)', name, 
 		players, data['turnsNum'])
 	mapId = lastId()
+	result = list()
 	if 'regions' in data:
 		regions = data['regions']
 		query('SELECT MAX(RegionId) FROM Regions')
@@ -100,10 +101,11 @@ def act_uploadMap(data):
 						VALUES(%s, %s)""", curRegion, n + maxId)
 					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
 						VALUES(%s, %s)""", n + maxId, curRegion)
+				result.append(curRegion)
 				curRegion += 1
 			except KeyError:
 				raise BadFieldException('badRegion')
-	return {'result': 'ok', 'mapId': mapId}
+	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
 def addNewRegions(mapId, gameId):
 	query('SELECT RegionId, DefaultTokensNum FROM Regions WHERE MapId=%s', mapId)
