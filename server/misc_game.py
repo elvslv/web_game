@@ -2,6 +2,7 @@ import races
 import misc
 from editDb import query, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
+import random
 
 def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
 	queryStr = 'SELECT '
@@ -35,7 +36,6 @@ def getIdBySid(sid):
 	return fetchone()
 
 def getNextRaceAndPowerFromStack(gameId):
-	random.seed(857283578278)
 	racesInStack = range(0, misc.RACE_NUM)
 	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
 	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
@@ -45,31 +45,6 @@ def getNextRaceAndPowerFromStack(gameId):
 		specialPowersInStack.remove(rec[1])
 	raceId = random.choice(racesInStack)
 	specialPowerId = random.choice(specialPowersInStack)
-	return raceId, specialPowerId
-
-def showNextRace(gameId, lastIndex):
-	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId)
-	query("""UPDATE TokenBadges SET Position=Position+1 WHERE Position<%s 
-		AND GameId=%s""", lastIndex, gameId)
-	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, BonusMoney) 
-		VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
-	
-def updateRacesOnDesk(gameId, position):
-	query('UPDATE TokenBadges SET Position=NULL WHERE GameId=%s AND Position=%s', gameId, position)
-	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE Position>%s AND 
-		GameId=%s""", position, gameId)
-	showNextRace(gameId, position)
-
-def getNextRaceAndPowerFromStack(gameId):
-	racesInStack = range(0, misc.RACE_NUM)
-	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
-	row = fetchall()
-	for rec in row:
-		racesInStack.remove(rec[0])
-		specialPowersInStack.remove(rec[1])
-	raceId = racesInStack[0]#random.choice(racesInStack)
-	specialPowerId = specialPowersInStack[0]#random.choice(specialPowersInStack)
 	return raceId, specialPowerId
 
 def showNextRace(gameId, lastIndex):

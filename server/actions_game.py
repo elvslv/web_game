@@ -106,7 +106,7 @@ def act_conquer(data):
 	if playerBorderline: #case for flying and seafaring
 		if not callSpecialPowerMethod(specialPowerId, 'tryToConquerAdjacentRegion', 
 			playerRegions, regInfo['border'], regInfo['coast'], regInfo['sea']):
-			raise('badRegion')
+			raise BadFieldException('badRegion')
 
 	if not playerBorderline: 
 		f1 = callRaceMethod(raceId, 'tryToConquerNotAdjacentRegion', playerRegions, 
@@ -192,7 +192,11 @@ def act_redeploy(data):
 	sid, (userId, tokenBadgeId, gameId) = extractValues('Users', 'Sid', data['sid'], 
 		'badSid', True, ['Id', 'CurrentTokenBadge', 'GameId'])
 	checkForDefendingPlayer(gameId)
-
+	query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
+	prevState = fetchone()[0]
+	if prevState:
+		if not prevState in (misc.gameStates['finishTurn'], misc.gameStates['conquer']):
+			raise BadFieldException('badStage')
 	inDecline = False
 	if 'tokenBadgeId' in data:
 		tokenBadgeId, inDecline = extractValues('TokenBadges', 'TokenBadgeId', 
@@ -350,7 +354,8 @@ def act_defend(data):
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
 			CurrentRegionId=%s""", region['tokensNum'], region['regionId'])
 		tokensNum -= region['tokensNum']
-
+	
+	query('UPDATE Games SET DefendingPlayer=NULL WHERE GameId=%s', gameId)
 	return {'result': 'ok'}
 
 def act_dragonAttack(data):
@@ -404,11 +409,9 @@ def act_setEncampment(data):
 
 def act_getVisibleTokenBadges(data):
 	gameId = extractValues('Games', 'GameId', data['gameId'], 'badGameId', True)[0]
-	print gameId
 	query("""SELECT RaceId, SpecialPowerId, Position FROM TokenBadges WHERE
 		GameId=%s AND Position>=0 ORDER BY Position ASC""", gameId)
 	rows = fetchall()
-	print rows
 	result = list()
 	for tokenBadge in rows:
 		result.append({

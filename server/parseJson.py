@@ -43,6 +43,8 @@ def parseDataFromFile(fileName):
 		description = object['description']
 	if 'randseed' in object:
 		misc.TEST_RANDSEED = object['randseed']
+	else:
+		misc.TEST_RANDSEED = 21425364547
 		random.seed(misc.TEST_RANDSEED)
 		
 	object = object['test']
