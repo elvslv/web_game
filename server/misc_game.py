@@ -3,6 +3,15 @@ import misc
 from editDb import query, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 
+def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
+	queryStr = 'SELECT '
+	for field in selectFields:
+		queryStr += field + (', ' if field != selectFields[len(selectFields) - 1] else ' ')
+	queryStr += 'FROM %s WHERE %s=%%s' % (tableName, tableField)
+	if query(queryStr, param) != pres:
+		raise BadFieldException(msg)
+	return [param, fetchone()]
+
 def getTokenBadgeIdByRaceAndUser(raceId, userId):
 	query('SELECT TokenBadgeId From TokenBadges WHERE RaceId=%s AND OwnerId=%s', 
 		raceId, userId)
@@ -13,12 +22,12 @@ def getRaceAndPowerIdByTokenBadge(tokenBadge):
 		tokenBadge)
 	return fetchone()
 
-def clearRegionFromRace(regionId, tokenBadgeId):
+def clearRegionFromRace(currentRegionId, tokenBadgeId):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, regionId)
-	query("""UPDATE Regions SET Encampment = 0, Fortress=FALSE, Dragon=FALSE, 
-	HoleInTheGround=FALSE, Hero = FALSE WHERE RegionId=%s""", 
-		regionId)
+	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, currentRegionId)
+	query("""UPDATE CurrentRegionState SET Encampment = 0, Fortress=FALSE, Dragon=FALSE, 
+		HoleInTheGround=FALSE, Hero = FALSE WHERE CurrentRegionId=%s""", 
+		currentRegionId)
 
 def getIdBySid(sid):
 	if not query('SELECT Id, GameId FROM Users WHERE Sid=%s', sid):
@@ -95,16 +104,18 @@ def checkActivePlayer(gameId, userId):
 		Games.ActivePlayer=Users.Id AND Users.Id=%s""", gameId, userId):
 		raise BadFieldException('badStage') ##better message?
 
-def checkRegionIsImmune(regionId):
-	query('SELECT HoleInTheGround, Dragon, Hero FROM Regions WHERE RegionId=%s', regionId)
+def checkRegionIsImmune(currentRegionId):
+	query("""SELECT HoleInTheGround, Dragon, Hero FROM CurrentRegionState WHERE 
+		CurrentRegionId=%s""", currentRegionId)
 	row = fetchone()
 	if row[0] or row[1] or row[2]:
 		raise BadFieldException('regionIsImmune')
 
-def checkRegionIsCorrect(regionId, tokenBadgeId):
-	if not query("""SELECT 1 FROM Users, Games, Regions WHERE Users.TokenBadgeId=%s 
-		AND Users.GameId=Games.GameId AND Games.MapId=Regions.MapId AND 
-		Regions.RegionId=%s""", tokenBadgeId, regionId):
+def checkRegionIsCorrect(currentRegionId, tokenBadgeId):
+	if not query("""SELECT 1 FROM Users, Games, Regions, CurrentRegionState 
+		WHERE Users.TokenBadgeId=%s AND Users.GameId=Games.GameId AND 
+		Games.MapId=Regions.MapId AND Regions.RegionId=CurrentRegionState.RegionId 
+		AND CurrentRegionState.CurrentRegionId=%s""", tokenBadgeId, currentRegionState):
 		return BadFieldException('badRegion')
 
 def throwDice():
@@ -112,3 +123,29 @@ def throwDice():
 	if dice > 3:
 		dice = 0
 	return dice
+
+def getRegionInfoById(currentRegionId):
+	queryStr = 'SELECT '
+	for regParam in misc.possibleLandDescription:
+		queryStr += (', %s' if regParam != misc.possibleLandDescription else '%s') % regParam
+
+def getRegionInfo(currentRegionId):
+	if not query("""SELECT RegionId FROM CurrentRegionState WHERE CurrentRegionId=%s""",
+		currentRegionId):
+		raise BadFieldException('badRegionId')
+	regInfo = list(extractValues('Regions', 'RegionId', fetchone()[0], 'badRegionId', 
+		True, misc.possibleLandDescription[:11])[1])
+
+	queryStr = 'SELECT OwnerId, TokenBadgeId, TokensNum'
+	for regParam in misc.possibleLandDescription[11:]:
+		queryStr += ', %s' % regParam
+	queryStr += ' FROM CurrentRegionState WHERE currentRegionId=%s'
+	query(queryStr, currentRegionId)
+	row = list(fetchone())
+	ownerId, tokenBadgeId, tokensNum = row[:3]
+	regInfo[len(regInfo):] = row[3:]
+	result = dict()
+	for i in range(len(misc.possibleLandDescription)):
+		result[misc.possibleLandDescription[i]] = regInfo[i]
+
+	return ownerId, tokenBadgeId, tokensNum, result

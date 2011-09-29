@@ -8,7 +8,8 @@ DATABASE_NAME = "testdb"
 DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
 
-tables = ['Users', 'Games', 'Chat', 'Maps', 'Regions', 'AdjacentRegions', 'TokenBadges']
+tables = ['Users', 'Games', 'Chat', 'Maps', 'Regions', 'CurrentRegionState', 
+	'AdjacentRegions', 'TokenBadges']
 
 def fetchone():
 	return cursor.fetchone()
@@ -70,9 +71,7 @@ def createTables():
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Regions(
 			MapId INT UNSIGNED REFERENCES Maps(MapId), 
 			RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
-			TokenBadgeId INT UNSIGNED, 
-			TokensNum INT UNSIGNED, 
-			OwnerId INT UNSIGNED, 
+			DefaultTokensNum INT UNSIGNED DEFAULT 0,
 			Border BOOL DEFAULT FALSE, 
 			Coast BOOL DEFAULT FALSE, 
 			Mountain BOOL DEFAULT FALSE, 
@@ -83,7 +82,14 @@ def createTables():
 			Forest BOOL DEFAULT FALSE, 
 			Hill BOOL DEFAULT FALSE, 
 			Swamp BOOL DEFAULT FALSE, 
-			Cavern BOOL DEFAULT FALSE, 
+			Cavern BOOL DEFAULT FALSE)""")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS CurrentRegionState(
+			CurrentRegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
+			RegionId INT UNSIGNED REFERENCES Regions(RegionId),
+			GameId INT UNSIGNED REFERENCES Games(GameId),
+			TokenBadgeId INT UNSIGNED, 
+			TokensNum INT UNSIGNED, 
+			OwnerId INT UNSIGNED, 
 			HoleInTheGround BOOL DEFAULT FALSE,
 			Encampment INT UNSIGNED DEFAULT 0, 
 			Dragon BOOL DEFAULT FALSE, 

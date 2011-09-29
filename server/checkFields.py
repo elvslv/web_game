@@ -34,25 +34,16 @@ def checkFieldsCorrectness(data):
 		if not minValue <= value <= maxValue:
 			raise BadFieldException(msg)
 
-def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
-	queryStr = 'SELECT '
-	for field in selectFields:
-		queryStr += field + (', ' if field != selectFields[len(selectFields) - 1] else ' ')
-	queryStr += 'FROM %s WHERE %s=%%s' % (tableName, tableField)
-	if query(queryStr, param) != pres:
-		raise BadFieldException(msg)
-	return [param, fetchone()]
-
 def checkRegionCorrectness(data):
 	checkListCorrectness(data, 'landDescription', str)
 	checkListCorrectness(data, 'adjacent', int)
 	if not 'population' in data:
 		data['population'] = 0
 	
-	queryStr = 'INSERT INTO Regions(MapId, TokensNum'
+	queryStr = 'INSERT INTO Regions(MapId, DefaultTokensNum'
 	num = 0
 	for descr in data['landDescription']:
-		if not descr in misc.possibleLandDescription:
+		if not descr in misc.possibleLandDescription[:11]:
 			raise BadFieldException('unknownLandDescription')
 		queryStr += ', ' + descr.title()
 		num += 1

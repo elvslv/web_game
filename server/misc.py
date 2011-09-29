@@ -183,30 +183,14 @@ actionFields = {
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},
 		{'name': 'regions', 'type': list, 'mandatory': True}
+	],
+	'defend': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'regions', 'type': list, 'mandatory': True}
 	]
 }
 
-possibleLandDescription = {
-	'border': 0,
-	'coast': 1,
-	'sea': 2,
-	'mountain': 3,
-	'mine': 4,
-	'farmland': 5,
-	'magic': 6,
-	'forest': 7,
-	'hill': 8,
-	'swamp': 9,
-	'cavern': 10,
-	'holeInTheGround': 11,
-	'encampment': 12, 
-	'dragon': 13, 
-	'fortress': 14,
-	'hero': 15
-}
-
-##must be rewritten!!!
-possibleLandDescription_ = [
+possibleLandDescription = [
 	'border',
 	'coast',
 	'sea',

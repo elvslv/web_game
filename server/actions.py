@@ -102,6 +102,13 @@ def act_uploadMap(data):
 				raise BadFieldException('badRegion')
 	return {'result': 'ok', 'mapId': mapId}
 	
+def addNewRegions(mapId, gameId):
+	query('SELECT RegionId, DefaultTokensNum FROM Regions WHERE MapId=%s', mapId)
+	row = fetchall()
+	for region in row:
+		query("""INSERT INTO CurrentRegionState(RegionId, GameId, TokensNum)
+			VALUES(%s, %s, %s)""", region[0], gameId, region[1])
+
 def act_createGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
@@ -116,6 +123,8 @@ def act_createGame(data):
 	query("""INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) 
 		VALUES(%s, %s, %s, %s, %s)""", name, descr, mapId, 1, misc.gameStates['waiting'])
 	gameId = lastId()
+	addNewRegions(mapId, gameId)
+
 	query('UPDATE Users SET GameId=%s, isReady=0, Priority=1 WHERE Id=%s', gameId, userId)
 	return {'result': 'ok', 'gameId': gameId}
 	
@@ -146,8 +155,8 @@ def act_getGameList(data):
 		for i in range(len(mapRowNames)):
 			curGame['map'][mapRowNames[i]] = map[i]
 
-		query('SELECT Id, Username, IsReady, Sid FROM Users WHERE GameId=%s ORDER BY Priority ASC', 
-			gameId)
+		query("""SELECT Id, Username, IsReady, Sid FROM Users WHERE GameId=%s 
+			ORDER BY Priority ASC""", gameId)
 		players = fetchall()
 		resPlayers = list()
 		priority = 0
@@ -191,7 +200,7 @@ def act_leaveGame(data):
 	curPlayersNum = fetchone()[0]
 	query('UPDATE Users SET GameId=NULL, IsReady=NULL, Priority=NULL WHERE Id=%s',
 		userId)
-	query("""UPDATE Regions SET TokenBadgeId=NULL, Encampment=0, 
+	query("""UPDATE CurrentRegionState SET TokenBadgeId=NULL, Encampment=0, 
 		HoleInTheGround=FALSE, Dragon=FALSE, Fortress=FALSE, Hero=FALSE
 		WHERE TokenBadgeId=(SELECT TokenBadgeId FROM TokenBadges WHERE OwnerId=%s)""", 
 		userId)
