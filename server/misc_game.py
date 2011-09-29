@@ -35,6 +35,7 @@ def getIdBySid(sid):
 	return fetchone()
 
 def getNextRaceAndPowerFromStack(gameId):
+	random.seed(857283578278)
 	racesInStack = range(0, misc.RACE_NUM)
 	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
 	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
@@ -42,8 +43,8 @@ def getNextRaceAndPowerFromStack(gameId):
 	for rec in row:
 		racesInStack.remove(rec[0])
 		specialPowersInStack.remove(rec[1])
-	raceId = racesInStack[0]#random.choice(racesInStack)
-	specialPowerId = specialPowersInStack[0]#random.choice(specialPowersInStack)
+	raceId = random.choice(racesInStack)
+	specialPowerId = random.choice(specialPowersInStack)
 	return raceId, specialPowerId
 
 def showNextRace(gameId, lastIndex):

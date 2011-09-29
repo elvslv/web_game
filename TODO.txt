@@ -2,6 +2,10 @@
 	following special powers:
 		Fortifield,
 		Diplomat,
-		Heroic
+		Heroic,
+		Spirit, 
+		Berserk,
+		Dragon master?
+		
 		
 2. Send requests to server from testFromFiles

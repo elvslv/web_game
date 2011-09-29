@@ -1,6 +1,8 @@
 import json
 import actions 
 from gameExceptions import BadFieldException
+import misc
+import random
 
 def parseJsonObj(obj):
 	try:

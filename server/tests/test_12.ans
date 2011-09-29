@@ -33,18 +33,20 @@
 	},
 	
 	{
-		"result": "ok"
+		"result": "ok",
+		"tokenBadgeId": 4
 	},
 	
 	{
 		"result": "ok"
 	},
-		{
+	{
 		"result": "ok",
 		"nextPlayer" : 2
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"tokenBadgeId": 5
 	},
 	
 	{

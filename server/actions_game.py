@@ -62,7 +62,7 @@ def act_selectRace(data):
 		tokenBadgeId)	
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['selectRace'])
 	updateRacesOnDesk(gameId, position)
-	return {'result': 'ok'}
+	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId}
 
 def act_conquer(data):
 	sid, (userId, tokenBadgeId, gameId) = extractValues('Users', 'Sid', data['sid'], 
@@ -401,6 +401,21 @@ def act_setEncampment(data):
 		data['regionId'], data['encampmentsNum'])
 
 	return {'result': 'ok'}	
+
+def act_getVisibleTokenBadges(data):
+	gameId = extractValues('Games', 'GameId', data['gameId'], 'badGameId', True)[0]
+	print gameId
+	query("""SELECT RaceId, SpecialPowerId, Position FROM TokenBadges WHERE
+		GameId=%s AND Position>=0 ORDER BY Position ASC""", gameId)
+	rows = fetchall()
+	print rows
+	result = list()
+	for tokenBadge in rows:
+		result.append({
+			'raceId': races.racesList[tokenBadge[0]].name, 
+			'specialPowerId': races.specialPowerList[tokenBadge[1]].name,
+			'position': tokenBadge[2]})
+	return {'result': result}
 
 def act_throwDice(data):
 	sid, (userId, gameId, tokenBadgeId)= extractValues('Users', 'Sid', data['sid'], 

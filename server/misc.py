@@ -187,6 +187,9 @@ actionFields = {
 	'defend': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'regions', 'type': list, 'mandatory': True}
+	],
+	'getVisibleTokenBadges': [
+		{'name': 'gameId', 'type': int, 'mandatory': True}
 	]
 }
 
