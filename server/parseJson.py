@@ -55,12 +55,11 @@ def parseDataFromFile(fileName):
 		for obj in object:
 			conn.request("POST", "/small_worlds/", json.dumps(obj))
 			r1 = conn.getresponse()
-			ans = r1.read()
-			result.append(json.loads(ans))
+			result.append(json.loads(r1.read()))
 	else:
 		conn.request("POST", "/small_worlds/", json.dumps(object))
 		r1 = conn.getresponse()
-		return {'result': [r1], 'description': description}
+		return {'result': [r1.read()], 'description': description}
 
 	return {'result': result, 'description': description}
 	

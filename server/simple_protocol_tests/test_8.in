@@ -1,6 +1,8 @@
 {
 	"test":
-	[
+	[	{
+			"action": "resetServer"
+		},
 		{
 			"action": "register",
 			"username": "rewtgh444444444444444444444444444444444444444444444444444444sfdgfdjgsdgsahgjdfhdfhsshhhhhh",

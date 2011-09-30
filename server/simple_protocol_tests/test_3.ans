@@ -1,1 +1,3 @@
-[{"result": "badJson"}]
+[{
+		"result": "ok"
+	}, {"result": "badJson"}]
