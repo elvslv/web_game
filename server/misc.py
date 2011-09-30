@@ -162,7 +162,7 @@ actionFields = {
 			'type': int, 
 			'mandatory': True,
 			'min': 0,
-			'max': VISIBLE_RACES
+			'max': VISIBLE_RACES-1
 		}
 	],
 	'conquer': [
