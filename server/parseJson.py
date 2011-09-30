@@ -3,6 +3,7 @@ import actions
 from gameExceptions import BadFieldException
 import misc
 import random
+import httplib
 
 def parseJsonObj(obj):
 	try:
@@ -46,14 +47,20 @@ def parseDataFromFile(fileName):
 	else:
 		misc.TEST_RANDSEED = 21425364547
 		random.seed(misc.TEST_RANDSEED)
-		
 	object = object['test']
 	result = list()
+
+	conn = httplib.HTTPConnection("localhost:80")
 	if isinstance(object, list):
 		for obj in object:
-			result.append(parseJsonObj(obj))
+			conn.request("POST", "/small_worlds/", json.dumps(obj))
+			r1 = conn.getresponse()
+			ans = r1.read()
+			result.append(json.loads(ans))
 	else:
-		return {'result': [parseJsonObj(object)], 'description': description}
+		conn.request("POST", "/small_worlds/", json.dumps(object))
+		r1 = conn.getresponse()
+		return {'result': [r1], 'description': description}
 
 	return {'result': result, 'description': description}
 	

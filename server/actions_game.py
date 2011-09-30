@@ -4,7 +4,7 @@ from misc_game import *
 from gameExceptions import BadFieldException
 
 def act_setReadinessStatus(data):
-	sid, (userId, gameId) = extractValues('Users', 'Sid', data['sid'], 'badSid',True, ['Id', 'GameId'])
+	sid, (userId, gameId) = extractValues('Users', 'Sid', data['sid'], 'badSid', True, ['Id', 'GameId'])
 	if not query('SELECT State FROM Games WHERE GameId=%s', gameId):
 		raise BadFieldException('notInGame')
 	gameState = fetchone()[0]

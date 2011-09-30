@@ -1,6 +1,9 @@
 {
 	"test": [
 		{
+			"action": "resetServer"
+		},
+		{
 			"action": "uploadMap",
 			"mapName": "fgjajjsfhjksjhkljhkljgdfkhldklgdkhjskhjk"
 		},

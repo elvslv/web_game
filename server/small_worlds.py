@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 
 path = os.path.dirname(__file__)
 sys.path.append(path)
@@ -21,7 +22,7 @@ def application(environ, start_response):
         status = '200 OK'
         headers = [('Content-type', 'text/plain')]
         start_response(status, headers)
-        return str([response_body])
+        return json.dumps(response_body)
     else:
         response_body = ''
         status = '200 OK'
