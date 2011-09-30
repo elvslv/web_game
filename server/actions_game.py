@@ -4,7 +4,8 @@ from misc_game import *
 from gameExceptions import BadFieldException
 
 def act_setReadinessStatus(data):
-	sid, (userId, gameId) = extractValues('Users', 'Sid', data['sid'], 'badSid', True, ['Id', 'GameId'])
+	sid, (userId, gameId) = extractValues('Users', 'Sid', data['sid'], 'badSid', 
+		True, ['Id', 'GameId'])
 	if not query('SELECT State FROM Games WHERE GameId=%s', gameId):
 		raise BadFieldException('notInGame')
 	gameState = fetchone()[0]
@@ -13,8 +14,8 @@ def act_setReadinessStatus(data):
 
 	status = data['isReady']
 	query('UPDATE Users SET IsReady=%s WHERE sid=%s', status, sid)
-	query("""SELECT Maps.PlayersNum, Games.MapId FROM Games, Maps WHERE Games.GameId=%s AND 
-		Games.MapId=Maps.MapId""", gameId)
+	query("""SELECT Maps.PlayersNum, Games.MapId FROM Games, Maps WHERE 
+		Games.GameId=%s AND Games.MapId=Maps.MapId""", gameId)
 	maxPlayersNum = fetchone()[0]
 	query('SELECT COUNT(*) FROM Users WHERE GameId=%s AND IsReady=1', gameId)
 	readyPlayersNum = fetchone()[0]
@@ -24,9 +25,9 @@ def act_setReadinessStatus(data):
 			DeclinedTokenBadge=NULL WHERE GameId=%s', misc.INIT_COINS_NUM, gameId)
 		query('SELECT Id FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
 		actPlayer = fetchone()[0]
-		query("""UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s, PrevState=%s WHERE 
-			GameId=%s""", misc.gameStates['processing'], actPlayer, misc.gameStates['finishTurn'], 
-			gameId)
+		query("""UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s, PrevState=%s 
+			WHERE GameId=%s""", misc.gameStates['processing'], actPlayer, 
+			misc.gameStates['finishTurn'], gameId)
 
 		#generate first 6 races
 		for i in range(misc.VISIBLE_RACES):
@@ -62,7 +63,7 @@ def act_selectRace(data):
 		tokenBadgeId)	
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['selectRace'])
 	updateRacesOnDesk(gameId, position)
-	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId}
+	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
 
 def act_conquer(data):
 	sid, (userId, tokenBadgeId, gameId) = extractValues('Users', 'Sid', data['sid'], 
@@ -252,6 +253,9 @@ def act_redeploy(data):
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['redeployment'])
 	return {'result': 'ok'}
 		
+def endOfGame(coins): #rewrite!11
+	return {'result': 'ok', 'coins': coins}
+
 def act_finishTurn(data):
 	sid, (userId, gameId, tokenBadgeId, freeUnits, priority) = extractValues('Users', 
 		'Sid', data['sid'], 'badSid', True, ['Id', 'GameId','CurrentTokenBadge',
@@ -273,13 +277,14 @@ def act_finishTurn(data):
 		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, gameId, rec[0])
 
 	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
-
+	query('SELECT Coins FROM Users WHERE UserId=%s', userId)
+	coins = fecthone()[0]
 	#check for the end of game		
 	query("""SELECT Maps.TurnsNum, Games.Turn FROM Maps, Games WHERE Games.GameId=%s AND 
 			Maps.MapId=Games.MapId""", gameId)
 	turnsNum, curTurn = fetchone()
 	if turnsNum == curTurn + 1:
-		return endOfGame()
+		return endOfGame(coins)
 
 	#select the next player
 	query('SELECT Id, CurrentTokenBadge, TokensInHand FROM Users WHERE Priority>%s AND GameId=%s',
@@ -310,7 +315,7 @@ def act_finishTurn(data):
 			tokenBadgeId)
 
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['finishTurn'])
-	return {'result': 'ok', 'nextPlayer' : newActPlayer}
+	return {'result': 'ok', 'nextPlayer' : newActPlayer,'coins': coins}
 
 def act_defend(data):
 	sid, (userId, tokenBadgeId, gameId) = extractValues('Users', 'Sid', data['sid'], 
@@ -355,6 +360,8 @@ def act_defend(data):
 			CurrentRegionId=%s""", region['tokensNum'], region['regionId'])
 		tokensNum -= region['tokensNum']
 	
+	if tokensNum:
+		raise BadFieldException('thereAreTokensInTheHand')
 	query('UPDATE Games SET DefendingPlayer=NULL WHERE GameId=%s', gameId)
 	return {'result': 'ok'}
 

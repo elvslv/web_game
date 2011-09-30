@@ -14,8 +14,8 @@ MAX_GAMEDESCR_LEN = 300
 VISIBLE_RACES = 6
 INIT_COINS_NUM = 5
 BASIC_CONQUER_COST = 2
-RACE_NUM = 14
-SPECIAL_POWER_NUM = 20
+RACE_NUM = 13
+SPECIAL_POWER_NUM = 19
 
 X0 = 5363478883
 A = 9995326
@@ -249,7 +249,7 @@ defaultMaps = [
 	{
 		'mapName': 'defaultMap6', 
 		'playersNum': 2, 
-		'turnsNum': 7,
+		'turnsNum': 5,
 	 	'regions' : 
 	 	[
 	 		{

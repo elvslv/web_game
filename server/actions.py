@@ -112,9 +112,12 @@ def act_uploadMap(data):
 def addNewRegions(mapId, gameId):
 	query('SELECT RegionId, DefaultTokensNum FROM Regions WHERE MapId=%s', mapId)
 	row = fetchall()
+	result = list()
 	for region in row:
 		query("""INSERT INTO CurrentRegionState(RegionId, GameId, TokensNum)
 			VALUES(%s, %s, %s)""", region[0], gameId, region[1])
+		result.append(lastId())
+	return result
 
 def act_createGame(data):
 	userId, gameId = getIdBySid(data['sid'])
@@ -130,10 +133,10 @@ def act_createGame(data):
 	query("""INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) 
 		VALUES(%s, %s, %s, %s, %s)""", name, descr, mapId, 1, misc.gameStates['waiting'])
 	gameId = lastId()
-	addNewRegions(mapId, gameId)
+	regionIds = addNewRegions(mapId, gameId)
 
 	query('UPDATE Users SET GameId=%s, isReady=0, Priority=1 WHERE Id=%s', gameId, userId)
-	return {'result': 'ok', 'gameId': gameId}
+	return {'result': 'ok', 'gameId': gameId, 'regions': regionIds}
 	
 def act_getGameList(data):
 	result = {'result': 'ok'}
@@ -223,7 +226,6 @@ def act_doSmth(data):
 	return {'result': 'ok'}
 
 def act_resetServer(data):
-	print 'resetServer'
 	misc.LAST_SID = 0
 	misc.LAST_TIME = 0
 	misc.TEST_MODE = True

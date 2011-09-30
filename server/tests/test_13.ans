@@ -1,0 +1,329 @@
+[
+	{
+		"result": "ok"
+	},
+		{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok",
+		"gameId": 1,
+		"regions":[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+	},
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 3
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 9
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 4
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 9
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 18
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 17
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 24
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 26
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 5
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "badRegion"
+	},
+	{
+		"result": "notEnoughTokens"
+	},
+	{
+		"result": "thereAreTokensInTheHand"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "notEnoughTokensForRedeployment"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 31
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badStage"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 34
+	},
+	{
+		"result": "badRegion"
+	},
+	{
+		"result": "ok"
+	},	
+	{
+		"result": "ok"
+	},	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badRegionId"
+	},
+	{
+		"result": "badRegion"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 41
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 2
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 41
+	},
+	{
+		"result": "regionIsImmune"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 53
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 50
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 62
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 1,
+		"coins": 60
+	}
+]
+			 

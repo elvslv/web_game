@@ -126,7 +126,8 @@ def createTables():
 	# 		GameId INT REFERENCES Games(GameId),
 	# 		State INT UNSIGNED,
 	# 		TokenBadgeId INT UNSIGNED,
-	# 		CurrentRegionId INT UNSIGNED
+	# 		CurrentRegionId INT UNSIGNED,
+			
 	# 		)""")
                 
 def clearDb():		

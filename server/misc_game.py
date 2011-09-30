@@ -53,12 +53,13 @@ def showNextRace(gameId, lastIndex):
 		AND GameId=%s""", lastIndex, gameId)
 	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, BonusMoney) 
 		VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
+	return races.racesList[raceId].name, races.specialPowerList[specialPowerId].name, 
 	
 def updateRacesOnDesk(gameId, position):
 	query('UPDATE TokenBadges SET Position=NULL WHERE GameId=%s AND Position=%s', gameId, position)
 	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE Position>%s AND 
 		GameId=%s""", position, gameId)
-	showNextRace(gameId, position)
+	return showNextRace(gameId, position)
 
 def callRaceMethod(raceId, methodName, *args):
 	race = races.racesList[raceId]
