@@ -2,7 +2,7 @@
 	{
 		"result": "ok"
 	},
-		{
+	{
 		"result": "ok"
 	},
 	{
@@ -83,6 +83,9 @@
 	},
 	{
 		"result": "ok"
+	},
+	{
+		"result": "badStage"
 	},
 	{
 		"result": "ok"

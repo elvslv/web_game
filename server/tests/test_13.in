@@ -133,7 +133,7 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId": 12
+			"regionId": 12 
 		},
 		{
 			"action": "conquer",
@@ -143,11 +143,16 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 10
+			"regionId": 10 
 		},
 		{
 			"action": "conquer",
-			"sid": 1,
+			"sid": 2,
+			"regionId": 10 
+		},
+		{
+			"action": "conquer",
+			"sid": 2,
 			"regionId": 24
 		},
 		{
