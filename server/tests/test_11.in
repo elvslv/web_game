@@ -68,11 +68,6 @@
 			"regionId" : 1
 		},
 		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 4
-		},
-		{
 			"action": "redeploy",
 			"sid": 1,
 			"regions" : 
@@ -113,8 +108,6 @@
 				}
 			]
 		}
-
-
 
 
 			

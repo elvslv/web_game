@@ -499,9 +499,12 @@ class SpecialPowerFortifield(BaseSpecialPower):
 		return fetchone()[0]
 
 	def clearRegion(self, tokenBadgeId, currentRegionId):
-		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=
-			max(TotalSpecialPowerBonusNum-1, 0) WHERE TokenBadgesId=%s""", 
+                query("""Select TotalSpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s""", 
 			tokenBadgeId)
+                TotalSpecialPowerBonusNum = fetchone()[0]
+                m = max(TotalSpecialPowerBonusNum-1, 0)
+		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=%s
+			WHERE TokenBadgeId=%s""", m, tokenBadgeId)
 
 
 class SpecialPowerHeroic(BaseSpecialPower):
