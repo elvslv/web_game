@@ -401,7 +401,6 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	def setEncampment(self, tokenBadgeId, currentRegionId, encampmentsNum):
 		if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s AND 
 			TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
-			print '3566747 ', tokenBadgeId
 			raise BadFieldException('badRegion')
 		query("""SELECT SpecialPowerBonusNum FROM TokenBadges WHERE 
 			TokenBadgeId=%s""", tokenBadgeId)
@@ -416,7 +415,6 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	def breakEncampment(self, tokenBadgeId, currentRegionId, encampmentsNum):
 		if not query("""SELECT Encampments FROM CurrentRegionState WHERE 
 			CurrentRegionId=%s AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
-			print 'hfgjfjd ', tokenBadgeId
 			raise BadFieldException('badRegion')
 		if fetchone()[0] < encampmentsNum:
 			raise BadFieldException('tooManyEncampmentsToBreak')
@@ -442,7 +440,6 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 			encampmentsNum = region['encampmentsNum']
 			if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
 				AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
-				print '24jfnf ', tokenBadgeId
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
 				raise BadFieldException('notEnoughEncampentsForRedeployment')

@@ -72,7 +72,6 @@ def callSpecialPowerMethod(specialPowerId, methodName, *args):
 def checkForDefendingPlayer(gameId):
 	query('SELECT DefendingPlayer FROM Games WHERE GameId=%s', gameId)
 	if fetchone()[0]:
-		print 'defending'
 		raise BadFieldException('badStage') ##better message?
 
 def checkActivePlayer(gameId, userId):
@@ -92,7 +91,6 @@ def checkRegionIsCorrect(currentRegionId, tokenBadgeId):
 		WHERE Users.TokenBadgeId=%s AND Users.GameId=Games.GameId AND 
 		Games.MapId=Regions.MapId AND Regions.RegionId=CurrentRegionState.RegionId 
 		AND CurrentRegionState.CurrentRegionId=%s""", tokenBadgeId, currentRegionState):
-		print tokenBadgeId
 		return BadFieldException('badRegion')
 
 def throwDice():
