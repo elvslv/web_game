@@ -46,7 +46,7 @@ def act_selectRace(data):
 	checkForDefendingPlayer(gameId)
 
 	position, (raceId, specialPowerId, tokenBadgeId, bonusMoney) = extractValues(
-		'TokenBadges', 'Position', data['position'], 'badChoice', True, 
+		'TokenBadges', 'Position', data['position'], 'badPsition', True, 
 		['RaceId', 'SpecialPowerId','TokenBadgeId', 'BonusMoney'])
 	query('SELECT COUNT(*) From TokenBadges WHERE Position>%s', position)
 	price = fetchone()[0]
