@@ -94,7 +94,8 @@ def createTables():
 			Encampment INT UNSIGNED DEFAULT 0, 
 			Dragon BOOL DEFAULT FALSE, 
 			Fortress BOOL DEFAULT FALSE,
-			Hero BOOL DEFAULT FALSE, 
+			Hero BOOL DEFAULT FALSE,
+			Fortifield BOOL DEFAULT FALSE,
 			InDecline BOOL)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS 
 			AdjacentRegions (

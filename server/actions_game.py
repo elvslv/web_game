@@ -277,8 +277,8 @@ def act_finishTurn(data):
 		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, gameId, rec[0])
 
 	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
-	query('SELECT Coins FROM Users WHERE UserId=%s', userId)
-	coins = fecthone()[0]
+	query('SELECT Coins FROM Users WHERE Id=%s', userId)
+	coins = fetchone()[0]
 	#check for the end of game		
 	query("""SELECT Maps.TurnsNum, Games.Turn FROM Maps, Games WHERE Games.GameId=%s AND 
 			Maps.MapId=Games.MapId""", gameId)

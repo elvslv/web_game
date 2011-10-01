@@ -494,7 +494,7 @@ class SpecialPowerFortifield(BaseSpecialPower):
 		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
 			CurrentRegionState.TokenBadgeId=%s AND 
 			CurrentRegionState.RegionId=Regions.RegionId AND 
-			Regions.Fortifield=TRUE""", 
+			CurrentRegionState.Fortifield=TRUE""", 
 			getTokenBadgeIdByRaceAndUser(raceId, userId))
 		return fetchone()[0]
 
