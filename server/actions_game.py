@@ -207,6 +207,7 @@ def act_redeploy(data):
 
 	for region in data['regions']:
 		if not ('regionId' in region and 'tokensNum' in region):
+			print 1
 			raise BadFieldException('badJson')
 		if not isinstance(region['regionId'], int):
 			raise BadFieldException('badRegionId')
@@ -225,6 +226,10 @@ def act_redeploy(data):
 			tokensNum, currentRegionId)
 		unitsNum -= tokensNum
 
+	if 'encampments' in data['regions']:
+		callRaceMethod(raceId, 'setEncampments', data['regions']['encampments'], 
+			tokenBadgeId)
+		
 	if unitsNum:
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
 			CurrentRegionId=%s""", tokensNum, currentRegionId)
@@ -317,6 +322,7 @@ def act_defend(data):
 	raceId, currentRegionId, tokensNum = fetchone()
 	tokensNum += callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)
 	if not 'regions' in data:
+		print 2
 		raise BadFieldException('badJson')
 
 	#find not adjacent regions
@@ -328,8 +334,10 @@ def act_defend(data):
 	notAdjacentRegions = fetchall()
 	for region in data['regions']:
 		if not 'regionId' in region:
+			print 3
 			raise BadFieldException('badJson')
-		if not 'tokensNum' in region:
+		if not 'tokensNum' in region:	
+			print 4
 			raise BadFieldException('badJson')
 		if not isinstance(region['regionId'], int):
 			raise BadFieldException('badRegionId')

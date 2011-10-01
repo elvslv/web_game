@@ -348,6 +348,9 @@ class BaseSpecialPower:
 	def decline(self, userId):
 		pass
 
+	def setEncampments(encampments, tokenBadgeId):
+		raise BadFieldException('badSpecialPower')
+
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
@@ -418,6 +421,31 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
 			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
 
+	def setEncampments(encampments, tokenBadgeId):
+		checkObjectsListCorrection(encampments, 
+			[{'name': 'regionId', 'type': int, 'min': 1}, 
+			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
+
+		query('UPDATE CurrentRegionState SET Encampment=0 WHERE TokenBadgeId=%s', 
+			tokenBadgeId)
+		freeEncampments = 5
+		for encampment in ecampments:
+			currentRegionId = region['regionId']
+			encampmentsNum = region['encampmentsNum']
+			if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
+				AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
+				raise BadFieldException('badRegion')
+			if encampmentsNum > freeEncampments:
+				raise BadFieldException('notEnoughEncampentsForRedeployment')
+			query("""UPDATE CurrentRegionState SET Encampment=%s WHERE 
+				CurrentRegionId=%s""", encampmentsNum, currentRegionId )
+
+			freeEncampments -= encampmentsNum
+
+		query('UPDATE Users SET SpecialPowerBonusNum=%s WHERE TokenBadgeId=%s',
+			freeEncampments, tokenBadgeId)
+
+				
 class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)

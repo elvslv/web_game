@@ -8,6 +8,7 @@ import httplib
 def parseJsonObj(obj):
 	try:
 		if not('action' in obj):
+			print 9
 			raise BadFieldException('badJson')
 		else:
 			ans = actions.doAction(obj)
@@ -19,9 +20,11 @@ def parseInputData(data):
 	try:
 		object = json.loads(data)
 	except (TypeError, ValueError), e:
+		print 10
 		return {"result": "badJson"}
 	
 	if isinstance(object, list):
+		print 11
 		return {"result": "badJson"}
 	else:
 		return parseJsonObj(object)
@@ -35,6 +38,7 @@ def parseDataFromFile(fileName):
 	try:
 		object = json.loads(file.read())
 	except (TypeError, ValueError):
+		print 12
 		return {'result': [{"result": "badJson"}], 'description': description}
 
 	if not ('test' in object):

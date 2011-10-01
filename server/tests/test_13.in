@@ -143,7 +143,8 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 10 
+			"regionId": 10,
+			"pos": 25
 		},
 		{
 			"action": "conquer",
@@ -213,6 +214,7 @@
 		},
 		{
 			"action": "redeploy",
+			"sid": 1,
 			"regions": 
 			[
 				{
