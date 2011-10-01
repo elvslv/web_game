@@ -27,7 +27,8 @@ class BaseRace:
 		query("""UPDATE CurrentRegionState SET InDecline=True, TokensNum=1 WHERE 
 			OwnerId=%s""", userId)
 		query("""UPDATE TokenBadges SET InDecline=True, TotalTokensNum=(SELECT 
-			COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s)""", userId)
+			COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s) WHERE OwnerId=%s""", 
+			userId, userId)
 	
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		pass
@@ -388,7 +389,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		query('SELECT Encampment FROM CurrentRegionState WHERE CurrentRegionId=%s', 
 			currentRegionId)
 		encampment = fetchone()[0]
-		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=min(%s, 
+		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=LEAST(%s, 
 			SpecialPowerBonusNum+%s) WHERE TokenBadgeId=%s""", 
 			self.getInitBonusNum(), encampment, tokenBadgeId)
 		

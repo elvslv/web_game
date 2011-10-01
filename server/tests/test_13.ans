@@ -145,9 +145,6 @@
 		"result": "badStage"
 	},
 	{
-		"result": "badStage"
-	},
-	{
 		"result": "ok",
 		"nextPlayer": 2,
 		"coins": 24
@@ -165,7 +162,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"

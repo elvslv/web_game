@@ -250,7 +250,7 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId": 26
+			"regionId": 26 
 		},
 		{
 			"action": "conquer",
@@ -299,7 +299,7 @@
 				}, 
 				{
 					"regionId": 23,
-					"encampmentsNum": 2
+					"encampmentsNum": 3
 				}
 			]
 		},
@@ -318,7 +318,8 @@
 		},
 		{
 			"action": "defend",
-			"sid": 1
+			"sid": 1,
+			"regions": []
 		},
 		{
 			"action": "decline",

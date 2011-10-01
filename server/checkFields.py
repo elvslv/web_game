@@ -5,7 +5,6 @@ import sys
 
 def checkListCorrectness(data, field, type):
 	if not field in data:
-		print 6
 		raise BadFieldException('badJson')
 
 	msg = 'bad' + field[0].upper() + field[1:]
@@ -18,7 +17,6 @@ def checkObjectsListCorrection(data, fields):
 	for obj in data:
 		for field in fields:
 			if not(field['name'] in obj):
-				print 7
 				raise BadFieldException('badJson')
 			msg = 'bad' + field['name'][0].upper() + field['name'][1:]
 			if not isinstance(obj[field['name']], field['type']):
@@ -34,7 +32,6 @@ def checkFieldsCorrectness(data):
 	for field in fields:
 		if not field['name'] in data:
 			if field['mandatory']:
-				print 8
 				raise BadFieldException('badJson')
 			continue
 

@@ -72,6 +72,7 @@ def callSpecialPowerMethod(specialPowerId, methodName, *args):
 def checkForDefendingPlayer(gameId):
 	query('SELECT DefendingPlayer FROM Games WHERE GameId=%s', gameId)
 	if fetchone()[0]:
+		print 'defending'
 		raise BadFieldException('badStage') ##better message?
 
 def checkActivePlayer(gameId, userId):
@@ -111,19 +112,19 @@ def getRegionInfo(currentRegionId):
 	regInfo = list(extractValues('Regions', 'RegionId', fetchone()[0], 'badRegionId', 
 		True, misc.possibleLandDescription[:11])[1])
 
-	queryStr = 'SELECT OwnerId, TokenBadgeId, TokensNum'
+	queryStr = 'SELECT OwnerId, TokenBadgeId, TokensNum, InDecline'
 	for regParam in misc.possibleLandDescription[11:]:
 		queryStr += ', %s' % regParam
 	queryStr += ' FROM CurrentRegionState WHERE currentRegionId=%s'
 	query(queryStr, currentRegionId)
 	row = list(fetchone())
-	ownerId, tokenBadgeId, tokensNum = row[:3]
-	regInfo[len(regInfo):] = row[3:]
+	ownerId, tokenBadgeId, tokensNum, inDecline = row[:4]
+	regInfo[len(regInfo):] = row[4:]
 	result = dict()
 	for i in range(len(misc.possibleLandDescription)):
 		result[misc.possibleLandDescription[i]] = regInfo[i]
 
-	return ownerId, tokenBadgeId, tokensNum, result
+	return ownerId, tokenBadgeId, tokensNum, inDecline, result
 
 def generateTokenBadges(randSeed, num):
 	random.seed(randSeed)
