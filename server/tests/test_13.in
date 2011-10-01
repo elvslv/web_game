@@ -91,6 +91,7 @@
 		},
 		{
 			"action": "redeploy",
+			"sid": 1,
 			"regions": 
 			[
 				{

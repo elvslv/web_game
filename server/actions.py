@@ -32,18 +32,15 @@ def act_register(data):
 	return {'result': 'ok'}
 
 def act_login(data):
-	print 'login'
 	username = data['username']
 	passwd = data['password']
 	if not query('SELECT 1 FROM Users WHERE Username=%s AND Password=%s', username, passwd):
 		raise BadFieldException('badUsernameOrPassword')
 
 	while 1:
-		sid = misc.generateSidForTest()
-		print sid
+		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
 		if not query('SELECT 1 FROM Users WHERE Sid=%s', sid):
 			break
-	print sid
 	query('UPDATE Users SET Sid=%s WHERE Username=%s', sid, username)
 	return {'result': 'ok', 'sid': sid}
 

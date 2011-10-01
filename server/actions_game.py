@@ -80,16 +80,8 @@ def act_conquer(data):
 
 	ownerId, attackedTokenBadgeId, attackedTokensNum, regInfo = getRegionInfo(
 		currentRegionId)
-	#check the attacking race
-	inDecline = 0
-	if 'tokenBadgeId' in data:
-		tokenBadgeId, raceId, specialPowerId, inDecline = extractValues('TokenBadges', 
-		'TokenBadgeId', data['tokenBadgeId'], 'badTokenBadgeId', True, ['RaceId', 'SpecialPowerId',
-		'InDecline'])
-		if inDecline:
-			callRaceMethod(raceId, 'tryToAttackByRaceInDecline')
 
-	if ownerId == userId and not inDecline: 
+	if ownerId == userId: 
 		raise BadFieldException('badRegion')
 
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE 
@@ -133,7 +125,7 @@ def act_conquer(data):
 		additionalTokensNum = callRaceMethod(attackedRace, 'countAdditionalConquerPrice')
 	unitPrice = max(misc.BASIC_CONQUER_COST + attackedTokensNum + mountain + encampment + 
 		fortress + additionalTokensNum + callRaceMethod(raceId, 'countConquerBonus', 
-		currentRegionId, attackedTokenBadgeId) + callSpecialPowerMethod(raceId, 
+		currentRegionId, attackedTokenBadgeId) + callSpecialPowerMethod(specialPowerId, 
 		'countConquerBonus', currentRegionId, attackedTokenBadgeId), 1)
 	
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
@@ -153,8 +145,8 @@ def act_conquer(data):
 	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, userId)
 	if attackedTokenBadgeId:
 		clearRegionFromRace(currentRegionId, attackedTokenBadgeId)
-	query("""UPDATE CurrentRegionState SET OwnerId=%s, TokensNum=%s, InDecline=%s, TokenBadgeId=%s	
-		WHERE CurrentRegionId=%s""", userId, unitPrice, inDecline, tokenBadgeId, 
+	query("""UPDATE CurrentRegionState SET OwnerId=%s, TokensNum=%s, InDecline=False, TokenBadgeId=%s	
+		WHERE CurrentRegionId=%s""", userId, unitPrice, tokenBadgeId, 
 		currentRegionId) 
 	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=
 		CounqueredRegionsNum+1, NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, 
@@ -176,15 +168,11 @@ def act_decline(data):
 
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(specialPowerId, 'tryToGoInDecline', gameId)
-	query("""DELETE FROM TokenBadges WHERE TokenBadgeId=(SELECT DeclinedTokenBadge 
-		FROM Users WHERE Users.Id=%s)""", userId)
-	query("""UPDATE CurrentRegionState SET OwnerId=NULL, InDecline=0, TokenBadgeId=NULL WHERE OwnerId=%s 
-		AND InDecline=1""", userId)
 	
-	callRaceMethod(raceId, 'setRegionsInDecline', userId)	
-	query("""UPDATE Users SET DeclinedTokenBadge=%s, CurrentTokenBadge=NULL, TokensInHand=0 WHERE Sid=%s""", 
-		tokenBadgeId, sid)
-	query('UPDATE TokenBadges SET SpecialPowerId=NULL WHERE TokenBadgeId=%s', tokenBadgeId)
+	callRaceMethod(raceId, 'decline', userId)	
+	callSpecialPowerMethod(specialPowerId, 'decline', userId)	
+	query("""UPDATE Users SET DeclinedTokenBadge=%s, CurrentTokenBadge=NULL, 
+		TokensInHand=0 WHERE Id=%s""", tokenBadgeId, userId)
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['decline'])
 
 	return {'result': 'ok'}
@@ -266,7 +254,10 @@ def act_finishTurn(data):
 
 	query('SELECT COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s', userId)
 	income = fetchone()[0]
-	if not income:
+	query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
+	prevState = fetchone()[0]
+	if not income or not prevState in (misc.gameStates['decline'], 
+		misc.gameStates['redeployment']):
 		raise BadFieldException('badStage')
 
 	additionalCoins = 0
@@ -277,8 +268,8 @@ def act_finishTurn(data):
 		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, gameId, rec[0])
 
 	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
-	query('SELECT Coins FROM Users WHERE UserId=%s', userId)
-	coins = fecthone()[0]
+	query('SELECT Coins FROM Users WHERE Id=%s', userId)
+	coins = fetchone()[0]
 	#check for the end of game		
 	query("""SELECT Maps.TurnsNum, Games.Turn FROM Maps, Games WHERE Games.GameId=%s AND 
 			Maps.MapId=Games.MapId""", gameId)
@@ -298,6 +289,7 @@ def act_finishTurn(data):
 
 	newActPlayer, newTokenBadgeId, tokensInHand = row
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)
+	clearGameStateAtTheEndOfTurn(gameId)
 	query("""SELECT TokenBadges.TotalTokensNum, COUNT(*) FROM CurrentRegionState, 
 		TokenBadges WHERE CurrentRegionState.OwnerId=%s AND 
 		TokenBadges.OwnerId=CurrentRegionState.OwnerId""", newActPlayer)
@@ -307,7 +299,8 @@ def act_finishTurn(data):
 	#	Gathering troops
 	query('UPDATE Users SET TokensInHand=%s WHERE Id=%s', unitsNum - regionsNum,  
 		newActPlayer)
-	query('UPDATE CurrentRegionState SET TokensNum=1 WHERE TokenBadgeId=%s', newTokenBadgeId)
+	query('UPDATE CurrentRegionState SET TokensNum=1 WHERE TokenBadgeId=%s', 
+		newTokenBadgeId)
 
 	for rec in races:
 		callRaceMethod(rec[0], 'updateBonusStateAtTheAndOfTurn', tokenBadgeId)

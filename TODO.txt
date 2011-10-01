@@ -3,9 +3,9 @@
 		Fortifield,
 		Diplomat,
 		Heroic,
-		Spirit, 
 		Berserk,
 		Dragon master?
-		
-		
-2. Send requests to server from testFromFiles
+
+2. Change checking of correctness going in decline in context of history
+
+3. add the checking of decline in specialPOwers and races methods

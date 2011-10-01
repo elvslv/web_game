@@ -3,6 +3,7 @@ import misc
 from editDb import query, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 import random
+import sys
 
 def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
 	queryStr = 'SELECT '
@@ -16,7 +17,8 @@ def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1'])
 def getTokenBadgeIdByRaceAndUser(raceId, userId):
 	query('SELECT TokenBadgeId From TokenBadges WHERE RaceId=%s AND OwnerId=%s', 
 		raceId, userId)
-	return fetchone()[0]
+	row = fetchone()
+	return int(row[0])
 	
 def getRaceAndPowerIdByTokenBadge(tokenBadge):
 	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE TokenBadgeId=%s', 
@@ -25,11 +27,9 @@ def getRaceAndPowerIdByTokenBadge(tokenBadge):
 
 def clearRegionFromRace(currentRegionId, tokenBadgeId):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+	callRaceMethod(raceId, 'clearRegion', tokenBadgeId, currentRegionId)
 	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, currentRegionId)
-	query("""UPDATE CurrentRegionState SET Encampment = 0, Fortress=FALSE, Dragon=FALSE, 
-		HoleInTheGround=FALSE, Hero = FALSE WHERE CurrentRegionId=%s""", 
-		currentRegionId)
-
+	
 def getIdBySid(sid):
 	if not query('SELECT Id, GameId FROM Users WHERE Sid=%s', sid):
 		raise BadFieldException('badSid')
@@ -66,8 +66,6 @@ def callRaceMethod(raceId, methodName, *args):
 	return getattr(race, methodName)(*args)
 
 def callSpecialPowerMethod(specialPowerId, methodName, *args):
-	if not specialPowerId:
-		return
 	specialPower = races.specialPowerList[specialPowerId]
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
 
@@ -126,3 +124,26 @@ def getRegionInfo(currentRegionId):
 		result[misc.possibleLandDescription[i]] = regInfo[i]
 
 	return ownerId, tokenBadgeId, tokensNum, result
+
+def generateTokenBadges(randSeed, num):
+	random.seed(randSeed)
+	racesInStack = range(0, misc.RACE_NUM)
+	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
+	result = list()
+	for i in range(num):
+		raceId = random.choice(racesInStack)
+		specialPowerId = random.choice(specialPowersInStack)
+		result.append({'race': races.racesList[raceId].name, 
+			'specialPower': races.specialPowerList[specialPowerId].name})
+		racesInStack.remove(raceId)
+		specialPowersInStack.remove(specialPowerId)
+	return result
+
+def clearGameStateAtTheEndOfTurn(gameId):
+	query("""UPDATE Games SET CounqueredRegionsNum=0, 
+		NonEmptyCounqueredRegionsNum=0, ConqueredRegion=NULL, 
+		AttackedTokenBadgeId=NULL, AttackedTokensNum=NULL, Dice=NULL WHERE 
+		GameId=%s""", gameId)
+
+if __name__=='__main__':
+	print generateTokenBadges(int(sys.argv[1]), int(sys.argv[2]))

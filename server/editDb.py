@@ -53,13 +53,13 @@ def createTables():
 			Turn TINYINT UNSIGNED, 
 			ActivePlayer INT UNSIGNED,
 			DefendingPlayer INT UNSIGNED, 
-			CounqueredRegionsNum INT UNSIGNED, 
-			NonEmptyCounqueredRegionsNum INT UNSIGNED, 
+			CounqueredRegionsNum INT UNSIGNED DEFAULT 0, 
+			NonEmptyCounqueredRegionsNum INT UNSIGNED DEFAULT 0, 
 			PrevState INT UNSIGNED,
 			ConqueredRegion INT UNSIGNED, 
 			AttackedTokenBadgeId INT UNSIGNED, 
-			AttackedTokensNum INT UNSIGNED, 
-			Dice INT UNSIGNED,
+			AttackedTokensNum INT UNSIGNED DEFAULT 0, 
+			Dice INT UNSIGNED DEFAULT 0,
 			MapId INT UNSIGNED REFERENCES Maps(MapId))""", 
 			(MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN))
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Maps(
@@ -88,14 +88,14 @@ def createTables():
 			RegionId INT UNSIGNED REFERENCES Regions(RegionId),
 			GameId INT UNSIGNED REFERENCES Games(GameId),
 			TokenBadgeId INT UNSIGNED, 
-			TokensNum INT UNSIGNED, 
+			TokensNum INT UNSIGNED DEFAULT 0, 
 			OwnerId INT UNSIGNED, 
 			HoleInTheGround BOOL DEFAULT FALSE,
 			Encampment INT UNSIGNED DEFAULT 0, 
 			Dragon BOOL DEFAULT FALSE, 
 			Fortress BOOL DEFAULT FALSE,
 			Hero BOOL DEFAULT FALSE, 
-			InDecline BOOL)""")
+			InDecline BOOL DEFAULT FALSE)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS 
 			AdjacentRegions (
 			FirstRegionId INT UNSIGNED REFERENCES Regions(RegionId), 
@@ -109,11 +109,11 @@ def createTables():
 			Position TINYINT, 
 			BonusMoney TINYINT, 
 			OwnerId INT UNSIGNED, 
-			InDecline BOOL, 
-			TotalTokensNum INT UNSIGNED,
-			RaceBonusNum INT UNSIGNED,
-			SpecialPowerBonusNum INT UNSIGNED,
-			TotalSpecialPowerBonusNum INT UNSIGNED)""")
+			InDecline BOOL DEFAULT FALSE, 
+			TotalTokensNum INT UNSIGNED DEFAULT 0,
+			RaceBonusNum INT UNSIGNED DEFAULT 0,
+			SpecialPowerBonusNum INT UNSIGNED DEFAULT 0,
+			TotalSpecialPowerBonusNum INT UNSIGNED DEFAULT 0)""")
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Chat(
 			Id INT PRIMARY KEY AUTO_INCREMENT, 
 			UserId INT REFERENCES Users(Id), 
