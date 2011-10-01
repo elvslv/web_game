@@ -671,11 +671,11 @@ class SpecialPowerWealthy(BaseSpecialPower):
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
 		query('SELECT SpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
+			getTokenBadgeIdByRaceAndUser(raceId, userId))
 		if not fetchone()[0]:
 			return 0
 		query('UPDATE TokenBadges SET SpecialPowerBonusNum=0 WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
+			getTokenBadgeIdByRaceAndUser(raceId, userId))
 		return 7
 
 specialPowerList = [

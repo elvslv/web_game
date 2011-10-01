@@ -206,7 +206,7 @@
 	{
 		"result": "ok",
 		"nextPlayer": 2,
-		"coins": 31
+		"coins": 40
 	},
 	{
 		"result": "badStage"
@@ -214,6 +214,9 @@
 	{
 		"result": "ok"
 	},
+	{
+		"result": "badStage"
+	},	
 	{
 		"result": "badStage"
 	},
