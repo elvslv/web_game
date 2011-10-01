@@ -36,9 +36,7 @@ class BaseRace:
 	def countAdditionalCoins(self, userId, gameId):
 		return 0
 
-	def updateAttackedTokensNum(self, tokensBadgeId):
-		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
-			TokenBadgeId=%s""", tokensBadgeId)
+	def countAddDefendingTokensNum(self):
 		return -1
 
 	def countAdditionalConquerPrice(self):
@@ -66,6 +64,10 @@ class BaseRace:
 		query("""UPDATE CurrentRegionState SET Encampment = 0, Fortress=FALSE, 
 			Dragon=FALSE, HoleInTheGround=FALSE, Hero = FALSE 
 			WHERE CurrentRegionId=%s""", currentRegionId) 
+
+	def updateAttackedTokensNum(self, tokenBadgeId):
+		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
+			TokenBadgeId=%s""", tokensBadgeId)
 	
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -218,8 +220,11 @@ class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
-	def updateAttackedTokensNum(self):
+	def countAddDefendingTokensNum(self):
 		return 0
+
+	def updateAttackedTokensNum(self, tokenBadgeId):
+		pass
 
 class RaceRatmen(BaseRace):
 	def __init__(self):

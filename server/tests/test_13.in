@@ -332,7 +332,7 @@
 		},
 		{
 			"action": "finishTurn",
-			"sid": 1
+			"sid": 1 
 		},
 		{
 			"action": "conquer",

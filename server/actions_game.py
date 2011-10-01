@@ -54,6 +54,7 @@ def act_selectRace(data):
 		raise BadFieldException('badMoneyAmount')
 
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum
+	print races.racesList[raceId].name, races.specialPowerList[specialPowerId].name, tokenBadgeId
 	query("""UPDATE Users SET CurrentTokenBadge=%s, Coins=Coins-%s+%s, TokensInHand=%s 
 		WHERE Sid=%s""", tokenBadgeId, price, bonusMoney, tokensNum, sid)
 	query("""UPDATE TokenBadges SET OwnerId=%s, InDecline=False, SpecialPowerBonusNum=%s, 
@@ -329,8 +330,11 @@ def act_defend(data):
 	if not query("""SELECT AttackedTokenBadgeId, ConqueredRegion, AttackedTokensNum 
 		FROM Games WHERE GameId=%s AND DefendingPlayer=%s""", gameId, userId):
 		raise BadFieldException('badStage') ##better comment?
-	raceId, currentRegionId, tokensNum = fetchone()
-	tokensNum += callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)
+	tokenBadgeId, currentRegionId, tokensNum = fetchone()
+	
+	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
+	tokensNum += callRaceMethod(raceId, 'countAddDefendingTokensNum')
+	print 'tok ', tokensNum
 	if not 'regions' in data:
 		raise BadFieldException('badJson')
 
@@ -368,6 +372,8 @@ def act_defend(data):
 	
 	if tokensNum:
 		raise BadFieldException('thereAreTokensInTheHand')
+		
+	callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)
 	query('UPDATE Games SET DefendingPlayer=NULL WHERE GameId=%s', gameId)
 	return {'result': 'ok'}
 
@@ -443,3 +449,4 @@ def act_throwDice(data):
 	dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
 	query('UPDATE Games SET Dice=0 WHERE GameId=%s', gameId)
 	return {'result': 'ok', 'dice': dice}	
+
