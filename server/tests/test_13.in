@@ -416,7 +416,7 @@
 		{
 			"action": "defend",
 			"sid": 2,
-			"regions": [{"regionId": 3, "tokensNum": 2}]
+			"regions": [{"regionId": 3, "tokensNum": 2}] 
 		},
 		{
 			"action": "defend",

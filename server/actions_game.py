@@ -83,7 +83,8 @@ def act_conquer(data):
 		CurrentRegionState.CurrentRegionId=%s""", userId, currentRegionId):
 		raise BadFieldException('badRegionId')
 	ownerId, attackedTokenBadgeId, attackedTokensNum, attackedInDecline, regInfo = getRegionInfo(currentRegionId)
-	if ownerId == userId: 
+	if ownerId == userId and not attackedInDecline: 
+		print 1
 		raise BadFieldException('badRegion')
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE 
 		TokenBadgeId=%s""", tokenBadgeId)
@@ -100,6 +101,7 @@ def act_conquer(data):
 	if playerBorderline: #case for flying and seafaring
 		if not callSpecialPowerMethod(specialPowerId, 'tryToConquerAdjacentRegion', 
 			playerRegions, regInfo['border'], regInfo['coast'], regInfo['sea']):
+			print 2
 			raise BadFieldException('badRegion')
 
 	if not playerBorderline: 
@@ -109,9 +111,11 @@ def act_conquer(data):
 				playerRegions, regInfo['border'], regInfo['coast'], 
 				currentRegionId, tokenBadgeId)
 		if not (f1 or f2):
+			print 3
 			raise BadFieldException('badRegion')
 
 	if (regInfo['holeInTheGround'] or regInfo['dragon'] or regInfo['hero']):
+		print 4
 		raise BadFieldException('badRegion')
 	mountain = regInfo['mountain']
 	encampment = regInfo['encampment']
@@ -334,7 +338,6 @@ def act_defend(data):
 	
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	tokensNum += callRaceMethod(raceId, 'countAddDefendingTokensNum')
-	print 'tok ', tokensNum
 	if not 'regions' in data:
 		raise BadFieldException('badJson')
 
@@ -359,11 +362,14 @@ def act_defend(data):
 			raise BadFieldException('notEnoughTokens')
 		if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
 			AND OwnerId=%s""", region['regionId'], userId):
+			print data
+			print 456
 			raise BadFieldException('badRegion')
 		if query("""SELECT 1 FROM AdjacentRegions a, CurrentRegionState b, 
 			CurrentRegionState c WHERE a.FirstRegionId=b.RegionId AND 
 			a.SecondRegionId=c.RegionId AND b.CurrentRegionId=%s AND 
 			c.CurrentRegionId=%s""", currentRegionId, region['regionId']) and notAdjacentRegions:
+			print 123
 			raise BadFieldException('badRegion')
 		
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 

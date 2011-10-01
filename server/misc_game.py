@@ -92,6 +92,7 @@ def checkRegionIsCorrect(currentRegionId, tokenBadgeId):
 		WHERE Users.TokenBadgeId=%s AND Users.GameId=Games.GameId AND 
 		Games.MapId=Regions.MapId AND Regions.RegionId=CurrentRegionState.RegionId 
 		AND CurrentRegionState.CurrentRegionId=%s""", tokenBadgeId, currentRegionState):
+		print tokenBadgeId
 		return BadFieldException('badRegion')
 
 def throwDice():

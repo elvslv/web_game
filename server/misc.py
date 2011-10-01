@@ -283,7 +283,7 @@ defaultMaps = [
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'mountain', 'coast'],
-	 			'adjacent' : [6, 25, 9, 8] 
+	 			'adjacent' : [6, 25, 9, 8, 23] 
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'sea'],
@@ -354,7 +354,7 @@ defaultMaps = [
 	 		},
 	 		{
 	 			'landDescription' : ['hill', 'magic'],
-	 			'adjacent' : [22, 25, 6, 24] 
+	 			'adjacent' : [22, 25, 6, 24, 7] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain', 'cavern'],
