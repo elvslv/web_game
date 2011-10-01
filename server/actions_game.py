@@ -68,8 +68,12 @@ def act_selectRace(data):
 def act_conquer(data):
 	sid, (userId, tokenBadgeId, gameId) = extractValues('Users', 'Sid', data['sid'], 
 		'badSid', True, ['Id', 'CurrentTokenBadge', 'GameId'])
+	if not tokenBadgeId:
+		raise BadFieldException('badStage')
+		
 	checkActivePlayer(gameId, userId)
 	checkForDefendingPlayer(gameId)		
+	
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	currentRegionId = data['regionId']
 	if not query("""SELECT 1 From Games, Users, Regions, CurrentRegionState WHERE 
@@ -77,13 +81,10 @@ def act_conquer(data):
 		Regions.RegionId=CurrentRegionState.RegionId AND 
 		CurrentRegionState.CurrentRegionId=%s""", userId, currentRegionId):
 		raise BadFieldException('badRegionId')
-
 	ownerId, attackedTokenBadgeId, attackedTokensNum, regInfo = getRegionInfo(
 		currentRegionId)
-
 	if ownerId == userId: 
 		raise BadFieldException('badRegion')
-
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE 
 		TokenBadgeId=%s""", tokenBadgeId)
 	playerRegions = fetchall()
@@ -112,7 +113,6 @@ def act_conquer(data):
 
 	if (regInfo['holeInTheGround'] or regInfo['dragon'] or regInfo['hero']):
 		raise BadFieldException('badRegion')
-
 	mountain = regInfo['mountain']
 	encampment = regInfo['encampment']
 	fortress = regInfo['fortress']
@@ -127,7 +127,6 @@ def act_conquer(data):
 		fortress + additionalTokensNum + callRaceMethod(raceId, 'countConquerBonus', 
 		currentRegionId, attackedTokenBadgeId) + callSpecialPowerMethod(specialPowerId, 
 		'countConquerBonus', currentRegionId, attackedTokenBadgeId), 1)
-	
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
 	query('SELECT Dice FROM Games WHERE GameId=%s', gameId)
@@ -141,7 +140,6 @@ def act_conquer(data):
 		unitPrice -= dice
 		if unitsNum < unitPrice:
 			raise BadFieldException('badTokensNum')
-
 	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, userId)
 	if attackedTokenBadgeId:
 		clearRegionFromRace(currentRegionId, attackedTokenBadgeId)
@@ -151,7 +149,7 @@ def act_conquer(data):
 	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=
 		CounqueredRegionsNum+1, NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, 
 		PrevState=%s, ConqueredRegion=%s, AttackedTokenBadgeId=%s, AttackedTokensNum=%s, 
-		Dice=NULL""", ownerId, 1 if attackedTokensNum else 0, misc.gameStates['conquer'], 
+		Dice=0""", ownerId, 1 if attackedTokensNum else 0, misc.gameStates['conquer'], 
 		currentRegionId, attackedTokenBadgeId, attackedTokensNum)
 
 	callRaceMethod(raceId, 'conquered', currentRegionId, tokenBadgeId)
@@ -428,5 +426,5 @@ def act_throwDice(data):
 	checkActivePlayer(gameId, userId)
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
-	query('UPDATE Games SET Dice WHERE GameId=%s', gameId)
+	query('UPDATE Games SET Dice=0 WHERE GameId=%s', gameId)
 	return {'result': 'ok', 'dice': dice}	

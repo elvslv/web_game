@@ -142,7 +142,7 @@ def generateTokenBadges(randSeed, num):
 def clearGameStateAtTheEndOfTurn(gameId):
 	query("""UPDATE Games SET CounqueredRegionsNum=0, 
 		NonEmptyCounqueredRegionsNum=0, ConqueredRegion=NULL, 
-		AttackedTokenBadgeId=NULL, AttackedTokensNum=NULL, Dice=NULL WHERE 
+		AttackedTokenBadgeId=NULL, AttackedTokensNum=0, Dice=0 WHERE 
 		GameId=%s""", gameId)
 
 if __name__=='__main__':

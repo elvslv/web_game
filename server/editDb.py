@@ -41,7 +41,7 @@ def createTables():
 			DeclinedTokenBadge INT UNSIGNED, 
 			ScndDeclinedTokenBadge INT UNSIGNED, 
 			Coins TINYINT UNSIGNED, 
-			TokensInHand INT UNSIGNED, 
+			TokensInHand INT UNSIGNED DEFAULT 0, 
 			Priority INT UNSIGNED)""",
 			(MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Games(
