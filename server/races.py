@@ -77,8 +77,8 @@ class RaceHalflings(BaseRace):
 
 	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
 		tokenBadgeId):
-		if regions:
-			return False
+		return False if regions else True
+
 	
 	def getInitBonusNum(self):
 		return 2
@@ -169,10 +169,7 @@ class RaceOrcs(BaseRace):
 			return 0
 		query('SELECT NonEmptyCounqueredRegionsNum FROM Games WHERE GameId=%s', gameId)
 		res = fetchone()
-		if res:
-			return res[0]
-		else:
-			return 0
+		return res[0] if res else 0
 
 class RaceWizards(BaseRace):
 	def __init__(self):
@@ -590,15 +587,12 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 			AND d.TokenBadgeId=%s AND a.RegionId=c.RegionId AND b.RegionId=d.RegionId""", 
 			attackedRegion, tokenBadgeId)
 		cavern1, cavern2 = fetchone()
-		if not (cavern1 and cavern2):
-			return False
+		return (cavern1 and cavern2)
 		
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
 		regionInfo = getRegionInfoById(currentRegionId)
-		if regionInfo['cavern']: ##cavern
-			return -1
-		else:
-			return 0
+		return -1 if regionInfo['cavern'] else 0
+
 	
 class SpecialPowerWealthy(BaseSpecialPower):
 	def __init__(self):
