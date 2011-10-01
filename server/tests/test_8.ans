@@ -1,4 +1,9 @@
-[
+[	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
 	{
 		"result": "ok"
 	},
@@ -10,6 +15,55 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok" 
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok",
+		"gameId": 1,
+		"regions": [1, 2, 3, 4]
+	},
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok",
+		"tokenBadgeId": 4
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	
+	{
+		"result": "ok"
+	},
+	
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 4
+	},
+	
+	{
+		"result": "ok",
+		"tokenBadgeId": 5
 	}
+		
+	
 ]

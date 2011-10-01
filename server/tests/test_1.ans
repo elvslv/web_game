@@ -1,4 +1,6 @@
-[
+[	{
+		"result": "ok"
+	},
 	{
 		"result": "badJson"
 	},

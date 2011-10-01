@@ -2,27 +2,100 @@
 	"test":
 	[
 		{
+			"action": "resetServer"
+		},
+		{
+			"action": "createDefaultMaps"
+		},
+		{
 			"action": "register",
 			"username": "user1",
-			"password": "fhjdgj"
+			"password": "111111"
 		},
 		{
 			"action": "login",
 			"username": "user1",
-			"password": "fhjdgj"
+			"password": "111111"
 		},
 		{
-			"action": "sendMessage",
-			"sid": 1,
-			"text": "hello!",
-			"noTime": "noTime"
+			"action": "register",
+			"username": "user2",
+			"password": "222222"
 		},
 		{
-			"action": "sendMessage",
+			"action": "login",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "createGame",
 			"sid": 1,
-			"text": "hello again!",
-			"noTime": "noTime"
-		}
+			"gameName": "game1",
+			"mapId": 5,
+			"playersNum": 2
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1		
+		},
+		
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 1
+		},
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"position" : 2
+		},
+
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 3
+		},
+
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions" : 
+			[ 
+				{
+					"regionId" : 1,
+					"tokensNum" : 1
+				}
+			]
+		},
+
+		{
+			"action": "finishTurn",
+			"sid" : 1
+			
+		},
+
+		{
+			"action": "selectRace",
+			"sid" : 2,
+			"position" : 2
+		}			
+				
+			
 	],
-	"description": "sending 2 messages"
+	"description": "testing game mechanics"
 }
+
+
+

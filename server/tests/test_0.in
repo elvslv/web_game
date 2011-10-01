@@ -1,6 +1,9 @@
 {
 	"test":[
 		{
+			"action": "resetServer"
+		},
+		{
 			"action": "register", 
 			"username": "user1", 
 			"password": "325glh"
