@@ -69,10 +69,38 @@ def callSpecialPowerMethod(specialPowerId, methodName, *args):
 	specialPower = races.specialPowerList[specialPowerId]
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
 
-def checkForDefendingPlayer(gameId):
-	query('SELECT DefendingPlayer FROM Games WHERE GameId=%s', gameId)
-	if fetchone()[0]:
-		raise BadFieldException('badStage') ##better message?
+def checkDefendingPlayerNotExists(gameId):
+	query("""SELECT AttackedTokenBadgeId FROM AttackingHistory WHERE 
+		HistoryId=(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
+	row = fetchone()
+	if not row:
+		return
+	if row[0]:
+		query('SELECT InDecline FROM TokenBadges WHERE TokenBadgeId=%s', row[0])
+		if not fetchone()[0]:
+			raise BadFieldException('badStage')
+
+def getNonEmptyConqueredRegions(tokenBadgeId, gameId):
+	query("""SELECT COUNT(*) FROM AttackingHistory a, History b, Games c WHERE 
+		a.AttackingTokenBadgeId=%s AND a.AttackedTokensNum>0 AND a.HistoryId=b.HistoryId
+		AND b.Turn=c.Turn AND b.GameId=c.GameId AND c.GameId=%s""", 
+		tokenBadgeId, gameId)
+	row = fetchone()
+	return row[0] if row else 0
+
+def checkForDefendingPlayer(gameId, tokenBadgeId):
+	query("""SELECT ConqueredRegion, AttackedTokensNum FROM AttackingHistory 
+		WHERE HistoryId=(SELECT MAX(HistoryId) FROM History WHERE GameId=%s) AND 
+		AttackedTokenBadgeId=%s""", gameId, tokenBadgeId)
+	row = fetchone()
+	if not row:
+		raise BadFieldException('badStage')
+	return row
+
+def getPrevState(gameId):
+	query("""SELECT State FROM History WHERE HistoryId=(SELECT MAX(HistoryId) 
+		FROM History WHERE GameId=%s)""", gameId)
+	return fetchone()[0]
 
 def checkActivePlayer(gameId, userId):
 	if not query("""SELECT 1 FROM Games, Users WHERE Games.GameId=%s AND 
@@ -144,10 +172,7 @@ def generateTokenBadges(randSeed, num):
 	return result
 
 def clearGameStateAtTheEndOfTurn(gameId):
-	query("""UPDATE Games SET CounqueredRegionsNum=0, 
-		NonEmptyCounqueredRegionsNum=0, ConqueredRegion=NULL, 
-		AttackedTokenBadgeId=NULL, AttackedTokensNum=0, Dice=0 WHERE 
-		GameId=%s""", gameId)
+	pass
 
 if __name__=='__main__':
 	print generateTokenBadges(int(sys.argv[1]), int(sys.argv[2]))
