@@ -2,6 +2,7 @@ from checkFields import *
 from editDb import query, fetchall, fetchone, lastId
 from misc_game import *
 from gameExceptions import BadFieldException
+from misc import *
 
 def act_setReadinessStatus(data):
 	sid, (userId, gameId) = extractValues('Users', 'Sid', data['sid'], 'badSid', 
@@ -64,7 +65,6 @@ def act_selectRace(data):
 		callRaceMethod(raceId, 'getInitBonusNum'), tokensNum, tokenBadgeId)	
 	query('UPDATE Games SET PrevState=%s', GAME_SELECT_RACE)
 	updateRacesOnDesk(gameId, position)
-	print raceId
 	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
 
 def act_conquer(data):
@@ -327,8 +327,10 @@ def act_finishTurn(data):
 	if not unitsNum: unitsNum = 0
 
 	#	Gathering troops
-	query('UPDATE Users SET TokensInHand=%s WHERE Id=%s', unitsNum - regionsNum,  
-		newActPlayer)
+	query("""UPDATE Users SET TokensInHand=(SELECT TotalTokensNum FROM 
+		TokenBadges WHERE TokenBadgeId=%s)-(SELECT COUNT(*) FROM 
+		CurrentRegionState WHERE TokenBadgeId=%s) WHERE Id=%s""",  newTokenBadgeId,
+		newTokenBadgeId, newActPlayer)
 	query('UPDATE CurrentRegionState SET TokensNum=1 WHERE TokenBadgeId=%s', 
 		newTokenBadgeId)
 
@@ -387,7 +389,6 @@ def act_defend(data):
 			CurrentRegionId=%s""", region['tokensNum'], region['regionId'])
 		tokensNum -= region['tokensNum']
 	if tokensNum:
-		print 'tok ', tokensNum
 		raise BadFieldException('thereAreTokensInTheHand')
 		
 	callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)

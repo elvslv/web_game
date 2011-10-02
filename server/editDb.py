@@ -121,16 +121,22 @@ def createTables():
 			Message TEXT, 
 			Time INT)""")
 
-	# cursor.execute("""CREATE TABLE IF NOT EXISTS History(
-	# 		HistoryId INT PRIMARY KEY AUTO_INCREMENT,
-	# 		UserId INT REFERENCES Users(Id),
-	# 		GameId INT REFERENCES Games(GameId),
-	# 		State INT UNSIGNED,
-	# 		TokenBadgeId INT UNSIGNED,
-	# 		CurrentRegionId INT UNSIGNED,
-			
-	# 		)""")
-                
+#	cursor.execute("""CREATE TABLE IF NOT EXISTS History(
+#			HistoryId INT PRIMARY KEY AUTO_INCREMENT,
+#			UserId INT REFERENCES Users(Id),
+#			GameId INT REFERENCES Games(GameId),
+#			State INT UNSIGNED,
+#			TokenBadgeId INT UNSIGNED
+#		
+#			)""")
+
+#	cursor.execute("""CREATE TABLE IF NOT EXISTS AttackingHistory(
+#			AttackingHistoryId INT PRIMARY KEY AUTO_INCREMENT,
+#			HistoryId INT UNSIGNED REFERENCES History(HistoryId),
+#			AttackinTokenBadgeId INT UNSIGNED TokenBadges(TokenBadgeId),
+#			
+#			)""")
+	        
 def clearDb():		
 	for t in tables:
 		cursor.execute("TRUNCATE TABLE %s" % t)
