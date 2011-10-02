@@ -2,7 +2,6 @@ import editDb
 import re
 import time
 import math
-import misc
 import MySQLdb
 import sys
 import random
@@ -13,6 +12,7 @@ from checkFields import *
 from editDb import query, fetchall, fetchone, lastId, commit, rollback
 from actions_game import *
 from misc_game import *
+from misc import *
 
 def createDefaultRaces(): 
 	pass
@@ -128,7 +128,7 @@ def act_createGame(data):
 		descr = data['gameDescr']
 
 	query("""INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) 
-		VALUES(%s, %s, %s, %s, %s)""", name, descr, mapId, 1, misc.gameStates['waiting'])
+		VALUES(%s, %s, %s, %s, %s)""", name, descr, mapId, 1, GAME_WAITING)
 	gameId = lastId()
 	regionIds = addNewRegions(mapId, gameId)
 
@@ -185,7 +185,7 @@ def act_joinGame(data):
 	gameId, (playersNum, mapId, state) = extractValues(
 		'Games', 'GameId', data['gameId'], 'badGameId', True, ['PlayersNum', 'MapId', 
 		'State'])
-	if state != misc.gameStates['waiting']:
+	if state != GAME_WAITING:
 		raise BadFieldException('badGameState')
 	query('SELECT PlayersNum From Maps WHERE MapId=%s', mapId)
 	maxPlayersNum = fetchone()[0]
@@ -215,7 +215,7 @@ def act_leaveGame(data):
 		query('UPDATE Games SET PlayersNum=PlayersNum-1 WHERE GameId=%s', gameId)
 	else:
 		query('UPDATE Games SET PlayersNum=0, State=%s WHERE GameId=%s', 
-			misc.gameStates['ended'], gameId)
+			GAME_ENDED, gameId)
 	return {'result': 'ok'}
 
 def act_doSmth(data):

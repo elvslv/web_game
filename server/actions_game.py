@@ -9,7 +9,7 @@ def act_setReadinessStatus(data):
 	if not query('SELECT State FROM Games WHERE GameId=%s', gameId):
 		raise BadFieldException('notInGame')
 	gameState = fetchone()[0]
-	if gameState != misc.gameStates['waiting']:
+	if gameState != GAME_WAITING:
 		raise BadFieldException('badGameState')
 
 	status = data['isReady']
@@ -26,8 +26,8 @@ def act_setReadinessStatus(data):
 		query('SELECT Id FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
 		actPlayer = fetchone()[0]
 		query("""UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s, PrevState=%s 
-			WHERE GameId=%s""", misc.gameStates['processing'], actPlayer, 
-			misc.gameStates['finishTurn'], gameId)
+			WHERE GameId=%s""", GAME_PROCESSING, actPlayer, 
+			GAME_FINISH_TURN, gameId)
 
 		#generate first 6 races
 		for i in range(misc.VISIBLE_RACES):
@@ -62,7 +62,7 @@ def act_selectRace(data):
 		Position=NULL WHERE TokenBadgeId=%s""", userId,	
 		callSpecialPowerMethod(specialPowerId, 'getInitBonusNum'), 
 		callRaceMethod(raceId, 'getInitBonusNum'), tokensNum, tokenBadgeId)	
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['selectRace'])
+	query('UPDATE Games SET PrevState=%s', GAME_SELECT_RACE)
 	updateRacesOnDesk(gameId, position)
 	print raceId
 	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
@@ -135,7 +135,7 @@ def act_conquer(data):
 		'countConquerBonus', currentRegionId, attackedTokenBadgeId), 1)
 	query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 	prevState = fetchone()[0]
-	if prevState == misc.gameStates['finishTurn']:
+	if prevState == GAME_FINISH_TURN:
 		query('UPDATE CurrentRegionState SET TokensNum=1 WHERE TokenBadgeId=%s',
 			tokenBadgeId)
 		query("""UPDATE Users SET TokensInHand=(SELECT TotalTokensNum FROM 
@@ -173,7 +173,7 @@ def act_conquer(data):
 		NonEmptyCounqueredRegionsNum+%s, PrevState=%s, ConqueredRegion=%s, 
 		AttackedTokenBadgeId=%s, AttackedTokensNum=%s, Dice=0""", 
 		ownerId if not attackedInDecline else None, 
-		1 if attackedTokensNum else 0, misc.gameStates['conquer'], 
+		1 if attackedTokensNum else 0, GAME_CONQUER, 
 		currentRegionId, attackedTokenBadgeId, attackedTokensNum)
 	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
 		TokenBadgeId=%s""", addUnits, tokenBadgeId)
@@ -198,7 +198,7 @@ def act_decline(data):
 	callSpecialPowerMethod(specialPowerId, 'decline', userId)	
 	query("""UPDATE Users SET DeclinedTokenBadge=%s, CurrentTokenBadge=NULL, 
 		TokensInHand=0 WHERE Id=%s""", tokenBadgeId, userId)
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['decline'])
+	query('UPDATE Games SET PrevState=%s', GAME_DECLINE)
 
 	return {'result': 'ok'}
 
@@ -212,7 +212,7 @@ def act_redeploy(data):
 	query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 	prevState = fetchone()[0]
 	if prevState:
-		if not prevState in (misc.gameStates['finishTurn'], misc.gameStates['conquer']):
+		if not prevState in (GAME_FINISH_TURN, GAME_CONQUER):
 			raise BadFieldException('badStage')
 			
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
@@ -271,7 +271,7 @@ def act_redeploy(data):
 
 	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
 		TokenBadgeId=%s""", addUnits, tokenBadgeId)
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['redeployment'])
+	query('UPDATE Games SET PrevState=%s', GAME_REDEPLOYMENT)
 	return {'result': 'ok'}
 		
 def endOfGame(coins): #rewrite!11
@@ -289,8 +289,7 @@ def act_finishTurn(data):
 	income = fetchone()[0]
 	query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 	prevState = fetchone()[0]
-	if not income or not prevState in (misc.gameStates['decline'], 
-		misc.gameStates['redeployment']):
+	if not income or not prevState in (GAME_DECLINE, GAME_REDEPLOYMENT):
 		raise BadFieldException('badStage')
 
 	additionalCoins = 0
@@ -338,7 +337,7 @@ def act_finishTurn(data):
 		callSpecialPowerMethod(rec[1], 'updateBonusStateAtTheAndOfTurn', 
 			tokenBadgeId)
 
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['finishTurn'])
+	query('UPDATE Games SET PrevState=%s', GAME_FINISH_TURN)
 	return {'result': 'ok', 'nextPlayer' : newActPlayer,'coins': coins}
 
 def act_defend(data):
@@ -405,7 +404,7 @@ def act_dragonAttack(data):
 	callSpecialPowerMethod(specialPowerId, 'dragonAttack', tokenBadgeId, data['regionId'], 
 		data['tokensNum'])
 
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['conquer'])
+	query('UPDATE Games SET PrevState=%s', GAME_CONQUER)
 	return {'result': 'ok'}	
 
 def act_enchant(data):
@@ -417,7 +416,7 @@ def act_enchant(data):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(raceId, 'enchant', tokenBadgeId, data['regionId'])
 
-	query('UPDATE Games SET PrevState=%s', misc.gameStates['conquer'])
+	query('UPDATE Games SET PrevState=%s', GAME_CONQUER)
 	return {'result': 'ok'}	
 
 def act_breakEncampment(data):

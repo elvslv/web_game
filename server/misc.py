@@ -26,6 +26,15 @@ TEST_MODE=True
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
+GAME_WAITING = 1
+GAME_PROCESSING = 2
+GAME_ENDED = 3
+GAME_FINISH_TURN = 4
+GAME_SELECT_RACE = 5
+GAME_CONQUER = 6
+GAME_DECLINE = 7
+GAME_REDEPLOYMENT = 8
+
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
@@ -388,13 +397,3 @@ defaultMaps = [
 			
 ]
 
-gameStates = {
-	'waiting': 1, 
-	'processing': 2, 
-	'ended': 3, 
-	'finishTurn': 4, 
-	'selectRace': 5,
-	'conquer': 6, 
-	'decline': 7,
-	'redeployment': 8
-}

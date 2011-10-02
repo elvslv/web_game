@@ -1,7 +1,7 @@
 from editDb import query, fetchall, fetchone
 from gameExceptions import BadFieldException
 from misc_game import getTokenBadgeIdByRaceAndUser, getRegionInfoById
-import misc
+from misc import *
 
 class BaseRace:
 	def __init__(self, name, initialNum, maxNum):
@@ -191,13 +191,12 @@ class RaceAmazons(BaseRace):
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
-		return -4 if  prevState == misc.gameStates['conquer'] else 0
+		return -4 if  prevState == GAME_CONQUER else 0
 
 	def countAdditionalConquerUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
-		return 4 if prevSTate in (misc.gameStates['finishTurn'], 
-			misc.gameStates['selectRace']) else 0
+		return 4 if prevSTate in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
 
 class RaceSkeletons(BaseRace):
 	def __init__(self):
@@ -206,7 +205,7 @@ class RaceSkeletons(BaseRace):
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
-		if prevState == misc.gameStates['conquer']:
+		if prevState == GAME_CONQUER:
 			query("""SELECT NonEmptyCounqueredRegionsNum FROM Games WHERE GameId=%s""", 
 				gameId)
 			regionsNum = int(fetchone()[0])
@@ -316,7 +315,7 @@ class BaseSpecialPower:
 
 	def tryToGoInDecline(self, gameId): ##rewrite in context of history
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
-		if fetchone()[0] != misc.gameStates['finishTurn']:
+		if fetchone()[0] != GAME_FINISH_TURN:
 			raise BadFieldException('badStage')
 
 	def getInitBonusNum(self):
@@ -487,7 +486,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		query("""SELECT Games.PrevState FROM Games, Users WHERE 
 			Users.TokenBadgeId=%s AND Users.GameId=Games.GameId""", tokenBadgeId)
 		prevState = fetchone()[0]
-		if prevState in (gameStates['finishTurn'], gameStates['decline']): ###fix it!!!
+		if prevState in (GAME_FINISH_TURN, GAME_DECLINE): ###fix it!!!
 			raise('badStage')
 		query('SELECT SpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s', 
 			tokenBadgeId)
