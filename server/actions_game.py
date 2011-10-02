@@ -111,7 +111,7 @@ def act_conquer(data):
 			raise BadFieldException('badRegion')
 
 	if (regInfo['holeInTheGround'] or regInfo['dragon'] or regInfo['hero']):
-		raise BadFieldException('badRegion')
+		raise BadFieldException('regionIsImmune')
 	mountain = regInfo['mountain']
 	encampment = regInfo['encampment']
 	fortress = regInfo['fortress']
@@ -222,7 +222,9 @@ def act_redeploy(data):
 		if not isinstance(region['tokensNum'], int):
 			raise BadFieldException('badTokensNum')
 
-		currentRegionId = region['regionId']
+		currentRegionId = extractValues('CurrentRegionState', 'CurrentRegionId', 
+			region['regionId'], 'badRegionId', True)[0]
+		
 		tokensNum = region['tokensNum']
 		if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
 			AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
@@ -285,7 +287,7 @@ def act_finishTurn(data):
 	query("""SELECT Maps.TurnsNum, Games.Turn FROM Maps, Games WHERE Games.GameId=%s AND 
 			Maps.MapId=Games.MapId""", gameId)
 	turnsNum, curTurn = fetchone()
-	if turnsNum == curTurn + 1:
+	if turnsNum == curTurn:
 		return endOfGame(coins)
 
 	#select the next player
