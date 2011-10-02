@@ -20,7 +20,8 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1
+		"gameId": 1,
+		"regions": [1, 2, 3, 4]
 	},
 	{
 		"result": "ok"
@@ -33,7 +34,6 @@
 	{
 		"result": "ok"
 	},
-	
 	{
 		"result": "ok",
 		"tokenBadgeId": 4
@@ -47,14 +47,14 @@
 	{
 		"result": "ok"
 	},
+	{
+		"result": "ok"
+	},	
 
-	
-	
-
-	
 	{
 		"result": "ok",
-		"nextPlayer" : 2
+		"nextPlayer" : 2,
+		"coins" : 4
 	},
 	
 	{
@@ -67,6 +67,10 @@
 	{
 		"result": "badStage"
 	},
+	{
+		"result": "badStage"
+	},
+	
 	{
 		"result": "badStage"
 	}

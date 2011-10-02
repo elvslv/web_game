@@ -557,14 +557,17 @@ class SpecialPowerFortifield(BaseSpecialPower):
 		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
 			CurrentRegionState.TokenBadgeId=%s AND 
 			CurrentRegionState.RegionId=Regions.RegionId AND 
-			Regions.Fortifield=TRUE""", 
+			CurrentRegionState.Fortifield=TRUE""", 
 			getTokenBadgeIdByRaceAndUser(raceId, userId))
 		return int(fetchone()[0])
 
 	def clearRegion(self, tokenBadgeId, currentRegionId):
-		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=
-			max(TotalSpecialPowerBonusNum-1, 0) WHERE TokenBadgesId=%s""", 
+                query("""Select TotalSpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s""", 
 			tokenBadgeId)
+                TotalSpecialPowerBonusNum = fetchone()[0]
+                m = max(TotalSpecialPowerBonusNum-1, 0)
+		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=%s
+			WHERE TokenBadgeId=%s""", m, tokenBadgeId)
 
 
 class SpecialPowerHeroic(BaseSpecialPower):

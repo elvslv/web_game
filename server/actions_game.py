@@ -64,6 +64,7 @@ def act_selectRace(data):
 		callRaceMethod(raceId, 'getInitBonusNum'), tokensNum, tokenBadgeId)	
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['selectRace'])
 	updateRacesOnDesk(gameId, position)
+	print raceId
 	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
 
 def act_conquer(data):
@@ -87,6 +88,7 @@ def act_conquer(data):
 	ownerId, attackedTokenBadgeId, attackedTokensNum, attackedInDecline, regInfo = getRegionInfo(currentRegionId)
 	if ownerId == userId and not attackedInDecline: 
 		raise BadFieldException('badRegion')
+
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE 
 		TokenBadgeId=%s""", tokenBadgeId)
 	playerRegions = fetchall()
@@ -385,8 +387,8 @@ def act_defend(data):
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
 			CurrentRegionId=%s""", region['tokensNum'], region['regionId'])
 		tokensNum -= region['tokensNum']
-	
 	if tokensNum:
+		print 'tok ', tokensNum
 		raise BadFieldException('thereAreTokensInTheHand')
 		
 	callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)

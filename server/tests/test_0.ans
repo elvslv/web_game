@@ -54,7 +54,8 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1
+		"gameId": 1,
+		"regions": []
 	},
 	{
 		"result": "badGameName"
@@ -64,7 +65,8 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 2
+		"gameId": 2,
+		"regions": []
 	},
 	{
 		"result": "alreadyInGame"

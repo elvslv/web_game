@@ -68,8 +68,11 @@
 			"regionId" : 1
 		},
 
-
-
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 3, "tokensNum": 5}, {"regionId": 1, "tokensNum": 4}]
+		},
 
 		{
 			"action": "finishTurn",
@@ -86,6 +89,11 @@
 			"action": "conquer",
 			"sid": 2,
 			"regionId" : 3
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 3, "tokensNum": 9}]
 		},
 		{
 			"action": "finishTurn",
