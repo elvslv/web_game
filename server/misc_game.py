@@ -35,20 +35,36 @@ def getIdBySid(sid):
 		raise BadFieldException('badSid')
 	return fetchone()
 
-def getNextRaceAndPowerFromStack(gameId):
-	racesInStack = range(0, misc.RACE_NUM)
-	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
-	row = fetchall()
-	for rec in row:
-		racesInStack.remove(rec[0])
-		specialPowersInStack.remove(rec[1])
-	raceId = random.choice(racesInStack)
-	specialPowerId = random.choice(specialPowersInStack)
+def getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower):
+        if vRace != '' and vSpecialPower != '':
+                raceId = -1
+                for i in range(len(races.racesList)):
+                        if vRace == races.racesList[i].name:
+                                raceId = i
+                                break
+                if raceId == -1:
+                        raise BadFieldException('badRace')
+                specialPowerId = -1
+                for i in range(len(races.specialPowerList)):
+                        if vSpecialPower == races.specialPowerList[i].name:
+                                specialPowerId = i
+                                break
+                if specialPowerId == -1:
+                        raise BadFieldException('badSpecialPower')
+        else:
+                racesInStack = range(0, misc.RACE_NUM)
+                specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
+                query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
+                row = fetchall()
+                for rec in row:
+                        racesInStack.remove(rec[0])
+                        specialPowersInStack.remove(rec[1])
+                raceId = random.choice(racesInStack)
+                specialPowerId = random.choice(specialPowersInStack)
 	return raceId, specialPowerId
 
-def showNextRace(gameId, lastIndex):
-	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId)
+def showNextRace(gameId, lastIndex, vRace = '', vSpecialPower = ''):
+	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower)
 	query("""UPDATE TokenBadges SET Position=Position+1 WHERE Position<%s 
 		AND GameId=%s""", lastIndex, gameId)
 	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, BonusMoney) 

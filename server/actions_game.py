@@ -50,8 +50,14 @@ def act_setReadinessStatus(data):
 			GameId=%s""", GAME_PROCESSING, actPlayer, gameId)
 
 		#generate first 6 races
-		for i in range(misc.VISIBLE_RACES):
-			showNextRace(gameId, misc.VISIBLE_RACES - 1)
+		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
+                        vRaces = data['visibleRaces']
+                        vSpecialPowers = data['visibleSpecialPowers']
+                        for i in range(misc.VISIBLE_RACES):
+                                showNextRace(gameId, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], vSpecialPowers[misc.VISIBLE_RACES-i-1])
+                else:
+                        for i in range(misc.VISIBLE_RACES):
+                                showNextRace(gameId, misc.VISIBLE_RACES - 1)
 			
 	updateHistory(userId, gameId, GAME_START, None)
 	return {'result': 'ok'}
@@ -285,6 +291,8 @@ def act_redeploy(data):
 	for region in regions:
 		callRaceMethod(raceId, 'declineRegion', region[0])
 		callSpecialPowerMethod(specialPowerId, 'declineRegion', region[0])
+		
+	query("UPDATE CurrentRegionState SET OwnerId=NULL  WHERE TokensNum=0")
 
 	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
 		TokenBadgeId=%s""", addUnits, tokenBadgeId)
