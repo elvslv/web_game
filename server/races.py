@@ -31,7 +31,10 @@ class BaseRace:
 			userId, userId)
 	
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
-		pass
+		return 0
+
+	def countAdditionalConquerUnits(self, userId, gameId):
+		return 0
 	
 	def countAdditionalCoins(self, userId, gameId):
 		return 0
@@ -188,14 +191,13 @@ class RaceAmazons(BaseRace):
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
-		if prevState == misc.gameStates['finishTurn']:
-			query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+4 WHERE 
-				OwnerId=%s AND RaceId=%s""", self.raceId)
-		elif prevState == misc.gameStates['conquer']:
-			query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-4 WHERE 
-				OwnerId=%s AND RaceId=%s""", self.raceId)
-		else:
-			raise BadFieldException('badStage')
+		return -4 if  prevState == misc.gameStates['conquer'] else 0
+
+	def countAdditionalConquerUnits(self, userId, gameId):
+		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
+		prevState = fetchone()[0]
+		return 4 if prevSTate in (misc.gameStates['finishTurn'], 
+			misc.gameStates['selectRace']) else 0
 
 class RaceSkeletons(BaseRace):
 	def __init__(self):
@@ -204,18 +206,14 @@ class RaceSkeletons(BaseRace):
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 		prevState = fetchone()[0]
-		if prevState == misc.gameStates['finishTurn']:
-			pass
-		elif prevState == misc.gameStates['conquer']:
+		if prevState == misc.gameStates['conquer']:
 			query("""SELECT NonEmptyCounqueredRegionsNum FROM Games WHERE GameId=%s""", 
 				gameId)
 			regionsNum = int(fetchone()[0])
-			query("""UPDATE TokenBadges SET TotalTokensNum=LEAST(TotalTokensNum+%s, %s) 
-				WHERE OwnerId=%s AND RaceId=%s""", regionsNum / 2, self.maxNum, userId, 
-				self.raceId)
+			return regionsNum / 2
 		else:
-			raise BadFieldException('badStage')
-
+			return 0
+			
 class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)

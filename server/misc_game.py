@@ -104,6 +104,10 @@ def getRegionInfoById(currentRegionId):
 	for regParam in misc.possibleLandDescription:
 		queryStr += (', %s' if regParam != misc.possibleLandDescription else '%s') % regParam
 
+	queryStr += ' FROM CurrentRegionState WHERE CurrentRegionId=%%s'
+	query(queryStr, currentRegionId)
+	return fetchone()
+
 def getRegionInfo(currentRegionId):
 	if not query("""SELECT RegionId FROM CurrentRegionState WHERE CurrentRegionId=%s""",
 		currentRegionId):

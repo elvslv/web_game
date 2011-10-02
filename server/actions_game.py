@@ -54,13 +54,14 @@ def act_selectRace(data):
 		raise BadFieldException('badMoneyAmount')
 
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum
-	query("""UPDATE Users SET CurrentTokenBadge=%s, Coins=Coins-%s+%s, TokensInHand=%s 
-		WHERE Sid=%s""", tokenBadgeId, price, bonusMoney, tokensNum, sid)
-	query("""UPDATE TokenBadges SET OwnerId=%s, InDecline=False, SpecialPowerBonusNum=%s, 
-		RaceBonusNum=%s, TotalTokensNum=%s, Position=NULL WHERE 
-		TokenBadgeId=%s""", userId,	callSpecialPowerMethod(specialPowerId, 
-		'getInitBonusNum'), callRaceMethod(raceId, 'getInitBonusNum'), tokensNum,
-		tokenBadgeId)	
+	query("""UPDATE Users SET CurrentTokenBadge=%s, Coins=Coins-%s+%s, 
+		TokensInHand=%s WHERE Sid=%s""", tokenBadgeId, price, bonusMoney, 
+		tokensNum, sid)
+	query("""UPDATE TokenBadges SET OwnerId=%s, InDecline=False, 
+		SpecialPowerBonusNum=%s, RaceBonusNum=%s, TotalTokensNum=%s, 
+		Position=NULL WHERE TokenBadgeId=%s""", userId,	
+		callSpecialPowerMethod(specialPowerId, 'getInitBonusNum'), 
+		callRaceMethod(raceId, 'getInitBonusNum'), tokensNum, tokenBadgeId)	
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['selectRace'])
 	updateRacesOnDesk(gameId, position)
 	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
@@ -76,11 +77,13 @@ def act_conquer(data):
 	
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	currentRegionId = data['regionId']
-	if not query("""SELECT 1 From Games, Users, Regions, CurrentRegionState WHERE 
-		Users.Id=%s AND Users.GameId=Games.GameId AND Games.MapId=Regions.MapId AND 
+	if not query("""SELECT 1 From Games, Users, Regions, CurrentRegionState 
+		WHERE Users.Id=%s AND Users.GameId=Games.GameId AND 
+		Games.MapId=Regions.MapId AND 
 		Regions.RegionId=CurrentRegionState.RegionId AND 
 		CurrentRegionState.CurrentRegionId=%s""", userId, currentRegionId):
 		raise BadFieldException('badRegionId')
+		
 	ownerId, attackedTokenBadgeId, attackedTokensNum, attackedInDecline, regInfo = getRegionInfo(currentRegionId)
 	if ownerId == userId and not attackedInDecline: 
 		raise BadFieldException('badRegion')
@@ -121,10 +124,12 @@ def act_conquer(data):
 		attackedRace, attackedSpecialPower = getRaceAndPowerIdByTokenBadge(attackedTokenBadgeId)
 	additionalTokensNum = 0
 	if attackedRace:
-		additionalTokensNum = callRaceMethod(attackedRace, 'countAdditionalConquerPrice')
-	unitPrice = max(misc.BASIC_CONQUER_COST + attackedTokensNum + mountain + encampment + 
-		fortress + additionalTokensNum + callRaceMethod(raceId, 'countConquerBonus', 
-		currentRegionId, attackedTokenBadgeId) + callSpecialPowerMethod(specialPowerId, 
+		additionalTokensNum = callRaceMethod(attackedRace, 
+			'countAdditionalConquerPrice')
+	unitPrice = max(misc.BASIC_CONQUER_COST + attackedTokensNum + mountain + 
+		encampment + fortress + additionalTokensNum + 
+		callRaceMethod(raceId, 'countConquerBonus', currentRegionId, 
+		attackedTokenBadgeId) + callSpecialPowerMethod(specialPowerId, 
 		'countConquerBonus', currentRegionId, attackedTokenBadgeId), 1)
 	query('SELECT PrevState FROM Games WHERE GameId=%s', gameId)
 	prevState = fetchone()[0]
@@ -138,6 +143,9 @@ def act_conquer(data):
 			
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
+	addUnits =  callRaceMethod(raceId, 'countAdditionalConquerUnits', userId, 
+		gameId)
+	unitsNum += addUnits
 	query('SELECT Dice FROM Games WHERE GameId=%s', gameId)
 	dice = fetchone()[0]
 	if dice:
@@ -149,19 +157,24 @@ def act_conquer(data):
 		unitPrice -= dice
 		if unitsNum < unitPrice:
 			raise BadFieldException('badTokensNum')
-	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, userId)
+			
+	query('UPDATE Users SET TokensInHand=TokensInHand-%s WHERE Id=%s', unitPrice, 
+		userId)
 	if attackedTokenBadgeId:
 		clearRegionFromRace(currentRegionId, attackedTokenBadgeId)
+		
 	query("""UPDATE CurrentRegionState SET OwnerId=%s, TokensNum=%s, InDecline=False, 
 		TokenBadgeId=%s	WHERE CurrentRegionId=%s""", userId, unitPrice, tokenBadgeId, 
 		currentRegionId) 
 	query("""UPDATE Games SET DefendingPlayer=%s, CounqueredRegionsNum=
-		CounqueredRegionsNum+1, NonEmptyCounqueredRegionsNum=NonEmptyCounqueredRegionsNum+%s, 
-		PrevState=%s, ConqueredRegion=%s, AttackedTokenBadgeId=%s, AttackedTokensNum=%s, 
-		Dice=0""", ownerId if not attackedInDecline else None, 1 if attackedTokensNum else 0, misc.gameStates['conquer'], 
-		currentRegionId, attackedTokenBadgeId, 
-		attackedTokensNum)
-
+		CounqueredRegionsNum+1, NonEmptyCounqueredRegionsNum=
+		NonEmptyCounqueredRegionsNum+%s, PrevState=%s, ConqueredRegion=%s, 
+		AttackedTokenBadgeId=%s, AttackedTokensNum=%s, Dice=0""", 
+		ownerId if not attackedInDecline else None, 
+		1 if attackedTokensNum else 0, misc.gameStates['conquer'], 
+		currentRegionId, attackedTokenBadgeId, attackedTokensNum)
+	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
+		TokenBadgeId=%s""", addUnits, tokenBadgeId)
 	callRaceMethod(raceId, 'conquered', currentRegionId, tokenBadgeId)
 	return {'result': 'ok'}
 		
@@ -201,10 +214,13 @@ def act_redeploy(data):
 			raise BadFieldException('badStage')
 			
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	
-	callRaceMethod(raceId, 'countAdditionalRedeploymentUnits', userId, gameId)
-	query('SELECT TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadgeId)
+
+	query('SELECT TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', 
+		tokenBadgeId)
 	unitsNum = fetchone()[0]
+	addUnits =  callRaceMethod(raceId, 'countAdditionalRedeploymentUnits', userId, 
+		gameId)
+	unitsNum += addUnits
 	if not unitsNum:
 		raise BadFieldException('noTokensForRedeployment')
 	query('UPDATE CurrentRegionState SET TokensNum=0 WHERE TokenBadgeId=%s', tokenBadgeId)
@@ -251,6 +267,8 @@ def act_redeploy(data):
 		callRaceMethod(raceId, 'declineRegion', region[0])
 		callSpecialPowerMethod(specialPowerId, 'declineRegion', region[0])
 
+	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
+		TokenBadgeId=%s""", addUnits, tokenBadgeId)
 	query('UPDATE Games SET PrevState=%s', misc.gameStates['redeployment'])
 	return {'result': 'ok'}
 		
