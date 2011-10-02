@@ -249,7 +249,7 @@ defaultMaps = [
 	{
 		'mapName': 'defaultMap6', 
 		'playersNum': 2, 
-		'turnsNum': 5,
+		'turnsNum': 7,
 	 	'regions' : 
 	 	[
 	 		{

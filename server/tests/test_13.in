@@ -566,12 +566,12 @@
 		},
 		{
 			"action": "finishTurn",
-			"sid": 2
+			"sid": 2 
 		},
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 25
+			"regionId": 25 
 		},
 		{
 			"action": "conquer",
@@ -588,6 +588,13 @@
 			"sid": 1,
 			"regions": [
 				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
+				{"regionId": 7, "tokensNum": 3}, {"regionId": 8, "tokensNum": 3}]
+		},		
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [
+				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 1}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
 				{"regionId": 7, "tokensNum": 3}, {"regionId": 8, "tokensNum": 3}]
 		},
 		{

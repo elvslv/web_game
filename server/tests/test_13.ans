@@ -285,32 +285,10 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
+		"result": "notEnoughTokensForRedeployment"
 	},
 	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 53
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 50
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
+		"result": "ok" 
 	},
 	{
 		"result": "ok",
@@ -329,7 +307,31 @@
 	{
 		"result": "ok",
 		"nextPlayer": 1,
-		"coins": 60
+		"coins": 49
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer": 2,
+		"coins": 73
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"coins": 59
 	}
 ]
 			 

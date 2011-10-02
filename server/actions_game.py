@@ -278,18 +278,12 @@ def act_finishTurn(data):
 	races = fetchall()
 	for rec in races:
 		income += callRaceMethod(rec[0], 'countAdditionalCoins', userId, gameId)
-		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, gameId, rec[0])
+		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, 
+			gameId, rec[0])
 
 	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
 	query('SELECT Coins FROM Users WHERE Id=%s', userId)
 	coins = fetchone()[0]
-	#check for the end of game		
-	query("""SELECT Maps.TurnsNum, Games.Turn FROM Maps, Games WHERE Games.GameId=%s AND 
-			Maps.MapId=Games.MapId""", gameId)
-	turnsNum, curTurn = fetchone()
-	if turnsNum == curTurn:
-		return endOfGame(coins)
-
 	#select the next player
 	query('SELECT Id, CurrentTokenBadge, TokensInHand FROM Users WHERE Priority>%s AND GameId=%s',
 		priority, gameId)
@@ -299,7 +293,11 @@ def act_finishTurn(data):
 			ORDER BY Priority""", gameId)
 		row = fetchone()
 		query('UPDATE Games SET Turn=Turn+1 WHERE GameId=%s', gameId)
-
+		query("""SELECT Maps.TurnsNum, Games.Turn FROM Maps, Games WHERE Games.GameId=%s AND 
+				Maps.MapId=Games.MapId""", gameId)
+		turnsNum, curTurn = fetchone()
+		if turnsNum == curTurn:
+			return endOfGame(coins)
 	newActPlayer, newTokenBadgeId, tokensInHand = row
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)
 	clearGameStateAtTheEndOfTurn(gameId)
