@@ -21,7 +21,7 @@
 	{
 		"result": "ok",
 		"gameId": 1,
-		"regions": [1, 2, 3, 4]
+		"regions": [1, 2, 3, 4, 5]
 	},
 	{
 		"result": "ok"
@@ -34,36 +34,32 @@
 	{
 		"result": "ok"
 	},
-	
 	{
 		"result": "ok",
-		"tokenBadgeId": 4
+		"tokenBadgeId": 6
 	},
-	
 	{
 		"result": "ok"
 	},
-	
-	
 	{
 		"result": "ok"
 	},
-	
-	
+	{
+		"result": "ok"
+	},	
 	{
 		"result": "ok"
 	},
-	
+	{
+		"result": "notEnoughTokensForRedeployment"
+	},
+	{
+		"result": "ok"
+	},
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 3
-	},
-	
-	{
-		"result": "ok",
-		"tokenBadgeId": 5
+		"coins" : 1
 	}
-		
-	
+
 ]

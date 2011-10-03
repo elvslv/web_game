@@ -191,7 +191,9 @@ actionFields = {
 			'mandatory': True,
 			'min': 0,
 			'max': 1
-		}
+		},
+                {'name': 'visibleRaces', 'type': list, 'mandatory': False},
+                {'name': 'visibleSpecialPowers', 'type': list, 'mandatory': False}
 	],
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -421,6 +423,35 @@ defaultMaps = [
 	 			'landDescription' : ['hill'],
 	 			'adjacent' : [28, 27, 12, 11, 26] 
 	 		},
+	 	]
+	},	{
+		'mapName': 'defaultMap7', 
+		'playersNum': 2, 
+		'turnsNum': 5,
+	 	'regions' : 
+	 	[
+	 		{
+	 			'landDescription' : ['border', 'mountain'],
+	 			'adjacent' : [2] 
+	 		},
+	 		{
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [1, 3] 
+	 		},
+	 		{
+	 			'population': 1,
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [2, 4] 
+	 		},
+	 		{
+	 			'population': 1,
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [3, 5] 
+	 		},
+                        	 		{
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [4] 
+	 		}
 	 	]
 	}	
 			
