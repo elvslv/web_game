@@ -229,9 +229,6 @@ def act_redeploy(data):
 	query('SELECT TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', 
 		tokenBadgeId)
 	unitsNum = fetchone()[0]
-	addUnits =  callRaceMethod(raceId, 'countAdditionalRedeploymentUnits', userId, 
-		gameId)
-	unitsNum += addUnits
 	if not unitsNum:
 		raise BadFieldException('noTokensForRedeployment')
 	query('UPDATE CurrentRegionState SET TokensNum=0 WHERE TokenBadgeId=%s', tokenBadgeId)
