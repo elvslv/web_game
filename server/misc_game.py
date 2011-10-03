@@ -122,9 +122,12 @@ def checkRegionIsCorrect(currentRegionId, tokenBadgeId):
 		return BadFieldException('badRegion')
 
 def throwDice():
-	dice = random.randint(1, 6)
-	if dice > 3:
+	if misc.TEST_MODE:
 		dice = 0
+	else:
+		dice = random.randint(1, 6)
+		if dice > 3:
+			dice = 0
 	return dice
 
 def getRegionInfoById(currentRegionId):

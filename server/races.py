@@ -71,7 +71,7 @@ class BaseRace:
 	def updateAttackedTokensNum(self, tokenBadgeId):
 		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
 			TokenBadgeId=%s""", tokenBadgeId)
-	
+
 class RaceHalflings(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Halflings', 6, 11)
