@@ -93,8 +93,7 @@ def createTables():
 			Fortifield BOOL DEFAULT FALSE,
 			InDecline BOOL)""")
 			
-	cursor.execute("""CREATE TABLE IF NOT EXISTS 
-			AdjacentRegions (
+	cursor.execute("""CREATE TABLE IF NOT EXISTS AdjacentRegions (
 			FirstRegionId INT UNSIGNED REFERENCES Regions(RegionId), 
 			SecondRegionId INT UNSIGNED REFERENCES Regions(RegionId),
 			UNIQUE(FirstRegionId, SecondRegionId))""")
@@ -126,7 +125,8 @@ def createTables():
 			State INT UNSIGNED,
 			TokenBadgeId INT UNSIGNED,
 			Turn INT UNSIGNED,
-			Dice INT UNSIGNED)""")
+			Dice INT UNSIGNED, 
+			Friend INT UNSIGNED)""")
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS AttackingHistory(
 			AttackingHistoryId INT PRIMARY KEY AUTO_INCREMENT,

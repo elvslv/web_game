@@ -4,10 +4,21 @@ from misc_game import *
 from gameExceptions import BadFieldException
 from misc import *
 
-def updateHistory(userId, gameId, state, tokenBadgeId):
-	query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn) 
-	SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", userId, 
-	gameId, state, tokenBadgeId, gameId)
+def checkForFriends(userId, attackedUserId):
+	query("""SELECT a.Priority, b.Priority FROM Users a, Users b WHERE 
+		a.Id=%s AND b.Id=%s""", userId, attackedUserId)
+
+	attackingPriority, attackedPriority = fetchone()
+	if query("""SELECT 1 FROM History a, Games b WHERE a.GameId=b.GameId AND 
+		a.Turn=b.Turn-%s AND a.State=%s AND a.UserId=%s AND a.Friend=%s""", 
+		1 if attackingPriority < attackedPriority else 0, GAME_CHOOSE_FRIEND, 
+		attackedUserId, userId):
+			raise BadFieldException('UsersAreFriends')
+
+def updateHistory(userId, gameId, state, tokenBadgeId, dice = None):
+	query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, Dice) 
+		SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", userId, 
+		gameId, state, tokenBadgeId, gameId, dice)
 
 def updateConquerHistory(historyId, attackingTokenBadgeId, counqueredRegion, 
 	attackedTokenBadgeId, attackedTokensNum, dice, attackType):
@@ -117,6 +128,8 @@ def act_conquer(data):
 	ownerId, attackedTokenBadgeId, attackedTokensNum, attackedInDecline, regInfo = getRegionInfo(currentRegionId)
 	if ownerId == userId and not attackedInDecline: 
 		raise BadFieldException('badRegion')
+
+	checkForFriends(userId, ownerId)
 
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE 
 		TokenBadgeId=%s""", tokenBadgeId)
@@ -260,10 +273,22 @@ def act_redeploy(data):
 			tokensNum, currentRegionId)
 		unitsNum -= tokensNum
 
-	if 'encampments' in data['regions']:
-		callRaceMethod(raceId, 'setEncampments', data['regions']['encampments'], 
+	if 'encampments' in data:
+		callSpecialPowerMethod(specialPowerId, 'setEncampments', data['encampments'], 
 			tokenBadgeId)
-		
+
+	if 'fortifield' in data:
+		callSpecialPowerMethod(specialPowerMethod, 'setFortifield', 
+			data['fortifield'], tokenBadgeId)
+
+	if 'heroes' in data:
+		callSpecialPowerMethod(specialPowerMethod, 'setHeroes', data['heroes'], 
+			tokenBadgeId)
+
+	if 'selectFriend' in data:
+		callSpecialPowerMethod(specialPowerMethod, 'selectFriend', data['selectFriend'], 
+			tokenBadgeId)
+			
 	if unitsNum:
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
 			CurrentRegionId=%s""", tokensNum, currentRegionId)
@@ -397,7 +422,6 @@ def act_dragonAttack(data):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(specialPowerId, 'dragonAttack', tokenBadgeId, data['regionId'], 
 		data['tokensNum'])
-
 	return {'result': 'ok'}	
 
 def act_enchant(data):
@@ -438,9 +462,10 @@ def act_throwDice(data):
 	checkStage(GAME_THROW_DICE, gameId)
 	checkDefendingPlayerNotExists(gameId)
 	checkActivePlayer(gameId, userId)
+	
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
-	query('UPDATE Games SET Dice=0 WHERE GameId=%s', gameId)
+	updateHistory(userId, gameId, GAME_THROW_DICE, tokenBadgeId, dice)
 	return {'result': 'ok', 'dice': dice}	
 
 def prepareForNextTurn(gameId, newActPlayer, newTokenBadgeId):

@@ -1,11 +1,3 @@
-1. Add functionality for the
-	following special powers:
-		Fortifield,
-		Diplomat,
-		Heroic,
-		Berserk,
-		Dragon master?
+1. test everything
 
-2. Change checking of correctness going in decline in context of history
-
-3. add the checking of decline in specialPOwers and races methods
+2. code refactoring
