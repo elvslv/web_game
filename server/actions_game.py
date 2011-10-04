@@ -101,10 +101,9 @@ def act_conquer(data):
 	if ownerId:
 		checkForFriends(userId, ownerId)
 
-	f1 = callRaceMethod(raceId, 'tryToConquerRegion', currentRegionId, tokenBadgeId, 
-		regInfo)
+	f1 = callRaceMethod(raceId, 'tryToConquerRegion', currentRegionId, tokenBadgeId)
 	f2 = callSpecialPowerMethod(specialPowerId, 'tryToConquerRegion', currentRegionId, 
-		tokenBadgeId, regInfo)
+		tokenBadgeId)
 		
 	if not (f1 and f2):
 		raise BadFieldException('badRegion')

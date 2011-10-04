@@ -13,8 +13,9 @@ class BaseRace:
 	def setId(self, id):
 		self.raceId = id
 
-	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId):
 		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		regionInfo = getRegionInfo(currentRegionId)[4]
 		return (not regions and (regionInfo['coast'] or regionInfo['border'])) or regions
 	
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
@@ -82,7 +83,7 @@ class RaceHalflings(BaseRace):
 		query("""UPDATE CurrentRegionState SET HoleInTheGround=TRUE WHERE 
 			TokenBadgeId=%s""", tokenBadgeId)
 
-	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId):
 		return True
 
 	
@@ -220,6 +221,10 @@ class RaceSorcerers(BaseRace):
 			currentRegionId, 'badRegionId')
 		checkRegionIsImmune(currentRegionId)
 		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
+
+		if not(self.tryToConquerRegion(currentRegionId, tokenBadgeId) 
+			and specialPowerList[getRaceAndPowerIdByTokenBadge()[1]].tryToConquerRegion(currentRegionId, tokenBadgeId)):
+			raise BadFieldException('badRegion')
 		query("""SELECT Encampment, TokensNum, TokenBadgeId, InDecline FROM CurrentRegion 
 			WHERE CurrentRegionId=%s""", currentRegionId)
 		row = fetchone()
@@ -281,8 +286,9 @@ class BaseSpecialPower:
 	def setId(self, id):
 		self.specialPowerId = id
 
-	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId):
 		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		regionInfo = getRegionInfo(currentRegionId)[4]
 		return (isAdjacent or not regions) and not regionInfo['sea']
 
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
@@ -434,7 +440,12 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			currentRegionId, 'badRegionId')[0]
 		checkRegionIsImmune(currentRegionId)
 		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
+		raceId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)[0]
 		
+		if not(racesList[raceId].tryToConquerRegion(currentRegionId, tokenBadgeId) 
+			and self.tryToConquerRegion(currentRegionId, tokenBadgeId)):
+			raise BadFieldException('badRegion')
+			
 		if query("""SELECT 1 FROM History a, AttackingHistory b, TokenBadges c, 
 			Users d, Games e WHERE b.AttackingTokenBadgeId=%s AND 
 			c.TokenBadgeId=b.AttackingTokenBadgeId AND c.UserId=d.Id AND 
@@ -468,8 +479,9 @@ class SpecialPowerFlying(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
-	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId):
 		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		regionInfo = getRegionInfo(currentRegionId)[4]
 		return ((not isAdjacent and regions) or not regions) and not regionInfo['sea']
 
 
@@ -613,7 +625,7 @@ class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
 	
-	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId):
 		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
 		return (isAdjacent and regions) or not regions 
 
