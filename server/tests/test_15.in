@@ -1,0 +1,114 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "createDefaultMaps"
+		},
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "111111"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "111111"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 7,
+			"playersNum": 2
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1		
+		},
+		
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 1,
+			"visibleRaces": ["Amazons", "Dwarves", "Elves", "Giants", "Halflings", "Humans"],
+			"visibleSpecialPowers": ["Forest", "Berserk", "Bivouacking", "Commando", "Diplomat", "Dragon master"]
+		},
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"position" : 1
+		},
+		{
+			"action": "throwDice",
+			"sid": 1,
+			"dice": 1
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+		{
+			"action": "throwDice",
+			"sid": 1,
+			"dice": 1
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 2
+		},
+		{
+			"action": "throwDice",
+			"sid": 1,
+			"dice": 1
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 3
+		},
+		{
+			"action": "throwDice",
+			"sid": 1,
+			"dice": 1
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 4
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 3, "tokensNum": 7}]
+		},
+
+		{
+			"action": "finishTurn",
+			"sid" : 1
+			
+		}
+
+	],
+	"description": "race Dwarves and special power Berserk"
+}
