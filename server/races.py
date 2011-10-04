@@ -136,7 +136,6 @@ class RaceDwarves(BaseRace):
 			Regions.RegionId=CurrentRegionState.RegionId AND Regions.Mine=1""", 
 			getTokenBadgeIdByRaceAndUser(self.raceId, userId))
 		res = int(fetchone()[0])
-		print res
 		return res
 
 class RaceHumans(BaseRace):

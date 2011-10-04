@@ -66,7 +66,6 @@ def act_selectRace(data):
 		gameId)
 
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum
-	print tokensNum + addUnits
 	query("""UPDATE Users SET CurrentTokenBadge=%s, Coins=Coins-%s+%s, 
 		TokensInHand=%s WHERE Sid=%s""", tokenBadgeId, price, bonusMoney, 
 		tokensNum + addUnits, sid)
@@ -144,11 +143,8 @@ def act_conquer(data):
 		dice = throwDice()
 		unitPrice -= dice
 
-	print unitPrice, unitsNum, dice	
 	if unitsNum < unitPrice:
 		updateHistory(userId, gameId, GAME_UNSUCCESSFULL_CONQUER, tokenBadgeId)
-		print currentRegionId, attackedTokensNum, mountain, encampment, fortress, additionalTokensNum
-		print races.racesList[raceId].name, races.specialPowerList[specialPowerId].name
 		return {'result': 'badTokensNum', 'dice': dice}
 
 	if attackedTokenBadgeId:
@@ -178,7 +174,6 @@ def act_decline(data):
 
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(specialPowerId, 'tryToGoInDecline', gameId)
-	print 'decline', userId
 	callSpecialPowerMethod(specialPowerId, 'decline', userId)
 	callRaceMethod(raceId, 'decline', userId)	
 	query("""UPDATE Users SET DeclinedTokenBadge=%s, CurrentTokenBadge=NULL, 
@@ -280,7 +275,6 @@ def act_finishTurn(data):
 
 	query('SELECT COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s', userId)
 	income = fetchone()[0]
-	print income
 	additionalCoins = 0
 	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE OwnerId=%s', userId)
 	races = fetchall()
