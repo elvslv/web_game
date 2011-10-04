@@ -1,9 +1,68 @@
 import races
 import misc
+from misc import GAME_DEFEND, GAME_CONQUER, possiblePrevCmd, GAME_CHOOSE_FRIEND, ATTACK_ENCHANT
 from editDb import query, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 import random
 import sys
+
+
+def checkForFriends(userId, attackedUserId):
+	query("""SELECT a.Priority, b.Priority FROM Users a, Users b WHERE 
+		a.Id=%s AND b.Id=%s""", userId, attackedUserId)
+
+	attackingPriority, attackedPriority = fetchone()
+
+	if query("""SELECT 1 FROM History a, Games b WHERE a.GameId=b.GameId AND 
+		a.Turn=b.Turn-%s AND a.State=%s AND a.UserId=%s AND a.Friend=%s""", 
+		1 if attackingPriority < attackedPriority else 0, GAME_CHOOSE_FRIEND, 
+		attackedUserId, userId):
+			raise BadFieldException('UsersAreFriends')
+
+def updateHistory(userId, gameId, state, tokenBadgeId, dice = None):
+	query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, Dice) 
+		SELECT %s, %s, %s, %s, Turn, %s FROM Games WHERE GameId=%s""", userId, 
+		gameId, state, tokenBadgeId, dice, gameId)
+
+def updateConquerHistory(historyId, attackingTokenBadgeId, counqueredRegion, 
+	attackedTokenBadgeId, attackedTokensNum, dice, attackType):
+	query("""INSERT INTO AttackingHistory(HistoryId, AttackingTokenBadgeId, 
+		ConqueredRegion, AttackedTokenBadgeId, AttackedTokensNum, Dice, AttackType) 
+		VALUES(%s, %s, %s, %s, %s, %s, %s)""", historyId, attackingTokenBadgeId, 
+		counqueredRegion, attackedTokenBadgeId, attackedTokensNum, 
+		dice if dice != -1 else None, attackType)
+
+def checkStage(state, gameId):
+	query("""SELECT State FROM History WHERE HistoryId=(SELECT MAX(HistoryId) 
+		FROM History WHERE GameId=%s)""", gameId)
+	row = fetchone()
+	prevState = row[0]
+	badStage = False
+	
+	if state == GAME_DEFEND and prevState == GAME_CONQUER:
+		query("""SELECT AttackType FROM AttackingHistory WHERE HistoryId=
+		(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
+		badStage = (fetchone()[0] == ATTACK_ENCHANT)
+	else:
+		badStage = (not prevState in possiblePrevCmd[state])
+
+	if badStage: raise BadFieldException('badStage')
+
+def isRegionAdjacent(currentRegionId, tokenBadgeId):
+	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE TokenBadgeId=%s""", 
+		tokenBadgeId)
+	playerRegions = fetchall()
+	playerBorderline = False	
+	for plRegion in playerRegions:
+		query("""SELECT COUNT(*) FROM AdjacentRegions a, CurrentRegionState b,
+			CurrentRegionState c WHERE b.RegionId=a.FirstRegionId 
+			AND c.RegionId=a.SecondRegionId AND b.CurrentRegionId=%s AND 
+			c.CurrentRegionId=%s""", plRegion[0], currentRegionId)
+		if fetchone():
+			playerBorderline = True
+			break
+
+	return playerBorderline, playerRegions
 
 def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
 	queryStr = 'SELECT '

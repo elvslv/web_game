@@ -12,10 +12,10 @@ class BaseRace:
 
 	def setId(self, id):
 		self.raceId = id
-	
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return not regions and (border or coast)
+
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		return (not regions and (regionInfo['coast'] or regionInfo['border'])) or regions
 	
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
 		return 0
@@ -45,9 +45,6 @@ class BaseRace:
 
 	def countAdditionalConquerPrice(self):
 		return 0
-
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return True	
 
 	def getInitBonusNum(self):
 		return 0
@@ -85,9 +82,8 @@ class RaceHalflings(BaseRace):
 		query("""UPDATE CurrentRegionState SET HoleInTheGround=TRUE WHERE 
 			TokenBadgeId=%s""", tokenBadgeId)
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return False if regions else True
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+		return True
 
 	
 	def getInitBonusNum(self):
@@ -286,13 +282,10 @@ class BaseSpecialPower:
 	def setId(self, id):
 		self.specialPowerId = id
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return not regions and (border or coast)
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		return (isAdjacent or not regions) and not regionInfo['sea']
 
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return not sea	
-	
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
 		return 0
 
@@ -442,12 +435,15 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			currentRegionId, 'badRegionId')[0]
 		checkRegionIsImmune(currentRegionId)
 		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
-		if query("""SELECT 1 FROM History a, AttackingHistory b, TokenBadges c, Users d, 
-			Games e	WHERE b.AttackingTokenBadgeId=%s AND c.TokenBadgeId=b.AttackingTokenBadgeId 
-			AND c.UserId=d.Id AND d.GameId=a.GameId AND e.GameId = a.GameId AND 
-			a.Turn=e.Turn AND a.HistoryId=b.HistoryId AND b.AttackType=%s""", 
-			tokenBadgeId, ATTACK_DRAGON):
+		
+		if query("""SELECT 1 FROM History a, AttackingHistory b, TokenBadges c, 
+			Users d, Games e WHERE b.AttackingTokenBadgeId=%s AND 
+			c.TokenBadgeId=b.AttackingTokenBadgeId AND c.UserId=d.Id AND 
+			d.GameId=a.GameId AND e.GameId = a.GameId AND a.Turn=e.Turn AND 
+			a.HistoryId=b.HistoryId AND b.AttackType=%s""", tokenBadgeId, 
+			ATTACK_DRAGON):
 			raise BadFieldException('dragonAlreadyAttackedOnThisTurn')
+			
 		query("""SELECT a.TokenBadgeId, b.TokenBadgeId, a.TokensNum FROM 
 			CurrentRegionState a, CurrentRegionState b WHERE a.CurrentRegionId=%s 
 			AND b.TokenBadgeId=%s""", currentRegionId, tokenBadgeId)
@@ -473,12 +469,10 @@ class SpecialPowerFlying(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return True
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		return ((not isAdjacent and regions) or not regions) and not regionInfo['sea']
 
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return False
 
 class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
@@ -620,8 +614,10 @@ class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
 	
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return True	
+	def tryToConquerRegion(self, currentRegionId, tokenBadgeId, regionInfo):
+		isAdjacent, regions = isRegionAdjacent(currentRegionId, tokenBadgeId)
+		return (isAdjacent and regions) or not regions 
+
 
 class SpecialPowerStout(BaseSpecialPower):
 	def __init__(self):
