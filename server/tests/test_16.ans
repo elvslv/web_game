@@ -36,39 +36,13 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 6
 	},
 	{
-		"result": "ok",
-		"dice": 1
+		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"dice": 1
-	},
-	{
-		"result": "ok",
-		"dice": 1
-	},
-	{
-		"result": "ok",
-		"dice": 1
-	},
-	{
-		"result": "ok",
-		"dice": 1
-	},	
-	{
-		"result": "ok",
-		"dice": 1
-	},	
-	{
-		"result": "ok",
-		"dice": 1
-	},
-	{
-		"result": "badTokensNum",
-		"dice": 1
+		"result": "ok"
 	},
 	{
 		"result": "ok"
@@ -76,7 +50,19 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 4
+		"coins" : 2
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 7
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "thereAreTokensInTheHand"
+	},
+	{
+		"result": "ok"
 	}
-
 ]
