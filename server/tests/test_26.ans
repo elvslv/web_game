@@ -51,22 +51,23 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 4
+		"coins" : 3
 	},
 	{
 		"result": "ok",
 		"tokenBadgeId": 5
 	},
 	{
-		"result": "badStage"
+		"result": "ok"
 	},
 	{
 		"result": "ok"
+	},
+	{
+		"result": "badTokensNum",
+		"dice": 0
 	}
 
 ]
