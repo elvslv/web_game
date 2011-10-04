@@ -145,7 +145,9 @@ class RaceDwarves(BaseRace):
 			CurrentRegionState.TokenBadgeId=%s AND 
 			Regions.RegionId=CurrentRegionState.RegionId AND Regions.Mine=1""", 
 			getTokenBadgeIdByRaceAndUser(self.raceId, userId))
-		return int(fetchone()[0])
+		res = int(fetchone()[0])
+		print res
+		return res
 
 class RaceHumans(BaseRace):
 	def __init__(self):
@@ -376,6 +378,8 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	def decline(self, userId):
 		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
 			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
+		query("""UPDATE CurrentRegionState SET Encampment=0 WHERE OwnerId=%s""",
+			userId)
 
 	def setEncampments(self, encampments, tokenBadgeId):
 		checkObjectsListCorrection(encampments, 

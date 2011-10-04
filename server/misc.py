@@ -231,7 +231,9 @@ actionFields = {
 	'getVisibleTokenBadges': [
 		{'name': 'gameId', 'type': int, 'mandatory': True}
 	],
-	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}]
+	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}],
+	'throwDice': [{'name': 'sid', 'type': int, 'mandatory': True}, 
+		{'name': 'dice', 'type': int, 'mandatory': False}]
 }
 
 possibleLandDescription = [
@@ -440,7 +442,7 @@ defaultMaps = [
 	 		},
 	 		{
 	 			'population': 1,
-	 			'landDescription' : ['mountain'],
+	 			'landDescription' : ['mountain', 'mine'],
 	 			'adjacent' : [1, 3] 
 	 		},
 	 		{
@@ -448,8 +450,8 @@ defaultMaps = [
 	 			'landDescription' : ['mountain'],
 	 			'adjacent' : [2, 4] 
 	 		},
-                        	 		{
-	 			'landDescription' : ['mountain'],
+			{
+	 			'landDescription' : ['mountain', 'mine'],
 	 			'adjacent' : [3] 
 	 		}
 	 	]
