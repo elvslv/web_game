@@ -432,9 +432,14 @@ defaultMaps = [
 	 	[
 	 		{
 	 			'landDescription' : ['border', 'mountain'],
-	 			'adjacent' : [2] 
+	 			'adjacent' : [1] 
 	 		},
 	 		{
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [0, 2] 
+	 		},
+	 		{
+	 			'population': 1,
 	 			'landDescription' : ['mountain'],
 	 			'adjacent' : [1, 3] 
 	 		},
@@ -443,14 +448,9 @@ defaultMaps = [
 	 			'landDescription' : ['mountain'],
 	 			'adjacent' : [2, 4] 
 	 		},
-	 		{
-	 			'population': 1,
-	 			'landDescription' : ['mountain'],
-	 			'adjacent' : [3, 5] 
-	 		},
                         	 		{
 	 			'landDescription' : ['mountain'],
-	 			'adjacent' : [4] 
+	 			'adjacent' : [3] 
 	 		}
 	 	]
 	}	

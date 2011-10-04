@@ -2,6 +2,7 @@ from editDb import query, fetchall, fetchone
 from gameExceptions import BadFieldException
 from misc_game import *
 from misc import *
+from checkFields import *
 
 class BaseRace:
 	def __init__(self, name, initialNum, maxNum):
@@ -321,12 +322,6 @@ class BaseSpecialPower:
 	def clearRegion(self, tokenBadgeId, currentRegionId):
 		pass
 
-	def setEncampment(self, tokenBadgeId, currentRegionId, encampmentsNum):
-		raise BadFieldException('badAction')
-
-	def breakEncampment(self, tokenBadgeId, currentRegionId, encampmentsNum):
-		raise BadFieldException('badAction')
-
 	def throwDice(self):
 		raise BadFieldException('badAction')
 
@@ -382,7 +377,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
 			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
 
-	def setEncampments(encampments, tokenBadgeId):
+	def setEncampments(self, encampments, tokenBadgeId):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
@@ -390,9 +385,9 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		query('UPDATE CurrentRegionState SET Encampment=0 WHERE TokenBadgeId=%s', 
 			tokenBadgeId)
 		freeEncampments = 5
-		for encampment in ecampments:
-			currentRegionId = region['regionId']
-			encampmentsNum = region['encampmentsNum']
+		for encampment in encampments:
+			currentRegionId = encampment['regionId']
+			encampmentsNum = encampment['encampmentsNum']
 			if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
 				AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
 				raise BadFieldException('badRegion')
@@ -403,10 +398,6 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 
 			freeEncampments -= encampmentsNum
 
-		query('UPDATE Users SET SpecialPowerBonusNum=%s WHERE TokenBadgeId=%s',
-			freeEncampments, tokenBadgeId)
-
-				
 class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)

@@ -9,6 +9,7 @@ def checkForFriends(userId, attackedUserId):
 		a.Id=%s AND b.Id=%s""", userId, attackedUserId)
 
 	attackingPriority, attackedPriority = fetchone()
+
 	if query("""SELECT 1 FROM History a, Games b WHERE a.GameId=b.GameId AND 
 		a.Turn=b.Turn-%s AND a.State=%s AND a.UserId=%s AND a.Friend=%s""", 
 		1 if attackingPriority < attackedPriority else 0, GAME_CHOOSE_FRIEND, 
@@ -17,8 +18,8 @@ def checkForFriends(userId, attackedUserId):
 
 def updateHistory(userId, gameId, state, tokenBadgeId, dice = None):
 	query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, Dice) 
-		SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", userId, 
-		gameId, state, tokenBadgeId, gameId, dice)
+		SELECT %s, %s, %s, %s, Turn, %s FROM Games WHERE GameId=%s""", userId, 
+		gameId, state, tokenBadgeId, dice, gameId)
 
 def updateConquerHistory(historyId, attackingTokenBadgeId, counqueredRegion, 
 	attackedTokenBadgeId, attackedTokensNum, dice, attackType):
@@ -31,7 +32,8 @@ def updateConquerHistory(historyId, attackingTokenBadgeId, counqueredRegion,
 def checkStage(state, gameId):
 	query("""SELECT State FROM History WHERE HistoryId=(SELECT MAX(HistoryId) 
 		FROM History WHERE GameId=%s)""", gameId)
-	prevState = fetchone()[0]
+	row = fetchone()
+	prevState = row[0]
 	if not prevState in possiblePrevCmd[state]:
 		raise BadFieldException('badStage')
 	
@@ -53,8 +55,8 @@ def act_setReadinessStatus(data):
 	readyPlayersNum = fetchone()[0]
 	if maxPlayersNum == readyPlayersNum:
 		# Starting
-		query('UPDATE Users SET Coins=%s, TokensInHand=0, CurrentTokenBadge=NULL, \
-			DeclinedTokenBadge=NULL WHERE GameId=%s', misc.INIT_COINS_NUM, gameId)
+		query("""UPDATE Users SET Coins=%s, TokensInHand=0, CurrentTokenBadge=NULL,
+			DeclinedTokenBadge=NULL WHERE GameId=%s""", misc.INIT_COINS_NUM, gameId)
 		query('SELECT Id FROM Users WHERE GameId=%s ORDER BY Priority', gameId)
 		actPlayer = fetchone()[0]
 		query("""UPDATE Games SET State=%s, Turn=0, ActivePlayer=%s WHERE 
@@ -62,24 +64,23 @@ def act_setReadinessStatus(data):
 
 		#generate first 6 races
 		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
-                        vRaces = data['visibleRaces']
-                        vSpecialPowers = data['visibleSpecialPowers']
-                        for i in range(misc.VISIBLE_RACES):
-                                showNextRace(gameId, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], vSpecialPowers[misc.VISIBLE_RACES-i-1])
-                else:
-                        for i in range(misc.VISIBLE_RACES):
-                                showNextRace(gameId, misc.VISIBLE_RACES - 1)
+			vRaces = data['visibleRaces']
+			vSpecialPowers = data['visibleSpecialPowers']
+			for i in range(misc.VISIBLE_RACES):
+				showNextRace(gameId, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES- i - 1], vSpecialPowers[misc.VISIBLE_RACES - i - 1])
+		else:
+			for i in range(misc.VISIBLE_RACES):
+				showNextRace(gameId, misc.VISIBLE_RACES - 1)
 			
-	updateHistory(userId, gameId, GAME_START, None)
+		updateHistory(userId, gameId, GAME_START, None)
+		
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
 	sid, (tokenBadgeId, coins, userId, gameId) = extractValues('Users', 'Sid', 
 		data['sid'], 'badSid', True, ['CurrentTokenBadge', 'Coins', 'Id', 'GameId'])
-
 	if tokenBadgeId:
 		raise BadFieldException('badStage')
-		
 	checkStage(GAME_SELECT_RACE, gameId)
 	checkActivePlayer(gameId, userId)
 	checkDefendingPlayerNotExists(gameId)
@@ -125,11 +126,13 @@ def act_conquer(data):
 		Regions.RegionId=CurrentRegionState.RegionId AND 
 		CurrentRegionState.CurrentRegionId=%s""", userId, currentRegionId):
 		raise BadFieldException('badRegionId')
+
 	ownerId, attackedTokenBadgeId, attackedTokensNum, attackedInDecline, regInfo = getRegionInfo(currentRegionId)
 	if ownerId == userId and not attackedInDecline: 
 		raise BadFieldException('badRegion')
 
-	checkForFriends(userId, ownerId)
+	if ownerId:
+		checkForFriends(userId, ownerId)
 
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE 
 		TokenBadgeId=%s""", tokenBadgeId)
@@ -174,7 +177,7 @@ def act_conquer(data):
 		callRaceMethod(raceId, 'countConquerBonus', currentRegionId, 
 		attackedTokenBadgeId) + callSpecialPowerMethod(specialPowerId, 
 		'countConquerBonus', currentRegionId, attackedTokenBadgeId), 1)
-			
+
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
 	dice = -1
@@ -191,13 +194,14 @@ def act_conquer(data):
 	if unitsNum < unitPrice:
 		updateHistory(userId, gameId, GAME_UNSUCCESSFULL_CONQUER, tokenBadgeId)
 		return {'result': 'badTokensNum', 'dice': dice}
-			
+
 	if attackedTokenBadgeId:
 		clearRegionFromRace(currentRegionId, attackedTokenBadgeId)
 	query("""UPDATE CurrentRegionState SET OwnerId=%s, TokensNum=%s, InDecline=False, 
 		TokenBadgeId=%s	WHERE CurrentRegionId=%s""", userId, unitPrice, tokenBadgeId, 
 		currentRegionId) 
 	callRaceMethod(raceId, 'conquered', currentRegionId, tokenBadgeId)
+
 	updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
 	updateConquerHistory(lastId(), tokenBadgeId, currentRegionId, attackedTokenBadgeId, 
 		attackedTokensNum, dice, ATTACK_CONQUER)
@@ -351,7 +355,6 @@ def act_finishTurn(data):
 			tokenBadgeId)
 
 	updateHistory(userId, gameId, GAME_FINISH_TURN, tokenBadgeId)
-	print row
 	prepareForNextTurn(gameId, row[0], row[1])
 	return {'result': 'ok', 'nextPlayer' : row[0],'coins': coins}
 
