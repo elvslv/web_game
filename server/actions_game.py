@@ -34,8 +34,16 @@ def checkStage(state, gameId):
 		FROM History WHERE GameId=%s)""", gameId)
 	row = fetchone()
 	prevState = row[0]
-	if not prevState in possiblePrevCmd[state]:
-		raise BadFieldException('badStage')
+	badStage = False
+	
+	if state == GAME_DEFEND and prevState == GAME_CONQUER:
+		query("""SELECT AttackType FROM AttackingHistory WHERE HistoryId=
+		(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
+		badStage = (fetchone()[0] == ATTACK_ENCHANT)
+	else:
+		badStage = (not prevState in possiblePrevCmd[state])
+
+	if badStage: raise BadFieldException('badStage')
 	
 def act_setReadinessStatus(data):
 	sid, (userId, gameId) = extractValues('Users', 'Sid', data['sid'], 'badSid', 
@@ -103,11 +111,8 @@ def act_selectRace(data):
 	query("""UPDATE Users SET CurrentTokenBadge=%s, Coins=Coins-%s+%s, 
 		TokensInHand=%s WHERE Sid=%s""", tokenBadgeId, price, bonusMoney, 
 		tokensNum + addUnits, sid)
-	query("""UPDATE TokenBadges SET OwnerId=%s, InDecline=False, 
-		SpecialPowerBonusNum=%s, RaceBonusNum=%s, TotalTokensNum=%s, 
-		Position=NULL WHERE TokenBadgeId=%s""", userId,	
-		callSpecialPowerMethod(specialPowerId, 'getInitBonusNum'), 
-		callRaceMethod(raceId, 'getInitBonusNum'), tokensNum, tokenBadgeId)	
+	query("""UPDATE TokenBadges SET OwnerId=%s, InDecline=False, TotalTokensNum=%s, 
+		Position=NULL WHERE TokenBadgeId=%s""", userId,	tokensNum, tokenBadgeId)	
 	updateRacesOnDesk(gameId, position)
 	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
 
@@ -429,7 +434,7 @@ def act_dragonAttack(data):
 	if not(tokenBadgeId):
 		raise BadFieldException('badStage')
 
-	checkStage(GAME_DRAGON_ATTACK, gameId)
+	checkStage(GAME_CONQUER, gameId)
 	checkDefendingPlayerNotExists(gameId)
 	checkActivePlayer(gameId, userId)
 	
@@ -445,7 +450,7 @@ def act_enchant(data):
 	if not(tokenBadgeId):
 		raise BadFieldException('badStage')
 
-	checkStage(GAME_ENCHANT, gameId)
+	checkStage(GAME_CONQUER, gameId)
 	checkDefendingPlayerNotExists(gameId)
 	checkActivePlayer(gameId, userId)
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)

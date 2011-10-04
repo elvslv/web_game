@@ -108,8 +108,6 @@ def createTables():
 			OwnerId INT UNSIGNED, 
 			InDecline BOOL DEFAULT FALSE, 
 			TotalTokensNum INT UNSIGNED DEFAULT 0,
-			RaceBonusNum INT UNSIGNED DEFAULT 0,
-			SpecialPowerBonusNum INT UNSIGNED DEFAULT 0,
 			TotalSpecialPowerBonusNum INT UNSIGNED DEFAULT 0)""")
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Chat(
