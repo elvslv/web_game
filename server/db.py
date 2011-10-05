@@ -88,12 +88,10 @@ class TokenBadge(Base):
     bonusMoney = Column(Integer, default = 0)
     inDecline = Column(Boolean, default=False)
     totalTokensNum = Column(Integer, default = 0)
-    raceBonusNum = Column(Integer, default = 0)
-    specPowersNum = Column(Integer, default = 0)
     totalSpecPowerBonusNum = Column(Integer, default = 0)
 
     game = relationship(Game, backref=backref('tokenBadges'))
-    owner = relationship(User, backref=backref('tokenBadges'))
+    owner = relationship(User)
 
     def __init__(self, raceId, specPowerId): 
         self.raceId = raceId
@@ -274,5 +272,3 @@ def Database():
     return _database
 
 
-if __name__=='__main__':
-	a = Database()

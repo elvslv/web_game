@@ -1,4 +1,4 @@
-import editDb
+from db import Database, User
 import re
 import time
 import math
@@ -9,10 +9,12 @@ import races
 
 from gameExceptions import BadFieldException
 from checkFields import *
-from editDb import query, fetchall, fetchone, lastId, commit, rollback
 from actions_game import *
 from misc_game import *
 from misc import *
+
+
+dbi = Database()
 
 def createDefaultRaces(): 
 	pass
@@ -25,10 +27,7 @@ def act_register(data):
 	if  not re.match(misc.pwdRegexp, passwd, re.I):
 		raise BadFieldException('badPassword')
 
-	if query('SELECT 1 FROM Users WHERE Username=%s', username):
-		raise BadFieldException('usernameTaken')
-	query('INSERT INTO Users(Username, Password) VALUES (%s, %s)',
-		username, passwd)
+	dbi.add(User(username, passwd))
 	return {'result': 'ok'}
 
 def act_login(data):
