@@ -60,7 +60,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id = pkey()
-    username = Column(String(MAX_USERNAME_LEN), unique=True, nullable=False)
+    name = Column(String(MAX_USERNAME_LEN), unique=True, nullable=False)
     password = string(MAX_PASSWORD_LEN)
     sid = Column(Integer, unique=True)
     gameId = fkey('games.id')
@@ -74,7 +74,7 @@ class User(Base):
     game = relationship(Game, backref=backref('players'))
 
     def __init__(self, username, password):
-        self.username = username
+        self.name = username
         self.password = password
 
 
@@ -277,6 +277,15 @@ class _Database:
             return self.session.query(User).filter_by(sid=sid).one()
         except NoResultFound:
           return None
+    
+    def getUserByNameAndPwd(self, username, password):
+        try:
+            return self.session.query(User).\
+                filter(User.name == username).\
+                filter(User.password == password).one()
+        except NoResultFound:
+            return None
+
 
 _database = _Database()
 

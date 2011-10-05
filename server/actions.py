@@ -8,6 +8,7 @@ import random
 import races
 
 from gameExceptions import BadFieldException
+from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
 from actions_game import *
 from misc_game import *
@@ -31,14 +32,16 @@ def act_register(data):
 def act_login(data):
 	username = data['username']
 	passwd = data['password']
-	if not query('SELECT 1 FROM Users WHERE Username=%s AND Password=%s', username, passwd):
+	user = dbi.getUserByNameAndPwd(username, passwd)
+	if not user:
 		raise BadFieldException('badUsernameOrPassword')
 
 	while 1:
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
-		if not query('SELECT 1 FROM Users WHERE Sid=%s', sid):
+		if not dbi.getUserBySid(sid):
 			break
-	query('UPDATE Users SET Sid=%s WHERE Username=%s', sid, username)
+	user.sid = sid
+	dbi.commit()
 	return {'result': 'ok', 'sid': sid}
 
 def act_logout(data):
@@ -240,6 +243,6 @@ def doAction(data):
 		checkFieldsCorrectness(data);
 		res = globals()[func](data)
 		return res
-	except MySQLdb.Error, e:
+	except SQLAlchemyError, e:
 		dbi.rollback()
 		return e
