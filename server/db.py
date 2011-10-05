@@ -1,6 +1,6 @@
 from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN
 from gameExceptions import BadFieldException
-from sqlalchemy import create_engine, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime
+from sqlalchemy import create_engine, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text
 from sqlalchemy.orm import sessionmaker, relationship, backref, join
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
@@ -19,6 +19,7 @@ DB_STRING =  """mysql+mysqldb://%s:%s@%s:%d/%s""" % \
 Base = declarative_base()
 
 string = lambda len: Column(String(len))
+#text = lambda : Column(String())
 pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 requiredInteger = lambda: Column(Integer, nullable=False)
@@ -50,10 +51,11 @@ class Game(Base):
 
     map = relationship(Map)
 
-    def __init__(self, name, descr, turn, mapId): 
+    def __init__(self, name, descr, mapId): 
         self.name = name
         self.descr = descr
-        self.turn = turn
+        self.turn = 0
+        self.state = GAME_WAITING
         self.mapId = mapId
 
 class User(Base):
@@ -71,7 +73,7 @@ class User(Base):
     tokensInHand = Column(Integer, default = 0)
     priority = Column(Integer)
 
-    game = relationship(Game, backref=backref('players'))
+    game = relationship(Game, backref=backref('players', order_by=priority))
 
     def __init__(self, username, password):
         self.name = username
@@ -103,6 +105,7 @@ class Region(Base):
     __tablename__ = 'regions'
 
     id = pkey()
+    mapId = fkey('maps.id')
     defTokensNum = Column(Integer, default = 0)
 
     border = Column(Boolean, default=False)
@@ -117,9 +120,11 @@ class Region(Base):
     swamp = Column(Boolean, default=False) 
     cavern = Column(Boolean, default=False)
 
-    def __init__(self, defTokensNum, descr): 
+    map = relationship(Map, backref=backref('regions'))
+
+    def __init__(self, defTokensNum, mapId): 
         self.defTokensNum = defTokensNum
-        self.descr = descr
+        self.mapId = mapId
 
     def addNeighbors(self, *nodes):
         for node in nodes:
@@ -170,15 +175,17 @@ class RegionState(Base):
     owner = relationship(User, backref=backref('regions'))
     region = relationship(Region, uselist=False, backref=backref('state'))
 
-    def __init__(self, regionId):
+    def __init__(self, regionId, gameId, tokensNum):
         self.regionId = regionId
+        self.gameId = gameId
+        self.tokensNum = tokensNum
 
 class Message(Base):
     __tablename__ = 'chat'
 
     id = pkey()
     sender = fkey('users.id')
-    text = string(300)
+    text = text()
     time = Column(Integer)
 
     def __init__(self, sender, text, time): 
@@ -240,12 +247,28 @@ class _Database:
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
-    def addUser(self, user):
+    def addUnique(self, obj, name):
         try:
-            self.add(user)
+            self.add(obj)
         except IntegrityError:
             self.rollback()
-            raise BadFieldException('UsernameTaken')
+            raise BadFieldException('%sTaken', name)
+    
+    def addRegion(regInfo):
+        misc.checkListCorrectness(regInfo, 'landDescription', str)
+        misc.checkListCorrectness(regInfo, 'adjacent', int)
+        if not 'population' in regInfo:
+            regInfo['population'] = 0
+
+        reg = Region(regInfo['mapId'], regInfo['population'])
+        for descr in regInfo['landDescription']:
+            if not descr in misc.possibleLandDescription[:11]:
+                raise BadFieldException('unknownLandDescription')
+            setattr(reg, descr, 1)
+        reg.addNeighbors(map(lambda x: Adjacency(reg.id, x), regInfo['adjacent'])).\
+            addNeighbors(map(lambda x: Adjacency(x, reg.id), regInfo['adjacent'])) 
+
+        self.add(reg)
 
     def commit(self):
         self.session.commit()
@@ -273,7 +296,7 @@ class _Database:
             self.engine.execute(table.delete())
 
     def getUserBySid(self, sid):
-        try:
+         try:
             return self.session.query(User).filter_by(sid=sid).one()
         except NoResultFound:
           return None
@@ -285,6 +308,21 @@ class _Database:
                 filter(User.password == password).one()
         except NoResultFound:
             return None
+
+## Are there any macro in python? 
+
+    def getMapById(self, id):
+        try:
+            return self.session.query(Map).filter_by(id=id).one()
+        except NoResultFound:
+          return None
+    
+    def getGameById(self, id):
+        try:
+            return self.session.query(Game).filter_by(id=id).one()
+        except NoResultFound:
+          return None
+
 
 
 _database = _Database()

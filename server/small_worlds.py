@@ -17,7 +17,6 @@ def application(environ, start_response):
         except (TypeError, ValueError):
             return 'Cannot read request body'
         try:
-	    misc.LAST_SID = 0
             response_body = parseJson.parseInputData(request_body)
         except BaseException, e:
             response_body = 'An error %s occured while trying parse json: %s' % (e, request_body)
