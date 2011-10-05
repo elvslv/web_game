@@ -57,16 +57,6 @@
 		"result": "ok",
 		"nextPlayer" : 2,
 		"coins" : 4
-	},
-	{
-		"result": "ok",
-		"tokenBadgeId": 5
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok"
 	}
 
 ]

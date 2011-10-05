@@ -49,7 +49,7 @@
 			"action": "setReadinessStatus",
 			"sid": 2,
 			"isReady": 1,
-			"visibleRaces": ["Amazons", "Sorcerers", "Elves", "Giants", "Halflings", "Humans"],
+			"visibleRaces": ["Humans", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
 			"visibleSpecialPowers": ["Forest", "Berserk", "Bivouacking", "Commando", "Diplomat", "Dragon master"]
 		},
 		{
@@ -64,53 +64,18 @@
 			"regionId" : 1
 		},
 		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 3
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 4
-		},
-		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 1}, 
-				{"regionId": 2, "tokensNum": 1},
-				{"regionId": 3, "tokensNum": 1}, 
-				{"regionId": 4, "tokensNum": 7}]
+			"regions": [{"regionId": 1, "tokensNum": 9}]
 		},
-
 		{
 			"action": "finishTurn",
 			"sid" : 1
 			
-		},
-		{
-			"action": "selectRace",
-			"sid": 2,
-			"position" : 1
-		},
-		{
-			"action": "enchant",
-			"sid": 2,
-			"regionId" : 1
-		},
-
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId" : 1
 		}
 
 	],
-	"description": "race Sorcerers"
+	"description": "race Humans"
 }
 
 

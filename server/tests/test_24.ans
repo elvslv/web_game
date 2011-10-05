@@ -21,7 +21,7 @@
 	{
 		"result": "ok",
 		"gameId": 1,
-		"regions": [1, 2, 3, 4, 5]
+		"regions": [1, 2, 3, 4]
 	},
 	{
 		"result": "ok"
@@ -48,25 +48,9 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 4
-	},
-	{
-		"result": "ok",
-		"tokenBadgeId": 5
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok"
+		"coins" : 1
 	}
 
 ]
