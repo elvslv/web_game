@@ -217,7 +217,6 @@ def getRegionInfoById(currentRegionId):
 def getRegionInfo(currentRegionId):
 	if not query("""SELECT RegionId FROM CurrentRegionState WHERE CurrentRegionId=%s""",
 		currentRegionId):
-		print 4
 		raise BadFieldException('badRegionId')
 	regInfo = list(extractValues('Regions', 'RegionId', fetchone()[0], 'badRegionId', 
 		True, misc.possibleLandDescription[:11])[1])
