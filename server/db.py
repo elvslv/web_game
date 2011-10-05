@@ -4,23 +4,19 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, join
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 
-import MySQLdb
-
-
-
 DATABASE_HOST = "localhost"
 DATABASE_USER = "admin"
 DATABASE_NAME = "testdb"
 DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
 
-DB_STRING =  'mysql+mysqldb://<%s>:<%s>@<%s>[:<%s>]/<%s>', \
-	DATABASE_USER, DATABASE_PASSWD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME 
+DB_STRING =  """mysql+mysqldb://%s:%s@%s:%d/%s""" % \
+	(DATABASE_USER, DATABASE_PASSWD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME)
+
 
 Base = declarative_base()
 
 string = lambda len: Column(String(len))
-uniqueString = lambda: Column(String, unique=True)
 pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 requiredInteger = lambda: Column(Integer, nullable=False)
@@ -50,7 +46,7 @@ class Game(Base):
     activePlayer = Column(Integer)
     mapId = fkey('maps.id')
 
-    map = relationship(Map, backref=backref('games'))
+    map = relationship(Map)
 
     def __init__(self, name, descr, turn, mapId): 
         self.name = name
@@ -64,8 +60,8 @@ class User(Base):
     id = pkey()
     username = Column(String(MAX_USERNAME_LEN), unique=True, nullable=False)
     password = string(MAX_PASSWORD_LEN)
-    sid = uniqueString()
-    gameId = fkey('Games.id')
+    sid = Column(Integer, unique=True)
+    gameId = fkey('games.id')
     isReady = Column(Boolean, default=False)
     currentTokenBadge = Column(Integer)
     declinedTokenBadge = Column(Integer) 
@@ -73,12 +69,35 @@ class User(Base):
     tokensInHand = Column(Integer, default = 0)
     priority = Column(Integer)
 
-    game = relationship(Game, backref=backref('users'))
+    game = relationship(Game, backref=backref('players'))
 
     def __init__(self, username, password):
         self.username = username
         self.password = password
 
+
+class TokenBadge(Base):
+    __tablename__ = 'tokenBadges'
+
+    id = pkey()
+    raceId = Column(Integer)
+    specPowId = Column(Integer)
+    gameId = fkey('games.id')
+    owner = fkey('users.id')
+    pos = Column(Integer)
+    bonusMoney = Column(Integer, default = 0)
+    inDecline = Column(Boolean, default=False)
+    totalTokensNum = Column(Integer, default = 0)
+    raceBonusNum = Column(Integer, default = 0)
+    specPowersNum = Column(Integer, default = 0)
+    totalSpecPowerBonusNum = Column(Integer, default = 0)
+
+    game = relationship(Game, backref=backref('tokenBadges'))
+    owner = relationship(User, backref=backref('tokenBadges'))
+
+    def __init__(self, raceId, specPowerId): 
+        self.raceId = raceId
+        self.specPowerId = specPowerId
 
 class Region(Base):
     __tablename__ = 'regions'
@@ -105,7 +124,7 @@ class Region(Base):
     def addNeighbors(self, *nodes):
         for node in nodes:
             Edge(self, node)
-    	return self
+        return self
    
     def getNeighbors(self):
         return map(lambda x : x.left, self.rightNeightbors) + map(lambda x : x.right, self.leftNeightbors)
@@ -134,48 +153,32 @@ class RegionState(Base):
 	
     id = pkey()
     gameId = fkey('games.id')
-    tokenBadgeId = fkey('TokenBadges.id') 
+    tokenBadgeId = fkey('tokenBadges.id') 
+    ownerId = fkey('users.id')
+    regionId = fkey('regions.id') 
     tokensNum = Column(Integer, default = 0)
-    owner = fkey('Users.id') 
     holeInTheGround = Column(Boolean, default = False)
     encampment = Column(Integer, default = 0)
     dragon = Column(Boolean, default = False) 
     fortress = Column(Boolean, default = False) 
     hero = Column(Boolean, default = False) 
-    fortifield = Column(Boolean, default = False) 
+    fortified = Column(Boolean, default = False) 
     inDecline = Column(Boolean, default = False) 
 
-    game = relationship(Game, backref=backref('currentRegionStates'))
+    game = relationship(Game, backref=backref('currentRegionState'))
+    tokenBadge = relationship(TokenBadge, backref=backref('ourRegionState'))    # rename
+    owner = relationship(User, backref=backref('regions'))
+    region = relationship(Region, uselist=False, backref=backref('state'))
 
-class TokenBadge(Base):
-    __tablename__ = 'tokenBadges'
-
-    id = pkey()
-    raceId = Column(Integer)
-    specPowId = Column(Integer)
-    gameId = fkey('games.id')
-    pos = Column(Integer)
-    bonusMoney = Column(Integer, default = 0)
-    owner = fkey('users.id')
-    inDecline = Column(Boolean, default=False)
-    totalTokensNum = Column(Integer, default = 0)
-    raceBonusNum = Column(Integer, default = 0)
-    specPowersNum = Column(Integer, default = 0)
-    totalSpecPowerBonusNum = Column(Integer, default = 0)
-
-    game = relationship(Game, backref=backref('tokenBadges'))
-
-    def __init__(self, raceId, specPowerId): 
-        self.raceId = raceId
-        self.specPowerId = specPowerId
-
+    def __init__(self, regionId):
+        self.regionId = regionId
 
 class Message(Base):
     __tablename__ = 'chat'
 
     id = pkey()
     sender = fkey('users.id')
-    text = Column(String)
+    text = string(300)
     time = Column(Integer)
 
     def __init__(self, sender, text, time): 
@@ -210,15 +213,15 @@ class AttackingHistoryEntry(Base):
     id = pkey()
     mainHistEntryId = fkey('history.id')
     aggressorBadgeId = fkey('tokenBadges.id')
-    victimBadgeId = fkey('tokenBadgeId')
+    victimBadgeId = fkey('tokenBadges.id')
     conqRegion = Column(Integer)
     aggressorTokensNum = Column(Integer, default = 0)
     diceRes = Column(Integer)
     attackType = Column(Integer) 
     
     mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory'))
-    agressorBadge = relationship(TokenBadge, backref=backref('warHistory'))
-    victimBadge = relationship(TokenBadge, backref=backref('warHistory'))
+    agressorBadge = relationship(TokenBadge)
+    victimBadge = relationship(TokenBadge)
 
     def __init__(self, mainHistEntry, aggressorBadgeId, conqRegion, victimBadgeId, diceRes, attackType): 
        self.mainHistEntry = mainHistoryEntry
@@ -230,7 +233,7 @@ class AttackingHistoryEntry(Base):
 
 
 class _Database:
-    engine = create_engine(DB_STRING, echo=False)
+    engine = create_engine(DB_STRING, echo=True)
 
     def __init__(self):
         Base.metadata.create_all(self.engine)
