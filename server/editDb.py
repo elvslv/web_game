@@ -64,7 +64,8 @@ def createTables():
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Regions(
 			MapId INT UNSIGNED REFERENCES Maps(MapId), 
-			RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
+			RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+			LocalRegionId INT UNSIGNED,
 			DefaultTokensNum INT UNSIGNED DEFAULT 0,
 			Border BOOL DEFAULT FALSE, 
 			Coast BOOL DEFAULT FALSE, 

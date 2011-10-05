@@ -438,25 +438,25 @@ defaultMaps = [
 	 	[
 	 		{
 	 			'landDescription' : ['border', 'mountain', 'mine', 'farmland','magic'],
-	 			'adjacent' : [1] 
+	 			'adjacent' : [2] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain'],
-	 			'adjacent' : [0, 2] 
-	 		},
-	 		{
-	 			'population': 1,
-	 			'landDescription' : ['mountain', 'mine'],
 	 			'adjacent' : [1, 3] 
 	 		},
 	 		{
 	 			'population': 1,
-	 			'landDescription' : ['mountain'],
+	 			'landDescription' : ['mountain', 'mine'],
 	 			'adjacent' : [2, 4] 
+	 		},
+	 		{
+	 			'population': 1,
+	 			'landDescription' : ['mountain'],
+	 			'adjacent' : [3, 5] 
 	 		},
 			{
 	 			'landDescription' : ['mountain', 'mine'],
-	 			'adjacent' : [3] 
+	 			'adjacent' : [4] 
 	 		}
 	 	]
 	}	

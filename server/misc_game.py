@@ -212,17 +212,12 @@ def throwDice():
 	return dice
 
 def getRegionInfoById(currentRegionId):
-	queryStr = 'SELECT '
-	for regParam in misc.possibleLandDescription:
-		queryStr += (', %s' if regParam != misc.possibleLandDescription else '%s') % regParam
-
-	queryStr += ' FROM CurrentRegionState WHERE CurrentRegionId=%%s'
-	query(queryStr, currentRegionId)
-	return fetchone()
+	return getRegionInfo(currentRegionId)[4]
 
 def getRegionInfo(currentRegionId):
 	if not query("""SELECT RegionId FROM CurrentRegionState WHERE CurrentRegionId=%s""",
 		currentRegionId):
+		print 4
 		raise BadFieldException('badRegionId')
 	regInfo = list(extractValues('Regions', 'RegionId', fetchone()[0], 'badRegionId', 
 		True, misc.possibleLandDescription[:11])[1])
@@ -257,6 +252,21 @@ def generateTokenBadges(randSeed, num):
 
 def clearGameStateAtTheEndOfTurn(gameId):
 	pass
+
+def getCurrentRegionId(localRegionId, gameId):
+	#print localRegionId, gameId
+	#if not query("""SELECT a.CurrentRegionId FROM CurrentRegionState a, Regions b, 
+	#	Maps c, Games d WHERE a.RegionId=b.RegionId AND b.LocalRegionId=%s AND 
+	#	b.MapId=c.MapId AND c.MapId=d.MapId AND d.GameId=%s""", localRegionId, gameId):
+	#	raise BadFieldException('badRegionId')
+
+	#return fetchone()[0]
+	return localRegionId
+
+def getGameIdByTokenBadge(tokenBadgeId):
+	query("""SELECT a.GameId FROM Users a, TokenBadges b WHERE a.Id=b.OwnerId 
+		AND b.TokenBadgeId=%s""", tokenBadgeId)
+	return fetchone()[0]
 
 if __name__=='__main__':
 	print generateTokenBadges(int(sys.argv[1]), int(sys.argv[2]))

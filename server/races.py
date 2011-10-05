@@ -32,7 +32,7 @@ class BaseRace:
 			COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s) WHERE OwnerId=%s""", 
 			userId, userId)
 	
-	def countAdditionalRedeploymentUnits(self, userId, gameId):
+	def countAdditionalRedeploymentUnits(self, tokenBadgeId, gameId):
 		return 0
 
 	def countAdditionalConquerUnits(self, userId, gameId):
@@ -105,13 +105,13 @@ class RaceGiants(BaseRace):
 
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
 		res = 0
-		query("""SELECT Regions.RegionId, Regions.Mountain FROM CurrentRegionState, 
-			Regions WHERE CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId""", tokenBadgeId)
+		query("""SELECT b.RegionId, b.Mountain FROM CurrentRegionState a, 
+			Regions b WHERE a.TokenBadgeId=%s AND a.RegionId=b.RegionId""", 
+			tokenBadgeId)
 		row = fetchall()
 		for region in row:
 			if query("""SELECT 1 FROM AdjacentRegions, CurrentRegionState 
-				WHERE CurrentRegionState.RegionId=FirstRegionId AND
+				WHERE CurrentRegionState.RegionId=AdjacentRegions.FirstRegionId AND
 				CurrentRegionState.CurrentRegionId=%s AND 
 				AdjacentRegions.SecondRegionId=%s""", currentRegionId, 
 				region[0]) and region[1]:
@@ -177,8 +177,8 @@ class RaceAmazons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Amazons', 6, 15)
 
-	def countAdditionalRedeploymentUnits(self, userId, gameId):
-		return -4 if  getPrevState(gameId) == GAME_CONQUER else 0
+	#def countAdditionalRedeploymentUnits(self, userId, gameId):
+	#	return -4 if  getPrevState(gameId) == GAME_CONQUER else 0
 
 	def countAdditionalConquerUnits(self, userId, gameId):
 		return 4 if getPrevState(gameId) in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
@@ -187,7 +187,7 @@ class RaceSkeletons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Skeletons', 5, 18)
 
-	def countAdditionalRedeploymentUnits(self, userId, gameId):
+	def countAdditionalRedeploymentUnits(self, tokenBadgeId, gameId):
 		return getNonEmptyConqueredRegions(tokenBadgeId, gameId) / 2
 		
 			
@@ -372,12 +372,13 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
-
 		query('UPDATE CurrentRegionState SET Encampment=0 WHERE TokenBadgeId=%s', 
 			tokenBadgeId)
 		freeEncampments = 5
 		for encampment in encampments:
-			currentRegionId = encampment['regionId']
+			
+			currentRegionId = getCurrentRegionId(encampment['regionId'], 
+				getGameIdByTokenBadge(tokenBadgeId))
 			encampmentsNum = encampment['encampmentsNum']
 			if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
 				AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
@@ -530,7 +531,8 @@ class SpecialPowerFortifield(BaseSpecialPower):
 			raise BadFieldException('badRegionId')
 
 		currentRegionId, ownerBadgeId, hasFortifield = extractValues('CurrentRegionState', 
-			'CurrentRegionId', fortifield['regionId'], 'badRegionId', True, 
+			'CurrentRegionId', getCurrentRegionId(fortifield['regionId'], 
+			getGameIdByTokenBadge(tokenBadgeId)), 'badRegionId', True, 
 			['TokenBadgeId', 'Fortifield'])
 
 		if ownerBadgeId != tokenBadgeId:
@@ -574,7 +576,8 @@ class SpecialPowerHeroic(BaseSpecialPower):
 			tokenBadgeId)
 		for hero in heroes:
 			currentRegionId, ownerBadgeId = extractValues('CurrentRegionState', 
-			'CurrentRegionId', heroe['regionId'], 'badRegionId', True, 
+			'CurrentRegionId', getCurrentRegionId(heroe['regionId'], 
+			getGameIdByTokenBadge(tokenBadgeId)), 'badRegionId', True, 
 			['TokenBadgeId'])
 
 			if ownerBadgeId != tokenBadgeId:
