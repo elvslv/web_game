@@ -202,7 +202,8 @@ def act_redeploy(data):
 	unitsNum += addUnits
 	if not unitsNum:
 		raise BadFieldException('noTokensForRedeployment')
-	query('UPDATE CurrentRegionState SET TokensNum=0 WHERE TokenBadgeId=%s', tokenBadgeId)
+	query('UPDATE CurrentRegionState SET TokensNum=0 WHERE TokenBadgeId=%s', 
+		tokenBadgeId)
 
 	if not query("""SELECT CurrentRegionId, COUNT(*) FROM CurrentRegionState WHERE 
 		TokenBadgeId=%s""", tokenBadgeId):
@@ -258,7 +259,8 @@ def act_redeploy(data):
 		callRaceMethod(raceId, 'declineRegion', region[0])
 		callSpecialPowerMethod(specialPowerId, 'declineRegion', region[0])
 		
-	query("UPDATE CurrentRegionState SET OwnerId=NULL  WHERE TokensNum=0")
+	query("""UPDATE CurrentRegionState SET OwnerId=NULL, TokenBadgeId=NULL WHERE 
+		TokensNum=0""")
 	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
 		TokenBadgeId=%s""", addUnits, tokenBadgeId)
 
@@ -279,15 +281,18 @@ def act_finishTurn(data):
 
 	query('SELECT COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s', userId)
 	income = fetchone()[0]
-	additionalCoins = 0
+	print income
 	query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE OwnerId=%s', userId)
 	races = fetchall()
 	for rec in races:
 		income += callRaceMethod(rec[0], 'countAdditionalCoins', userId, gameId)
+		print income
 		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, 
 			gameId, rec[0])
+		print income
 
-	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, sid)
+	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, 
+		sid)
 	query('SELECT Coins FROM Users WHERE Id=%s', userId)
 	coins = fetchone()[0]
 	#select the next player
