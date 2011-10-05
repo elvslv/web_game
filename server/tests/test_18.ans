@@ -63,10 +63,10 @@
 		"tokenBadgeId": 5
 	},
 	{
-		"result": "badStage"
+		"result": "ok"
 	},
 	{
-		"result": "ok"
+		"result": "badRegion"
 	}
 
 ]

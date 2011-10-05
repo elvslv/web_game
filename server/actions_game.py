@@ -384,12 +384,13 @@ def act_enchant(data):
 
 	if not(tokenBadgeId):
 		raise BadFieldException('badStage')
-
+		
 	checkStage(GAME_CONQUER, gameId)
 	checkDefendingPlayerNotExists(gameId)
 	checkActivePlayer(gameId, userId)
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	callSpecialPowerMethod(raceId, 'enchant', tokenBadgeId, data['regionId'])
+	
+	callRaceMethod(raceId, 'enchant', tokenBadgeId, data['regionId'])
 
 	return {'result': 'ok'}	
 

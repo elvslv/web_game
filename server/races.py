@@ -218,15 +218,16 @@ class RaceSorcerers(BaseRace):
 
 	def enchant(self, tokenBadgeId, currentRegionId):
 		currentRegionId = extractValues('CurrentRegionState', 'CurrentRegionId', 
-			currentRegionId, 'badRegionId')
+			currentRegionId, 'badRegionId', True)[0]
+			
 		checkRegionIsImmune(currentRegionId)
 		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
 
 		if not(self.tryToConquerRegion(currentRegionId, tokenBadgeId) 
-			and specialPowerList[getRaceAndPowerIdByTokenBadge()[1]].tryToConquerRegion(currentRegionId, tokenBadgeId)):
+			and specialPowerList[getRaceAndPowerIdByTokenBadge(tokenBadgeId)[1]].tryToConquerRegion(currentRegionId, tokenBadgeId)):
 			raise BadFieldException('badRegion')
-		query("""SELECT Encampment, TokensNum, TokenBadgeId, InDecline FROM CurrentRegion 
-			WHERE CurrentRegionId=%s""", currentRegionId)
+		query("""SELECT TokenBadgeId, Encampment, TokensNum, InDecline FROM 
+			CurrentRegionState WHERE CurrentRegionId=%s""", currentRegionId)
 		row = fetchone()
 		if row[0] == tokenBadgeId:
 			raise BadFieldException('badAttackedRace')
@@ -239,22 +240,26 @@ class RaceSorcerers(BaseRace):
 		if row[3]:
 			raise BadFieldException('cannotEnchantDeclinedRace')
 
-		query('SELECT TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', 
+		query("""SELECT a.TotalTokensNum, a.OwnerId, b.GameId FROM TokenBadges a, 
+			Users b WHERE a.TokenBadgeId=%s AND a.OwnerId=b.Id""", 
 			tokenBadgeId)
-		if fetchone()[0] == self.maxNum:
+		totalTokensNum, userId, gameId = fetchone()
+		if totalTokensNum == self.maxNum:
 			raise BadFieldException('noMoreTokensInStorageTray')
 
 		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
 			TokenBadgeId=%s""", row[0])
-		
 		raceId, specialPowerId  = getRaceAndPowerIdByTokenBadge(row[0])
 		racesList[raceId].clearRegion(row[0], currentRegionId)
 		specialPowerList[specialPowerId].clearRegion(row[0], currentRegionId)
-		query("""UPDATE CurrentRegionState SET TokenBadgeId=%s 
-			WHERE CurrentRegionId=%s""", tokenBadgeId, currentRegionId) 
+		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+1 WHERE 
+			TokenBadgeId=%s""", tokenBadgeId)
+		query("""UPDATE CurrentRegionState SET TokenBadgeId=%s, OwnerId=%s, 
+			TokensNum=1 WHERE CurrentRegionId=%s""", tokenBadgeId, userId, 
+			currentRegionId) 
 
 		updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-		updateConquerHistory(lastId(), tokenBadgeId, regionId, row[2], row[1], 
+		updateConquerHistory(lastId(), tokenBadgeId, currentRegionId, row[2], row[1], 
 			-1, ATTACK_ENCHANT)
 
 

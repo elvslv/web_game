@@ -37,16 +37,20 @@ def checkStage(state, gameId):
 		FROM History WHERE GameId=%s)""", gameId)
 	row = fetchone()
 	prevState = row[0]
-	badStage = False
-	
-	if state == GAME_DEFEND and prevState == GAME_CONQUER:
-		query("""SELECT AttackType FROM AttackingHistory WHERE HistoryId=
-		(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
-		badStage = (fetchone()[0] == ATTACK_ENCHANT)
-	else:
-		badStage = (not prevState in possiblePrevCmd[state])
+	badStage = (not prevState in possiblePrevCmd[state])
 
-	if badStage: raise BadFieldException('badStage')
+	if prevState == GAME_CONQUER:
+		query("""SELECT AttackType, AttackedTokensNum FROM AttackingHistory WHERE HistoryId=
+			(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
+		attackType, attackedTokensNum = fetchone()
+		if state == GAME_DEFEND:
+			if attackType == ATTACK_ENCHANT:
+				badStage = True
+		elif attackedTokensNum > 1:
+			badStage = True
+			
+	if badStage: 
+		raise BadFieldException('badStage')
 
 def isRegionAdjacent(currentRegionId, tokenBadgeId):
 	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE TokenBadgeId=%s""", 
@@ -145,10 +149,12 @@ def callSpecialPowerMethod(specialPowerId, methodName, *args):
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
 
 def checkDefendingPlayerNotExists(gameId):
-	query("""SELECT AttackedTokenBadgeId FROM AttackingHistory WHERE 
+	query("""SELECT AttackedTokenBadgeId, AttackType FROM AttackingHistory WHERE 
 		HistoryId=(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
 	row = fetchone()
 	if not row:
+		return
+	if row[1] == ATTACK_ENCHANT:
 		return
 	if row[0]:
 		query('SELECT InDecline FROM TokenBadges WHERE TokenBadgeId=%s', row[0])
@@ -191,9 +197,9 @@ def checkRegionIsImmune(currentRegionId):
 
 def checkRegionIsCorrect(currentRegionId, tokenBadgeId):
 	if not query("""SELECT 1 FROM Users, Games, Regions, CurrentRegionState 
-		WHERE Users.TokenBadgeId=%s AND Users.GameId=Games.GameId AND 
+		WHERE Users.CurrentTokenBadge=%s AND Users.GameId=Games.GameId AND 
 		Games.MapId=Regions.MapId AND Regions.RegionId=CurrentRegionState.RegionId 
-		AND CurrentRegionState.CurrentRegionId=%s""", tokenBadgeId, currentRegionState):
+		AND CurrentRegionState.CurrentRegionId=%s""", tokenBadgeId, currentRegionId):
 		return BadFieldException('badRegion')
 
 def throwDice():
