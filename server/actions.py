@@ -13,7 +13,6 @@ from actions_game import *
 from misc_game import *
 from misc import *
 
-
 dbi = Database()
 
 def createDefaultRaces(): 
@@ -26,8 +25,7 @@ def act_register(data):
 		raise BadFieldException('badUsername')
 	if  not re.match(misc.pwdRegexp, passwd, re.I):
 		raise BadFieldException('badPassword')
-
-	dbi.add(User(username, passwd))
+	dbi.addUser(User(username, passwd))	
 	return {'result': 'ok'}
 
 def act_login(data):
@@ -241,8 +239,7 @@ def doAction(data):
 			raise BadFieldException('badAction')
 		checkFieldsCorrectness(data);
 		res = globals()[func](data)
-		commit()
 		return res
 	except MySQLdb.Error, e:
-		rollback()
+		dbi.rollback()
 		return e

@@ -1,7 +1,9 @@
 from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN
+from gameExceptions import BadFieldException
 from sqlalchemy import create_engine, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship, backref, join
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 
 DATABASE_HOST = "localhost"
@@ -83,7 +85,7 @@ class TokenBadge(Base):
     raceId = Column(Integer)
     specPowId = Column(Integer)
     gameId = fkey('games.id')
-    owner = fkey('users.id')
+    ownerId = fkey('users.id')
     pos = Column(Integer)
     bonusMoney = Column(Integer, default = 0)
     inDecline = Column(Boolean, default=False)
@@ -91,7 +93,7 @@ class TokenBadge(Base):
     totalSpecPowerBonusNum = Column(Integer, default = 0)
 
     game = relationship(Game, backref=backref('tokenBadges'))
-    owner = relationship(User)
+    owner = relationship(User, backref=backref('tokenBadges'))
 
     def __init__(self, raceId, specPowerId): 
         self.raceId = raceId
@@ -218,8 +220,8 @@ class AttackingHistoryEntry(Base):
     attackType = Column(Integer) 
     
     mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory'))
-    agressorBadge = relationship(TokenBadge)
-    victimBadge = relationship(TokenBadge)
+    agressorBadge = relationship(TokenBadge, primaryjoin=aggressorBadgeId==TokenBadge.id)
+    victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id)
 
     def __init__(self, mainHistEntry, aggressorBadgeId, conqRegion, victimBadgeId, diceRes, attackType): 
        self.mainHistEntry = mainHistoryEntry
@@ -238,20 +240,30 @@ class _Database:
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
+    def addUser(self, user):
+        try:
+            self.add(user)
+        except IntegrityError:
+            self.rollback()
+            raise BadFieldException('UsernameTaken')
+
     def commit(self):
         self.session.commit()
+    
+    def rollback(self):
+        self.session.rollback()
 
     def add(self, obj):
         self.session.add(obj)
-        commit()
+        self.commit()
 
     def addAll(self, objs):
         self.session.add_all(objs)
-        commit()
+        self.commit()
 
     def delete(self, *args, **kwargs):
         self.session.delete(*args, **kwargs)
-        commit()
+        self.commit()
 
     def query(self, *args, **kwargs):
         return self.session.query(*args, **kwargs)
@@ -272,3 +284,5 @@ def Database():
     return _database
 
 
+if __name__=='__main__':
+	a = Database()
