@@ -228,21 +228,16 @@ def act_redeploy(data):
 			AND GameId=%s""", tokensNum, regionId, gameId)
 		unitsNum -= tokensNum
 
-	if 'encampments' in data:
-		callSpecialPowerMethod(specialPowerId, 'setEncampments', data['encampments'], 
-			tokenBadgeId)
+	specAbilities = [
+	{'name': 'encampments', 'cmd': 'setEncampments'},
+	{'name': 'fortifield', 'cmd': 'setFortifield'},
+	{'name': 'heroes', 'cmd': 'setHeroes'},
+	{'name': 'selectFriend', 'cmd': 'selectFriend'}]
 
-	if 'fortifield' in data:
-		callSpecialPowerMethod(specialPowerMethod, 'setFortifield', 
-			data['fortifield'], tokenBadgeId)
-
-	if 'heroes' in data:
-		callSpecialPowerMethod(specialPowerMethod, 'setHeroes', data['heroes'], 
-			tokenBadgeId)
-
-	if 'selectFriend' in data:
-		callSpecialPowerMethod(specialPowerMethod, 'selectFriend', data['selectFriend'], 
-			tokenBadgeId)
+	for specAbility in specAbilities:
+		if specAbility['name'] in data:
+			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], 
+				data[specAbility['name']], tokenBadgeId)
 
 	if unitsNum:
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
@@ -369,37 +364,39 @@ def act_defend(data):
 	updateHistory(userId, gameId, GAME_DEFEND, tokenBadgeId)
 	return {'result': 'ok'}
 
-def act_dragonAttack(data):
+def getFieldsForSpecialPowers(data, t):
 	sid, userId, gameId, tokenBadgeId= extractValues('Users', ['Sid', 'Id', 
 		'GameId', 'CurrentTokenBadge'], [data['sid']])
 
 	if not(tokenBadgeId):
 		raise BadFieldException('badStage')
 
-	checkStage(GAME_CONQUER, gameId)
+	checkStage(t, gameId)
 	checkDefendingPlayerNotExists(gameId)
 	checkActivePlayer(gameId, userId)
 	
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	callSpecialPowerMethod(specialPowerId, 'dragonAttack', tokenBadgeId, 
+
+	return raceId, specialPowerId, tokenBadgeId, userId, gameId
+	
+def act_dragonAttack(data):
+	fields = getFieldsForSpecialPowers(data, GAME_CONQUER)
+	callSpecialPowerMethod(fields[1], 'dragonAttack', fields[2], 
 		data['regionId'], data['tokensNum'])
 	return {'result': 'ok'}	
 
 def act_enchant(data):
-	sid, userId, gameId, tokenBadgeId= extractValues('Users', ['Sid', 'Id', 
-		'GameId', 'CurrentTokenBadge'], [data['sid']])
-
-	if not(tokenBadgeId):
-		raise BadFieldException('badStage')
-		
-	checkStage(GAME_CONQUER, gameId)
-	checkDefendingPlayerNotExists(gameId)
-	checkActivePlayer(gameId, userId)
-	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	
-	callRaceMethod(raceId, 'enchant', tokenBadgeId, data['regionId'])
-
+	fields = getFieldsForSpecialPowers(data, GAME_CONQUER)
+	callRaceMethod(fields[0], 'enchant', fields[2], data['regionId'])
 	return {'result': 'ok'}	
+
+def act_throwDice(data):
+	fields = getFieldsForSpecialPowers(data, GAME_THROW_DICE)
+	dice = data['dice'] if misc.TEST_MODE else callSpecialPowerMethod(fields[1], 
+		'throwDice')
+	updateHistory(fields[3], fields[4], GAME_THROW_DICE, fields[2], dice)
+	return {'result': 'ok', 'dice': dice}	
+
 
 def act_getVisibleTokenBadges(data):
 	gameId = extractValues('Games', ['GameId'], [data['gameId']])
@@ -413,22 +410,6 @@ def act_getVisibleTokenBadges(data):
 			'specialPowerId': races.specialPowerList[tokenBadge[1]].name,
 			'position': tokenBadge[2]})
 	return {'result': result}
-
-def act_throwDice(data):
-	sid, userId, gameId, tokenBadgeId= extractValues('Users', ['Sid', 'Id', 
-		'GameId', 'CurrentTokenBadge'], [data['sid']])
-
-	if not(tokenBadgeId):
-		raise BadFieldException('badStage')
-
-	checkStage(GAME_THROW_DICE, gameId)
-	checkDefendingPlayerNotExists(gameId)
-	checkActivePlayer(gameId, userId)
-	
-	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	dice = data['dice'] if misc.TEST_MODE else callSpecialPowerMethod(specialPowerId, 'throwDice')
-	updateHistory(userId, gameId, GAME_THROW_DICE, tokenBadgeId, dice)
-	return {'result': 'ok', 'dice': dice}	
 
 def prepareForNextTurn(gameId, newActPlayer, newTokenBadgeId):
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)
