@@ -84,28 +84,24 @@ def act_uploadMap(data):
 	query('INSERT INTO Maps(MapName, PlayersNum, TurnsNum) VALUES(%s, %s, %s)', name, 
 		players, data['turnsNum'])
 	mapId = lastId()
-	result = list()
 	if 'regions' in data:
 		regions = data['regions']
-		query('SELECT MAX(RegionId) FROM Regions')
-		maxId = fetchone()[0]
-		if not maxId: maxId = 0
-		index = 1
+		curRegion = 1
 		for region in regions:
 			try:	
-				query(checkRegionCorrectness(region), mapId, index, region['population'])
-				index += 1
-				curRegion = lastId()
+				query(checkRegionCorrectness(region), mapId, curRegion, region['population'])
 				#add links in graph
 				for n in region['adjacent']:
 					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, 
-						SecondRegionId) VALUES(%s, %s)""", curRegion, n + maxId)
+						SecondRegionId, MapId) VALUES(%s, %s, %s)""", curRegion,
+						n, mapId)
 					query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, 
-						SecondRegionId) VALUES(%s, %s)""", n + maxId, curRegion)
-				result.append(curRegion)
+						SecondRegionId, MapId) VALUES(%s, %s, %s)""", n,
+						curRegion, mapId)
+				curRegion += 1
 			except KeyError:
 				raise BadFieldException('badRegion')
-	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
+	return {'result': 'ok', 'mapId': mapId}
 	
 def addNewRegions(mapId, gameId):
 	query('SELECT RegionId, DefaultTokensNum FROM Regions WHERE MapId=%s', mapId)
@@ -114,27 +110,22 @@ def addNewRegions(mapId, gameId):
 	for region in row:
 		query("""INSERT INTO CurrentRegionState(RegionId, GameId, TokensNum)
 			VALUES(%s, %s, %s)""", region[0], gameId, region[1])
-		result.append(lastId())
 	return result
 
 def act_createGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
-
-	mapId = extractValues('Maps', ['MapId'], data['mapId'])
+	mapId = extractValues('Maps', ['MapId'], [data['mapId']])
 	name = checkIsUnique('Games', 'GameName', data['gameName'])
-
 	descr = None
 	if 'gameDescr' in data:
 		descr = data['gameDescr']
-
 	query("""INSERT INTO Games(GameName, GameDescr, MapId, PlayersNum, State) 
 		VALUES(%s, %s, %s, %s, %s)""", name, descr, mapId, 1, GAME_WAITING)
 	gameId = lastId()
-	regionIds = addNewRegions(mapId, gameId)
-
+	addNewRegions(mapId, gameId)
 	query('UPDATE Users SET GameId=%s, isReady=0, Priority=1 WHERE Id=%s', gameId, userId)
-	return {'result': 'ok', 'gameId': gameId, 'regions': regionIds}
+	return {'result': 'ok', 'gameId': gameId}
 	
 def act_getGameList(data):
 	result = {'result': 'ok'}
@@ -184,7 +175,7 @@ def act_joinGame(data):
 	if gameId: raise BadFieldException('alreadyInGame')
 
 	gameId, playersNum, mapId, state = extractValues('Games', ['GameId', 
-		'PlayersNum', 'MapId', 'State'],  data['gameId'])
+		'PlayersNum', 'MapId', 'State'],  [data['gameId']])
 	if state != GAME_WAITING:
 		raise BadFieldException('badGameState')
 	query('SELECT PlayersNum From Maps WHERE MapId=%s', mapId)

@@ -19,8 +19,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1,
-		"regions": []
+		"gameId": 1
 	},
 	{
 		"result": "alreadyInGame"

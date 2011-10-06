@@ -23,6 +23,9 @@ def lastId():
 def query(qstring, *args):
     return int(cursor.execute(qstring, args))	
 
+def queryt(qstring, args):
+    return int(cursor.execute(qstring, args))	
+
 def commit():
 	db.commit()
 
@@ -64,8 +67,7 @@ def createTables():
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Regions(
 			MapId INT UNSIGNED REFERENCES Maps(MapId), 
-			RegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-			LocalRegionId INT UNSIGNED,
+			RegionId INT UNSIGNED,
 			DefaultTokensNum INT UNSIGNED DEFAULT 0,
 			Border BOOL DEFAULT FALSE, 
 			Coast BOOL DEFAULT FALSE, 
@@ -77,10 +79,10 @@ def createTables():
 			Forest BOOL DEFAULT FALSE, 
 			Hill BOOL DEFAULT FALSE, 
 			Swamp BOOL DEFAULT FALSE, 
-			Cavern BOOL DEFAULT FALSE)""")
+			Cavern BOOL DEFAULT FALSE,
+			PRIMARY KEY(MapId, RegionId))""")
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS CurrentRegionState(
-			CurrentRegionId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
 			RegionId INT UNSIGNED REFERENCES Regions(RegionId),
 			GameId INT UNSIGNED REFERENCES Games(GameId),
 			TokenBadgeId INT UNSIGNED, 
@@ -92,12 +94,14 @@ def createTables():
 			Fortress BOOL DEFAULT FALSE,
 			Hero BOOL DEFAULT FALSE,
 			Fortifield BOOL DEFAULT FALSE,
-			InDecline BOOL)""")
+			InDecline BOOL,
+			PRIMARY KEY(RegionId, GameId))""")
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS AdjacentRegions (
 			FirstRegionId INT UNSIGNED REFERENCES Regions(RegionId), 
 			SecondRegionId INT UNSIGNED REFERENCES Regions(RegionId),
-			UNIQUE(FirstRegionId, SecondRegionId))""")
+			MapId INT UNSIGNED REFERENCES Maps(MapId),
+			UNIQUE(FirstRegionId, SecondRegionId, MapId))""")
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(
 			TokenBadgeId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 

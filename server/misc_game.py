@@ -1,7 +1,7 @@
 import races
 import misc
 from misc import GAME_DEFEND, GAME_CONQUER, possiblePrevCmd, GAME_CHOOSE_FRIEND, ATTACK_ENCHANT
-from editDb import query, fetchall, fetchone, lastId
+from editDb import query, queryt, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 import random
 import sys
@@ -52,28 +52,31 @@ def checkStage(state, gameId):
 	if badStage: 
 		raise BadFieldException('badStage')
 
-def isRegionAdjacent(currentRegionId, tokenBadgeId):
-	query("""SELECT CurrentRegionId FROM CurrentRegionState WHERE TokenBadgeId=%s""", 
+def isRegionAdjacent(regionId, tokenBadgeId):
+	query("""SELECT RegionId FROM CurrentRegionState WHERE TokenBadgeId=%s""", 
 		tokenBadgeId)
 	playerRegions = fetchall()
 	playerBorderline = False	
 	for plRegion in playerRegions:
-		query("""SELECT COUNT(*) FROM AdjacentRegions a, CurrentRegionState b,
-			CurrentRegionState c WHERE b.RegionId=a.FirstRegionId 
-			AND c.RegionId=a.SecondRegionId AND b.CurrentRegionId=%s AND 
-			c.CurrentRegionId=%s""", plRegion[0], currentRegionId)
+		query("""SELECT COUNT(*) FROM AdjacentRegions a, Regions b,
+			Regions c WHERE b.RegionId=a.FirstRegionId AND a.MapId=b.MapId AND
+			a.MapId=c.MapId AND a.MapId=%s AND c.RegionId=a.SecondRegionId AND
+			b.RegionId=%s AND c.RegionId=%s""", getMapIdByTokenBadge(tokenBadgeId), 
+			plRegion[0], regionId)
 		if fetchone():
 			playerBorderline = True
 			break
 
 	return playerBorderline, playerRegions
 
-def extractValues(tableName, selectFields, param):
+def extractValues(tableName, selectFields, params):
 	queryStr = 'SELECT '
 	for field in selectFields:
 		queryStr += field + (', ' if field != selectFields[len(selectFields) - 1] else ' ')
-	queryStr += 'FROM %s WHERE %s=%%s' % (tableName, selectFields[0])
-	if not query(queryStr, param):
+	queryStr += 'FROM %s WHERE' % tableName
+	for i in range(len(params)):
+		queryStr += (' %s=%%s' if i == 0 else ' AND %s=%%s') % selectFields[i]
+	if not queryt(queryStr, tuple(params)):
 		raise BadFieldException('bad%s' % selectFields[0])
 	res = fetchone()
 	return res if len(res) > 1 else res[0]
@@ -95,10 +98,10 @@ def getRaceAndPowerIdByTokenBadge(tokenBadge):
 		tokenBadge)
 	return fetchone()
 
-def clearRegionFromRace(currentRegionId, tokenBadgeId):
+def clearRegionFromRace(regionId, tokenBadgeId):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	callRaceMethod(raceId, 'clearRegion', tokenBadgeId, currentRegionId)
-	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, currentRegionId)
+	callRaceMethod(raceId, 'clearRegion', tokenBadgeId, regionId)
+	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, regionId)
 	
 def getIdBySid(sid):
 	if not query('SELECT Id, GameId FROM Users WHERE Sid=%s', sid):
@@ -195,18 +198,17 @@ def checkActivePlayer(gameId, userId):
 		Games.ActivePlayer=Users.Id AND Users.Id=%s""", gameId, userId):
 		raise BadFieldException('badStage') ##better message?
 
-def checkRegionIsImmune(currentRegionId):
+def checkRegionIsImmune(regionId, gameId):
 	query("""SELECT HoleInTheGround, Dragon, Hero FROM CurrentRegionState WHERE 
-		CurrentRegionId=%s""", currentRegionId)
+		RegionId=%s AND GameId=%s""", regionId, gameId)
 	row = fetchone()
 	if row[0] or row[1] or row[2]:
 		raise BadFieldException('regionIsImmune')
 
-def checkRegionIsCorrect(currentRegionId, tokenBadgeId):
-	if not query("""SELECT 1 FROM Users, Games, Regions, CurrentRegionState 
-		WHERE Users.CurrentTokenBadge=%s AND Users.GameId=Games.GameId AND 
-		Games.MapId=Regions.MapId AND Regions.RegionId=CurrentRegionState.RegionId 
-		AND CurrentRegionState.CurrentRegionId=%s""", tokenBadgeId, currentRegionId):
+def checkRegionIsCorrect(regionId, tokenBadgeId):
+	if not query("""SELECT 1 FROM Users a, Games b, Regions c WHERE 
+		a.CurrentTokenBadge=%s AND a.GameId=b.GameId AND b.MapId=c.MapId AND 
+		c.RegionId=%s""", tokenBadgeId, regionId):
 		return BadFieldException('badRegion')
 
 def throwDice():
@@ -218,36 +220,36 @@ def throwDice():
 			dice = 0
 	return dice
 
-def getRegionInfoById(currentRegionId):
-	return getRegionInfo(currentRegionId)[4]
+def getRegionInfoById(regionId, gameId):
+	return getRegionInfo(regionId, gameId)[4]
 
-def getRegionInfo(currentRegionId):
-	if not query("""SELECT RegionId FROM CurrentRegionState WHERE CurrentRegionId=%s""",
-		currentRegionId):
+def getRegionInfo(regionId, gameId):
+	if not query("""SELECT 1 FROM CurrentRegionState WHERE RegionId=%s AND 
+		GameId=%s""", regionId, gameId):
 		raise BadFieldException('badRegionId')
-	regionId = fetchone()[0]
+	query('SELECT MapId FROM Games WHERE GameId=%s', gameId)
+	mapId = fetchone()[0]
+	
 	l = list()
 	l.append('RegionId')
-	print 1
+	l.append('MapId')
 	l.extend(misc.possibleLandDescription[:11])
-	regInfo = list(extractValues('Regions', l, regionId)[1:])
+	regInfo = list(extractValues('Regions', l, [regionId, mapId])[2:])
+	
 	queryStr = 'SELECT OwnerId, TokenBadgeId, TokensNum, InDecline'
 	for regParam in misc.possibleLandDescription[11:]:
 		queryStr += ', %s' % regParam
-	queryStr += ' FROM CurrentRegionState WHERE currentRegionId=%s'
-	print 2
-	query(queryStr, currentRegionId)
-	print 3
+	queryStr += ' FROM CurrentRegionState WHERE RegionId=%s AND GameId=%s'
+	query(queryStr, regionId, gameId)
+	
 	row = list(fetchone())
-	print 4
 	ownerId, tokenBadgeId, tokensNum, inDecline = row[:4]
-	print 5
 	regInfo[len(regInfo):] = row[4:]
-	print 6
+	
 	result = dict()
 	for i in range(len(misc.possibleLandDescription)):
 		result[misc.possibleLandDescription[i]] = regInfo[i]
-	print 7
+		
 	return ownerId, tokenBadgeId, tokensNum, inDecline, result
 
 def generateTokenBadges(randSeed, num):
@@ -267,19 +269,14 @@ def generateTokenBadges(randSeed, num):
 def clearGameStateAtTheEndOfTurn(gameId):
 	pass
 
-def getCurrentRegionId(localRegionId, gameId):
-	#print localRegionId, gameId
-	#if not query("""SELECT a.CurrentRegionId FROM CurrentRegionState a, Regions b, 
-	#	Maps c, Games d WHERE a.RegionId=b.RegionId AND b.LocalRegionId=%s AND 
-	#	b.MapId=c.MapId AND c.MapId=d.MapId AND d.GameId=%s""", localRegionId, gameId):
-	#	raise BadFieldException('badRegionId')
-
-	#return fetchone()[0]
-	return localRegionId
-
 def getGameIdByTokenBadge(tokenBadgeId):
 	query("""SELECT a.GameId FROM Users a, TokenBadges b WHERE a.Id=b.OwnerId 
 		AND b.TokenBadgeId=%s""", tokenBadgeId)
+	return fetchone()[0]
+
+def getMapIdByTokenBadge(tokenBadgeId):
+	query("""SELECT MapId FROM Games WHERE GameId=%s""", 
+		getGameIdByTokenBadge(tokenBadgeId))
 	return fetchone()[0]
 
 if __name__=='__main__':

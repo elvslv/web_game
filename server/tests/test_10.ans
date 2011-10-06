@@ -21,8 +21,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1,
-		"regions": [1, 2, 3, 4]
+		"gameId": 1
 	},
 	{
 		"result": "ok"

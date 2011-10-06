@@ -53,7 +53,7 @@ def checkRegionCorrectness(data):
 	if not 'population' in data:
 		data['population'] = 0
 	
-	queryStr = 'INSERT INTO Regions(MapId, LocalRegionId, DefaultTokensNum'
+	queryStr = 'INSERT INTO Regions(MapId, RegionId, DefaultTokensNum'
 	num = 0
 	for descr in data['landDescription']:
 		if not descr in misc.possibleLandDescription[:11]:
