@@ -19,7 +19,6 @@ DB_STRING =  """mysql+mysqldb://%s:%s@%s:%d/%s""" % \
 Base = declarative_base()
 
 string = lambda len: Column(String(len))
-#text = lambda : Column(String())
 pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 requiredInteger = lambda: Column(Integer, nullable=False)
@@ -122,9 +121,9 @@ class Region(Base):
 
     map = relationship(Map, backref=backref('regions'))
 
-    def __init__(self, defTokensNum, mapId): 
+    def __init__(self, defTokensNum, map_): 
         self.defTokensNum = defTokensNum
-        self.mapId = mapId
+        self.map = map_
 
     def addNeighbors(self, *nodes):
         for node in nodes:
@@ -185,7 +184,7 @@ class Message(Base):
 
     id = pkey()
     sender = fkey('users.id')
-    text = text()
+    text = Column(Text)
     time = Column(Integer)
 
     def __init__(self, sender, text, time): 
@@ -240,7 +239,7 @@ class AttackingHistoryEntry(Base):
 
 
 class _Database:
-    engine = create_engine(DB_STRING, echo=True)
+    engine = create_engine(DB_STRING, echo=False)
 
     def __init__(self):
         Base.metadata.create_all(self.engine)
@@ -252,15 +251,15 @@ class _Database:
             self.add(obj)
         except IntegrityError:
             self.rollback()
-            raise BadFieldException('%sTaken', name)
+            raise BadFieldException("""%sTaken""" % name)
     
-    def addRegion(regInfo):
+    def addRegion(map_, regInfo):
         misc.checkListCorrectness(regInfo, 'landDescription', str)
         misc.checkListCorrectness(regInfo, 'adjacent', int)
         if not 'population' in regInfo:
             regInfo['population'] = 0
 
-        reg = Region(regInfo['mapId'], regInfo['population'])
+        reg = Region(regInfo['population'], map_)
         for descr in regInfo['landDescription']:
             if not descr in misc.possibleLandDescription[:11]:
                 raise BadFieldException('unknownLandDescription')
@@ -292,14 +291,19 @@ class _Database:
         return self.session.query(*args, **kwargs)
 
     def clear(self):
-        for table in Base.metadata.sorted_tables:
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        for table in meta.sorted_tables:
             self.engine.execute(table.delete())
+    #       self.engine.execute("""ALTER TABLE %s AUTO_INCREMENT=0""" % table.name)
 
-    def getUserBySid(self, sid):
-         try:
+    def getUserBySid(self, sid, mandatory=True):
+        try:
             return self.session.query(User).filter_by(sid=sid).one()
         except NoResultFound:
-          return None
+            if mandatory:
+                raise BadFieldException('badSid')
+            return None
     
     def getUserByNameAndPwd(self, username, password):
         try:
@@ -307,7 +311,7 @@ class _Database:
                 filter(User.name == username).\
                 filter(User.password == password).one()
         except NoResultFound:
-            return None
+           raise BadFieldException('badUsernameOrPassword')
 
 ## Are there any macro in python? 
 
@@ -329,7 +333,3 @@ _database = _Database()
 
 def Database():
     return _database
-
-
-if __name__=='__main__':
-	a = Database()

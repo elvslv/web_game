@@ -1,18 +1,15 @@
-from db import Database, User
+from db import Database, User, Message
 import re
 import time
 import math
 import MySQLdb
 import sys
 import random
-import races
 
 from gameExceptions import BadFieldException
 from sqlalchemy import func 
 from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
-from actions_game import *
-from misc_game import *
 from misc import *
 
 dbi = Database()
@@ -34,20 +31,14 @@ def act_login(data):
 	username = data['username']
 	passwd = data['password']
 	user = dbi.getUserByNameAndPwd(username, passwd)
-	if not user:
-		raise BadFieldException('badUsernameOrPassword')
-
 	while 1:
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
-		if not dbi.getUserBySid(sid): break
+		if not dbi.getUserBySid(sid, False): break
 	user.sid = sid
-	dbi.commit()
 	return {'result': 'ok', 'sid': sid}
 
 def act_logout(data):
-	user = dbi.getUserBySid(data['sid'])
-	if not user: raise BadFieldException('badSid')
-	user.sid = None
+	dbi.getUserBySid(data['sid']).sid = None
 	return {'result': 'ok'}
 
 def act_sendMessage(data):
@@ -59,7 +50,7 @@ def act_sendMessage(data):
 
 def act_getMessages(data):
 	since = data['since']
-	records =  dbi.query(Message).filter_by(Message.time > since).order_by(Message.time).all()[-100:]
+	records =  dbi.query(Message).filter(Message.time > since).order_by(Message.time).all()[-100:]
 	messages = []
 	for rec in records:
 		messages.append({'userId': rec.sender, 'text': rec.text, 'time': rec.time})
@@ -74,8 +65,6 @@ def act_uploadMap(data):
 	name = data['mapName']
 	players = int(data['playersNum'])
 	newMap = Map(name, playersNum, data['turnsNum'])
-	dbi.addUnique(newMap, 'mapName')
-	mapId = newMap.id
 	result = list()
 	if 'regions' in data:
 		regions = data['regions']
@@ -84,7 +73,7 @@ def act_uploadMap(data):
 	#	curRegion = maxId
 		for region in regions:
 			try:	
-				dbi.addRegion(region)
+				dbi.addRegion(newMap, region)
 				#add links in graph
 				##	Cryptic writings Have to decipher later 
 			#	for n in region['adjacent']:
@@ -96,6 +85,8 @@ def act_uploadMap(data):
 			#	curRegion += 1
 			except KeyError:
 				raise BadFieldException('badRegion')
+	dbi.addUnique(newMap, 'mapName')
+	mapId = newMap.id
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
 
@@ -152,7 +143,7 @@ def act_getGameList(data):
 		for player in players:
 			curPlayer = dict()
 			for i in range(len(playerAttrs)):
-				curPlayer[playerAttrs[i]] = getattr(player, playerAttrs)
+				curPlayer[playerAttrs[i]] = getattr(player, playerAttrs[i])
 			priority += 1	
 			curPlayer['priority'] = priority
 			resPlayers.append(curPlayer)
@@ -202,8 +193,9 @@ def act_leaveGame(data):
 		game.state = GAME_ENDED
 	return {'result': 'ok'}
 
-def act_doSmth(data):
-	userId = getIdBySid(data['sid'])[0]
+def act_doSmtn(data):
+	user = dbi.getUserBySid(data['sid'])
+	if not user: raise BadFieldException('badSid')
 	return {'result': 'ok'}
 
 def act_resetServer(data):
@@ -215,7 +207,6 @@ def act_resetServer(data):
 	else:
 		misc.TEST_RANDSEED = 21425364547
 	random.seed(misc.TEST_RANDSEED)
-	db.clearDb()
 	createDefaultRaces()
 	return {'result': 'ok'}
 
@@ -224,8 +215,9 @@ def doAction(data):
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
-		checkFieldsCorrectness(data);
+		checkFieldsCorrectness(data)
 		res = globals()[func](data)
+		dbi.commit()
 		return res
 	except SQLAlchemyError, e:
 		dbi.rollback()

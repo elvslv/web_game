@@ -1,6 +1,5 @@
 import races
 import misc
-from editDb import query, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 import random
 import sys
@@ -30,11 +29,6 @@ def clearRegionFromRace(currentRegionId, tokenBadgeId):
 	callRaceMethod(raceId, 'clearRegion', tokenBadgeId, currentRegionId)
 	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, currentRegionId)
 	
-def getIdBySid(sid):
-	if not query('SELECT Id, GameId FROM Users WHERE Sid=%s', sid):
-		raise BadFieldException('badSid')
-	return fetchone()
-
 def getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower):
         if vRace != '' and vSpecialPower != '':
                 raceId = -1
