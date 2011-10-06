@@ -1,0 +1,100 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "createDefaultMaps"
+		},
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "111111"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "111111"
+		},
+		{
+			"action": "register",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "login",
+			"username": "user2",
+			"password": "222222"
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 7,
+			"playersNum": 2
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1		
+		},
+		
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 1,
+			"visibleRaces": ["Giants", "Dwarves", "Amazons", "Elves", "Halflings", "Humans"],
+			"visibleSpecialPowers": ["Bivouacking","Forest", "Berserk", "Commando", "Diplomat", "Dragon master"]
+		},
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"position" : 0
+		},
+
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 2
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 3
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 4
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 1, "tokensNum": 7},
+				{"regionId": 2, "tokensNum": 1},
+				{"regionId": 3, "tokensNum": 1},
+				{"regionId": 4, "tokensNum": 1}]
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 1
+			
+		}
+
+	],
+	"description": "race Giants"
+}
+
+
+

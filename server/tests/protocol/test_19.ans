@@ -1,0 +1,12 @@
+[
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "ok",
+		"sid": 1
+	}, 
+	{
+		"result": "badJson"
+	}
+]
