@@ -217,8 +217,8 @@ class RaceSorcerers(BaseRace):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
 	def enchant(self, tokenBadgeId, currentRegionId):
-		currentRegionId = extractValues('CurrentRegionState', 'CurrentRegionId', 
-			currentRegionId, 'badRegionId', True)[0]
+		currentRegionId = extractValues('CurrentRegionState', ['CurrentRegionId'], 
+			currentRegionId)
 			
 		checkRegionIsImmune(currentRegionId)
 		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
@@ -411,8 +411,8 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 		if not('friendId' in data and isinstance(data['friendId'], int)):
 			raise BadFieldException('badFriendId')
 
-		friendId, friendBadgeId = extractValues('Users', 'Id', data['friendId'], 'badUserId', 
-			True, ['CurrentTokenBadge'])
+		friendId, friendBadgeId = extractValues('Users', ['Id', 
+			'CurrentTokenBadge'], data['friendId'])
 
 		if friendId == userId:
 			raise BadFieldException('badFriend')
@@ -442,8 +442,8 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		return 1
 
 	def dragonAttack(self, tokenBadgeId, currentRegionId, tokensNum):
-		currentRegionId = extractValues('CurrentRegionState', 'CurrentRegionId', 
-			currentRegionId, 'badRegionId')[0]
+		currentRegionId = extractValues('CurrentRegionState', ['CurrentRegionId'], 
+			currentRegionId)
 		checkRegionIsImmune(currentRegionId)
 		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
 		raceId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)[0]
@@ -531,9 +531,8 @@ class SpecialPowerFortifield(BaseSpecialPower):
 			raise BadFieldException('badRegionId')
 
 		currentRegionId, ownerBadgeId, hasFortifield = extractValues('CurrentRegionState', 
-			'CurrentRegionId', getCurrentRegionId(fortifield['regionId'], 
-			getGameIdByTokenBadge(tokenBadgeId)), 'badRegionId', True, 
-			['TokenBadgeId', 'Fortifield'])
+			['CurrentRegionId', 'TokenBadgeId', 'Fortifield'], 
+			getCurrentRegionId(fortifield['regionId']))
 
 		if ownerBadgeId != tokenBadgeId:
 			raise BadFieldException('badRegion')
@@ -576,9 +575,9 @@ class SpecialPowerHeroic(BaseSpecialPower):
 			tokenBadgeId)
 		for hero in heroes:
 			currentRegionId, ownerBadgeId = extractValues('CurrentRegionState', 
-			'CurrentRegionId', getCurrentRegionId(heroe['regionId'], 
-			getGameIdByTokenBadge(tokenBadgeId)), 'badRegionId', True, 
-			['TokenBadgeId'])
+				['CurrentRegionId', 'TokenBadgeId'], 
+				getCurrentRegionId(heroe['regionId'], 
+				getGameIdByTokenBadge(tokenBadgeId)))
 
 			if ownerBadgeId != tokenBadgeId:
 				raise BadFieldException('badRegion')

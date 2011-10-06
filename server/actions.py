@@ -79,7 +79,7 @@ def act_createDefaultMaps(data):
 	return {'result': 'ok'}
 
 def act_uploadMap(data):
-	name = extractValues('Maps', 'MapName', data['mapName'], 'badMapName', False)[0]
+	name = checkIsUnique('Maps', 'MapName', data['mapName'])
 	players = int(data['playersNum'])
 	query('INSERT INTO Maps(MapName, PlayersNum, TurnsNum) VALUES(%s, %s, %s)', name, 
 		players, data['turnsNum'])
@@ -121,8 +121,8 @@ def act_createGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
 
-	mapId, name = extractValues('Maps', 'MapId', data['mapId'], 'badMapId', True)
-	name = extractValues('Games', 'GameName', data['gameName'], 'badGameName', False)[0]
+	mapId = extractValues('Maps', ['MapId'], data['mapId'])
+	name = checkIsUnique('Games', 'GameName', data['gameName'])
 
 	descr = None
 	if 'gameDescr' in data:
@@ -183,9 +183,8 @@ def act_joinGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
 
-	gameId, (playersNum, mapId, state) = extractValues(
-		'Games', 'GameId', data['gameId'], 'badGameId', True, ['PlayersNum', 'MapId', 
-		'State'])
+	gameId, playersNum, mapId, state = extractValues('Games', ['GameId', 
+		'PlayersNum', 'MapId', 'State'],  data['gameId'])
 	if state != GAME_WAITING:
 		raise BadFieldException('badGameState')
 	query('SELECT PlayersNum From Maps WHERE MapId=%s', mapId)

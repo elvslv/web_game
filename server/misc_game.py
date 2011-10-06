@@ -68,14 +68,21 @@ def isRegionAdjacent(currentRegionId, tokenBadgeId):
 
 	return playerBorderline, playerRegions
 
-def extractValues(tableName, tableField, param, msg, pres, selectFields = ['1']):
+def extractValues(tableName, selectFields, param):
 	queryStr = 'SELECT '
 	for field in selectFields:
 		queryStr += field + (', ' if field != selectFields[len(selectFields) - 1] else ' ')
-	queryStr += 'FROM %s WHERE %s=%%s' % (tableName, tableField)
-	if query(queryStr, param) != pres:
-		raise BadFieldException(msg)
-	return [param, fetchone()]
+	queryStr += 'FROM %s WHERE %s=%%s' % (tableName, selectFields[0])
+	if not query(queryStr, param):
+		raise BadFieldException('bad%s' % selectFields[0])
+	res = fetchone()
+	return res if len(res) > 1 else res[0]
+
+def checkIsUnique(tableName, tableField, param):
+	queryStr = 'SELECT 1 FROM %s WHERE %s=%%s' % (tableName, tableField)
+	if query(queryStr, param):
+		raise BadFieldException('bad%s' % tableField)
+	return param
 
 def getTokenBadgeIdByRaceAndUser(raceId, userId):
 	query('SELECT TokenBadgeId From TokenBadges WHERE RaceId=%s AND OwnerId=%s', 
@@ -218,21 +225,29 @@ def getRegionInfo(currentRegionId):
 	if not query("""SELECT RegionId FROM CurrentRegionState WHERE CurrentRegionId=%s""",
 		currentRegionId):
 		raise BadFieldException('badRegionId')
-	regInfo = list(extractValues('Regions', 'RegionId', fetchone()[0], 'badRegionId', 
-		True, misc.possibleLandDescription[:11])[1])
-
+	regionId = fetchone()[0]
+	l = list()
+	l.append('RegionId')
+	print 1
+	l.extend(misc.possibleLandDescription[:11])
+	regInfo = list(extractValues('Regions', l, regionId)[1:])
 	queryStr = 'SELECT OwnerId, TokenBadgeId, TokensNum, InDecline'
 	for regParam in misc.possibleLandDescription[11:]:
 		queryStr += ', %s' % regParam
 	queryStr += ' FROM CurrentRegionState WHERE currentRegionId=%s'
+	print 2
 	query(queryStr, currentRegionId)
+	print 3
 	row = list(fetchone())
+	print 4
 	ownerId, tokenBadgeId, tokensNum, inDecline = row[:4]
+	print 5
 	regInfo[len(regInfo):] = row[4:]
+	print 6
 	result = dict()
 	for i in range(len(misc.possibleLandDescription)):
 		result[misc.possibleLandDescription[i]] = regInfo[i]
-
+	print 7
 	return ownerId, tokenBadgeId, tokensNum, inDecline, result
 
 def generateTokenBadges(randSeed, num):
