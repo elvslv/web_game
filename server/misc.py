@@ -69,7 +69,7 @@ pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
 def generateSidForTest():
 	global LAST_SID
-	LAST_SID = LAST_SID + 1
+ 	LAST_SID = LAST_SID + 1
 	return LAST_SID
 	
 def generateSids(n):
@@ -216,7 +216,7 @@ actionFields = {
 	'finishTurn': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
-	'doSmth': [
+	'doSmtn': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
 	'redeploy': [
