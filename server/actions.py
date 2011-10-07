@@ -125,6 +125,7 @@ def act_createGame(data):
 	gameId = lastId()
 	addNewRegions(mapId, gameId)
 	query('UPDATE Users SET GameId=%s, isReady=0, Priority=1 WHERE Id=%s', gameId, userId)
+	updateGameHistory(gameId, data)
 	return {'result': 'ok', 'gameId': gameId}
 	
 def act_getGameList(data):
@@ -188,6 +189,7 @@ def act_joinGame(data):
 	query('UPDATE Users SET GameId=%s, IsReady=0, Priority=%s+1 WHERE Id=%s', 
 		gameId, priority, userId)
 	query('UPDATE Games SET PlayersNum=PlayersNum+1 WHERE GameId=%s', gameId)
+	updateGameHistory(gameId, data)
 	return {'result': 'ok'}
 	
 def act_leaveGame(data):
@@ -207,6 +209,7 @@ def act_leaveGame(data):
 	else:
 		query('UPDATE Games SET PlayersNum=0, State=%s WHERE GameId=%s', 
 			GAME_ENDED, gameId)
+	updateGameHistory(gameId, data)
 	return {'result': 'ok'}
 
 def act_doSmth(data):
@@ -225,6 +228,27 @@ def act_resetServer(data):
 	editDb.clearDb()
 	createDefaultRaces()
 	return {'result': 'ok'}
+
+def act_saveGame(data):
+	gameId = extractValues('Games', ['GameId'], data['gameId'])
+	query("""SELECT Actions FROM GameHistory WHERE GameId=%s ORDER BY 
+		GameHistoryId ASC""")
+	row = fetchall()
+	result = list()
+	for action in row:
+		result.append(action[0])
+
+	return {'result': 'ok', 'actions': result}
+
+def act_loadGame(data):
+	for act in data:
+		if 'userId' in act:
+			sid = extractValues('Users', ['Id', 'Sid'], [data['userId']])[1]
+			del act['userId']
+			act['sid'] = sid
+
+	for act in data:
+		doAction(act)
 
 def doAction(data):
 	try:

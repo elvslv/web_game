@@ -5,7 +5,15 @@ from editDb import query, queryt, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 import random
 import sys
+import json
 
+def updateGameHistory(gameId, data):
+	if 'sid' in data:
+		userId = getIdBySid(data['sid'])
+		del data['sid']
+		data['userId'] = userId
+	query('INSERT INTO GameHistory(GameId, Action) VALUES(%s, %s)', gameId, 
+		json.dumps(data))
 
 def checkForFriends(userId, attackedUserId):
 	query("""SELECT a.Priority, b.Priority FROM Users a, Users b WHERE 

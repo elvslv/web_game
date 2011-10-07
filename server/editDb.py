@@ -140,7 +140,12 @@ def createTables():
 			AttackedTokensNum INT UNSIGNED DEFAULT 0, 
 			Dice INT UNSIGNED,
 			AttackType INT UNSIGNED DEFAULT 0)""")
-			
+
+	cursor.execute("""CREATE TABLE IF NOT EXISTS GameHistory(
+			GameHistoryId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+			GameId INT UNSIGNED REFERENCES Games(GameId),
+			Action TEXT 
+		)""")
 	        
 def clearDb():		
 	for t in tables:

@@ -47,7 +47,7 @@ def act_setReadinessStatus(data):
 				showNextRace(gameId, misc.VISIBLE_RACES - 1)
 			
 		updateHistory(userId, gameId, GAME_START, None)
-		
+	updateGameHistory(gameId, data)	
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
@@ -83,7 +83,7 @@ def act_selectRace(data):
 		tokensNum, tokenBadgeId)	
 
 	updateRacesOnDesk(gameId, position)
-
+	updateGameHistory(gameId, data)
 	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
 
 def act_conquer(data):
@@ -164,7 +164,7 @@ def act_conquer(data):
 	updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
 	updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadgeId, 
 		attackedTokensNum, dice, ATTACK_CONQUER)
-
+	updateGameHistory(gameId, data)
 	return {'result': 'ok', 'dice': dice} if dice != -1 else {'result': 'ok'}
 		
 def act_decline(data):
@@ -186,6 +186,7 @@ def act_decline(data):
 		TokensInHand=0 WHERE Id=%s""", tokenBadgeId, userId)
 
 	updateHistory(userId, gameId, GAME_DECLINE, tokenBadgeId)
+	updateGameHistory(gameId, data)
 	return {'result': 'ok'}
 
 def act_redeploy(data):
@@ -258,7 +259,7 @@ def act_redeploy(data):
 	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
 		TokenBadgeId=%s""", addUnits, tokenBadgeId)
 	updateHistory(userId, gameId, GAME_REDEPLOY, tokenBadgeId)
-
+	updateGameHistory(gameId, data)
 	return {'result': 'ok'}
 		
 def endOfGame(coins): 
@@ -308,6 +309,7 @@ def act_finishTurn(data):
 
 	updateHistory(userId, gameId, GAME_FINISH_TURN, tokenBadgeId)
 	prepareForNextTurn(gameId, row[0], row[1])
+	updateGameHistory(gameId, data)
 	return {'result': 'ok', 'nextPlayer' : row[0],'coins': coins}
 
 def act_defend(data):
@@ -366,6 +368,7 @@ def act_defend(data):
 		
 	callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)
 	updateHistory(userId, gameId, GAME_DEFEND, tokenBadgeId)
+	updateGameHistory(gameId, data)
 	return {'result': 'ok'}
 
 def getStandardFields(data, t):
@@ -386,11 +389,13 @@ def act_dragonAttack(data):
 	fields = getStandardFields(data, GAME_CONQUER)
 	callSpecialPowerMethod(fields[1], 'dragonAttack', fields[2], 
 		data['regionId'], data['tokensNum'])
+	updateGameHistory(fields[4], data)
 	return {'result': 'ok'}	
 
 def act_enchant(data):
 	fields = getStandardFields(data, GAME_CONQUER)
 	callRaceMethod(fields[0], 'enchant', fields[2], data['regionId'])
+	updateGameHistory(fields[4], data)
 	return {'result': 'ok'}	
 
 def act_throwDice(data):
@@ -398,6 +403,7 @@ def act_throwDice(data):
 	dice = data['dice'] if misc.TEST_MODE else callSpecialPowerMethod(fields[1], 
 		'throwDice')
 	updateHistory(fields[3], fields[4], GAME_THROW_DICE, fields[2], dice)
+	updateGameHistory(fields[4], data)
 	return {'result': 'ok', 'dice': dice}	
 
 
