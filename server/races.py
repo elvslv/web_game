@@ -33,7 +33,7 @@ class BaseRace:
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		return 0
 
-	def countAdditionalConquerUnits(self, userId, gameId):
+	def countAdditionalConquerUnits(self, userId, gameId):		# almighty function
 		return 0
 	
 	def countAdditionalCoins(self, userId, gameId):

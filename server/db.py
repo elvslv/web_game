@@ -6,6 +6,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 
+import misc
+
 DATABASE_HOST = "localhost"
 DATABASE_USER = "admin"
 DATABASE_NAME = "testdb"
@@ -25,60 +27,112 @@ requiredInteger = lambda: Column(Integer, nullable=False)
 
 
 class Map(Base):
-    __tablename__ = 'maps'
+	__tablename__ = 'maps'
 
-    id = pkey()
-    name = string(MAX_MAPNAME_LEN)
-    playersNum = Column(Integer)
-    turnsNum = Column(Integer)
+	id = pkey()
+    	name = string(MAX_MAPNAME_LEN)
+   	playersNum = Column(Integer)
+    	turnsNum = Column(Integer)
     
-    def __init__(self, name, playersNum, turnsNum): 
-        self.name = name
-        self.playersNum = playersNum
-        self.turnsNum = turnsNum
+    	def __init__(self, name, playersNum, turnsNum): 
+    		self.name = name
+    		self.playersNum = playersNum
+    		self.turnsNum = turnsNum
 
 class Game(Base):
-    __tablename__ = 'games'
+	__tablename__ = 'games'
 
-    id = pkey()
-    name = string(MAX_GAMENAME_LEN)
-    descr = string(MAX_GAMEDESCR_LEN)
-    state = Column(Integer, default = 0)
-    turn = Column(Integer)
-    activePlayer = Column(Integer)
-    mapId = fkey('maps.id')
+    	id = pkey()
+    	name = string(MAX_GAMENAME_LEN)
+    	descr = string(MAX_GAMEDESCR_LEN)
+    	state = Column(Integer, default = 0)
+    	turn = Column(Integer)
+    	mapId = fkey('maps.id')
+    	activePlayerId = fkey('users.id')
 
-    map = relationship(Map)
+    	map = relationship(Map)
+    	activePlayer = relationship(User)
 
-    def __init__(self, name, descr, mapId): 
-        self.name = name
-        self.descr = descr
-        self.turn = 0
-        self.state = GAME_WAITING
-        self.mapId = mapId
+    	def __init__(self, name, descr, mapId): 
+    		self.name = name
+        	self.descr = descr
+        	self.turn = 0
+        	self.state = GAME_WAITING
+        	self.mapId = mapId
 
+        
+
+        def checkStage(self, state, user):
+        	lastEvent = history[-1]
+		aggressor = lastEvent.warHistory.aggressorBadge
+        	war = aggressor and not agressor.tokenBadge.inDecline
+        	if not lastEvent.state in misc.possiblePrevCmd[state] or 
+        		war != state == GAME_DEFEND  or 
+        		user != self.activePlayer:
+        		
+        		raise BadFieldException('badStage')
+
+       def getDefendingRegionInfo(self, player):
+       	lastWarHistoryEntry = self.warHistory[-1]
+		if lastWarHistoryEntry.victimBadge.id != player.currentTokenBadge.id
+			raise BadFieldException('badStage')
+		return lastWarHistoryEntry.conqRegion
+
+       def getNextPlayer(self):
+        	try:
+        		return dbi.query(User).filter(User.priority > activePlayer.priority).one()
+        	except NoResultFound:
+        		return None
+
+       def getLastState(self):
+       	return self.history[-1].state
+
+	def prepareForNextTurn(self, newActPlayer):
+		self.activePlayer = newActPlayer
+		clearGameStateAtTheEndOfTurn(gameId)
+		if newActPlayer.currentTokenBadge.id:
+			addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId,
+				'countAdditionalConquerUnits', newActPlayer, gameId)
+			newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum)
+			for region in newActPlayer.regions:
+				region.tokensNum = 1
+
+	def getNonEmptyConqueredRegions(self, tokenBadge):
+		return len(filter(lambda x: x.agressorBadge == tokenBadge and agressorTokensNum > 0, warHistory))
+        
 class User(Base):
-    __tablename__ = 'users'
+	__tablename__ = 'users'
 
-    id = pkey()
-    name = Column(String(MAX_USERNAME_LEN), unique=True, nullable=False)
-    password = string(MAX_PASSWORD_LEN)
-    sid = Column(Integer, unique=True)
-    gameId = fkey('games.id')
-    isReady = Column(Boolean, default=False)
-    currentTokenBadge = Column(Integer)
-    declinedTokenBadge = Column(Integer) 
-    coins = Column(Integer)
-    tokensInHand = Column(Integer, default = 0)
-    priority = Column(Integer)
+    	id = pkey()
+    	name = Column(String(MAX_USERNAME_LEN), unique=True, nullable=False)
+    	password = string(MAX_PASSWORD_LEN)
+    	sid = Column(Integer, unique=True)
+    	gameId = fkey('games.id')
+    	isReady = Column(Boolean, default=False)
+    	currentTokenBadgeId = fkey('tokenBadges.id')
+    	declinedTokenBadgeId = fkey('tokenBadges.id')
+    	coins = Column(Integer, default=misc.INIT_COINS_NUM)
+    	tokensInHand = Column(Integer, default = 0)
+	priority = Column(Integer)
 
-    game = relationship(Game, backref=backref('players', order_by=priority))
+	
+    	game = relationship(Game, backref=backref('players', order_by=priority))
+    	currentTokenBadge = relationship(TokenBadge, backref=backref('owner'), primary_join=currentTokenBadgeId==TokenBadge.id)
+    	declinedTokenBadge = relationship(TokenBadge, backref=backref('owner'), primary_join=declinedTokenBadgeId==TokenBadge.id)
 
-    def __init__(self, username, password):
-        self.name = username
-        self.password = password
+    	def __init__(self, username, password):
+       	self.name = username
+        	self.password = password
 
+        def checkForFriends(self, attackedUser):
+		turn = self.game.turn -  int(self.priority < attackedUser.priority)
+		histEntry = dbi.query(HistoryEntry).filter(HistoryEntry.id==self.game.id).\
+									filter(HistoryEntry.turn==turn)
+		if histEntry.state == GAME_CHOOSE_FRIEND and histEntry.user == self 
+			and histEntry.friend == attackedUser:
 
+			raise BadFieldException('UsersAreFriends')
+			
 class TokenBadge(Base):
     __tablename__ = 'tokenBadges'
 
@@ -86,19 +140,17 @@ class TokenBadge(Base):
     raceId = Column(Integer)
     specPowId = Column(Integer)
     gameId = fkey('games.id')
-    ownerId = fkey('users.id')
-    pos = Column(Integer)
+    pos = Column(Integer, default=0)
     bonusMoney = Column(Integer, default = 0)
     inDecline = Column(Boolean, default=False)
     totalTokensNum = Column(Integer, default = 0)
-    totalSpecPowerBonusNum = Column(Integer, default = 0)
 
     game = relationship(Game, backref=backref('tokenBadges'))
-    owner = relationship(User, backref=backref('tokenBadges'))
 
-    def __init__(self, raceId, specPowerId): 
+    def __init__(self, raceId, specPowerId, gameId): 
         self.raceId = raceId
         self.specPowerId = specPowerId
+        self.gameId = gameId
 
 class Region(Base):
     __tablename__ = 'regions'
@@ -135,49 +187,64 @@ class Region(Base):
 
 
 class Adjacency(Base):
-    __tablename__ = 'adjacentRegions'
+	__tablename__ = 'adjacentRegions'
 
-    leftId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
-    
-    rightId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
-    left = relationship(Region, primaryjoin=leftId==Region.id, backref=backref('leftNeighbors'))
-    right = relationship(Region, primaryjoin=rightId==Region.id, backref=backref('rightNeighbors'))
+	leftId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
+	rightId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
+	mapId = Column(Integer, ForeignKey('maps.id'), primary_key=True)
 
-    def __init__(self, n1, n2):
-        if n1.id < n2.id:
-            self.left = n1
-            self.right = n2
-        else:
-            self.left = n2
-            self.right = n1
+   	left = relationship(Region, primaryjoin=leftId==Region.id, backref=backref('leftNeighbors'))
+    	right = relationship(Region, primaryjoin=rightId==Region.id, backref=backref('rightNeighbors'))
+	map_ = relationship(Map)
+
+	def __init__(self, n1, n2):
+		if n1.id < n2.id:
+            		self.left = n1
+            		self.right = n2
+            		self.map = n1.map
+		else:
+            		self.left = n2
+            		self.right = n1
         	
 
 class RegionState(Base):
-    __tablename__ = 'currentRegionStates'
+	__tablename__ = 'currentRegionStates'
 	
-    id = pkey()
-    gameId = fkey('games.id')
-    tokenBadgeId = fkey('tokenBadges.id') 
-    ownerId = fkey('users.id')
-    regionId = fkey('regions.id') 
-    tokensNum = Column(Integer, default = 0)
-    holeInTheGround = Column(Boolean, default = False)
-    encampment = Column(Integer, default = 0)
-    dragon = Column(Boolean, default = False) 
-    fortress = Column(Boolean, default = False) 
-    hero = Column(Boolean, default = False) 
-    fortified = Column(Boolean, default = False) 
-    inDecline = Column(Boolean, default = False) 
+    	id = pkey()
+    	gameId = fkey('games.id')
+    	tokenBadgeId = fkey('tokenBadges.id') 
+    	ownerId = fkey('users.id')
+    	regionId = fkey('regions.id') 
+    	tokensNum = Column(Integer, default = 0)
+    	holeInTheGround = Column(Boolean, default = False)
+    	encampment = Column(Integer, default = 0)
+    	dragon = Column(Boolean, default = False) 
+    	fortress = Column(Boolean, default = False) 
+    	hero = Column(Boolean, default = False) 
+    	fortified = Column(Boolean, default = False) 
+    	inDecline = Column(Boolean, default = False) 
 
-    game = relationship(Game, backref=backref('currentRegionState'))
-    tokenBadge = relationship(TokenBadge, backref=backref('ourRegionState'))    # rename
-    owner = relationship(User, backref=backref('regions'))
-    region = relationship(Region, uselist=False, backref=backref('state'))
+    	game = relationship(Game, backref=backref('currentRegionState'))
+    	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
+    	owner = relationship(User, backref=backref('regions'))
+    	region = relationship(Region, uselist=False, backref=backref('state'))
 
-    def __init__(self, regionId, gameId, tokensNum):
-        self.regionId = regionId
-        self.gameId = gameId
-        self.tokensNum = tokensNum
+	def __init__(self, regionId, gameId, tokensNum):
+       	self.regionId = regionId
+        	self.gameId = gameId
+        	self.tokensNum = tokensNum
+
+	def clearFromRace(self, tokenBadge):
+		callRaceMethod(tokenBadge.raceId, 'clearRegion', tokenBadge.id, self.id)
+		callSpecialPowerMethod(tokenBadge.specPowerId, 'clearRegion', tokenBadge.id, self.id)
+
+	def checkIfImmune(self):
+		if self.holeInTheGround or self.dragon or self.hero:
+			raise BadFieldException('regionIsImmune')
+
+	def checkRegionIsCorrect(self, tokenBadge):
+		if tokenBadge != self.tokenBadge
+			raise BadFieldException('badRegion')
 
 class Message(Base):
     __tablename__ = 'chat'
@@ -204,14 +271,15 @@ class HistoryEntry(Base):
     dice = Column(Integer)
     friend = Column(Integer)
 
-    game = relationship(Game, backref=backref('history'))
+    game = relationship(Game, backref=backref('history', order_by=id))
     user = relationship(User, backref=backref('history'))
 
-    def __init__(self, userId, gameId, state, tokenBadgeId): 
+    def __init__(self, userId, gameId, state, tokenBadgeId, dice = None): 
         self.userId = userId
         self.gameId = gameId
         self.state = state
         self.tokenBadgeId = tokenBadgeId
+        self.dice = dice
 
 class AttackingHistoryEntry(Base):
     __tablename__ = 'warHistory'
@@ -226,8 +294,8 @@ class AttackingHistoryEntry(Base):
     attackType = Column(Integer) 
     
     mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory'))
-    agressorBadge = relationship(TokenBadge, primaryjoin=aggressorBadgeId==TokenBadge.id)
-    victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id)
+    agressorBadge = relationship(TokenBadge, primaryjoin=aggressorBadgeId==TokenBadge.id, backref=backref('tokenBadge')
+    victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id, backref=backref('TokenBadge'))
 
     def __init__(self, mainHistEntry, aggressorBadgeId, conqRegion, victimBadgeId, diceRes, attackType): 
        self.mainHistEntry = mainHistoryEntry
@@ -236,6 +304,7 @@ class AttackingHistoryEntry(Base):
        self.victimBadgeId = victimBadgeId
        self.diceRes = diceRes
        self.attackType = attackType
+
 
 
 class _Database:
@@ -294,8 +363,8 @@ class _Database:
         meta = MetaData()
         meta.reflect(bind=self.engine)
         for table in meta.sorted_tables:
-            self.engine.execute(table.delete())
-    #       self.engine.execute("""ALTER TABLE %s AUTO_INCREMENT=0""" % table.name)
+        	self.engine.execute(table.delete())
+           
 
     def getUserBySid(self, sid, mandatory=True):
         try:
@@ -326,6 +395,24 @@ class _Database:
             return self.session.query(Game).filter_by(id=id).one()
         except NoResultFound:
           return None
+
+	def getTokenBadgeByPosition(self, pos):
+		try:
+			return self.session.query(TokenBadge).filter_by(pos=pos).one()
+		except NoResultFound:
+			raise BadFieldException('badTokenBadgePosition')
+
+	def getTokenBadgeById(self, pos):
+		try:
+			return self.session.query(TokenBadge).filter_by(id=id).one()
+		except NoResultFound:
+			raise BadFieldException('badTokenBadgeId')
+
+	def getCurrentRegionStateById(self, id):
+		try:
+			return self.session.query(RegionState).filter_by(id=id).one()
+		except NoResultFound:
+			raise BadFieldException('badRegionStateId')
 
 
 
