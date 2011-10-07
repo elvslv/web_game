@@ -1,6 +1,6 @@
 import races
 import misc
-from misc import GAME_DEFEND, GAME_CONQUER, possiblePrevCmd, GAME_CHOOSE_FRIEND, ATTACK_ENCHANT
+from misc import *
 from editDb import query, queryt, fetchall, fetchone, lastId
 from gameExceptions import BadFieldException
 import random
@@ -40,8 +40,9 @@ def checkStage(state, gameId):
 	badStage = (not prevState in possiblePrevCmd[state])
 
 	if prevState == GAME_CONQUER:
-		query("""SELECT AttackType, AttackedTokensNum FROM AttackingHistory WHERE HistoryId=
-			(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
+		query("""SELECT AttackType, AttackedTokensNum FROM AttackingHistory WHERE 
+			HistoryId= (SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", 
+			gameId)
 		attackType, attackedTokensNum = fetchone()
 		if state == GAME_DEFEND:
 			if attackType == ATTACK_ENCHANT:
@@ -127,7 +128,8 @@ def getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower):
 	else:
 		racesInStack = range(0, misc.RACE_NUM)
 		specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-		query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', gameId)
+		query('SELECT RaceId, SpecialPowerId FROM TokenBadges WHERE GameId=%s', 
+			gameId)
 		row = fetchall()
 		for rec in row:
 			racesInStack.remove(rec[0])
@@ -137,17 +139,20 @@ def getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower):
 	return raceId, specialPowerId
 
 def showNextRace(gameId, lastIndex, vRace = '', vSpecialPower = ''):
-	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower)
+	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId, vRace, 
+		vSpecialPower)
 	query("""UPDATE TokenBadges SET Position=Position+1 WHERE Position<%s 
 		AND GameId=%s""", lastIndex, gameId)
-	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, BonusMoney) 
-		VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
-	return races.racesList[raceId].name, races.specialPowerList[specialPowerId].name, 
+	query("""INSERT INTO TokenBadges(RaceId, SpecialPowerId, GameId, Position, 
+		BonusMoney) VALUES(%s, %s, %s, 0, 0)""", raceId, specialPowerId, gameId)
+	return races.racesList[raceId].name, races.specialPowerList[
+		specialPowerId].name, 
 	
 def updateRacesOnDesk(gameId, position):
-	query('UPDATE TokenBadges SET Position=NULL WHERE GameId=%s AND Position=%s', gameId, position)
-	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE Position>%s AND 
-		GameId=%s""", position, gameId)
+	query('UPDATE TokenBadges SET Position=NULL WHERE GameId=%s AND Position=%s', 
+		gameId, position)
+	query("""UPDATE TokenBadges SET BonusMoney=BonusMoney+1 WHERE Position>%s 
+		AND	GameId=%s""", position, gameId)
 	return showNextRace(gameId, position)
 
 def callRaceMethod(raceId, methodName, *args):
@@ -173,9 +178,9 @@ def checkDefendingPlayerNotExists(gameId):
 
 def getNonEmptyConqueredRegions(tokenBadgeId, gameId):
 	query("""SELECT COUNT(*) FROM AttackingHistory a, History b, Games c WHERE 
-		a.AttackingTokenBadgeId=%s AND a.AttackedTokensNum>0 AND a.HistoryId=b.HistoryId
-		AND b.Turn=c.Turn AND b.GameId=c.GameId AND c.GameId=%s""", 
-		tokenBadgeId, gameId)
+		a.AttackingTokenBadgeId=%s AND a.AttackedTokensNum>0 AND 
+		a.HistoryId=b.HistoryId AND b.Turn=c.Turn AND b.GameId=c.GameId AND 
+		c.GameId=%s""", tokenBadgeId, gameId)
 	row = fetchone()
 	return row[0] if row else 0
 

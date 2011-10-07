@@ -140,6 +140,7 @@ def createTables():
 			AttackedTokensNum INT UNSIGNED DEFAULT 0, 
 			Dice INT UNSIGNED,
 			AttackType INT UNSIGNED DEFAULT 0)""")
+			
 	        
 def clearDb():		
 	for t in tables:
