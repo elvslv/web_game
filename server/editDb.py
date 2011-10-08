@@ -51,7 +51,6 @@ def createTables():
 			GameId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
 			GameName VARCHAR(%s), 
 			GameDescr VARCHAR(%s), 
-			PlayersNum INT UNSIGNED, 
 			State INT UNSIGNED, 
 			Turn TINYINT UNSIGNED, 
 			ActivePlayer INT UNSIGNED,

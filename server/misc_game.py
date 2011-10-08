@@ -292,5 +292,91 @@ def getMapIdByTokenBadge(tokenBadgeId):
 		getGameIdByTokenBadge(tokenBadgeId))
 	return fetchone()[0]
 
+def getVisibleTokenBadges(gameId):
+	query("""SELECT RaceId, SpecialPowerId, Position FROM TokenBadges WHERE
+		GameId=%s AND Position>=0 ORDER BY Position ASC""", gameId)
+	rows = fetchall()
+	result = list()
+	for tokenBadge in rows:
+		result.append({
+			'raceId': races.racesList[tokenBadge[0]].name, 
+			'specialPowerId': races.specialPowerList[tokenBadge[1]].name,
+			'position': tokenBadge[2]})
+	return result
+
+def getRegionState(regionId, scndFields, scndField, regionParams, offset):
+	queryList = list()
+	queryList.extend(['RegionId'])
+	queryList.extend(scndFields)
+	queryList.extend(regionParams)
+	regionDescr = extractValues('Regions', queryList, [regionId, scndField])
+	result = dict()
+	result['regionId'] = regionId
+	for i in range(1, len(scndFields)):
+		result[scndFields[i]] = regionDescr[i]
+	for i in range(len(scndFields) + 1, len(queryList)):
+		result[regionParams[i + offset]] = regionDescr[i]
+
+	return result
+
+def getCurrentRegionState(regionId, gameId):
+	return getRegionState(regionId, ['gameId', 'ownerId', 'tokenBadgeId', 
+		'tokensNum'], gameId, possibleLandDescription[11:], 11)
+	
+def getConstRegionState(regionId, mapId):
+	return getRegionState(regionId, ['mapId'], mapId, 
+		possibleLandDescription[:11], 0)
+	
+def getMapState(mapId, gameId=None):
+	mapQueryFields = ['mapId', 'mapName', 'turnsNum', 'playersNum']
+	mapDescr = extractValues('Maps', mapQueryFields, mapId)
+	mapRes = dict()
+	for i in range(len(mapQueryFields)):
+		mapRes[mapQueryFields[i]] = mapDescr[i]
+	regions = list()
+	query('SELECT RegionId FROM Regions WHERE MapId=%s', mapId)
+	regionsList = fetchall()
+	for regionId in regionsList:
+		region = dict()
+		region = getConstRegionState(regionId[0], mapId)
+		if gameId:
+			region.update(getCurrentRegionState(regionId[0], gameId))
+			
+		query("""SELECT SecondRegionId FROM AdjacentRegions WHERE FirstRegionId=%s 
+			AND MapId=%s""")
+		adjacent = list()
+		adjac = fetchall()
+		for a in adjac:
+			adjacent.append(a[0])
+		region['adjacentRegions'].append(adjacentadjacent)
+		
+		regions.append(region)
+	return regions
+
+def getTokenBadgeState(tokenBadgeId):
+	tokenBadgeQueryFields = ['tokenBadgeId', 'raceId', 'specialPowerId', 
+		'totalTokensNum']
+	tokenBadge = extractValues('TokenBadges', tokenBadgeQueryFields, tokenBadgeId)
+	result = dict()
+	for i in range(len(tokenBadgeQueryFields)):
+		result[tokenBadgeQueryFields[i]] = tokenBadge[i]
+	result['raceName'] = races.racesList[tokenBadge[1]].name
+	result['specialPower'] = races.specialPowerList[tokenBadge[2]].name
+	return result
+
+def getUserState(userId):
+	userQueryFields = ['id', 'userName', 'isReady', 'coins', 'tokensInHand', 
+		'priority', 'currentTokenBadge', 'declinedTokenBadge']
+	user = extractValues('Users', userQueryFields, userId)
+	result = dict()
+	result['userId'] = userId
+	for i in range(1, 6):
+		result[userQueryFields[i]] = user[i]
+	if user[6]:
+		result['currentTokenBadge'] = getTokenBadgeState(user[6])
+	if user[7]:
+		result['declinedTokenBadge'] = getTokenBadgeState(user[7])
+	return result
+
 if __name__=='__main__':
 	print generateTokenBadges(int(sys.argv[1]), int(sys.argv[2]))

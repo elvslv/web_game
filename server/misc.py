@@ -228,7 +228,9 @@ actionFields = {
 	],
 	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}],
 	'throwDice': [{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'dice', 'type': int, 'mandatory': False}]
+		{'name': 'dice', 'type': int, 'mandatory': False}],
+	'getGameState': [{'name': 'gameId', 'type': int, 'mandatory': True}],
+	'getMapState': [{'name': 'mapId', 'type': int, 'mandatory': True}]
 }
 
 possibleLandDescription = [

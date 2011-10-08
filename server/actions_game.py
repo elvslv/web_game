@@ -409,16 +409,7 @@ def act_throwDice(data):
 
 def act_getVisibleTokenBadges(data):
 	gameId = extractValues('Games', ['GameId'], [data['gameId']])
-	query("""SELECT RaceId, SpecialPowerId, Position FROM TokenBadges WHERE
-		GameId=%s AND Position>=0 ORDER BY Position ASC""", gameId)
-	rows = fetchall()
-	result = list()
-	for tokenBadge in rows:
-		result.append({
-			'raceId': races.racesList[tokenBadge[0]].name, 
-			'specialPowerId': races.specialPowerList[tokenBadge[1]].name,
-			'position': tokenBadge[2]})
-	return {'result': result}
+	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokenBadges(gameId)}
 
 def prepareForNextTurn(gameId, newActPlayer, newTokenBadgeId):
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)

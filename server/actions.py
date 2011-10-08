@@ -171,6 +171,35 @@ def act_getGameList(data):
 		result['games'].append(curGame)
 	return result
 
+def act_getMapState(data):
+	return {'result': 'ok', 'mapState': getMapState(data['mapId'])}
+
+def act_getGameState(data):
+	gameQueryFields = ['GameId', 'GameName', 'GameDescr', 'PlayersNum', 'State', 
+		'Turn', 'ActivePlayer', 'MapId']
+	gameResFields = ['gameId', 'gameName', 'gameDescription', 'currentPlayersNum', 
+		'state', 'currentTurn', 'activePlayerId']
+		
+	game = extractValues('Games', gameFields, data['gameId'])
+	gameId = game[0]
+	mapId = game[len(gameQueryFields) - 1]
+	result = dict()
+	for i in range(len(gameResFields)):
+		result[gameResFields[i]] = game[i]
+		
+	result['map'] = getMapState(mapId, gameId)
+	query('SELECT Id FROM Users WHERE GameId=%s', gameId)
+	
+	users = list()
+	usersDescr = fetchall()
+	for user in usersDescr:
+		users.append(getUserState(user[0]))
+	result['users'] = users
+	
+	result['visibleTokenBadges'] = getVisibleTokenBadges(gameId) 
+	
+	return {'result': ok, 'gameState': result}
+
 def act_joinGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	if gameId: raise BadFieldException('alreadyInGame')
