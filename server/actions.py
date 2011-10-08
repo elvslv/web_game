@@ -1,4 +1,4 @@
-from db import Database, User, Message
+from db import Database, User, Message, Game, Map, Adjacency, RegionState
 import re
 import time
 import math
@@ -33,16 +33,16 @@ def act_login(data):
 	user = dbi.getUserByNameAndPwd(username, passwd)
 	while 1:
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
-		if not dbi.getUserBySid(sid, False): break
+		if not dbi.getXbyY('User', 'sid', sid, False): break
 	user.sid = sid
 	return {'result': 'ok', 'sid': sid}
 
 def act_logout(data):
-	dbi.getUserBySid(data['sid']).sid = None
+	dbi.getXbyY('User', 'sid', data['sid']).sid = None
 	return {'result': 'ok'}
 
 def act_sendMessage(data):
-	userId = dbi.getUserBySid(data['sid']).id
+	userId = dbi.getXbyY('User', 'sid', data['sid']).id
 	msgTime = misc.generateTimeForTest() if misc.TEST_MODE else math.trunc(time.time())
 	text = data['text']
 	dbi.add(Message(userId, text, msgTime))
@@ -57,62 +57,54 @@ def act_getMessages(data):
 	return {'result': 'ok', 'messages': messages}
 
 def act_createDefaultMaps(data):
-	for map in misc.defaultMaps:
-		act_uploadMap(map)
+	for map_ in misc.defaultMaps:
+		act_uploadMap(map_)
 	return {'result': 'ok'}
 
 def act_uploadMap(data):
 	name = data['mapName']
-	players = int(data['playersNum'])
+	playersNum = int(data['playersNum'])
 	newMap = Map(name, playersNum, data['turnsNum'])
 	result = list()
 	if 'regions' in data:
 		regions = data['regions']
-	#	maxId = dbi.query(func.max(Region.id)) 
-	#	if not maxId: maxId = 0
-	#	curRegion = maxId
-		for region in regions:
+		for regInfo in regions:
 			try:	
-				dbi.addRegion(newMap, region)
-				#add links in graph
-				##	Cryptic writings Have to decipher later 
-			#	for n in region['adjacent']:
-			#		query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
-			#			VALUES(%s, %s)""", curRegion, n + maxId)
-			#		query("""INSERT IGNORE INTO AdjacentRegions(FirstRegionId, SecondRegionId) 
-			#			VALUES(%s, %s)""", n + maxId, curRegion)
-			#	result.append(curRegion)
-			#	curRegion += 1
+				dbi.addRegion(newMap, regInfo)
 			except KeyError:
 				raise BadFieldException('badRegion')
+		i = 0
+		for reg in newMap.regions:			#This is quite bad but I didn't manage to find the other way
+			regInfo = data['regions'][i]			
+			dbi.addNeighbors(reg, map(lambda x: Adjacency(reg.id, x), regInfo['adjacent']))
+        		i += 1
+
 	dbi.addUnique(newMap, 'mapName')
 	mapId = newMap.id
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
 
-def initRegions(mapId, gameId):
-	regions = dbi.getMapById(mapId)
+def initRegions(map, game):
 	result = list()
-	for region in regions:
-		regState = RegionState(region.id, gameId, region.defTokensNum)
+	for region in map.regions:
+		regState = RegionState(region, game)
 		dbi.add(regState)
 		result.append(regState.id)
 	return result
 
 def act_createGame(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.gameId: raise BadFieldException('alreadyInGame')
-
-	map_ = dbi.getMapById(data['mapId'])
+	map_ = user = dbi.getXbyY('Map', 'id', data['mapId'])
 	descr = None
 	if 'gameDescr' in data:
 		descr = data['gameDescr']
-
-	newGame = Game(data['mapName'], descr, map_.id)
-	regionIds = addNewRegions(map_.id, newGame.id)
+	newGame = Game(data['gameName'], descr, map_)
+	dbi.addUnique(newGame, 'gameName')
+	regionIds =  initRegions(map_, newGame)
 	user.game = newGame
 	user.isReady = True
-	userPriority = 1
+	user.priority = 1
 	return {'result': 'ok', 'gameId': newGame.id, 'regions': regionIds}
 	
 def act_getGameList(data):
@@ -152,50 +144,37 @@ def act_getGameList(data):
 	return result
 
 def act_joinGame(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.gameId: raise BadFieldException('alreadyInGame')
-	game = dbi.getGameById(data['gameId'])
+	game = dbi.getXbyY('Game', 'id', data['gameId'])
 	if game.state != GAME_WAITING:
 		raise BadFieldException('badGameState')
 	maxPlayersNum = game.map.playersNum
 	if playersNum >= maxPlayersNum:
 		raise BadFieldException('tooManyPlayers')
-
-	maxPriority = dbi.query(func.max(game.players.priority))
+	maxPriority = max(game.players, lambda x: x.priority)
 	user.game = game
 	user.priority = maxPriority + 1
-
-#	query('UPDATE Games SET PlayersNum=PlayersNum+1 WHERE GameId=%s', gameId)
-#	I hope this would happen by itself. Have to read more about sqlalchemy ``relationship'' 
 	return {'result': 'ok'}
 	
 def act_leaveGame(data):
-	user = dbi.getUserBySid(data['sid'])
-	if user.gameId: raise BadFieldException('notInGame')
-
-	curPlayersNum = len(dbi.getGameById(data['gameId']).players)
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not user.game: raise BadFieldException('notInGame')
 	game = user.game
 	user.game = None
-	for region in player.regions:
+	for region in user.regions:
 		region.tokenBadgeId = None
 		region.Encapment = 0
 		region.holeInTheGround = 0
 		region.dragon = False
 		region.Fortress = False
 		region.Hero = False
-#	if curPlayersNum > 1: 
-#		query('UPDATE Games SET PlayersNum=PlayersNum-1 WHERE GameId=%s', gameId)
-#	else:
-#		query('UPDATE Games SET PlayersNum=0, State=%s WHERE GameId=%s', 
-#			GAME_ENDED, gameId)
-##	Have to happen automatically.
-	if game.players == None:
+	if game.players == []:
 		game.state = GAME_ENDED
 	return {'result': 'ok'}
 
 def act_doSmtn(data):
-	user = dbi.getUserBySid(data['sid'])
-	if not user: raise BadFieldException('badSid')
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	return {'result': 'ok'}
 
 def act_resetServer(data):
@@ -208,6 +187,7 @@ def act_resetServer(data):
 		misc.TEST_RANDSEED = 21425364547
 	random.seed(misc.TEST_RANDSEED)
 	createDefaultRaces()
+	dbi.clear()
 	return {'result': 'ok'}
 
 def doAction(data):
@@ -219,6 +199,6 @@ def doAction(data):
 		res = globals()[func](data)
 		dbi.commit()
 		return res
-	except SQLAlchemyError, e:
+	except BadFieldException, e:			##Temporary
 		dbi.rollback()
-		return e
+		raise e

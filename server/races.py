@@ -19,16 +19,8 @@ class BaseRace:
 	def countConquerBonus(self, currentRegionId, tokenBadgeId):
 		return 0
 	
-	def decline(self, userId): 
-		query("""DELETE FROM TokenBadges WHERE TokenBadgeId=(SELECT DeclinedTokenBadge 
-			FROM Users WHERE Users.Id=%s)""", userId)
-		query("""UPDATE CurrentRegionState SET OwnerId=NULL, InDecline=False, 
-			TokenBadgeId=NULL WHERE OwnerId=%s AND InDecline=True""", userId)
-		query("""UPDATE CurrentRegionState SET InDecline=True, TokensNum=1 WHERE 
-			OwnerId=%s""", userId)
-		query("""UPDATE TokenBadges SET InDecline=True, TotalTokensNum=(SELECT 
-			COUNT(*) FROM CurrentRegionState WHERE OwnerId=%s) WHERE OwnerId=%s""", 
-			userId, userId)
+	def decline(self, user): 
+		user.decline()
 	
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		return 0
@@ -63,31 +55,29 @@ class BaseRace:
 	def enchant(self, tokenBadgeId, currentRegionId):
 		return BadFieldException('badRace')
 
-	def clearRegion(self, tokenBadgeId, currentRegionId):
-		query("""UPDATE CurrentRegionState SET Encampment = 0, Fortress=FALSE, 
-			Dragon=FALSE, HoleInTheGround=FALSE, Hero = FALSE 
-			WHERE CurrentRegionId=%s""", currentRegionId) 
+	def clearRegion(self, tokenBadge, region):
+		region.encampent = 0
+		region.fortress = False
+		region.dragon = False
+		region.holeInTheGround = False
+		region.hero = False
 
-	def updateAttackedTokensNum(self, tokenBadgeId):
-		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
-			TokenBadgeId=%s""", tokenBadgeId)
+	def countCasualties(self, tokenBadge):
+		tokenBadge.totalTokensNum -= 1
 
 class RaceHalflings(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Halflings', 6, 11)
 	
-	def conquered(self, currentRegionId, tokenBadgeId):
-		query('SELECT RaceBonusNum FROM TokenBadges WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
-		if not fetchone()[0]:
+	def conquered(self, currentRegion, tokenBadge):			#### Looks strange. Should read the rules
+		query("""SELECT COUNT(*) FROM CurrentRegionState WHERE TokenBadgeId=%s AND 
+			HoleInTheGround=TRUE""", tokenBadgeId)
+		
+		if len(filter(lambda x: x.holeInTheGround, tokenBadge.regions)) == 2:
 			return
-		query("""UPDATE CurrentRegionState SET HoleInTheGround=TRUE WHERE 
-			TokenBadgeId=%s""", tokenBadgeId)
-		query("""UPDATE TokenBadges SET RaceBonusNum=RaceBonusNum-1 WHERE 
-			TokenBadgeId=%s""", tokenBadgeId)
+		for region in tokenBadge.regions: region.holeInTheGround = True
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
+	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, tokenBadgeId):
 		return False if regions else True
 
 	
@@ -96,33 +86,23 @@ class RaceHalflings(BaseRace):
 
 	def decline(self, userId):
 		BaseRace.decline(self, userId)
-		query("""UPDATE CurrentRegionState SET HoleInTheGround=FALSE WHERE 
-			OwnerId=%s""", userId)
-		query("""UPDATE TokenBadges SET RaceBonusNum=0 WHERE OwnerId=%s""", 
-			userId)
+		for region in tokenBadge.regions: region.holeInTheGround = False
 		
-	def declineRegion(self, currentRegionId):
-		query("""UPDATE CurrentRegionState SET HoleInTheGround=FALSE WHERE 
-			CurrentRegionId=%s""", currentRegionId)
-		query("""UPDATE TokenBadges SET RaceBonusNum=0 WHERE TokenBadgeId=%s""",
-			tokenBadgeId)
+#	def declineRegion(self, currentRegionId):
+#		query("""UPDATE CurrentRegionState SET HoleInTheGround=FALSE WHERE 
+#			CurrentRegionId=%s""", currentRegionId)
+#		query("""UPDATE TokenBadges SET RaceBonusNum=0 WHERE TokenBadgeId=%s""",
+#			tokenBadgeId)
 
 class RaceGiants(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Giants', 6, 11)
 
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
+	def countConquerBonus(self, currentRegion, tokenBadge):
 		res = 0
-		query("""SELECT Regions.RegionId, Regions.Mountain FROM CurrentRegionState, 
-			Regions WHERE CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId""", tokenBadgeId)
-		row = fetchall()
+		regions = filter(lambda x: x.mountain, tokenBadge.regions)
 		for region in row:
-			if query("""SELECT 1 FROM AdjacentRegions, CurrentRegionState 
-				WHERE CurrentRegionState.RegionId=FirstRegionId AND
-				CurrentRegionState.CurrentRegionId=%s AND 
-				AdjacentRegions.SecondRegionId=%s""", currentRegionId, 
-				region[0]) and region[1]:
+			if currentRegion.adjacent(region.region):					#how do I set this straight?
 					res = -1
 					break
 		return res
@@ -131,71 +111,53 @@ class RaceTritons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
-		regionInfo = getRegionInfoById(currentRegionId)
-		return -1 if regionInfo['coast'] else 0
+	def countConquerBonus(self, currentRegion, tokenBadge):
+		return -1 if currentRegion.region.coast else 0
 
 class RaceDwarves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
-	def countAdditionalCoins(self, userId, gameId):
-		query("""SELECT COUNT(*) FROM Regions, CurrentRegionState WHERE 
-			CurrentRegionState.TokenBadgeId=%s AND 
-			Regions.RegionId=CurrentRegionState.RegionId AND Regions.Mine=1""", 
-			getTokenBadgeIdByRaceAndUser(self.raceId, userId))
-		return int(fetchone()[0])
+	def countAdditionalCoins(self, user, gameId):
+		return len(filter(lambda x: x.mine, user.currentTokenBadge.regions))
 
 class RaceHumans(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
-	def countAdditionalCoins(self, userId, gameId):
-		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
-			CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId AND Regions.Farmland=1""", 
-			getTokenBadgeIdByRaceAndUser(self.raceId, userId))
-		return int(fetchone()[0])
+	def countAdditionalCoins(self, user):
+		return len(filter(lambda x: x.farmland, user.currentTokenBadge.regions))
 
 class RaceOrcs(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Orcs', 5, 10)
 
-	def countAdditionalCoins(self, userId, gameId):
-		tokenBadgeId = getTokenBadgeIdByRaceAndUser(self.raceId, userId)
-		query('SELECT InDecline FROM TokenBadges WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
-		if fetchone()[0]:
-			return 0
-		return getNonEmptyConqueredRegions(tokenBadgeId, gameId)
+	def countAdditionalCoins(self, user, game):
+		return game.getNonEmptyConqueredRegions(user.currentTokenBadge)
 
 class RaceWizards(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
-	def countAdditionalCoins(self, userId, gameId):
-		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
-			CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId AND Regions.Magic=1""", 
-			getTokenBadgeIdByRaceAndUser(self.raceId, userId))
-		return int(fetchone()[0])
+	def countAdditionalCoins(self, user, game):
+		return len(filter(lambda x: x.magic, user.currentTokenBadge.regions))
 		
 class RaceAmazons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Amazons', 6, 15)
 
-	def countAdditionalRedeploymentUnits(self, userId, gameId):
-		return -4 if  getPrevState(gameId) == GAME_CONQUER else 0
+	def countAdditionalRedeploymentUnits(self,  game):
+		return -4 if  game.getLastState() == GAME_CONQUER else 0
 
-	def countAdditionalConquerUnits(self, userId, gameId):
-		return 4 if getPrevState(gameId) in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
+	def countAdditionalConquerUnits(self, game):
+		return 4 if game.getLastState()  in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
 
 class RaceSkeletons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Skeletons', 5, 18)
 
-	def countAdditionalRedeploymentUnits(self, userId, gameId):
-		return getNonEmptyConqueredRegions(tokenBadgeId, gameId) / 2
+	def countAdditionalRedeploymentUnits(self, user, game):
+		return game.getNonEmptyConqueredRegions(user.tokenBadge, game) / 2
 		
 			
 class RaceElves(BaseRace):
@@ -223,42 +185,32 @@ class RaceSorcerers(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
-	def enchant(self, tokenBadgeId, currentRegionId):
-		currentRegionId = extractValues('CurrentRegionState', 'CurrentRegionId', 
-			currentRegionId, 'badRegionId')
-		checkRegionIsImmune(currentRegionId)
-		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
-		query("""SELECT Encampment, TokensNum, TokenBadgeId, InDecline FROM CurrentRegion 
-			WHERE CurrentRegionId=%s""", currentRegionId)
-		row = fetchone()
-		if row[0] == tokenBadgeId:
-			raise BadFieldException('badAttackedRace')
-		if row[1]:
-			raise BadFieldException('regionIsImmune')
-		if not row[2]:
-			raise BadFieldException('nothingToEnchant')
-		if row[2] > 1:
-			raise BadFieldException('cannotEnchantMoreThanOneToken')
-		if row[3]:
-			raise BadFieldException('cannotEnchantDeclinedRace')
+	def enchant(self, tokenBadge, currentRegion):
+		currentRegion.checkIfImmune()
+		currentRegion.checkIfCorrect(tokenBadge)
+		attackedTokenBadge = currentRegion.tokenBadge
+		if attackedTokenBadge == tokenBadge: raise BadFieldException('badAttackedRace')
+		if currentRegion.encampment: raise BadFieldException('regionIsImmune')
+		if not currentRegion.tokensNum: 	raise BadFieldException('nothingToEnchant')
+		if currentRegion.tokensNum > 1: 	raise BadFieldException('cannotEnchantMoreThanOneToken')
+		if currentRegion.inDecline: raise BadFieldException('cannotEnchantDeclinedRace')
 
-		query('SELECT TotalTokensNum FROM TokenBadges WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
-		if fetchone()[0] == self.maxNum:
-			raise BadFieldException('noMoreTokensInStorageTray')
-
-		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
-			TokenBadgeId=%s""", row[0])
+		if tokenBadge.totalTokensNum == self.maxNum: raise BadFieldException('noMoreTokensInStorageTray')
+		attackedTokenBadge.totalTokensNum -= 1
+		tokenBadge.totalTokensNum += 1
+		raceId, specialPowerId  = attackedTokenBadge.raceId,attackedTokenBadge.specPowerId
+		racesList[raceId].clearRegion(attackedTokenBadge, currentRegion)
+		specialPowerList[specialPowerId].clearRegion(attackedTokenBadge, currentRegion)
+		currentRegion.tokenBadge = tokenBadge
+		currentRegion.owner = tokenBadge.owner
+		currentRegion.tokensNum = 1
+		dbi.add(History(user.id, game.id, GAME_CONQUER, tokenBadge.id))
+		dbi.add(WarHistory(dbi.last_id(), tokenBadge.id, currentRegion, attackedTokenBadge, attackedTokenBadge,
+			attackedTokensNum, dice, ATTACK_CONQUER))
 		
-		raceId, specialPowerId  = getRaceAndPowerIdByTokenBadge(row[0])
-		racesList[raceId].clearRegion(row[0], currentRegionId)
-		specialPowerList[specialPowerId].clearRegion(row[0], currentRegionId)
-		query("""UPDATE CurrentRegionState SET TokenBadgeId=%s 
-			WHERE CurrentRegionId=%s""", tokenBadgeId, currentRegionId) 
-
 		updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-		updateConquerHistory(lastId(), tokenBadgeId, regionId, row[2], row[1], 
-			-1, ATTACK_ENCHANT)
+		updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadge.tokensNum, 
+			attackedTokenBadge.encampment, -1, ATTACK_ENCHANT)
 
 
 racesList = [
@@ -289,21 +241,18 @@ class BaseSpecialPower:
 	def setId(self, id):
 		self.specialPowerId = id
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return not regions and (border or coast)
-
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return not sea	
-	
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
+	def tryToConquerRegion(self, region, tokenBadge):
+		ans = (not regions or region.adjacent(tokenBadge.region)) and not region.sea
+		return ans
+		
+	def countConquerBonus(self, regionId, tokenBadgeId):
 		return 0
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
 		return 0
 
-	def tryToGoInDecline(self, gameId): ##rewrite in context of history
-		if getPrevState(gameId) != GAME_FINISH_TURN:
+	def tryToGoInDecline(self, game):
+		if game.getLastState() != GAME_FINISH_TURN:
 			raise BadFieldException('badStage')
 
 	def getInitBonusNum(self):
@@ -315,22 +264,16 @@ class BaseSpecialPower:
 	def turnFinished(self, tokenBadgeId):
 		pass
 
-	def dragonAttack(self, tokenBadgeId, currentRegionId, tokensNum):
+	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
 		raise BadFieldException('badAction') ###
 
-	def clearRegion(self, tokenBadgeId, currentRegionId):
+	def clearRegion(self, tokenBadgeId, regionId):
 		pass
-
-	def setEncampment(self, tokenBadgeId, currentRegionId, encampmentsNum):
-		raise BadFieldException('badAction')
-
-	def breakEncampment(self, tokenBadgeId, currentRegionId, encampmentsNum):
-		raise BadFieldException('badAction')
 
 	def throwDice(self):
 		raise BadFieldException('badAction')
 
-	def declineRegion(self, currentRegionId):
+	def declineRegion(self, regionId, gameId):
 		pass
 
 	def decline(self, userId):
@@ -347,10 +290,8 @@ class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
-		query('SELECT InDecline FROM TokenBadges WHERE TokenBadgeId=%s',
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return 2 if not int(fetchone()[0]) else 0
+	def countAdditionalCoins(self, user, game, tokenBadge):
+		return 2 if not tokenBadge.inDecline else 0
 
 class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
@@ -367,51 +308,36 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 5
 
-	def clearRegion(self, tokenBadgeId, currentRegionId):
-		query('SELECT OwnerId FROM TokenBadges WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
-		userId = fetchone()[0]
-		query('SELECT Encampment FROM CurrentRegionState WHERE CurrentRegionId=%s', 
-			currentRegionId)
-		encampment = fetchone()[0]
-		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=LEAST(%s, 
-			SpecialPowerBonusNum+%s) WHERE TokenBadgeId=%s""", 
-			self.getInitBonusNum(), encampment, tokenBadgeId)
+	def clearRegion(self, tokenBadgeId, regionId):
+		pass
 
 	def decline(self, userId):
-		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
-			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
+		query("""UPDATE CurrentRegionState SET Encampment=0 WHERE OwnerId=%s""",
+			userId)
 
-	def setEncampments(encampments, tokenBadgeId):
+	def setEncampments(self, encampments, tokenBadge):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
 
-		query('UPDATE CurrentRegionState SET Encampment=0 WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
+		tokenBadge.region.encampment = 0
 		freeEncampments = 5
-		for encampment in ecampments:
-			currentRegionId = region['regionId']
-			encampmentsNum = region['encampmentsNum']
-			if not query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
-				AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId):
+		for encampment in encampments:
+			region =dbi.getRegionById(encampment['regionId'])
+			encampmentsNum = encampment['encampmentsNum']
+			if region.tokenBadge != tokenBadge:
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
 				raise BadFieldException('notEnoughEncampentsForRedeployment')
-			query("""UPDATE CurrentRegionState SET Encampment=%s WHERE 
-				CurrentRegionId=%s""", encampmentsNum, currentRegionId )
+				region.encampent = encampmentsNum
 
 			freeEncampments -= encampmentsNum
 
-		query('UPDATE Users SET SpecialPowerBonusNum=%s WHERE TokenBadgeId=%s',
-			freeEncampments, tokenBadgeId)
-
-				
 class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)
 
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
+	def countConquerBonus(self, regionid, tokenBadgeId):
 		return -1
 
 class SpecialPowerDiplomat(BaseSpecialPower):
@@ -422,33 +348,33 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 			return 1
 			
 	def decline(self, userId):
-		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
-			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
+		pass
 
 	def selectFriend(data, userId, tokenBadgeId, gameId):
-		if not('friendId' in data and isinstance(data['friendId'], int)):
-			raise BadFieldException('badFriendId')
+		pass
+	#	if not('friendId' in data and isinstance(data['friendId'], int)):
+	#		raise BadFieldException('badFriendId')
+#
+#		friendId, friendBadgeId = extractValues('Users', ['Id', 
+#			'CurrentTokenBadge'], [data['friendId']])
 
-		friendId, friendBadgeId = extractValues('Users', 'Id', data['friendId'], 'badUserId', 
-			True, ['CurrentTokenBadge'])
-
-		if friendId == userId:
-			raise BadFieldException('badFriend')
+#		if friendId == userId:
+#			raise BadFieldException('badFriend')
 			
-		if not query("""SELECT 1 FROM Users a, Users b WHERE a.Id=%s AND b.Id=%s
-			AND a.GameId=b.GameId"""):
-			raise BadFieldException('badFriend')
+#		if not query("""SELECT 1 FROM Users a, Users b WHERE a.Id=%s AND b.Id=%s
+#			AND a.GameId=b.GameId"""):
+#			raise BadFieldException('badFriend')
 			
-		if query("""SELECT 1 FROM AttackingHistory a, History b, Games c, 
-			TokenBadges d WHERE a.AttackingTokenBadgeId=%s AND 
-			a.AttackedTokenBadgeId=%s AND a.HistoryId=b.HistoryId AND 
-			b.GameId=c.GameId AND b.Turn=c.Turn	AND c.GameId=d.GameId AND 
-			d.TokenBadgeId=%s AND d.InDecline=False""", tokenBadgeId, 
-			friendBadgeId, friendBadgeId):
-			raise BadFieldException('badFriend')
+#		if query("""SELECT 1 FROM AttackingHistory a, History b, Games c, 
+#			TokenBadges d WHERE a.AttackingTokenBadgeId=%s AND 
+#			a.AttackedTokenBadgeId=%s AND a.HistoryId=b.HistoryId AND 
+#			b.GameId=c.GameId AND b.Turn=c.Turn	AND c.GameId=d.GameId AND 
+#			d.TokenBadgeId=%s AND d.InDecline=False""", tokenBadgeId, 
+#			friendBadgeId, friendBadgeId):
+#			raise BadFieldException('badFriend')
 
-		query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, 
-			Friend) SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", 
+#		query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, 
+#			Friend) SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", 
 			userId, gameId, GAME_CHOOSE_FRIEND, tokenBadgeId, gameId, friendId)
 
 
@@ -459,59 +385,64 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 1
 
-	def dragonAttack(self, tokenBadgeId, currentRegionId, tokensNum):
-		currentRegionId = extractValues('CurrentRegionState', 'CurrentRegionId', 
-			currentRegionId, 'badRegionId')
-		checkRegionIsImmune(currentRegionId)
-		checkRegionIsCorrect(currentRegionId, tokenBadgeId)
-		query('SELECT SpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
-		if not fetchone()[0]:
-			raise BadFieldException('dragonAlreadyAttackedOnThisTurn')
-		query("""SELECT a.TokenBadgeId, b.TokenBadgeId, a.TokensNum FROM 
-			CurrentRegionState a, CurrentRegionState b WHERE a.CurrentRegionId=%s 
-			AND b.TokenBadgeId=%s""", currentRegionId, tokenBadgeId)
-		row = fetchone()
-		if row[0] == row[1]:
-			raise BadFieldException('badRegion')
+	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
+		pass
+	#	regionId, gameId = extractValues('CurrentRegionState', ['RegionId', 'GameId'], 
+	#		[regionId, getGameIdByTokenBadge(tokenBadgeId)])
+	#	checkRegionIsImmune(regionId, gameId)
+	#	checkRegionIsCorrect(regionId, tokenBadgeId)
+	#	raceId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)[0]
+		
+	#	if not(racesList[raceId].tryToConquerRegion(regionId, tokenBadgeId) 
+	#		and self.tryToConquerRegion(regionId, tokenBadgeId)):
+	#		raise BadFieldException('badRegion')
+			
+	#	if query("""SELECT 1 FROM History a, AttackingHistory b, TokenBadges c, 
+	#		Users d, Games e WHERE b.AttackingTokenBadgeId=%s AND 
+	#		c.TokenBadgeId=b.AttackingTokenBadgeId AND c.UserId=d.Id AND 
+	#		d.GameId=a.GameId AND e.GameId = a.GameId AND a.Turn=e.Turn AND 
+	#		a.HistoryId=b.HistoryId AND b.AttackType=%s""", tokenBadgeId, 
+	#		ATTACK_DRAGON):
+	#		raise BadFieldException('dragonAlreadyAttackedOnThisTurn')
+			
+	#	query("""SELECT a.TokenBadgeId, a.TokensNum FROM CurrentRegionState a
+	#		WHERE a.RegionId=%s AND a.GameId""", regionId, gameId)
+	#	row = fetchone()
+	#	if row[0] == tokenBadgeId:
+	#		raise BadFieldException('badRegion')
 		##check anything else?
-		query('UPDATE CurrentRegionState SET Dragon=FALSE WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
-		query("""UPDATE CurrentRegionState SET TokenBadgeId=%s, Dragon=TRUE, 
-			TokensNum=%s WHERE CurrentRegionId=%s""", tokenBadgeId, tokensNum, 
-			currentRegionId)
+	#	query('UPDATE CurrentRegionState SET Dragon=FALSE WHERE TokenBadgeId=%s', 
+	#		tokenBadgeId)
+	#	query("""UPDATE CurrentRegionState SET TokenBadgeId=%s, Dragon=TRUE, 
+	#		TokensNum=%s WHERE RegionId=%s AND GameId=%s""", tokenBadgeId, 
+	#		tokensNum, regionId, gameId)
+	#	
+	#		updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
+	#		updateConquerHistory(lastId(), tokenBadgeId, regionId, row[0], row[2], 
+	#			-1, ATTACK_DRAGON)
 
-		updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-		updateConquerHistory(lastId(), tokenBadgeId, regionId, row[0], row[2], 
-			-1, ATTACK_DRAGON)
-
-	def decline(self, userId):
-		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
-			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
- 		query("""UPDATE CurrentRegionState SET Dragon=FALSE WHERE OwnerId=%s""", 
- 			userId)
-
+	def decline(self, user):
+		for region in user.reginos: region.dragon = False
+		
 class SpecialPowerFlying(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return True
+	def tryToConquerRegion(self, regionId, tokenBadgeId):
+		pass
+#		isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
+#		regionInfo = getRegionInfoById(regionId, getGameIdByTokenBadge(tokenBadgeId))
+#		return ((not isAdjacent and regions) or not regions) and not regionInfo['sea']
 
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return False
 
 class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Forest', 4)
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
-		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
-			CurrentRegionState.TokenBadgeId=%s AND Regions.Forest=1 AND 
-			Regions.RegionId=CurrentRegionState.RegionId""", 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return int(fetchone()[0])
+		return 0
+	#	return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
+	#		userId), gameId, 'Forest')	
 
 class SpecialPowerFortifield(BaseSpecialPower):
 	def __init__(self):
@@ -522,41 +453,50 @@ class SpecialPowerFortifield(BaseSpecialPower):
 		return 1
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
-		query("""SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND 
-			RaceId=%s""", userId, raceId)
-		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
-			CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId AND 
-			CurrentRegionState.Fortifield=TRUE""", 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return int(fetchone()[0])
+	#	query("""SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND 
+	#		RaceId=%s""", userId, raceId)
+	#	query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
+	#		CurrentRegionState.TokenBadgeId=%s AND 
+	#		CurrentRegionState.RegionId=Regions.RegionId AND 
+	#		CurrentRegionState.Fortifield=TRUE""", 
+	#		getTokenBadgeIdByRaceAndUser(raceId, userId))
+	#	return int(fetchone()[0])
+		return 0
 
-	def clearRegion(self, tokenBadgeId, currentRegionId):
-		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
-			TokenBadgeId=%s""", tokenBadgeId)
-		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
-			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
+	def clearRegion(self, tokenBadgeId, regionId):
+		pass
+#		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
+#			TokenBadgeId=%s""", tokenBadgeId)
+#		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
+#			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
 
 	def setFortifield(fortifield, tokenBadgeId):
-		if not('regionId' in fortifield and isinstance(fortifield['regionId'])):
-			raise BadFieldException('badRegionId')
+		pass
+#		if not('regionId' in fortifield and isinstance(fortifield['regionId'])):
+#			raise BadFieldException('badRegionId')
 
-		currentRegionId, ownerBadgeId, hasFortifield = extractValues('CurrentRegionState', 'CurrentRegionId', 
-			fortifield['regionId'], 'badRegionId', True, ['TokenBadgeId', 'Fortifield'])
+#		regionId, gameId, ownerBadgeId, hasFortifield = extractValues(
+#			'CurrentRegionState', ['RegionId', 'GameId', 'TokenBadgeId', 
+#			'Fortifield'], [fortifield['regionId'], 
+#			getGameIdByTokenBadge(tokenBadgeId)])
 
-		if ownerBadgeId != tokenBadgeId:
-			raise BadFieldException('badRegion')
+#		if ownerBadgeId != tokenBadgeId:
+#			raise BadFieldException('badRegion')
 
-		if hasFortifield:
-			raise BadFieldException('tooManyFortifieldsInRegion')
+#		if hasFortifield:
+#			raise BadFieldException('tooManyFortifieldsInRegion')
 
-		query("""SELECT COUNT(*) FROM CurrentRegionState WHERE Fortifields=True 
-			AND TokenBadgeId=%s""", tokenBadgeId)
-		if fetchone()[0] >= self.maxNum:
-			raise BadFieldException('tooManyFortifieldsOnMap')
-
-		query("""UPDATE CurrentRegionState SET Fortifield=True WHERE 
-			CurrentRegionId=%s""", currentRegionId)
+#		query("""SELECT COUNT(*) FROM CurrentRegionState WHERE Fortifield=True 
+#			AND TokenBadgeId=%s""", tokenBadgeId)
+#		fortifieldsOnMap = fetchone()[0]
+#		if fortifieldsOnMap >= self.maxNum:
+#			raise BadFieldException('tooManyFortifieldsOnMap')
+#		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
+#			TokenBadgeId=%s""", tokenBadgeId)
+#		if fortifieldsOnMap == fetchone()[0]:
+#			raise BadFieldException('tooManyFortifields')
+#		query("""UPDATE CurrentRegionState SET Fortifield=True WHERE 
+#			RegionId=%s AND GameId=%s""", regionId, gameId)
 	
 
 class SpecialPowerHeroic(BaseSpecialPower):
@@ -567,35 +507,34 @@ class SpecialPowerHeroic(BaseSpecialPower):
 		return 2
 
 	def decline(self, userId):
-		query("""UPDATE TokenBadges SET SpecialPowerBonusNum=0, 
-			TotalSpecialPowerBonusNum=0 WHERE OwnerId=%s""", userId)
- 		query("""UPDATE CurrentRegionState SET Hero=FALSE WHERE OwnerId=%s""", 
- 			userId)
+		for region in user.regions:
+			region.hero = False
 
  	def setHero(heroes, tokenBadgeId):
-		checkObjectsListCorrection(heroes, 
-			[{'name': 'regionId', 'type': int, 'min': 1}])
+ 		pass
+	#	checkObjectsListCorrection(heroes, 
+	#		[{'name': 'regionId', 'type': int, 'min': 1}])
+#
+#		if len(heroes) > 2:
+#			raise BadFieldException('badSetHeroCommand')
+#
+#		query('UPDATE CurrentRegionState SET Hero=False WHERE TokenBadgeId=%s',
+#			tokenBadgeId)
+#		for hero in heroes:
+#			regionId, gameId, ownerBadgeId = extractValues('CurrentRegionState', 
+#				['RegionId', 'GameId', 'TokenBadgeId'], [heroe['regionId'], 
+#				getGameIdByTokenBadge(tokenBadgeId)])
 
-		if len(heroes) > 2:
-			raise BadFieldException('badSetHeroCommand')
+#			if ownerBadgeId != tokenBadgeId:
+#				raise BadFieldException('badRegion')
 
-		query('UPDATE CurrentRegionState SET Hero=False WHERE TokenBadgeId=%s',
-			tokenBadgeId)
-		for hero in heroes:
-			currentRegionId, ownerBadgeId = extractValues('CurrentRegionState', 
-			'CurrentRegionId', heroe['regionId'], 'badRegionId', True, 
-			['TokenBadgeId'])
+#			query("""SELECT 1 FROM CurrentRegionState WHERE RegionId=%s 
+#				AND TokenBadgeId=%s""", regionId, tokenBadgeId)
+#			if not fetchone():
+#				raise BadFieldException('badRegion')
 
-			if ownerBadgeId != tokenBadgeId:
-				raise BadFieldException('badRegion')
-
-			query("""SELECT 1 FROM CurrentRegionState WHERE CurrentRegionId=%s 
-				AND TokenBadgeId=%s""", currentRegionId, tokenBadgeId)
-			if not fetchone():
-				raise BadFieldException('badRegion')
-
-			query('UPDATE CurrentRegionState SET Hero=True WHERE TokenBadgeId=%s',
-				tokenBadgeId)
+#			query('UPDATE CurrentRegionState SET Hero=True WHERE TokenBadgeId=%s',
+#				tokenBadgeId)
 		
 
 class SpecialPowerHill(BaseSpecialPower):
@@ -603,28 +542,23 @@ class SpecialPowerHill(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
-		query("""SELECT COUNT(*) FROM Regions, CurrentRegionState WHERE 
-			CurrentRegionState.TokeBadgeId=%s AND Regions.Hill=1 AND 
-			Regions.RegionId=CurrentRegionState.RegionId""", 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return int(fetchone()[0])
+		return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
+			userId), gameId, 'Hill')	
+
 
 class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
-		query('SELECT COUNT(*) FROM CurrentRegionState WHERE TokenBadgeId=%s', 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return int(fetchone()[0])
+	def countAdditionalCoins(self, user, game, race):
+		return len(user.regions)
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Mounted', 5) 
 
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
-		regionInfo = getRegionInfoById(currentRegionId)
-		return -1 if regionInfo['farmland'] or regionInfo['hill'] else 0
+	def countConquerBonus(self, region, tokenBadge):
+		return -1 if region.farmland or region.hill else 0
 
 
 class SpecialPowerPillaging(BaseSpecialPower):
@@ -632,15 +566,19 @@ class SpecialPowerPillaging(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Pillaging', 5)
 	
 	def countAdditionalCoins(self, userId, gameId, raceId): ###
-		return getNonEmptyConqueredRegions(getTokenBadgeIdByRaceAndUser(raceId, 
-			userId), gameId)
+		return 0
+	#	return getNonEmptyConqueredRegions(getTokenBadgeIdByRaceAndUser(raceId, 
+	#		userId), gameId)
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
 	
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return True	
+	def tryToConquerRegion(self, regionId, tokenBadgeId):
+		return True
+	#	isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
+	#	return (isAdjacent and regions) or not regions 
+
 
 class SpecialPowerStout(BaseSpecialPower):
 	def __init__(self):
@@ -653,28 +591,28 @@ class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
-	def countAdditionalCoins(self, userId, gameId, raceId): ###
-		query("""SELECT COUNT(*) FROM Regions, CurrentRegionState WHERE 
-			CurrentRegionState.TokenBadgeId=%s 
-			CurrentRegionState.RegionId=Regions.RegionId AND Regions.Swamp=1""", 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return int(fetchone()[0]) 
+	def countAdditionalCoins(self, userId, gameId, raceId): 
+		return 0
+	#	return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
+	#		userId), gameId, 'Swamp')	
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Underworld', 5) 
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, tokenBadgeId):
-		query("""SELECT a.Cavern, b.Cavern FROM Regions a, Regions b, 
-			CurrentRegionState c, CurrentRegionState d WHERE c.CurrentRegionId=%s 
-			AND d.TokenBadgeId=%s AND a.RegionId=c.RegionId AND b.RegionId=d.RegionId""", 
-			attackedRegion, tokenBadgeId)
-		cavern1, cavern2 = fetchone()
+	def tryToConquerRegion(self, regionId, tokenBadgeId):
+#		if BaseSpecialPower.tryToConquerRegion(self, regionId, tokenBadgeId):
+#			return True
+#		query("""SELECT a.Cavern, b.Cavern FROM Regions a, Regions b, 
+#			CurrentRegionState c WHERE a.RegionId=%s 
+#			AND c.TokenBadgeId=%s AND b.RegionId=c.RegionId AND b.MapId=%s 
+#			AND a.MapId=b.MapId""", attackedRegion, tokenBadgeId, 
+#			getMapIdByTokenBadge(tokenBadgeId))
+		cavern1, cavern2 = True, True
 		return (cavern1 and cavern2)
 		
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
-		regionInfo = getRegionInfoById(currentRegionId)
-		return -1 if regionInfo['cavern'] else 0
+	def countConquerBonus(self, region, tokenBadge):
+		return -1 if region.cavern else 0
 
 	
 class SpecialPowerWealthy(BaseSpecialPower):
@@ -685,13 +623,11 @@ class SpecialPowerWealthy(BaseSpecialPower):
 		return 1
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
-		query('SELECT SpecialPowerBonusNum FROM TokenBadges WHERE TokenBadgeId=%s', 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		if not fetchone()[0]:
-			return 0
-		query('UPDATE TokenBadges SET SpecialPowerBonusNum=0 WHERE TokenBadgeId=%s', 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
-		return 7
+		pass
+#		query("""SELECT b.Turn-a.Turn FROM History a, Games b WHERE a.TokenBadgeId=%s 
+#			AND a.State=%s AND b.GameId=a.GameId""", 
+#			getTokenBadgeIdByRaceAndUser(raceId, userId), GAME_SELECT_RACE)
+#		return 0 if fetchone()[0] else 7
 
 specialPowerList = [
 	SpecialPowerAlchemist(),

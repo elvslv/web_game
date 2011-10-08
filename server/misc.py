@@ -298,7 +298,7 @@ defaultMaps = [
 	 		},
 	 		{
 	 			'landDescription' : ['mine', 'border', 'coast', 'forest'],
-	 			'adjacent' : [0, 17, 18, 2] 
+	 			'adjacent' : [17, 18, 2] 
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'mountain'],
@@ -362,12 +362,12 @@ defaultMaps = [
 	 		{
 	 			'landDescription' : ['border', 'mountain', 'cavern', 'mine', 
 	 				'coast'],
-	 			'adjacent' : [15, 19, 0, 17] 
+	 			'adjacent' : [15, 19, 17] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['farmland', 'magic', 'coast'],
-	 			'adjacent' : [16, 19, 0, 18] 
+	 			'adjacent' : [16, 19, 18] 
 	 		},
 	 		{
 	 			'landDescription' : ['swamp'],

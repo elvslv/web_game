@@ -1,17 +1,7 @@
 from checkFields import *
-from editDb import query, fetchall, fetchone, lastId
 from misc_game import *
 from gameExceptions import BadFieldException
 from misc import *
-
-def updateConquerHistory(historyId, attackingTokenBadgeId, counqueredRegion, 
-	attackedTokenBadgeId, attackedTokensNum, dice, attackType):
-	query("""INSERT INTO AttackingHistory(HistoryId, AttackingTokenBadgeId, 
-		ConqueredRegion, AttackedTokenBadgeId, AttackedTokensNum, Dice, AttackType) 
-		VALUES(%s, %s, %s, %s, %s, %s, %s)""", historyId, attackingTokenBadgeId, 
-		counqueredRegion, attackedTokenBadgeId, attackedTokensNum, 
-		dice if dice != -1 else None, attackType)
-
 
 def act_setReadinessStatus(data):
 	user = dbi.getUserBySid(data['sid'])
