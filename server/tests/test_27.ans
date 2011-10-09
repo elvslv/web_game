@@ -65,9 +65,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"nextPlayer" : 1,
 		"coins" : 4

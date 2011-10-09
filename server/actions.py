@@ -64,7 +64,8 @@ def act_sendMessage(data):
 
 def act_getMessages(data):
 	since = data['since']
-	query('SELECT UserId, Message, Time FROM Chat WHERE Time > %s ORDER BY Time', since)
+	query('SELECT UserId, Message, Time FROM Chat WHERE Time > %s ORDER BY Time', 
+		since)
 	records =  fetchall()
 	records = records[-100:]
 	messages = []

@@ -69,6 +69,9 @@ class BaseRace:
 		query("""UPDATE CurrentRegionState SET Encampment = 0, Fortress=FALSE, 
 			Dragon=FALSE, HoleInTheGround=FALSE, Hero = FALSE WHERE RegionId=%s 
 			AND GameId=%s""", regionId, getGameIdByTokenBadge(tokenBadgeId)) 
+		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
+			TokenBadgeId=%s""", tokenBadgeId)
+		return -1
 
 	def updateAttackedTokensNum(self, tokenBadgeId):
 		query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum-1 WHERE 
@@ -198,6 +201,9 @@ class RaceElves(BaseRace):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
 	def countAddDefendingTokensNum(self):
+		return 0
+
+	def clearRegion(self, tokenBadgeId, regionId):
 		return 0
 
 	def updateAttackedTokensNum(self, tokenBadgeId):

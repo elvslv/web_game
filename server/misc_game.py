@@ -109,8 +109,9 @@ def getRaceAndPowerIdByTokenBadge(tokenBadge):
 
 def clearRegionFromRace(regionId, tokenBadgeId):
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
-	callRaceMethod(raceId, 'clearRegion', tokenBadgeId, regionId)
+	ans = callRaceMethod(raceId, 'clearRegion', tokenBadgeId, regionId)
 	callSpecialPowerMethod(specialPowerId, 'clearRegion', tokenBadgeId, regionId)
+	return ans
 	
 def getIdBySid(sid):
 	if not query('SELECT Id, GameId FROM Users WHERE Sid=%s', sid):
@@ -172,8 +173,9 @@ def callSpecialPowerMethod(specialPowerId, methodName, *args):
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
 
 def checkDefendingPlayerNotExists(gameId):
-	query("""SELECT AttackedTokenBadgeId, AttackType FROM AttackingHistory WHERE 
-		HistoryId=(SELECT MAX(HistoryId) FROM History WHERE GameId=%s)""", gameId)
+	query("""SELECT AttackedTokenBadgeId, AttackType, AttackedTokensNum FROM 
+		AttackingHistory WHERE HistoryId=(SELECT MAX(HistoryId) FROM History 
+		WHERE GameId=%s)""", gameId)
 	row = fetchone()
 	if not row:
 		return
