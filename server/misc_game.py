@@ -28,18 +28,16 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	raceId, specPowerId = getNextRaceAndPowerFromStack(game, vRace, vSpecialPower)
-	tokenBadgesInStack = dbi.query(TokenBadge).filter(TokenBadge.gameId==game.id).\
-										      filter(TokenBadge.pos< lastIndex).\
-										      all()
+	tokenBadgesInStack = filter(lambda x: not x.owner and x.pos < lastIndex, game.tokenBadges) 
 	for tokenBadge in tokenBadgesInStack: tokenBadge.pos += 1
 	dbi.add(TokenBadge(raceId, specPowerId, game.id))
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
-	dbi.getTokenBadgeByPosition(position).position = None
-	for tokenBadge in filter(lambda x: x.position > position, game.tokenBadges):
+	dbi.getXbyY('TokenBadge', 'pos', position).pos = None
+	for tokenBadge in filter(lambda x: x.pos > position, game.tokenBadges):
 		tokenBadge.bonusMoney += 1
-	return showNextRace(gameId, position)
+	return showNextRace(game, position)
 
 def callRaceMethod(raceId, methodName, *args):					##is there a way to put them in tokenBadges methods?
 	race = races.racesList[raceId]

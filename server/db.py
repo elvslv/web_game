@@ -65,11 +65,21 @@ class Game(Base):
         
 
         def checkStage(self, state, user):
-        	lastEvent = history[-1]
-		aggressor = lastEvent.warHistory.aggressorBadge
-        	war = aggressor and not agressor.tokenBadge.inDecline
-        	if not lastEvent.state in misc.possiblePrevCmd[state] or war != state == GAME_DEFEND  or user != self.activePlayer:
-        		raise BadFieldException('badStage')
+        	lastEvent = self.history[-1]
+		badStage = lastEvent.state not in misc.possiblePrevCmd[state] 
+		if lastEvent.state == misc.GAME_CONQUER:
+				battle = lastEvent.warHistory
+				agressor = battle.agressorBadge
+        			war = agressor and not agressor.currentTokenBadge.inDecline
+        			if state == misc.GAME_DEFEND:
+					if  battle.attackType == misc.ATTACK_ENCHANT or user.currentTokenBadge.inDecline:
+						badStage = True
+#				elif attackedTokensNum > 1: badStage = True  			What's going on here?
+		if badStage or user.id != self.activePlayerId:
+			raise BadFieldException('BadStage')
+			
+
+
 
         def getDefendingRegionInfo(self, player):
         	lastWarHistoryEntry = self.warHistory[-1]
@@ -146,7 +156,7 @@ class User(Base):
 		turn = self.game.turn -  int(self.priority < attackedUser.priority)
 		histEntry = dbi.query(HistoryEntry).filter(HistoryEntry.id==self.game.id).\
 									filter(HistoryEntry.turn==turn)
-		if histEntry.state == GAME_CHOOSE_FRIEND and histEntry.user == self 	and histEntry.friend == attackedUser:
+		if histEntry.state == misc.GAME_CHOOSE_FRIEND and histEntry.user == self 	and histEntry.friend == attackedUser:
 
 			raise BadFieldException('UsersAreFriends')
 

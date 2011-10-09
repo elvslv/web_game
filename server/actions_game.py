@@ -7,7 +7,7 @@ from misc import *
 dbi = Database()
 
 def act_setReadinessStatus(data):
-	user = user = dbi.getXbyY('User', 'sid', data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
 	if not game:
 		raise BadFieldException('notInGame')
@@ -21,7 +21,7 @@ def act_setReadinessStatus(data):
 	if maxPlayersNum == readyPlayersNum:
 		# Starting
 		game.activePlayerId = min(game.players, key=lambda x: x.priority).id
-		game.state = GAME_PROCESSING
+		game.state = GAME_START
 		#generate first 6 races
 		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
                         vRaces = data['visibleRaces']
@@ -37,31 +37,31 @@ def act_setReadinessStatus(data):
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
-	user = dbi.getUserBySid(data['sid'])
-	if user.tokenBadge:
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if user.currentTokenBadge:
 		raise BadFieldException('badStage')
 	game = user.game	
 	game.checkStage(GAME_SELECT_RACE, user)
-
-	chosenBadge = dbi.getTokenBadgeByPosition(data['position'])
-	price = dbi.query(TokenBadge).filter(TokenBadge.pos >chosenBadge.pos).count()
+	
+	chosenBadge = dbi.getXbyY('TokenBadge', 'pos', data['position'])
+	position = chosenBadge.pos
+	price = dbi.query(TokenBadge).filter(TokenBadge.pos >position).count()
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
-
+	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum
-	addUnits =  callRaceMethod(raceId, 'countAdditionalConquerUnits', userId, gameId)
+	addUnits =  callRaceMethod(raceId, 'countAdditionalConquerUnits', game)
 	user.coins += chosenBadge.bonusMoney - price
 	user.currentTokenBadge = chosenBadge
 	user.tokensInHand = tokensNum + addUnits
 	chosenBadge.inDecline = False
 	chosenBadge.bonusMoney = 0
-	chosenBadge.pos = 0
 	chosenBadge.tokensNum = tokensNum
+	updateRacesOnDesk(game, position)
 
-	dbi.add(History(user.id, game.id, GAME_SELECT_RACE, chosenBadge.id))
-	updateRacesOnDesk(gameId, position)
+	dbi.updateHistory(user.id, game.id, GAME_SELECT_RACE, chosenBadge.id)
 
-	return {'result': 'ok', 'tokenBadgeId': tokenBadgeId }
+	return {'result': 'ok', 'tokenBadgeId': chosenBadge.id}
 
 def act_conquer(data):
 	user = dbi.getUserBySid(data['sid'])
