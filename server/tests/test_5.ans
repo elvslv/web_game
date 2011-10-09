@@ -36,6 +36,6 @@
 		"result": "badGameDescr"
 	},
 	{
-		"result": "badGameName"
+		"result": "gameNameTaken"
 	}
 ]

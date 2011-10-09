@@ -28,6 +28,6 @@
 		"mapId": 2
 	},
 	{
-		"result": "badMapName"
+		"result": "mapNameTaken"
 	}
 ]

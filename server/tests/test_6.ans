@@ -84,61 +84,59 @@
 		"games": 
 		[
 			{
-				"activePlayer": 1,
-				"gameId": 1,
-				"gameName": "game1",
+				"activePlayerId": 1,
+				"id": 1,
+				"name": "game1",
+				"state": 2,
+				"turn" : 0,
+				"playersNum": 2,
 				"players":
 				[
 					{
-						"userId": 1,
-						"username": "user1",
-						"state": 1,
+						"id": 1,
+						"name": "user1",
 						"sid": 1,
 						"priority": 1
 					},
 					{
-						"userId": 4,
-						"username": "user4",
-						"state": 1,
+						"id": 4,
+						"name": "user4",
 						"sid": 4,
 						"priority": 2
 					}
 				],
 				"map":
 				{
-					"mapId": 1,
-					"mapName": "defaultMap1",
+					"id": 1,
+					"name": "defaultMap1",
 					"playersNum": 2,
 					"turnsNum": 5
-				},
-				"playersNum": 2,
-				"state": 2,
-				"turn": 0
+				}
 			},
 			{
-				"activePlayer": null,
-				"gameId": 2,
-				"gameName": "game2",
+				"activePlayerId": null,
+				"id": 2,
+				"name": "game2",
+				"state": 1,
+				"turn" : 0,
+				"playersNum": 1,
 				"players":
 				[
 					{
-						"userId": 3,
-						"username": "user3",
-						"state": 0,
+						"id": 3,
+						"name": "user3",
 						"sid": 3,
 						"priority": 1
 					}
 				],
 				"map":
 				{
-					"mapId": 2,
-					"mapName": "defaultMap2",
+					"id": 2,
+					"name": "defaultMap2",
 					"playersNum": 3,
 					"turnsNum": 5
-				},
-				"playersNum": 1,
-				"state": 1,
-				"turn": null
+				}
+				
 			}
 		]
 	

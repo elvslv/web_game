@@ -38,7 +38,7 @@
 		"sid": 5
 	},
 	{
-		"result": "badSid"		
+		"result": "badUserSid"		
 	},
 	{
 		"result": "badMapId"		
@@ -58,15 +58,18 @@
 		"regions": []
 	},
 	{
-		"result": "badGameName"
+		"result": "gameNameTaken"
 	},
 	{
 		"result": "alreadyInGame"
 	},
 	{
 		"result": "ok",
-		"gameId": 2,
+		"gameId": 3,
 		"regions": []
+	},
+	{
+		"result": "alreadyInGame"
 	},
 	{
 		"result": "alreadyInGame"
