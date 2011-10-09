@@ -50,6 +50,7 @@ class Game(Base):
     	descr = string(MAX_GAMEDESCR_LEN)
     	state = Column(Integer)
     	turn = Column(Integer)
+    	activePlayerId = Column(Integer)
     	mapId = fkey('maps.id')
   
     	map = relationship(Map)
@@ -102,9 +103,9 @@ class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
 
     	id = pkey()
+    	gameId = fkey('games.id')
     	raceId = Column(Integer)
     	specPowId = Column(Integer)
-    	gameId = fkey('games.id')
     	pos = Column(Integer, default=0)
     	bonusMoney = Column(Integer, default = 0)
     	inDecline = Column(Boolean, default=False)
@@ -112,9 +113,9 @@ class TokenBadge(Base):
 
     	game = relationship(Game, backref=backref('tokenBadges'))
 
- 	def __init__(self, raceId, specPowerId, gameId): 
+ 	def __init__(self, raceId, specPowId, gameId): 
  		self.raceId = raceId
-        	self.specPowerId = specPowerId
+        	self.specPowId = specPowId
         	self.gameId = gameId
         
 class User(Base):
@@ -355,7 +356,7 @@ class _Database:
 			return self.query(cls).filter(getattr(cls, y) == value).one()
 		except NoResultFound:
 			if mandatory:    	
-				n =  y[0].upper() + y[1:]
+				n =  x + y[0].upper() + y[1:]
 				raise BadFieldException("""bad%s""" % n)
 			return None
    			
@@ -393,7 +394,10 @@ class _Database:
     		except NoResultFound:
     			raise BadFieldException('badUsernameOrPassword')
 
-    	
+    	def updateHistory(self, userId, gameId, state, tokenBadgeId, dice = None): 
+    		self.add(HistoryEntry(userId, gameId, state, tokenBadgeId, dice))
+
+
 _database = _Database()
 
 def Database():

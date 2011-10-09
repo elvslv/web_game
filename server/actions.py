@@ -10,6 +10,7 @@ from gameExceptions import BadFieldException
 from sqlalchemy import func 
 from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
+from actions_game import *
 from misc import *
 
 dbi = Database()
@@ -95,7 +96,7 @@ def initRegions(map, game):
 def act_createGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.gameId: raise BadFieldException('alreadyInGame')
-	map_ = user = dbi.getXbyY('Map', 'id', data['mapId'])
+	map_ = dbi.getXbyY('Map', 'id', data['mapId'])
 	descr = None
 	if 'gameDescr' in data:
 		descr = data['gameDescr']
@@ -103,7 +104,6 @@ def act_createGame(data):
 	dbi.addUnique(newGame, 'gameName')
 	regionIds =  initRegions(map_, newGame)
 	user.game = newGame
-	user.isReady = True
 	user.priority = 1
 	return {'result': 'ok', 'gameId': newGame.id, 'regions': regionIds}
 	
@@ -112,24 +112,23 @@ def act_getGameList(data):
 	games = dbi.query(Game)
 	result['games'] = list()
 
-	gameAttrs = ['id', 'name', 'descr', 'state', 'turn',  'activePlayer']
+	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn']
 	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum']
-	playerAttrs = ['id', 'name', 'state', 'sid']
-
+	playerAttrs = ['id', 'name', 'sid']
 	for game in games:
 		curGame = dict()
 
 		for i in range(len(gameAttrs)):
-			if gameAttrs[i] == 'gameDescr' or not getattr(game, gameAttrs[i]):
+			if gameAttrs[i] == 'descr':
 				continue
 			curGame[gameAttrs[i]] = getattr(game, gameAttrs[i]) 
-
 		map_ = game.map
+		players = game.players
+		curGame['playersNum'] = len(players)
 		curGame['map'] = dict()
 		for i in range(len(mapAttrs)):
 			curGame['map'][mapAttrs[i]] = getattr(map_, mapAttrs[i])
 
-		players = game.players
 		resPlayers = list()
 		priority = 0
 		for player in players:
@@ -145,14 +144,14 @@ def act_getGameList(data):
 
 def act_joinGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	if user.gameId: raise BadFieldException('alreadyInGame')
+	if user.game: raise BadFieldException('alreadyInGame')
 	game = dbi.getXbyY('Game', 'id', data['gameId'])
 	if game.state != GAME_WAITING:
 		raise BadFieldException('badGameState')
 	maxPlayersNum = game.map.playersNum
-	if playersNum >= maxPlayersNum:
+	if len(game.players) >= maxPlayersNum:
 		raise BadFieldException('tooManyPlayers')
-	maxPriority = max(game.players, lambda x: x.priority)
+	maxPriority = max(game.players, key=lambda x: x.priority).priority
 	user.game = game
 	user.priority = maxPriority + 1
 	return {'result': 'ok'}

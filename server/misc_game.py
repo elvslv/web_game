@@ -1,3 +1,4 @@
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, TokenBadge
 import races
 import misc
 from gameExceptions import BadFieldException
@@ -5,43 +6,34 @@ import random
 import sys
 import db
 
-dbi = db.Database()
+dbi = Database()
 
-def getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower):
+def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
         if vRace != None and vSpecialPower !=None:
-                raceId = -1
-                for i in range(len(races.racesList)):
-                        if vRace == races.racesList[i].name:
-                                raceId = i
-                                break
-                if raceId == -1:
-                        raise BadFieldException('badRace')
-                specialPowerId = -1
-                for i in range(len(races.specialPowerList)):
-                        if vSpecialPower == races.specialPowerList[i].name:
-                                specialPowerId = i
-                                break
-                if specialPowerId == -1:
-                        raise BadFieldException('badSpecialPower')
+                race = filter(lambda x: x.name == vRace, races.racesList) 
+                if not race: raise BadFieldException('badRace')
+                raceId = races.racesList.index(race[0])
+                specialPower = filter(lambda x: x.name == vSpecialPower, races.specialPowerList) 
+                if not specialPower: raise BadFieldException('badSpecialPower')
+                specialPowerId = races.specialPowerList.index(specialPower[0])
         else:
                 racesInStack = range(0, misc.RACE_NUM)
                 specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-                row = game.tokenBadges
-                for rec in row:
-                        racesInStack.remove(rec.raceId)
-                        specialPowersInStack.remove(rec.specPowerId)
+                for tokenBadge in game.tokenBadges:
+                        racesInStack.remove(tokenBadge.raceId)
+                        specialPowersInStack.remove(tokenBadge.specPowId)
                 raceId = random.choice(racesInStack)
                 specialPowerId = random.choice(specialPowersInStack)
 	return raceId, specialPowerId
 
-def showNextRace(gameId, lastIndex, vRace = None, vSpecialPower = None):
-	raceId, specialPowerId = getNextRaceAndPowerFromStack(gameId, vRace, vSpecialPower)
-	tokenBadgesInStack = dbi.query(TokenBadge).filter(TokenBadge.gameId==gameId).\
-										      filter(TokenBadge.position< lastIndex).\
+def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
+	raceId, specPowerId = getNextRaceAndPowerFromStack(game, vRace, vSpecialPower)
+	tokenBadgesInStack = dbi.query(TokenBadge).filter(TokenBadge.gameId==game.id).\
+										      filter(TokenBadge.pos< lastIndex).\
 										      all()
 	for tokenBadge in tokenBadgesInStack: tokenBadge.pos += 1
-	dbi.add(TokenBadge(raceId, specPowerId, gameId))
-	return races.racesList[raceId].name, races.specialPowerList[specialPowerId].name, 
+	dbi.add(TokenBadge(raceId, specPowerId, game.id))
+	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
 	dbi.getTokenBadgeByPosition(position).position = None

@@ -1,13 +1,17 @@
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry
 from checkFields import *
 from misc_game import *
 from gameExceptions import BadFieldException
 from misc import *
 
+dbi = Database()
+
 def act_setReadinessStatus(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
 	if not game:
 		raise BadFieldException('notInGame')
+	
 	if game.state != GAME_WAITING:
 		raise BadFieldException('badGameState')
 
@@ -16,19 +20,20 @@ def act_setReadinessStatus(data):
 	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
 	if maxPlayersNum == readyPlayersNum:
 		# Starting
-		game.activePlayer = user
-		game.State = GAME_PROCESSING
+		game.activePlayerId = min(game.players, key=lambda x: x.priority).id
+		game.state = GAME_PROCESSING
 		#generate first 6 races
 		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
                         vRaces = data['visibleRaces']
                         vSpecialPowers = data['visibleSpecialPowers']
                         for i in range(misc.VISIBLE_RACES):
-                                showNextRace(gameId, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], vSpecialPowers[misc.VISIBLE_RACES-i-1])
+                                showNextRace(game, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], 
+                                	vSpecialPowers[misc.VISIBLE_RACES-i-1])
                 else:
                         for i in range(misc.VISIBLE_RACES):
-                                showNextRace(gameId, misc.VISIBLE_RACES - 1)
+                                showNextRace(game, misc.VISIBLE_RACES - 1)
 			
-	dbi.add(History(user.id, game.id, GAME_START, None))
+	dbi.updateHistory(user.id, game.id, GAME_START, None)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
@@ -71,7 +76,7 @@ def act_conquer(data):
 	playerRegions = user.tokenBadge.regions
 	playerBorderline = False	
 	for plRegion in playerRegions:
-		if region in plRegion.getNeighbors
+		if region in plRegion.getNeighbors():
 			playerBorderline = True
 			break
 	if playerBorderline: #case for flying and seafaring
@@ -144,7 +149,7 @@ def act_redeploy(data):
 	raceId, specialPowerId = user.tokenBadge.raceId, user.tokenBadge.specialPowerId
 	unitsNum = user.currentTokenBadge.totalTokensNum
 	if not unitsNum: raise BadFieldException('noTokensForRedeployment')
-	if not user.tokenBadge.regions
+	if not user.tokenBadge.regions:
 		raise BadFieldException('userHasNoRegions')
 	for region in user.currentTokenBadge.regions: region.tokensNum = 0
 
@@ -233,8 +238,8 @@ def act_defend(data):
 
 	#find not adjacent regions
 	notAdjacentRegions = []
-	for region in user.tokenBadge.regions
-		if not region in attackedRegion.getNeighbors: 
+	for region in user.tokenBadge.regions:
+		if not region in attackedRegion.getNeighbors(): 
 			notAdjacentRegions.extend(region)
 	for region in data['regions']:
 		if not 'regionId' in region:
@@ -277,9 +282,9 @@ def act_enchant(data):
 
 def act_getVisibleTokenBadges(data):
 	game = dbi.getGameById(data['gameId'])
-	rows = game.tokenBadgesl()
+	rows = game.tokenBadges()
 	result = list()
-	for tokenBadge in filter(lambda x: x.position > 0, rows)
+	for tokenBadge in filter(lambda x: x.position > 0, rows):
 		result.append({
 			'raceId': races.racesList[tokenBadge.raceId].name, 
 			'specialPowerId': races.specialPowerList[tokenBadge.specPowerId].name,
