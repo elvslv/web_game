@@ -214,7 +214,10 @@ actionFields = {
 	'redeploy': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},
-		{'name': 'regions', 'type': list, 'mandatory': True}
+		{'name': 'regions', 'type': list, 'mandatory': True},
+		{'name': 'encampments', 'type': list, 'mandatory': False},
+		{'name': 'fortifield', 'type': list, 'mandatory': False},
+		{'name': 'heroes', 'type': list, 'mandatory': False}
 	],
 	'defend': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
@@ -231,7 +234,10 @@ actionFields = {
 	'throwDice': [{'name': 'sid', 'type': int, 'mandatory': True}, 
 		{'name': 'dice', 'type': int, 'mandatory': False}],
 	'getGameState': [{'name': 'gameId', 'type': int, 'mandatory': True}],
-	'getMapState': [{'name': 'mapId', 'type': int, 'mandatory': True}]
+	'getMapState': [{'name': 'mapId', 'type': int, 'mandatory': True}],
+	'selectFriend': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'friendId', 'type': int, 'mandatory': True}]
 }
 
 possibleLandDescription = [
