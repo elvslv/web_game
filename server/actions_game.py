@@ -209,7 +209,7 @@ def act_redeploy(data):
 		TokenBadgeId=%s""", tokenBadgeId):
 		raise BadFieldException('userHasNotRegions') ##better comment?
 	regionId, regionsNum = fetchone()
-
+	regions = list()
 	for region in data['regions']:
 		if not ('regionId' in region and 'tokensNum' in region):
 			raise BadFieldException('badJson')
@@ -227,22 +227,31 @@ def act_redeploy(data):
 
 		if tokensNum > unitsNum:
 			raise BadFieldException('notEnoughTokensForRedeployment')
-
-		query("""UPDATE CurrentRegionState SET TokensNum=%s WHERE RegionId=%s 
-			AND GameId=%s""", tokensNum, regionId, gameId)
+		regions.append({'regionId': regionId, 'tokensNum': tokensNum})
 		unitsNum -= tokensNum
 
 	specAbilities = [
-	{'name': 'encampments', 'cmd': 'setEncampments'},
-	{'name': 'fortifield', 'cmd': 'setFortifield'},
-	{'name': 'heroes', 'cmd': 'setHeroes'},
-	{'name': 'selectFriend', 'cmd': 'selectFriend'}]
+	{'name': 'encampments', 'tryCmd': 'tryToSetEncampments', 'setCmd': 
+		'setEncampments'},
+	{'name': 'fortifield', 'tryCmd': 'tryToSetFortifield', 'setCmd': 
+		'setFortifield'},
+	{'name': 'heroes', 'tryCmd': 'tryToSetHeroes', 'setCmd': 'setHeroes'}]
+	specAbilityRegions = dict()
+	for specAbility in specAbilities:
+		if specAbility['name'] in data:
+			specAbilityRegions[specAbility['name']] = callSpecialPowerMethod(
+				specialPowerId, specAbility['tryCmd'], data[specAbility['name']], 
+				tokenBadgeId)
 
 	for specAbility in specAbilities:
 		if specAbility['name'] in data:
-			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], 
-				data[specAbility['name']], tokenBadgeId)
-
+			callSpecialPowerMethod(specialPowerId, specAbility['setCmd'], 
+				tokenBadgeId, specAbilityRegions[specAbility['name']])
+	
+	for region in regions:
+		query("""UPDATE CurrentRegionState SET TokensNum=%s WHERE RegionId=%s 
+			AND GameId=%s""", region['tokensNum'], region['regionId'], gameId)
+	
 	if unitsNum:
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
 			RegionId=%s AND GameId=%s""", unitsNum, regionId, gameId)
@@ -332,6 +341,7 @@ def act_defend(data):
 		FirstRegionId=a.RegionId AND SecondRegionId=b.RegionId)""", 
 		regionId, tokenBadgeId)
 	notAdjacentRegions = fetchall()
+	regions = list()
 	for region in data['regions']:
 		if not 'regionId' in region:
 			raise BadFieldException('badJson')
@@ -358,12 +368,16 @@ def act_defend(data):
 			getMapIdByTokenBadge(tokenBadgeId)) and notAdjacentRegions:
 			raise BadFieldException('badRegion')
 		
-		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
-			RegionId=%s AND GameId=%s""", region['tokensNum'], nextRegion, gameId)
+		regions.append({'regionId': nextRegion, 'tokensNum': region['tokensNum']})
 		tokensNum -= region['tokensNum']
-
+		
 	if tokensNum:
 		raise BadFieldException('thereAreTokensInTheHand')
+
+	for region in regions:
+		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
+			RegionId=%s AND GameId=%s""", region['tokensNum'], region['regionId'], 
+			gameId)
 		
 	callRaceMethod(raceId, 'updateAttackedTokensNum', tokenBadgeId)
 	updateHistory(userId, gameId, GAME_DEFEND, tokenBadgeId)
@@ -405,10 +419,13 @@ def act_throwDice(data):
 	updateGameHistory(fields[4], data)
 	return {'result': 'ok', 'dice': dice}	
 
-
 def act_getVisibleTokenBadges(data):
 	gameId = extractValues('Games', ['GameId'], [data['gameId']])
 	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokenBadges(gameId)}
+
+def act_selectFriend(data):
+	fields = getStandardFields(data, GAME_CHOOSE_FRIEND)
+	callSpecialPowerMethod(fields[1], 'selectFriend', data)
 
 def prepareForNextTurn(gameId, newActPlayer, newTokenBadgeId):
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)

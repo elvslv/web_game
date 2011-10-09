@@ -341,10 +341,25 @@ class BaseSpecialPower:
 	def decline(self, userId):
 		pass
 
-	def setEncampments(encampments, tokenBadgeId):
+	def setEncampments(self, tokenBadgeId, encampments):
 		raise BadFieldException('badSpecialPower')
 
-	def setFortifield(fortifield, tokenBadgeId):
+	def tryToSetEncampments(self, encampments, tokenBadgeId):
+		raise BadFieldException('badSpecialPower')
+
+	def setFortifield(self, tokenBadgeId, regionId):
+		raise BadFieldException('badSpecialPower')
+
+	def tryToSetFortifield(self, fortifield, tokenBadgeId):
+		raise BadFieldException('badSpecialPower')
+
+	def setHero(self, tokenBadgeId, heroes):
+		raise BadFieldException('badSpecialPower')
+
+	def tryToSetHero(self, heroes, tokenBadgeId):
+		raise BadFieldException('badSpecialPower')
+		
+	def selectFriend(self, data):
 		raise BadFieldException('badSpecialPower')
 	
 
@@ -379,13 +394,12 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		query("""UPDATE CurrentRegionState SET Encampment=0 WHERE OwnerId=%s""",
 			userId)
 
-	def setEncampments(self, encampments, tokenBadgeId):
+	def tryToSetEncampments(self, encampments, tokenBadgeId):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
 
-		query('UPDATE CurrentRegionState SET Encampment=0 WHERE TokenBadgeId=%s', 
-			tokenBadgeId)
+		result = list()
 		freeEncampments = 5
 		for encampment in encampments:
 			regionId = encampment['regionId']
@@ -396,11 +410,20 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
 				raise BadFieldException('notEnoughEncampentsForRedeployment')
-			query("""UPDATE CurrentRegionState SET Encampment=%s WHERE 
-				RegionId=%s AND GameId=%s""", encampmentsNum, regionId, 
-				getGameIdByTokenBadge(tokenBadgeId) )
+
+			result.append({'regionId': regionId, 'encampmentsNum': encampmentsNum})
 
 			freeEncampments -= encampmentsNum
+
+		return result
+
+	def setEncampments(self, tokenBadgeId, encampments):
+		query('UPDATE CurrentRegionState SET Encampment=0 WHERE TokenBadgeId=%s', 
+			tokenBadgeId)
+		for encampment in encampments:
+			query("""UPDATE CurrentRegionState SET Encampment=%s WHERE 
+				RegionId=%s AND GameId=%s""", encampment['encampmentsNum'], 
+				encampment['regionId'], getGameIdByTokenBadge(tokenBadgeId))	
 
 class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
@@ -419,7 +442,7 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 	def decline(self, userId):
 		pass
 
-	def selectFriend(data, userId, tokenBadgeId, gameId):
+	def selectFriend(self, data):
 		if not('friendId' in data and isinstance(data['friendId'], int)):
 			raise BadFieldException('badFriendId')
 
@@ -534,7 +557,7 @@ class SpecialPowerFortifield(BaseSpecialPower):
 		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
 			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
 
-	def setFortifield(fortifield, tokenBadgeId):
+	def tryToSetFortifield(self, fortifield, tokenBadgeId):
 		if not('regionId' in fortifield and isinstance(fortifield['regionId'])):
 			raise BadFieldException('badRegionId')
 
@@ -558,9 +581,12 @@ class SpecialPowerFortifield(BaseSpecialPower):
 			TokenBadgeId=%s""", tokenBadgeId)
 		if fortifieldsOnMap == fetchone()[0]:
 			raise BadFieldException('tooManyFortifields')
+		return regionId
+
+	def setFortifield(self, tokenBadgeId, regionId):
 		query("""UPDATE CurrentRegionState SET Fortifield=True WHERE 
-			RegionId=%s AND GameId=%s""", regionId, gameId)
-	
+			RegionId=%s AND GameId=%s""", regionId, getGameIdByTokenBadge(
+				tokenBadgeId))
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
@@ -573,15 +599,14 @@ class SpecialPowerHeroic(BaseSpecialPower):
  		query("""UPDATE CurrentRegionState SET Hero=FALSE WHERE OwnerId=%s""", 
  			userId)
 
- 	def setHero(heroes, tokenBadgeId):
+ 	def tryToSetHero(self, heroes, tokenBadgeId):
 		checkObjectsListCorrection(heroes, 
 			[{'name': 'regionId', 'type': int, 'min': 1}])
 
 		if len(heroes) > 2:
 			raise BadFieldException('badSetHeroCommand')
 
-		query('UPDATE CurrentRegionState SET Hero=False WHERE TokenBadgeId=%s',
-			tokenBadgeId)
+		result = list()
 		for hero in heroes:
 			regionId, gameId, ownerBadgeId = extractValues('CurrentRegionState', 
 				['RegionId', 'GameId', 'TokenBadgeId'], [heroe['regionId'], 
@@ -594,11 +619,15 @@ class SpecialPowerHeroic(BaseSpecialPower):
 				AND TokenBadgeId=%s""", regionId, tokenBadgeId)
 			if not fetchone():
 				raise BadFieldException('badRegion')
-
-			query('UPDATE CurrentRegionState SET Hero=True WHERE TokenBadgeId=%s',
-				tokenBadgeId)
+			result.append(regionId)
+			
+	def setHero(self, tokenBadgeId, heroes):
+		query('UPDATE CurrentRegionState SET Hero=False WHERE TokenBadgeId=%s',
+			tokenBadgeId)
+		for hero in heroes:
+			query("""UPDATE CurrentRegionState SET Hero=True WHERE 
+				TokenBadgeId=%s AND RegionId=%s""",	tokenBadgeId, hero)
 		
-
 class SpecialPowerHill(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Hill', 4)

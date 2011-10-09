@@ -366,6 +366,10 @@ def getTokenBadgeState(tokenBadgeId):
 	result['specialPower'] = races.specialPowerList[tokenBadge[2]].name
 	return result
 
+def getUserIdByTokenBadge(tokenBadgeId):
+	query('SELECT OwnerId FROM TokenBadges WHERE TokenBadgeId=%s', tokenBadgeId)
+	return fetchone()[0]
+
 def getUserState(userId):
 	userQueryFields = ['id', 'userName', 'isReady', 'coins', 'tokensInHand', 
 		'priority', 'currentTokenBadge', 'declinedTokenBadge']
