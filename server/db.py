@@ -42,6 +42,11 @@ class Map(Base):
     		self.playersNum = playersNum
     		self.turnsNum = turnsNum
 
+	def getRegion(self, regionId):
+		region = filter(lambda x: x.id == regionId, self.regions)
+		if not region: raise BadFieldException('badRegionId')
+		return region[0]
+
 class Game(Base):
 	__tablename__ = 'games'
 
@@ -62,7 +67,11 @@ class Game(Base):
         	self.turn = 0
         	self.state = misc.GAME_WAITING
         	self.map = map
-        
+
+        def getTokenBadge(self, position):
+        	tokenBadge = filter(lambda x: x.pos == position, self.tokenBadges)
+        	if not tokenBadge: raise BadFieldException('badPosition')
+        	return tokenBadge[0]
 
         def checkStage(self, state, user):
         	lastEvent = self.history[-1]
@@ -127,6 +136,12 @@ class TokenBadge(Base):
  		self.raceId = raceId
         	self.specPowId = specPowId
         	self.gameId = gameId
+
+        def isNeighbor(self, region):
+        	for reg in self.regions:
+        		if region.adjacent(reg):
+        			return True
+        	return False
         
 class User(Base):
 	__tablename__ = 'users'
@@ -152,8 +167,9 @@ class User(Base):
     		self.name = username
         	self.password = password
 
-        def checkForFriends(self, attackedUser):
-		turn = self.game.turn -  int(self.priority < attackedUser.priority)
+        def checkForFriends(self, attackedUser):			
+        	if not attackedUser: return
+		turn = self.game.turn -  int(self.priority < attackedUser.priority) ## Cryptic code mercilessly plagiarized without analysis 
 		histEntry = dbi.query(HistoryEntry).filter(HistoryEntry.id==self.game.id).\
 									filter(HistoryEntry.turn==turn)
 		if histEntry.state == misc.GAME_CHOOSE_FRIEND and histEntry.user == self 	and histEntry.friend == attackedUser:
@@ -196,8 +212,13 @@ class Region(Base):
         self.defTokensNum = defTokensNum
         self.map = map_
 
+    def getState(self, gameId):
+    	state = filter(lambda x : x.gameId == gameId, self.states)
+    	if not state: raise BadFieldException('badGameId')
+    	return state[0]
+
     def getNeighbors(self):
-        return map(lambda x : x.left, self.rightNeightbors) + map(lambda x : x.right, self.leftNeightbors)
+        return map(lambda x : x.left, self.rightNeighbors) + map(lambda x : x.right, self.leftNeighbors)
 
     def adjacent(self, region):
     	return region in self.getNeighbors() 
@@ -239,7 +260,7 @@ class RegionState(Base):
     	game = relationship(Game)
     	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
     	owner = relationship(User, backref=backref('regions'))
-    	region = relationship(Region, uselist=False, backref=backref('state'))
+    	region = relationship(Region, backref=backref('states'))
 
 	def __init__(self, region, game):
 		self.region = region
@@ -248,8 +269,8 @@ class RegionState(Base):
 
 
 	def clearFromRace(self, tokenBadge):
-		callRaceMethod(tokenBadge.raceId, 'clearRegion', tokenBadge.id, self.id)
-		callSpecialPowerMethod(tokenBadge.specPowerId, 'clearRegion', tokenBadge.id, self.id)
+		callRaceMethod(tokenBadge.raceId, 'clearRegion', tokenBadge, self)
+		callSpecialPowerMethod(tokenBadge.specPowerId, 'clearRegion', tokenBadge, self)
 
 	def checkIfImmune(self):
 		if self.holeInTheGround or self.dragon or self.hero:
@@ -294,31 +315,32 @@ class HistoryEntry(Base):
         self.tokenBadgeId = tokenBadgeId
         self.dice = dice
 
-class AttackingHistoryEntry(Base):
+class WarHistoryEntry(Base):
     __tablename__ = 'warHistory'
 
     id = pkey()
     mainHistEntryId = fkey('history.id')
-    aggressorBadgeId = fkey('tokenBadges.id')
+    agressorBadgeId = fkey('tokenBadges.id')
     victimBadgeId = fkey('tokenBadges.id')
-    conqRegion = Column(Integer)
-    aggressorTokensNum = Column(Integer, default = 0)
+    conqRegionId = Column(Integer)
+    victimTokensNum = Column(Integer, default = 0)
     diceRes = Column(Integer)
     attackType = Column(Integer) 
     
-    mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory'))
-    agressorBadge = relationship(TokenBadge, primaryjoin=aggressorBadgeId==TokenBadge.id)
+    mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory', uselist=False))
+    agressorBadge = relationship(TokenBadge, primaryjoin=agressorBadgeId==TokenBadge.id)
     victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id)
 
   	
 
-    def __init__(self, mainHistEntry, aggressorBadgeId, conqRegion, victimBadgeId, diceRes, attackType): 
-       self.mainHistEntry = mainHistEntry
-       self.aggressorBadgeId = aggressorBadgeId
-       self.conqRegion = conqRegion
+    def __init__(self, mainHistEntryId, agressorBadgeId, conqRegionId, victimBadgeId, victimTokensNum, diceRes, attackType): 
+       self.mainHistEntryId = mainHistEntryId
+       self.agressorBadgeId = agressorBadgeId
+       self.conqRegionId = conqRegionId
        self.victimBadgeId = victimBadgeId
        self.diceRes = diceRes
        self.attackType = attackType
+       self.victimTokensNum = victimTokensNum
        	
 
 
@@ -405,10 +427,16 @@ class _Database:
     			raise BadFieldException('badUsernameOrPassword')
 
     	def updateHistory(self, userId, gameId, state, tokenBadgeId, dice = None): 
-    		self.add(HistoryEntry(userId, gameId, state, tokenBadgeId, dice))
+    		self.add(HistoryEntry(userId,  gameId, state, tokenBadgeId, dice))
+
+    	def updateWarHistory(	self, userId, gameId, victimBadgeId, agressorBadgeId, dice, regionId, defense, attackType):
+    		hist = HistoryEntry(userId, gameId, misc.GAME_CONQUER, agressorBadgeId, dice)
+    		self.add(hist)
+    		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, defense, dice, attackType))
 
 
 _database = _Database()
+
 
 def Database():
     return _database

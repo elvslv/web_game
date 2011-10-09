@@ -90,6 +90,7 @@ def initRegions(map, game):
 	for region in map.regions:
 		regState = RegionState(region, game)
 		dbi.add(regState)
+		region.state = regState
 		result.append(regState.id)
 	return result
 

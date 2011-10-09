@@ -1,4 +1,4 @@
-from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry
 from checkFields import *
 from misc_game import *
 from gameExceptions import BadFieldException
@@ -43,7 +43,7 @@ def act_selectRace(data):
 	game = user.game	
 	game.checkStage(GAME_SELECT_RACE, user)
 	
-	chosenBadge = dbi.getXbyY('TokenBadge', 'pos', data['position'])
+	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
 	price = dbi.query(TokenBadge).filter(TokenBadge.pos >position).count()
 	if user.coins < price : 
@@ -56,7 +56,7 @@ def act_selectRace(data):
 	user.tokensInHand = tokensNum + addUnits
 	chosenBadge.inDecline = False
 	chosenBadge.bonusMoney = 0
-	chosenBadge.tokensNum = tokensNum
+	chosenBadge.totalTokensNum = tokensNum
 	updateRacesOnDesk(game, position)
 
 	dbi.updateHistory(user.id, game.id, GAME_SELECT_RACE, chosenBadge.id)
@@ -64,68 +64,58 @@ def act_selectRace(data):
 	return {'result': 'ok', 'tokenBadgeId': chosenBadge.id}
 
 def act_conquer(data):
-	user = dbi.getUserBySid(data['sid'])
-	if not user.tokenBadge: raise BadFieldException('badStage')
-
-	user.game.checkStage(GAME_CONQUER, user)
-	region = dbi.getCurrentRegionStateById(data['regionId'])
-	if region.owner == user and not region.inDecline: 
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not user.currentTokenBadge: raise BadFieldException('badStage')
+	game = user.game
+	game.checkStage(GAME_CONQUER, user)
+	region = game.map.getRegion(data['regionId'])
+	regState = region.getState(game.id)
+	owner = regState.owner
+	if owner == user and not regState.inDecline: 
 		raise BadFieldException('badRegion')
-	raceId, specialPowerId = user.tokenBadge.raceId, user.tokenBadge.specialPowerId
+	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
 	user.checkForFriends(owner)
-	playerRegions = user.tokenBadge.regions
-	playerBorderline = False	
-	for plRegion in playerRegions:
-		if region in plRegion.getNeighbors():
-			playerBorderline = True
-			break
-	if playerBorderline: #case for flying and seafaring
-		if not callSpecialPowerMethod(specialPowerId, 'tryToConquerAdjacentRegion', 
-			playerRegions, region.border, region.coast, region.sea):
-			raise BadFieldException('badRegion')
-	else:
-		f1 = callRaceMethod(raceId, 'tryToConquerNotAdjacentRegion', playerRegions, region, user.tokenBadge)
-		f2 = callSpecialPowerMethod(specialPowerId, 'tryToConquerNotAdjacentRegion',  playerRegions, region,  user.TokenBadge)
-		if not (f1 or f2):
-			raise BadFieldException('badRegion')
-
-	if region.holeInTheGround or region.dragon or region.hero:
-		raise BadFieldException('regionIsImmune')
+	f1 = callRaceMethod(raceId, 'canConquer', region, user.currentTokenBadge)
+	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  user.currentTokenBadge)
+	if not (f1 or f2):
+		raise BadFieldException('badRegion')
+	regState.checkIfImmune()
 	attackedRace = None
 	attackedSpecialPower = None
-	if attackedTokenBadgeId:
-		attackedRace = region.tokenBadge.race
-		attackedSpecialPower = region.tokenBadge.specialPower
+	if regState.tokenBadge:
+		attackedRace = regState.tokenBadge.raceId
+		attackedSpecialPower = regState.tokenBadge.specPowId
 	additionalTokensNum = 0
 	if attackedRace:
-		additionalTokensNum = callRaceMethod(attackedRace, 'countAdditionalConquerPrice')
-	unitPrice = max(misc.BASIC_CONQUER_COST + attackedTokensNum + region.mountain + 
-		region.encampment + region.fortress + additionalTokensNum + 
-		callRaceMethod(raceId, 'countConquerBonus', currentRegionId, 
-		attackedTokenBadgeId) + callSpecialPowerMethod(specialPowerId, 
-		'countConquerBonus', currentRegionId, attackedTokenBadgeId), 1)
-			
+		enemyDefenseBonus = callRaceMethod(attackedRace, 'defenseBonus')
+	defense = regState.tokensNum
+	unitPrice = max(misc.BASIC_CONQUER_COST + defense + region.mountain + 
+		regState.encampment + regState.fortress + additionalTokensNum + 
+		callRaceMethod(raceId, 'conquerBonus', region, regState.tokenBadge) + 
+		callSpecialPowerMethod(specialPowerId, 'conquerBonus', region, regState.tokenBadge)
+			, 1)
 	unitsNum = user.tokensInHand
 	dice = user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = throwDice()
-	unitPrice -= int(dice)
+	unitPrice -= dice if dice else 0				# How do I turn None into 0? int() doesn't seem to work
 	if unitsNum < unitPrice:
-		dbi.add(History(user.id, game.id, GAME_UNSUCCESFUL_CONQUER, user.tokenBadge.id))
+		dbi.updateHistory(user.id, game.id, GAME_UNSUCCESSFULL_CONQUER, user.currentTokenBadge.id)
 		return {'result': 'badTokensNum', 'dice': dice}
-	if attackedTokenBadgeId: region.clearFromRace(attackedTokenBadge)
-	region.owner = user
-	region.tokenBadge = user.tokenBadge
-	region.inDecline = false
-	region.tokensNum = unitPrice
-	callRaceMethod(raceId, 'conquered', currentRegionId, tokenBadgeId)
-	dbi.add(History(user.id, game.id, GAME_CONQUER, user.tokenBadge.id))
-	dbi.add(WarHistory(dbi.last_id(), user.tokenBadge.id, region, owner.tokenBadge.id, attackedTokensNum,
-		attackedTokensNum, dice, ATTACK_CONQUER))
+	if regState.tokenBadge: region.clearFromRace(regState.tokenBadge)
+	regState.owner = user
+	regState.tokenBadge = user.currentTokenBadge
+	regState.inDecline = False
+	regState.tokensNum = unitPrice
+	callRaceMethod(raceId, 'conquered', regState, user.currentTokenBadge)
+	victimBadgeId = owner.currentTokenBadge.id if owner else None
+	dbi.updateWarHistory(user.id, game.id, victimBadgeId, user.currentTokenBadge.id, dice, 
+		region.id, defense, ATTACK_CONQUER)
+	user.tokensInHand -= unitPrice
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
 		
 def act_decline(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.tokenBadge:
 		raise BadFieldException('badStage')
 
@@ -142,7 +132,7 @@ def act_decline(data):
 	return {'result': 'ok'}
 
 def act_redeploy(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not(tokenBadgeId): raise BadFieldException('badStage')
 	checkStage(GAME_REDEPLOY, user)
 			
@@ -196,7 +186,7 @@ def endOfGame(coins): #rewrite!11
 	return {'result': 'ok', 'coins': coins}
 
 def act_finishTurn(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	checkStage(GAME_FINISH_TURN, user)
 
 	income =len(user.regions)
@@ -225,7 +215,7 @@ def act_finishTurn(data):
 	return {'result': 'ok', 'nextPlayer' : row[0],'coins': coins}
 
 def act_defend(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 
 	if not(tokenBadgeId):
 		raise BadFieldException('badStage')
@@ -265,7 +255,7 @@ def act_defend(data):
 	return {'result': 'ok'}
 
 def act_dragonAttack(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.tokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_DRAGON_ATTACK, user)
 	callSpecialPowerMethod(user.currentTokenBadge.specialPower.id, 'dragonAttack', tokenBadgeId, data['regionId'], 
@@ -273,7 +263,7 @@ def act_dragonAttack(data):
 	return {'result': 'ok'}	
 
 def act_enchant(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.tokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_ENCHANT, user)
 	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge.id, data['regionId'])
@@ -281,7 +271,7 @@ def act_enchant(data):
 	return {'result': 'ok'}	
 
 def act_getVisibleTokenBadges(data):
-	game = dbi.getGameById(data['gameId'])
+	game = dbi.getXbyY('Game', 'id', data['gameId'])
 	rows = game.tokenBadges()
 	result = list()
 	for tokenBadge in filter(lambda x: x.position > 0, rows):
@@ -292,7 +282,7 @@ def act_getVisibleTokenBadges(data):
 	return {'result': result}
 
 def act_throwDice(data):
-	user = dbi.getUserBySid(data['sid'])
+	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not(user.tokenBadgeId): raise BadFieldException('badStage')
 	checkStage(GAME_THROW_DICE, user)
 	
