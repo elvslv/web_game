@@ -272,7 +272,7 @@ defaultMaps = [
 	 		{
 	 			'population' : 1,
 	 			'landDescription' : ['sea'],
-	 			'adjacent' : [1, 4] 
+	 			'adjacent' : [4] 
 	 		},
 	 		{
 	 			'population' : 1,

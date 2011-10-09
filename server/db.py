@@ -79,13 +79,13 @@ class Game(Base):
 		if lastEvent.state == misc.GAME_CONQUER:
 				battle = lastEvent.warHistory
 				agressor = battle.agressorBadge
-        			war = agressor and not agressor.currentTokenBadge.inDecline
+        			war = agressor and not agressor.inDecline
         			if state == misc.GAME_DEFEND:
 					if  battle.attackType == misc.ATTACK_ENCHANT or user.currentTokenBadge.inDecline:
 						badStage = True
 #				elif attackedTokensNum > 1: badStage = True  			What's going on here?
 		if badStage or user.id != self.activePlayerId:
-			raise BadFieldException('BadStage')
+			raise BadFieldException('badStage')
 			
 
 
@@ -96,24 +96,9 @@ class Game(Base):
 			raise BadFieldException('badStage')
 		return lastWarHistoryEntry.conqRegion
 
-	def getNextPlayer(self):
-        	try:
-        		return dbi.query(User).filter(User.priority > activePlayer.priority).one()
-        	except NoResultFound:
-        		return None
 
         def getLastState(self):
         	return self.history[-1].state
-
-	def prepareForNextTurn(self, newActPlayer):
-		self.activePlayer = newActPlayer
-		clearGameStateAtTheEndOfTurn(gameId)
-		if newActPlayer.currentTokenBadge.id:
-			addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId,
-				'countAdditionalConquerUnits', newActPlayer, gameId)
-			newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum
-			for region in newActPlayer.regions:
-				region.tokensNum = 1
 
 	def getNonEmptyConqueredRegions(self, tokenBadge):
 		return len(filter(lambda x: x.agressorBadge == tokenBadge and agressorTokensNum > 0, warHistory))
@@ -138,8 +123,8 @@ class TokenBadge(Base):
         	self.gameId = gameId
 
         def isNeighbor(self, region):
-        	for reg in self.regions:
-        		if region.adjacent(reg):
+         	for reg in self.regions:
+        		if region.adjacent(reg.region):
         			return True
         	return False
         
@@ -160,7 +145,8 @@ class User(Base):
 
 	
     	game = relationship(Game, backref=backref('players', order_by=priority))
-    	currentTokenBadge = relationship(TokenBadge, backref=backref('owner'), primaryjoin=currentTokenBadgeId==TokenBadge.id)
+    	currentTokenBadge = relationship(TokenBadge, backref=backref('owner', uselist=False), 
+    		primaryjoin=currentTokenBadgeId==TokenBadge.id)
     	declinedTokenBadge = relationship(TokenBadge, primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
     	def __init__(self, username, password):
@@ -218,10 +204,10 @@ class Region(Base):
     	return state[0]
 
     def getNeighbors(self):
-        return map(lambda x : x.left, self.rightNeighbors) + map(lambda x : x.right, self.leftNeighbors)
+    	return  map(lambda x : x.leftId, self.rightNeighbors) + map(lambda x : x.rightId, self.leftNeighbors)
 
     def adjacent(self, region):
-    	return region in self.getNeighbors() 
+    	return region.id in self.getNeighbors() 
 
 
 class Adjacency(Base):
@@ -231,8 +217,8 @@ class Adjacency(Base):
 	rightId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	mapId = Column(Integer, ForeignKey('maps.id'), primary_key=True)
 
-   	left = relationship(Region, primaryjoin=leftId==Region.id, backref=backref('leftNeighbors'))
-    	right = relationship(Region, primaryjoin=rightId==Region.id, backref=backref('rightNeighbors'))
+   	left = relationship(Region, primaryjoin="and_(Region.id==Adjacency.leftId, Region.mapId==Adjacency.mapId)",  backref=backref('leftNeighbors'))
+    	right = relationship(Region, primaryjoin="and_(Region.id==Adjacency.rightId, Region.mapId==Adjacency.mapId)", backref=backref('rightNeighbors'))
 	map = relationship(Map)
 
 	def __init__(self, n1, n2):
@@ -391,7 +377,14 @@ class _Database:
 				n =  x + y[0].upper() + y[1:]
 				raise BadFieldException("""bad%s""" % n)
 			return None
-   			
+
+   	def getNextPlayer(self, game):
+        	try:
+        		activePlayer = self.query(User).get(game.activePlayerId)
+        		return self.query(User).filter(User.priority > activePlayer.priority).one()
+        	except NoResultFound:
+        		return None
+
 
     	def addUnique(self, obj, name):
     		try:

@@ -1,4 +1,3 @@
-from editDb import query, fetchall, fetchone
 from gameExceptions import BadFieldException
 from misc_game import *
 from misc import *
@@ -12,11 +11,10 @@ class BaseRace:
 	def setId(self, id):
 		self.raceId = id
 	
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, 
-		tokenBadgeId):
-		return not regions and (border or coast)
-	
-	def countConquerBonus(self, currentRegionId, tokenBadgeId):
+	def canConquer(self, region, tokenBadge):
+		return not region.sea and ((not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.isNeighbor(region))
+
+	def conquerBonus(self, region, tokenBadge):
 		return 0
 	
 	def decline(self, user): 
@@ -25,7 +23,7 @@ class BaseRace:
 	def countAdditionalRedeploymentUnits(self, userId, gameId):
 		return 0
 
-	def countAdditionalConquerUnits(self, userId, gameId):		# almighty function
+	def countAdditionalConquerUnits(self, game):		#Why does it have this name?
 		return 0
 	
 	def countAdditionalCoins(self, userId, gameId):
@@ -34,11 +32,8 @@ class BaseRace:
 	def countAddDefendingTokensNum(self):
 		return -1
 
-	def countAdditionalConquerPrice(self):
+	def defenseBonus(self):
 		return 0
-
-	def tryToConquerAdjacentRegion(self, regions, border, coast, sea):
-		return True	
 
 	def getInitBonusNum(self):
 		return 0
@@ -69,16 +64,13 @@ class RaceHalflings(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Halflings', 6, 11)
 	
-	def conquered(self, currentRegion, tokenBadge):			#### Looks strange. Should read the rules
-		query("""SELECT COUNT(*) FROM CurrentRegionState WHERE TokenBadgeId=%s AND 
-			HoleInTheGround=TRUE""", tokenBadgeId)
-		
-		if len(filter(lambda x: x.holeInTheGround, tokenBadge.regions)) == 2:
+	def conquered(self, region, tokenBadge):	
+		if len(filter(lambda x: x.holeInTheGround, tokenBadge.regions)) >= 2:
 			return
 		for region in tokenBadge.regions: region.holeInTheGround = True
 
-	def tryToConquerNotAdjacentRegion(self, regions, border, coast, attackedRegion, tokenBadgeId):
-		return False if regions else True
+	def canConquer(self, region, tokenBadge):
+		return True
 
 	
 	def getInitBonusNum(self):
@@ -98,11 +90,11 @@ class RaceGiants(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Giants', 6, 11)
 
-	def countConquerBonus(self, currentRegion, tokenBadge):
+	def conquerBonus(self, region, tokenBadge):
 		res = 0
-		regions = filter(lambda x: x.mountain, tokenBadge.regions)
-		for region in row:
-			if currentRegion.adjacent(region.region):					#how do I set this straight?
+		lands = filter(lambda x: x.region.mountain, tokenBadge.regions)
+		for  land in lands:
+			if currentRegion.adjacent(land.region):					#how do I set this straight?
 					res = -1
 					break
 		return res
@@ -111,7 +103,7 @@ class RaceTritons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
-	def countConquerBonus(self, currentRegion, tokenBadge):
+	def conquerBonus(self, currentRegion, tokenBadge):
 		return -1 if currentRegion.region.coast else 0
 
 class RaceDwarves(BaseRace):
@@ -178,7 +170,7 @@ class RaceTrolls(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Trolls', 5, 10)
 
-	def countAdditionalConquerPrice(self):
+	def defenseBonus(self):
 		return 1
 
 class RaceSorcerers(BaseRace):
@@ -241,11 +233,10 @@ class BaseSpecialPower:
 	def setId(self, id):
 		self.specialPowerId = id
 
-	def tryToConquerRegion(self, region, tokenBadge):
-		ans = (not regions or region.adjacent(tokenBadge.region)) and not region.sea
-		return ans
+	def canConquer(self, region, tokenBadge):
+		return False
 		
-	def countConquerBonus(self, regionId, tokenBadgeId):
+	def conquerBonus(self, regionId, tokenBadgeId):
 		return 0
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
@@ -337,7 +328,7 @@ class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)
 
-	def countConquerBonus(self, regionid, tokenBadgeId):
+	def conquerBonus(self, regionid, tokenBadgeId):
 		return -1
 
 class SpecialPowerDiplomat(BaseSpecialPower):
@@ -345,7 +336,7 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Diplomat', 5)
 		
 	def getInitBonusNum(self):
-			return 1
+		return 1
 			
 	def decline(self, userId):
 		pass
@@ -375,7 +366,7 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 
 #		query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, 
 #			Friend) SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", 
-			userId, gameId, GAME_CHOOSE_FRIEND, tokenBadgeId, gameId, friendId)
+#			userId, gameId, GAME_CHOOSE_FRIEND, tokenBadgeId, gameId, friendId)
 
 
 class SpecialPowerDragonMaster(BaseSpecialPower):
@@ -428,8 +419,8 @@ class SpecialPowerFlying(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
-	def tryToConquerRegion(self, regionId, tokenBadgeId):
-		pass
+	def canConquer(self, region, tokenBadge):
+		return True
 #		isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
 #		regionInfo = getRegionInfoById(regionId, getGameIdByTokenBadge(tokenBadgeId))
 #		return ((not isAdjacent and regions) or not regions) and not regionInfo['sea']
@@ -542,22 +533,23 @@ class SpecialPowerHill(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
-		return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
-			userId), gameId, 'Hill')	
+		return 0
+	#	return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
+	#		userId), gameId, 'Hill')	
 
 
 class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
 
-	def countAdditionalCoins(self, user, game, race):
+	def countAdditionalCoins(self, user, gameId, race):
 		return len(user.regions)
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Mounted', 5) 
 
-	def countConquerBonus(self, region, tokenBadge):
+	def conquerBonus(self, region, tokenBadge):
 		return -1 if region.farmland or region.hill else 0
 
 
@@ -574,7 +566,7 @@ class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
 	
-	def tryToConquerRegion(self, regionId, tokenBadgeId):
+	def canConquer(self, region, tokenBadge):
 		return True
 	#	isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
 	#	return (isAdjacent and regions) or not regions 
@@ -600,7 +592,7 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Underworld', 5) 
 
-	def tryToConquerRegion(self, regionId, tokenBadgeId):
+	def canConquer(self, region, tokenBadge):
 #		if BaseSpecialPower.tryToConquerRegion(self, regionId, tokenBadgeId):
 #			return True
 #		query("""SELECT a.Cavern, b.Cavern FROM Regions a, Regions b, 
@@ -611,7 +603,7 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 		cavern1, cavern2 = True, True
 		return (cavern1 and cavern2)
 		
-	def countConquerBonus(self, region, tokenBadge):
+	def conquerBonus(self, region, tokenBadge):
 		return -1 if region.cavern else 0
 
 	
@@ -623,7 +615,7 @@ class SpecialPowerWealthy(BaseSpecialPower):
 		return 1
 
 	def countAdditionalCoins(self, userId, gameId, raceId):
-		pass
+		return 0
 #		query("""SELECT b.Turn-a.Turn FROM History a, Games b WHERE a.TokenBadgeId=%s 
 #			AND a.State=%s AND b.GameId=a.GameId""", 
 #			getTokenBadgeIdByRaceAndUser(raceId, userId), GAME_SELECT_RACE)
