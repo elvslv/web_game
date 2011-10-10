@@ -9,13 +9,16 @@ import db
 dbi = Database()
 
 
+def clearFromRace(reg):
+		if reg.tokenBadge:
+			callRaceMethod(reg.tokenBadge.raceId, 'clearRegion', reg.tokenBadge, reg)
+			callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
 
 def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
-	a = newActPlayer.id
 	if newActPlayer.currentTokenBadge:
 		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId,
-			'countAdditionalConquerUnits', newActPlayer, gameId)
+			'turnStateReinforcements', newActPlayer, gameId)
 		newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum
 		for region in newActPlayer.regions:
 			region.tokensNum = 1

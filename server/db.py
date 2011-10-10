@@ -78,30 +78,30 @@ class Game(Base):
 		badStage = lastEvent.state not in misc.possiblePrevCmd[state] 
 		if lastEvent.state == misc.GAME_CONQUER:
 				battle = lastEvent.warHistory
-				agressor = battle.agressorBadge
-        			war = agressor and not agressor.inDecline
-        			if state == misc.GAME_DEFEND:
-					if  battle.attackType == misc.ATTACK_ENCHANT or user.currentTokenBadge.inDecline:
-						badStage = True
-#				elif attackedTokensNum > 1: badStage = True  			What's going on here?
-		if badStage or user.id != self.activePlayerId:
+				victim = battle.victimBadge
+				canDefend = victim != None  and\
+					not victim.inDecline and\
+					battle.attackType != misc.ATTACK_ENCHANT and\
+					battle.victimTokensNum > 1
+				badStage |= canDefend != (state == misc.GAME_DEFEND)
+   					
+		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
 			raise BadFieldException('badStage')
 			
 
 
 
-        def getDefendingRegionInfo(self, player):
-        	lastWarHistoryEntry = self.warHistory[-1]
-        	if lastWarHistoryEntry.victimBadge.id != player.currentTokenBadge.id:
-			raise BadFieldException('badStage')
-		return lastWarHistoryEntry.conqRegion
+        def getDefendingRegion(self, player):
+        	lastWarHistoryEntry = self.history[-1].warHistory
+		return lastWarHistoryEntry.conqRegion.region
 
 
         def getLastState(self):
         	return self.history[-1].state
 
+
 	def getNonEmptyConqueredRegions(self, tokenBadge):
-		return len(filter(lambda x: x.agressorBadge == tokenBadge and agressorTokensNum > 0, warHistory))
+		return len(filter(lambda x: x.agressorBadge == tokenBadge and x.conqRegion.tokensNum > 0, warHistory))
 
 class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
@@ -155,11 +155,9 @@ class User(Base):
 
         def checkForFriends(self, attackedUser):			
         	if not attackedUser: return
-		turn = self.game.turn -  int(self.priority < attackedUser.priority) ## Cryptic code mercilessly plagiarized without analysis 
-		histEntry = dbi.query(HistoryEntry).filter(HistoryEntry.id==self.game.id).\
-									filter(HistoryEntry.turn==turn)
-		if histEntry.state == misc.GAME_CHOOSE_FRIEND and histEntry.user == self 	and histEntry.friend == attackedUser:
-
+		turn = self.game.turn -  int(self.priority < attackedUser.priority) 
+		histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND, self.game.history)
+		if histEntry and histEntry.user == self 	and histEntry.friend == attackedUser:
 			raise BadFieldException('UsersAreFriends')
 
 	def decline(self):
@@ -254,10 +252,6 @@ class RegionState(Base):
         	self.tokensNum = region.defTokensNum
 
 
-	def clearFromRace(self, tokenBadge):
-		callRaceMethod(tokenBadge.raceId, 'clearRegion', tokenBadge, self)
-		callSpecialPowerMethod(tokenBadge.specPowerId, 'clearRegion', tokenBadge, self)
-
 	def checkIfImmune(self):
 		if self.holeInTheGround or self.dragon or self.hero:
 			raise BadFieldException('regionIsImmune')
@@ -308,15 +302,15 @@ class WarHistoryEntry(Base):
     mainHistEntryId = fkey('history.id')
     agressorBadgeId = fkey('tokenBadges.id')
     victimBadgeId = fkey('tokenBadges.id')
-    conqRegionId = Column(Integer)
+    conqRegionId = fkey('currentRegionStates.id')
     victimTokensNum = Column(Integer, default = 0)
     diceRes = Column(Integer)
     attackType = Column(Integer) 
-    
+
     mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory', uselist=False))
     agressorBadge = relationship(TokenBadge, primaryjoin=agressorBadgeId==TokenBadge.id)
     victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id)
-
+    conqRegion = relationship(RegionState, uselist=False)
   	
 
     def __init__(self, mainHistEntryId, agressorBadgeId, conqRegionId, victimBadgeId, victimTokensNum, diceRes, attackType): 
