@@ -26,7 +26,7 @@ class BaseRace:
 	def countAdditionalConquerUnits(self, game):		#Why does it have this name?
 		return 0
 	
-	def countAdditionalCoins(self, userId, gameId):
+	def incomeBonus(self, user):
 		return 0
 
 	def countAddDefendingTokensNum(self):
@@ -38,10 +38,10 @@ class BaseRace:
 	def getInitBonusNum(self):
 		return 0
 
-	def declineRegion(self, currentRegionId):
+	def flee(self, region):
 		pass
 	
-	def updateBonusStateAtTheAndOfTurn(self, tokenBadgeId):
+	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
 		pass
 
 	def conquered(self, currentRegionId, tokenBadgeId):
@@ -80,11 +80,8 @@ class RaceHalflings(BaseRace):
 		BaseRace.decline(self, userId)
 		for region in tokenBadge.regions: region.holeInTheGround = False
 		
-#	def declineRegion(self, currentRegionId):
-#		query("""UPDATE CurrentRegionState SET HoleInTheGround=FALSE WHERE 
-#			CurrentRegionId=%s""", currentRegionId)
-#		query("""UPDATE TokenBadges SET RaceBonusNum=0 WHERE TokenBadgeId=%s""",
-#			tokenBadgeId)
+	def flee(self, region):
+		region.holeInTheGround = False
 
 class RaceGiants(BaseRace):
 	def __init__(self):
@@ -110,28 +107,28 @@ class RaceDwarves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
-	def countAdditionalCoins(self, user, gameId):
+	def incomeBonus(self, user):
 		return len(filter(lambda x: x.mine, user.currentTokenBadge.regions))
 
 class RaceHumans(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
-	def countAdditionalCoins(self, user):
+	def incomeBonus(self, user):
 		return len(filter(lambda x: x.farmland, user.currentTokenBadge.regions))
 
 class RaceOrcs(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Orcs', 5, 10)
 
-	def countAdditionalCoins(self, user, game):
+	def incomeBonus(self, user):
 		return game.getNonEmptyConqueredRegions(user.currentTokenBadge)
 
 class RaceWizards(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
-	def countAdditionalCoins(self, user, game):
+	def incomeBonus(self, user):
 		return len(filter(lambda x: x.magic, user.currentTokenBadge.regions))
 		
 class RaceAmazons(BaseRace):
@@ -239,24 +236,24 @@ class BaseSpecialPower:
 	def conquerBonus(self, regionId, tokenBadgeId):
 		return 0
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
+	def incomeBonus(self, user):
 		return 0
 
-	def tryToGoInDecline(self, game):
+	def decline(self, game):
 		if game.getLastState() != GAME_FINISH_TURN:
 			raise BadFieldException('badStage')
 
 	def getInitBonusNum(self):
 		return 0
 
-	def updateBonusStateAtTheAndOfTurn(self, tokenBadgeId):
+	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
 		pass
 
 	def turnFinished(self, tokenBadgeId):
 		pass
 
 	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
-		raise BadFieldException('badAction') ###
+		raise BadFieldException('badAction') 
 
 	def clearRegion(self, tokenBadgeId, regionId):
 		pass
@@ -264,11 +261,6 @@ class BaseSpecialPower:
 	def throwDice(self):
 		raise BadFieldException('badAction')
 
-	def declineRegion(self, regionId, gameId):
-		pass
-
-	def decline(self, userId):
-		pass
 
 	def setEncampments(encampments, tokenBadgeId):
 		raise BadFieldException('badSpecialPower')
@@ -281,8 +273,8 @@ class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
 
-	def countAdditionalCoins(self, user, game, tokenBadge):
-		return 2 if not tokenBadge.inDecline else 0
+	def incomeBonus(self, user):
+		return 2 if not user.currentTokenBadge.inDecline else 0
 
 class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
@@ -302,9 +294,10 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	def clearRegion(self, tokenBadgeId, regionId):
 		pass
 
-	def decline(self, userId):
-		query("""UPDATE CurrentRegionState SET Encampment=0 WHERE OwnerId=%s""",
-			userId)
+	def decline(self, user):
+		BaseSpecialPower.decline(user)
+		for region in user.regions:
+			region.encampment = False
 
 	def setEncampments(self, encampments, tokenBadge):
 		checkObjectsListCorrection(encampments, 
@@ -328,7 +321,7 @@ class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)
 
-	def conquerBonus(self, regionid, tokenBadgeId):
+	def conquerBonus(self, region, tokenBadge):
 		return -1
 
 class SpecialPowerDiplomat(BaseSpecialPower):
@@ -337,9 +330,6 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 		
 	def getInitBonusNum(self):
 		return 1
-			
-	def decline(self, userId):
-		pass
 
 	def selectFriend(data, userId, tokenBadgeId, gameId):
 		pass
@@ -413,6 +403,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	#			-1, ATTACK_DRAGON)
 
 	def decline(self, user):
+		BaseSpecialPower.decline(user)
 		for region in user.reginos: region.dragon = False
 		
 class SpecialPowerFlying(BaseSpecialPower):
@@ -430,10 +421,8 @@ class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Forest', 4)
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
-		return 0
-	#	return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
-	#		userId), gameId, 'Forest')	
+	def incomeBonus(self, user):
+		return len(filter(lambda x: x.forest, user.currentTokenBadge.regions))
 
 class SpecialPowerFortifield(BaseSpecialPower):
 	def __init__(self):
@@ -443,7 +432,7 @@ class SpecialPowerFortifield(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 1
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
+	def incomeBonus(self, user):
 	#	query("""SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND 
 	#		RaceId=%s""", userId, raceId)
 	#	query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
@@ -497,7 +486,8 @@ class SpecialPowerHeroic(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 2
 
-	def decline(self, userId):
+	def decline(self, user):
+		BaseSpecialPower.decline(user)
 		for region in user.regions:
 			region.hero = False
 
@@ -532,17 +522,15 @@ class SpecialPowerHill(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
-		return 0
-	#	return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
-	#		userId), gameId, 'Hill')	
+	def incomeBonus(self, user):
+		return len(filter(lambda x: x.hill, user.currentTokenBadge.regions))
 
 
 class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
 
-	def countAdditionalCoins(self, user, gameId, race):
+	def incomeBonus(self, user):
 		return len(user.regions)
 
 class SpecialPowerMounted(BaseSpecialPower):
@@ -557,10 +545,8 @@ class SpecialPowerPillaging(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Pillaging', 5)
 	
-	def countAdditionalCoins(self, userId, gameId, raceId): ###
-		return 0
-	#	return getNonEmptyConqueredRegions(getTokenBadgeIdByRaceAndUser(raceId, 
-	#		userId), gameId)
+	def countAdditionalCoins(self, user): 
+		return user.game.getNonEmptyConqueredRegions(user.tokenBadge)
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
@@ -576,17 +562,15 @@ class SpecialPowerStout(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Stout', 4) 
 
-	def tryToGoInDecline(self, gameId):
+	def decline(self, user):
 		pass
 
 class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
-	def countAdditionalCoins(self, userId, gameId, raceId): 
-		return 0
-	#	return getRegionParam(raceId, getTokenBadgeIdByRaceAndUser(raceId, 
-	#		userId), gameId, 'Swamp')	
+	def incomeBonus(self, user): 
+		return len(filter(lambda x: x.swamp, user.currentTokenBadge.regions))
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
@@ -614,7 +598,7 @@ class SpecialPowerWealthy(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 1
 
-	def countAdditionalCoins(self, userId, gameId, raceId):
+	def incomeBonus(self, user):
 		return 0
 #		query("""SELECT b.Turn-a.Turn FROM History a, Games b WHERE a.TokenBadgeId=%s 
 #			AND a.State=%s AND b.GameId=a.GameId""", 

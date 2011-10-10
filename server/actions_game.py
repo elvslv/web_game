@@ -120,10 +120,9 @@ def act_decline(data):
 
 	user.game.checkStage(GAME_DECLINE, user)
 	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
-	callSpecialPowerMethod(specialPowerId, 'tryToGoInDecline', game.id)
 
-	callRaceMethod(raceId, 'decline', user.id)	
 	callSpecialPowerMethod(specialPowerId, 'decline', user.id)	
+	callRaceMethod(raceId, 'decline', user.id)	
 	user.declinedTokenBadge = user.currentTokenBadge
 	user.currentTokenBadge = None
 	user.tokensInHand = 0
@@ -171,8 +170,7 @@ def act_redeploy(data):
 	if unitsNum: regState.tokensNum += unitsNum
 	emptyRegions = filter( lambda x: not x.tokensNum, tokenBadge.regions)
 	for region in emptyRegions:
-		callRaceMethod(raceId, 'declineRegion', region.tokenBadge)
-		callSpecialPowerMethod(specialPowerId, 'declineRegion', region.tokenBadge)		##??
+		callRaceMethod(raceId, 'flee', region)
 		region.owner = None
 
 	dbi.updateHistory(user.id, user.game.id, GAME_REDEPLOY, user.currentTokenBadge.id)
@@ -183,30 +181,31 @@ def endOfGame(coins): #rewrite!11
 
 def act_finishTurn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	user.game.checkStage(GAME_FINISH_TURN, user)
+	game = user.game
+	game.checkStage(GAME_FINISH_TURN, user)
 
 	income =len(user.regions)
 	additionalCoins = 0
-	races = dbi.query(TokenBadge).filter_by(owner=user)
+	races = dbi.query(TokenBadge).filter_by(owner=user).all()
 	for race in races:
-		income += callRaceMethod(race.raceId, 'countAdditionalCoins', user.id, user.game.id)
-		income += callSpecialPowerMethod(race.specPowId, 'countAdditionalCoins', user.id, user.game.id, user.currentTokenBadge.raceId)
+		income += callRaceMethod(race.raceId, 'incomeBonus', user)
+		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', user)
 	user.coins += income
 	user.tokensInHand = 0
-	nextPlayer = dbi.getNextPlayer(user.game)
+	nextPlayer = dbi.getNextPlayer(game)
 	if not nextPlayer:
-		nextPlayer = user.game.players[0]
-		user.game.turn += 1
-		if user.game.turn == user.game.turnsNum:
+		nextPlayer = game.players[0]
+		game.turn += 1
+		if game.turn == game.turnsNum:
 			return endOfGame(coins)
 
 	for rec in races:
-		callRaceMethod(rec.raceId, 'updateBonusStateAtTheAndOfTurn', user.currentTokenBadge.id)
-		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheAndOfTurn', user.currentTokenBadge.id)
+		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
+		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 
-	dbi.updateHistory(user.id, user.game.id, GAME_FINISH_TURN, user.currentTokenBadge.id)
-	prepareForNextTurn(user.game, nextPlayer)
-	return {'result': 'ok', 'nextPlayer' : nextPlayer,'coins': coins}
+	dbi.updateHistory(user.id, game.id, GAME_FINISH_TURN, user.currentTokenBadge.id)
+	prepareForNextTurn(game, nextPlayer)
+	return {'result': 'ok', 'nextPlayer' : nextPlayer.id,'coins': user.coins}
 
 def act_defend(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
@@ -259,7 +258,7 @@ def act_dragonAttack(data):
 def act_enchant(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.tokenBadge: raise BadFieldException('badStage')
-	checkStage(GAME_ENCHANT, user)
+	game.checkStage(GAME_ENCHANT, user)
 	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge.id, data['regionId'])
 
 	return {'result': 'ok'}	

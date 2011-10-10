@@ -12,6 +12,7 @@ dbi = Database()
 
 def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
+	a = newActPlayer.id
 	if newActPlayer.currentTokenBadge:
 		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId,
 			'countAdditionalConquerUnits', newActPlayer, gameId)
