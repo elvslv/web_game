@@ -99,9 +99,6 @@ class Game(Base):
         	return self.history[-1].state
 
 
-	def getNonEmptyConqueredRegions(self, tokenBadge):
-		return len(filter(lambda x: x.agressorBadge == tokenBadge and x.conqRegion.tokensNum > 0, warHistory))
-
 class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
 
@@ -172,58 +169,65 @@ class User(Base):
 		self.currentTokenBadge.totalTokensNum = len(self.regions)
 		self.currentTokenBadge = None
 		self.tokensInHand = 0
+
+	
+	def getNonEmptyConqueredRegions(self):
+		conqHist = filter(lambda x: x.turn == self.game.turn and x.state == misc.GAME_CONQUER, self.game.history) 
+		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
 			
 class Region(Base):
-    __tablename__ = 'regions'
+	__tablename__ = 'regions'
 
-    id = pkey()
-    mapId = fkey('maps.id')
-    defTokensNum = Column(Integer, default = 0)
+    	id = Column(Integer, primary_key=True, autoincrement=False)
+    	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+    	defTokensNum = Column(Integer, default = 0)
 
-    border = Column(Boolean, default=False)
-    coast = Column(Boolean, default=False)
-    mountain = Column(Boolean, default=False)
-    sea = Column(Boolean, default=False) 
-    mine = Column(Boolean, default=False) 
-    farmland = Column(Boolean, default=False) 
-    magic = Column(Boolean, default=False) 
-    forest = Column(Boolean, default=False) 
-    hill = Column(Boolean, default=False) 
-    swamp = Column(Boolean, default=False) 
-    cavern = Column(Boolean, default=False)
+    	border = Column(Boolean, default=False)
+    	coast = Column(Boolean, default=False)
+    	mountain = Column(Boolean, default=False)
+    	sea = Column(Boolean, default=False) 
+    	mine = Column(Boolean, default=False) 
+    	farmland = Column(Boolean, default=False) 
+   	magic = Column(Boolean, default=False) 
+    	forest = Column(Boolean, default=False) 
+    	hill = Column(Boolean, default=False) 
+    	swamp = Column(Boolean, default=False) 
+    	cavern = Column(Boolean, default=False)
 
-    map = relationship(Map, backref=backref('regions', order_by=id))
+    	map = relationship(Map, backref=backref('regions', order_by=id))
 
-    def __init__(self, defTokensNum, map_): 
-        self.defTokensNum = defTokensNum
-        self.map = map_
+	def __init__(self, id, defTokensNum, map_): 
+    		self.id = id
+        	self.defTokensNum = defTokensNum
+        	self.map = map_
 
-    def getState(self, gameId):
-    	state = filter(lambda x : x.gameId == gameId, self.states)
-    	if not state: raise BadFieldException('badGameId')
-    	return state[0]
+    	def getState(self, gameId):
+    		state = filter(lambda x : x.gameId == gameId, self.states)
+    		if not state: raise BadFieldException('badGameId')
+    		return state[0]
 
-    def getNeighbors(self):
-    	return  map(lambda x : x.leftId, self.rightNeighbors) + map(lambda x : x.rightId, self.leftNeighbors)
+    	def getNeighbors(self):
+    		return  map(lambda x : x.neighborId, filter(lambda x: x.mapId == self.mapId, self.neighbors)) #Uh-huh  
 
-    def adjacent(self, region):
-    	return region.id in self.getNeighbors() 
+    	def adjacent(self, region):
+    		return region.id in self.getNeighbors() 
 
 
 class Adjacency(Base):
 	__tablename__ = 'adjacentRegions'
 
-	leftId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
-	rightId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
+	regId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
+	neighborId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	mapId = Column(Integer, ForeignKey('maps.id'), primary_key=True)
 
-   	left = relationship(Region, primaryjoin="and_(Region.id==Adjacency.leftId, Region.mapId==Adjacency.mapId)",  backref=backref('leftNeighbors'))
-    	right = relationship(Region, primaryjoin="and_(Region.id==Adjacency.rightId, Region.mapId==Adjacency.mapId)", backref=backref('rightNeighbors'))
+   	n = relationship(Region, primaryjoin="and_(Region.id==Adjacency.regId, Region.mapId==Adjacency.mapId)",
+   		backref=backref('neighbors'))
+   		
 	map = relationship(Map)
 
 	def __init__(self, n1, n2):
-      		self.leftId = n1
-          	self.rightId = n2
+      		self.regId = n1
+          	self.neighborId = n2
         	
 
 class RegionState(Base):
@@ -276,26 +280,26 @@ class Message(Base):
         self.time = time
 
 class HistoryEntry(Base):
-    __tablename__ = 'history'
+	__tablename__ = 'history'
 
-    id = pkey()
-    userId = fkey('users.id')
-    gameId = fkey('games.id')
-    state = Column(Integer)
-    tokenBadgeId = Column(Integer)
-    turn = Column(Integer)
-    dice = Column(Integer)
-    friend = Column(Integer)
+	id = pkey()
+    	userId = fkey('users.id')
+    	gameId = fkey('games.id')
+    	state = Column(Integer)
+    	tokenBadgeId = Column(Integer)
+    	turn = Column(Integer)
+    	dice = Column(Integer)
+    	friend = Column(Integer)
 
-    game = relationship(Game, backref=backref('history', order_by=id))
-    user = relationship(User, backref=backref('history'))
+    	game = relationship(Game, backref=backref('history', order_by=id))
+   	user = relationship(User, backref=backref('history'))
 
-    def __init__(self, userId, gameId, state, tokenBadgeId, dice = None): 
-        self.userId = userId
-        self.gameId = gameId
-        self.state = state
-        self.tokenBadgeId = tokenBadgeId
-        self.dice = dice
+    	def __init__(self, userId, gameId, state, tokenBadgeId, dice = None): 
+    		self.userId = userId
+    		self.gameId = gameId
+        	self.state = state
+        	self.tokenBadgeId = tokenBadgeId
+        	self.dice = dice
 
 class WarHistoryEntry(Base):
     __tablename__ = 'warHistory'
@@ -388,13 +392,13 @@ class _Database:
     		except IntegrityError:
     			raise BadFieldException("""%sTaken""" % name)
     
-    	def addRegion(self, map_, regInfo):
+    	def addRegion(self, id, map_, regInfo):
     		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
     		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
     		if not 'population' in regInfo:
     			regInfo['population'] = 0
 
-        	reg = Region(regInfo['population'], map_)
+        	reg = Region(id, regInfo['population'], map_)
         	self.add(reg)
         	for descr in regInfo['landDescription']:
         		if not descr in misc.possibleLandDescription[:11]:
@@ -403,7 +407,7 @@ class _Database:
 
 	def addNeighbors(self, reg, nodes):
 		for node in nodes:
-			node.map = reg.map
+			node.mapId = reg.mapId
 			self.add(node)
 
   

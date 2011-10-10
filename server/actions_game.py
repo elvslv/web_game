@@ -181,7 +181,6 @@ def act_finishTurn(data):
 	game.checkStage(GAME_FINISH_TURN, user)
 
 	income =len(user.regions)
-	additionalCoins = 0
 	races = dbi.query(TokenBadge).filter_by(owner=user).all()
 	for race in races:
 		income += callRaceMethod(race.raceId, 'incomeBonus', user)
@@ -243,7 +242,7 @@ def act_defend(data):
 def act_dragonAttack(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	checkStage(GAME_DRAGON_ATTACK, user)
+	user.game.checkStage(GAME_DRAGON_ATTACK, user)
 	callSpecialPowerMethod(user.currentTokenBadge.specialPower.id, 'dragonAttack', tokenBadgeId, data['regionId'], 
 		data['tokensNum'])
 	return {'result': 'ok'}	
@@ -251,7 +250,7 @@ def act_dragonAttack(data):
 def act_enchant(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not currentTser.tokenBadge: raise BadFieldException('badStage')
-	game.checkStage(GAME_ENCHANT, user)
+	user.game.checkStage(GAME_ENCHANT, user)
 	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge.id, data['regionId'])
 
 	return {'result': 'ok'}	

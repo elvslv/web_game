@@ -29,9 +29,6 @@ class BaseRace:
 	def incomeBonus(self, user):
 		return 0
 
-	def countAddDefendingTokensNum(self):
-		return -1
-
 	def defenseBonus(self):
 		return 0
 
@@ -122,7 +119,7 @@ class RaceOrcs(BaseRace):
 		BaseRace.__init__(self, 'Orcs', 5, 10)
 
 	def incomeBonus(self, user):
-		return game.getNonEmptyConqueredRegions(user.currentTokenBadge)
+		return user.getNonEmptyConqueredRegions()
 
 class RaceWizards(BaseRace):
 	def __init__(self):
@@ -141,15 +138,12 @@ class RaceAmazons(BaseRace):
 	def turnStartReinforcements(self, user):
 		return 4 if user.game.getLastState()  in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
 
-	def attackReinforcenments(self, game):		
-		return 0
-
 class RaceSkeletons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Skeletons', 5, 18)
 
 	def turnEndReinforcements(self, user):
-		return user.game.getNonEmptyConqueredRegions(user.tokenBadge, user.game) / 2
+		return user.getNonEmptyConqueredRegions() / 2
 		
 			
 class RaceElves(BaseRace):
@@ -274,7 +268,7 @@ class SpecialPowerAlchemist(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
 
 	def incomeBonus(self, user):
-		return 2 if not user.currentTokenBadge.inDecline else 0
+		return 2 if not user.currentTokenBadge.inDecline else 0		##??
 
 class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
@@ -300,11 +294,11 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
-
+		game = tokenBadge.owner.game
 		tokenBadge.region.encampment = 0
 		freeEncampments = 5
 		for encampment in encampments:
-			region =dbi.getRegionById(encampment['regionId'])
+			region = game.map.getRegion(encampment['regionId']).getState(game.id)
 			encampmentsNum = encampment['encampmentsNum']
 			if region.tokenBadge != tokenBadge:
 				raise BadFieldException('badRegion')
@@ -559,7 +553,7 @@ class SpecialPowerSwamp(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
 	def incomeBonus(self, user): 
-		return len(filter(lambda x: x.swamp, user.currentTokenBadge.regions))
+		return len(filter(lambda x: x.region.swamp, user.currentTokenBadge.regions))
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
