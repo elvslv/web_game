@@ -20,10 +20,10 @@ class BaseRace:
 	def decline(self, user): 
 		user.decline()
 	
-	def countAdditionalRedeploymentUnits(self, userId, gameId):
+	def turnEndReinforcements(self, user):
 		return 0
 
-	def countAdditionalConquerUnits(self, game):		#Why does it have this name?
+	def turnStartReinforcements(self, user):		
 		return 0
 	
 	def incomeBonus(self, user):
@@ -57,7 +57,7 @@ class BaseRace:
 		region.holeInTheGround = False
 		region.hero = False
 
-	def countCasualties(self, tokenBadge):
+	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
 
 class RaceHalflings(BaseRace):
@@ -76,9 +76,9 @@ class RaceHalflings(BaseRace):
 	def getInitBonusNum(self):
 		return 2
 
-	def decline(self, userId):
-		BaseRace.decline(self, userId)
-		for region in tokenBadge.regions: region.holeInTheGround = False
+	def decline(self, user):
+		BaseRace.decline(user)
+		for region in user.currentTokenBadge.regions: region.holeInTheGround = False
 		
 	def flee(self, region):
 		region.holeInTheGround = False
@@ -108,14 +108,14 @@ class RaceDwarves(BaseRace):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
 	def incomeBonus(self, user):
-		return len(filter(lambda x: x.mine, user.currentTokenBadge.regions))
+		return len(filter(lambda x: x.region.mine, user.currentTokenBadge.regions))
 
 class RaceHumans(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
 	def incomeBonus(self, user):
-		return len(filter(lambda x: x.farmland, user.currentTokenBadge.regions))
+		return len(filter(lambda x: x.region.farmland, user.currentTokenBadge.regions))
 
 class RaceOrcs(BaseRace):
 	def __init__(self):
@@ -129,35 +129,35 @@ class RaceWizards(BaseRace):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
 	def incomeBonus(self, user):
-		return len(filter(lambda x: x.magic, user.currentTokenBadge.regions))
+		return len(filter(lambda x: x.region.magic, user.currentTokenBadge.regions))
 		
 class RaceAmazons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Amazons', 6, 15)
 
-	def countAdditionalRedeploymentUnits(self,  game):
-		return -4 if  game.getLastState() == GAME_CONQUER else 0
+	def turnEndReinforcements(self,  user):
+		return -4 if  user.game.getLastState() == GAME_CONQUER else 0
 
-	def countAdditionalConquerUnits(self, game):
-		return 4 if game.getLastState()  in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
+	def turnStartReinforcements(self, user):
+		return 4 if user.game.getLastState()  in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
+
+	def attackReinforcenments(self, game):		
+		return 0
 
 class RaceSkeletons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Skeletons', 5, 18)
 
-	def countAdditionalRedeploymentUnits(self, user, game):
-		return game.getNonEmptyConqueredRegions(user.tokenBadge, game) / 2
+	def turnEndReinforcements(self, user):
+		return user.game.getNonEmptyConqueredRegions(user.tokenBadge, user.game) / 2
 		
 			
 class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
-	def countAddDefendingTokensNum(self):
+	def sufferCasualties(self):
 		return 0
-
-	def updateAttackedTokensNum(self, tokenBadgeId):
-		pass
 
 class RaceRatmen(BaseRace):
 	def __init__(self):
@@ -239,8 +239,8 @@ class BaseSpecialPower:
 	def incomeBonus(self, user):
 		return 0
 
-	def decline(self, game):
-		if game.getLastState() != GAME_FINISH_TURN:
+	def decline(self, user):
+		if user.game.getLastState() != GAME_FINISH_TURN:
 			raise BadFieldException('badStage')
 
 	def getInitBonusNum(self):
@@ -255,7 +255,7 @@ class BaseSpecialPower:
 	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
 		raise BadFieldException('badAction') 
 
-	def clearRegion(self, tokenBadgeId, regionId):
+	def clearRegion(self, tokenBadge, region):
 		pass
 
 	def throwDice(self):
@@ -290,9 +290,6 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	
 	def getInitBonusNum(self):
 		return 5
-
-	def clearRegion(self, tokenBadgeId, regionId):
-		pass
 
 	def decline(self, user):
 		BaseSpecialPower.decline(user)
@@ -404,7 +401,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 
 	def decline(self, user):
 		BaseSpecialPower.decline(user)
-		for region in user.reginos: region.dragon = False
+		for region in user.regions: region.dragon = False
 		
 class SpecialPowerFlying(BaseSpecialPower):
 	def __init__(self):
@@ -422,35 +419,27 @@ class SpecialPowerForest(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Forest', 4)
 
 	def incomeBonus(self, user):
-		return len(filter(lambda x: x.forest, user.currentTokenBadge.regions))
+		return len(filter(lambda x: x.region.forest, user.currentTokenBadge.regions))
 
-class SpecialPowerFortifield(BaseSpecialPower):
+class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortifield', 3)
+		BaseSpecialPower.__init__(self, 'Fortified', 3)
 		self.maxNum = 6
 
 	def getInitBonusNum(self):
 		return 1
 
 	def incomeBonus(self, user):
-	#	query("""SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND 
-	#		RaceId=%s""", userId, raceId)
-	#	query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
-	#		CurrentRegionState.TokenBadgeId=%s AND 
-	#		CurrentRegionState.RegionId=Regions.RegionId AND 
-	#		CurrentRegionState.Fortifield=TRUE""", 
-	#		getTokenBadgeIdByRaceAndUser(raceId, userId))
-	#	return int(fetchone()[0])
-		return 0
+		return len(filter(lambda x: x.fortified, user.regions))
 
-	def clearRegion(self, tokenBadgeId, regionId):
+	def clearRegion(self, tokenBadge, region):
 		pass
 #		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
 #			TokenBadgeId=%s""", tokenBadgeId)
 #		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
 #			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
 
-	def setFortifield(fortifield, tokenBadgeId):
+	def setFortified(fortifield, tokenBadgeId):
 		pass
 #		if not('regionId' in fortifield and isinstance(fortifield['regionId'])):
 #			raise BadFieldException('badRegionId')
@@ -523,7 +512,7 @@ class SpecialPowerHill(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
 	def incomeBonus(self, user):
-		return len(filter(lambda x: x.hill, user.currentTokenBadge.regions))
+		return len(filter(lambda x: x.region.hill, user.currentTokenBadge.regions))
 
 
 class SpecialPowerMerchant(BaseSpecialPower):
@@ -614,7 +603,7 @@ specialPowerList = [
 	SpecialPowerDragonMaster(),
 	SpecialPowerFlying(),
 	SpecialPowerForest(),
-	SpecialPowerFortifield(),
+	SpecialPowerFortified(),
 	SpecialPowerHeroic(),
 	SpecialPowerHill(),
 	SpecialPowerMerchant(),

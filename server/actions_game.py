@@ -117,16 +117,12 @@ def act_conquer(data):
 def act_decline(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
-
+	
 	user.game.checkStage(GAME_DECLINE, user)
 	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
-
-	callSpecialPowerMethod(specialPowerId, 'decline', user.id)	
-	callRaceMethod(raceId, 'decline', user.id)	
-	user.declinedTokenBadge = user.currentTokenBadge
-	user.currentTokenBadge = None
-	user.tokensInHand = 0
-	dbi.updateHistory(user.id, game.id, GAME_DECLINE, user.currentTokenBadge.id)
+	callSpecialPowerMethod(specialPowerId, 'decline', user)	
+	callRaceMethod(raceId, 'decline', user)	
+	dbi.updateHistory(user.id, user.game.id, GAME_DECLINE, user.declinedTokenBadge.id)
 	return {'result': 'ok'}
 
 def act_redeploy(data):
@@ -196,12 +192,12 @@ def act_finishTurn(data):
 	if not nextPlayer:
 		nextPlayer = game.players[0]
 		game.turn += 1
-		if game.turn == game.turnsNum:
+		if game.turn == game.map.turnsNum:
 			return endOfGame(coins)
 
-	for rec in races:
-		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
-		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
+#	for rec in races:
+#		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
+#		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 
 	dbi.updateHistory(user.id, game.id, GAME_FINISH_TURN, user.currentTokenBadge.id)
 	prepareForNextTurn(game, nextPlayer)

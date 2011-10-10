@@ -18,11 +18,11 @@ def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
 	if newActPlayer.currentTokenBadge:
 		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId,
-			'turnStateReinforcements', newActPlayer, gameId)
+			'turnStartReinforcements', newActPlayer)
 		newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum
-		for region in newActPlayer.regions:
+		for region in newActPlayer.currentTokenBadge.regions:
 			region.tokensNum = 1
-
+		
 def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
         if vRace != None and vSpecialPower !=None:
                 race = filter(lambda x: x.name == vRace, races.racesList) 

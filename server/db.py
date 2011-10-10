@@ -54,17 +54,16 @@ class Game(Base):
     	name = uniqString(MAX_GAMENAME_LEN)
     	descr = string(MAX_GAMEDESCR_LEN)
     	state = Column(Integer)
-    	turn = Column(Integer)
+    	turn = Column(Integer, default=0)
     	activePlayerId = Column(Integer)
     	mapId = fkey('maps.id')
-  
+    	  
     	map = relationship(Map)
     	
     	
     	def __init__(self, name, descr, map): 
     		self.name = name
         	self.descr = descr
-        	self.turn = 0
         	self.state = misc.GAME_WAITING
         	self.map = map
 
@@ -161,15 +160,18 @@ class User(Base):
 			raise BadFieldException('UsersAreFriends')
 
 	def decline(self):
-		for declinedRegion in self.declinedTokenBadge.regions:
-			declinedRegion.owner = None
-			declinedRegion.inDecline = False
+		if self.declinedTokenBadge:
+			for declinedRegion in self.declinedTokenBadge.regions:
+				declinedRegion.owner = None
+				declinedRegion.inDecline = False
 		self.declinedTokenBadge = self.currentTokenBadge
 		for region in self.regions:
 			region.tokensNum = 1
 			region.inDecline = True
 		self.currentTokenBadge.inDecline = True
 		self.currentTokenBadge.totalTokensNum = len(self.regions)
+		self.currentTokenBadge = None
+		self.tokensInHand = 0
 			
 class Region(Base):
     __tablename__ = 'regions'
@@ -190,7 +192,7 @@ class Region(Base):
     swamp = Column(Boolean, default=False) 
     cavern = Column(Boolean, default=False)
 
-    map = relationship(Map, backref=backref('regions'))
+    map = relationship(Map, backref=backref('regions', order_by=id))
 
     def __init__(self, defTokensNum, map_): 
         self.defTokensNum = defTokensNum

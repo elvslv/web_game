@@ -68,7 +68,7 @@
 		"result": "ok"
 	},
 	{
-		"result": "badRegion"
+		"result": "badRegionId"
 	},
 	{
 		"result": "badStage"

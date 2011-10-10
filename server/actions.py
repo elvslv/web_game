@@ -91,8 +91,7 @@ def initRegions(map, game):
 	for region in map.regions:
 		regState = RegionState(region, game)
 		dbi.add(regState)
-		region.state = regState
-		result.append(regState.id)
+		result.append(region.id)
 	return result
 
 def act_createGame(data):
