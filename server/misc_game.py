@@ -10,9 +10,15 @@ dbi = Database()
 
 
 def clearFromRace(reg):
-		if reg.tokenBadge:
-			callRaceMethod(reg.tokenBadge.raceId, 'clearRegion', reg.tokenBadge, reg)
-			callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
+	if reg.tokenBadge:
+		callRaceMethod(reg.tokenBadge.raceId, 'clearRegion', reg.tokenBadge, reg)
+		callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
+			
+def throwDice():
+	if misc.TEST_MODE: return 0
+	dice = random.randint(1, 6)
+	if dice > 3: dice = 0
+	return dice
 
 def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
@@ -61,15 +67,6 @@ def callRaceMethod(raceId, methodName, *args):					##is there a way to put them 
 def callSpecialPowerMethod(specialPowerId, methodName, *args):
 	specialPower = races.specialPowerList[specialPowerId]
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
-
-def throwDice():
-	if misc.TEST_MODE:
-		dice = 0
-	else:
-		dice = random.randint(1, 6)
-		if dice > 3:
-			dice = 0
-	return dice
 
 def generateTokenBadges(randSeed, num):
 	random.seed(randSeed)

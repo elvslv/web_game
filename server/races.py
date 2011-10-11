@@ -15,7 +15,7 @@ class BaseRace:
 	def canConquer(self, region, tokenBadge):
 		return not region.sea and ((not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.isNeighbor(region))
 
-	def conquerBonus(self, region, tokenBadge):
+	def attackBonus(self, region, tokenBadge):
 		return 0
 	
 	def decline(self, user): 
@@ -33,14 +33,14 @@ class BaseRace:
 
 	def turnStartReinforcements(self, user):		
 		return 0
+
+	def needRedeployment(self):
+		return False
 	
 	def incomeBonus(self, user):
 		return 0
 
 	def defenseBonus(self):
-		return 0
-
-	def getInitBonusNum(self):
 		return 0
 
 	def flee(self, region):
@@ -93,11 +93,11 @@ class RaceGiants(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Giants', 6, 11)
 
-	def conquerBonus(self, region, tokenBadge):
+	def attackBonus(self, region, tokenBadge):
 		res = 0
 		lands = filter(lambda x: x.region.mountain, tokenBadge.regions)
 		for  land in lands:
-			if currentRegion.adjacent(land.region):					#how do I set this straight?
+			if region.adjacent(land.region):					#how do I set this straight?
 					res = -1
 					break
 		return res
@@ -106,8 +106,8 @@ class RaceTritons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
-	def conquerBonus(self, currentRegion, tokenBadge):
-		return -1 if currentRegion.region.coast else 0
+	def attackBonus(self, region, tokenBadge):
+		return -1 if region.coast else 0
 
 class RaceDwarves(BaseRace):
 	def __init__(self):
@@ -141,12 +141,12 @@ class RaceAmazons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Amazons', 6, 15)
 
-	def turnEndReinforcements(self,  user):
-		return -4 if  user.game.getLastState() == GAME_CONQUER else 0
-
 	def turnStartReinforcements(self, user):
-		return 4 if user.game.getLastState()  in (GAME_FINISH_TURN, GAME_SELECT_RACE) else 0
+		return 4
 
+	def needRedeployment(self):
+		return True
+	
 class RaceSkeletons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Skeletons', 5, 18)
@@ -177,34 +177,19 @@ class RaceSorcerers(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
-	def enchant(self, tokenBadge, currentRegion):
-		currentRegion.checkIfImmune()
-		currentRegion.checkIfCorrect(tokenBadge)
-		attackedTokenBadge = currentRegion.tokenBadge
-		if attackedTokenBadge == tokenBadge: raise BadFieldException('badAttackedRace')
-		if currentRegion.encampment: raise BadFieldException('regionIsImmune')
-		if not currentRegion.tokensNum: 	raise BadFieldException('nothingToEnchant')
-		if currentRegion.tokensNum > 1: 	raise BadFieldException('cannotEnchantMoreThanOneToken')
-		if currentRegion.inDecline: raise BadFieldException('cannotEnchantDeclinedRace')
-
+	def enchant(self, tokenBadge, regState):
+		game =  tokenBadge.owner.game
+		victimBadge = regState.tokenBadge
+		if victimBadge == tokenBadge: raise BadFieldException('badAttackedRace')			
 		if tokenBadge.totalTokensNum == self.maxNum: raise BadFieldException('noMoreTokensInStorageTray')
-		attackedTokenBadge.totalTokensNum -= 1
+		victimBadge.totalTokensNum -= 1
 		tokenBadge.totalTokensNum += 1
-		raceId, specialPowerId  = attackedTokenBadge.raceId,attackedTokenBadge.specPowerId
-		racesList[raceId].clearRegion(attackedTokenBadge, currentRegion)
-		specialPowerList[specialPowerId].clearRegion(attackedTokenBadge, currentRegion)
-		currentRegion.tokenBadge = tokenBadge
-		currentRegion.owner = tokenBadge.owner
-		currentRegion.tokensNum = 1
-		dbi.add(History(user.id, game.id, GAME_CONQUER, tokenBadge.id))
-		dbi.add(WarHistory(dbi.last_id(), tokenBadge.id, currentRegion, attackedTokenBadge, attackedTokenBadge,
-			attackedTokensNum, dice, ATTACK_CONQUER))
-		
-		updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-		updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadge.tokensNum, 
-			attackedTokenBadge.encampment, -1, ATTACK_ENCHANT)
+		raceId, specialPowerId  = victimBadge.raceId, victimBadge.specPowId
+		regState.tokenBadge = tokenBadge
+		regState.owner = tokenBadge.owner
+		regState.tokensNum = 1
 
-
+	
 racesList = [
 	RaceAmazons(),
 	RaceDwarves(),
@@ -237,7 +222,7 @@ class BaseSpecialPower:
 	def canConquer(self, region, tokenBadge):
 		return False
 		
-	def conquerBonus(self, regionId, tokenBadgeId):
+	def attackBonus(self, regionId, tokenBadgeId):
 		return 0
 
 	def incomeBonus(self, tokenBadge):
@@ -282,7 +267,7 @@ class SpecialPowerBerserk(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Berserk', 4)
 
 	def throwDice(self):
-		return throwDice()
+		return misc.throwDice()
 
 
 class SpecialPowerBivouacking(BaseSpecialPower):
@@ -315,7 +300,7 @@ class SpecialPowerCommando(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Commando', 4)
 
-	def conquerBonus(self, region, tokenBadge):
+	def attackBonus(self, region, tokenBadge):
 		return -1
 
 class SpecialPowerDiplomat(BaseSpecialPower):
@@ -390,6 +375,10 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	#		updateConquerHistory(lastId(), tokenBadgeId, regionId, row[0], row[2], 
 	#			-1, ATTACK_DRAGON)
 
+	def clearRegion(self, tokenBadge, region):
+		tokenBadge.specPowNum -= 1
+		region.dragon = False
+		
 	def decline(self, user):
 		BaseSpecialPower.decline(self, user)
 		for region in user.regions: region.dragon = False
@@ -409,8 +398,8 @@ class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Forest', 4)
 
-	def incomeBonus(self, user):
-		return len(filter(lambda x: x.region.forest, user.currentTokenBadge.regions))
+	def incomeBonus(self, tokenBadge):
+		return len(filter(lambda x: x.region.forest, tokenBadge.regions))
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
@@ -423,7 +412,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 
 	def clearRegion(self, tokenBadge, region):
 		pass
-#		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
+#		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 				##Can't figure out how it works
 #			TokenBadgeId=%s""", tokenBadgeId)
 #		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
 #			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
@@ -491,6 +480,10 @@ class SpecialPowerHeroic(BaseSpecialPower):
 
 #			query('UPDATE CurrentRegionState SET Hero=True WHERE TokenBadgeId=%s',
 #				tokenBadgeId)
+
+	def clearRegion(self, tokenBadge, region):
+		tokenBadge.specPowNum -= 1
+		region.hero = False
 		
 
 class SpecialPowerHill(BaseSpecialPower):
@@ -512,7 +505,7 @@ class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Mounted', 5) 
 
-	def conquerBonus(self, region, tokenBadge):
+	def attackBonus(self, region, tokenBadge):
 		return -1 if region.farmland or region.hill else 0
 
 
@@ -563,7 +556,7 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 		cavern1, cavern2 = True, True
 		return (cavern1 and cavern2)
 		
-	def conquerBonus(self, region, tokenBadge):
+	def attackBonus(self, region, tokenBadge):
 		return -1 if region.cavern else 0
 
 	

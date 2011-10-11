@@ -232,6 +232,13 @@ actionFields = {
 	'getVisibleTokenBadges': [
 		{'name': 'gameId', 'type': int, 'mandatory': True}
 	],
+	'throwDice': [{'name': 'sid', 'type': int, 'mandatory': True}, 
+			     {'name': 'dice', 'type': int, 'mandatory': False}
+	],
+	 'enchant': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'regionId', 'type': int, 'mandatory': True}
+	],
 	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}]
 }
 

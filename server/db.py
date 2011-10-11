@@ -1,6 +1,6 @@
 from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN
 from gameExceptions import BadFieldException
-from sqlalchemy import create_engine, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text
+from sqlalchemy import create_engine, and_, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text, ForeignKeyConstraint
 from sqlalchemy.orm import sessionmaker, relationship, backref, join
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
@@ -166,7 +166,7 @@ class User(Base):
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and x.state == misc.GAME_CONQUER, self.game.history)
 		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
-			
+
 class Region(Base):
 	__tablename__ = 'regions'
 
@@ -187,6 +187,8 @@ class Region(Base):
     	cavern = Column(Boolean, default=False)
 
     	map = relationship(Map, backref=backref('regions', order_by=id))
+    	neighbors = relationship('Adjacency'  ,primaryjoin='and_(Region.id==Adjacency.regId,\
+               								 Region.mapId==Adjacency.mapId)')
 
 	def __init__(self, id, defTokensNum, map_): 
     		self.id = id
@@ -199,37 +201,20 @@ class Region(Base):
     		return state[0]
 
     	def getNeighbors(self):
-    		return  map(lambda x : x.neighborId, self.neighbors) #Uh-huh  
+    		return  map(lambda x : x.neighborId, self.neighbors) 
 
     	def adjacent(self, region):
     		return region.id in self.getNeighbors() 
-
-
-class Adjacency(Base):
-	__tablename__ = 'adjacentRegions'
-
-	regId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
-	neighborId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
-	mapId = Column(Integer, ForeignKey('maps.id'), primary_key=True)
-
-   	n = relationship(Region, primaryjoin="and_(Region.id==Adjacency.regId, Region.mapId==Adjacency.mapId)",
-   		backref=backref('neighbors'))
-   		
-	map = relationship(Map)
-
-	def __init__(self, n1, n2):
-      		self.regId = n1
-          	self.neighborId = n2
-        	
 
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
 	
     	id = pkey()
     	gameId = fkey('games.id')
-	regionId = fkey('regions.id') 
-    	tokenBadgeId = fkey('tokenBadges.id') 
+	tokenBadgeId = fkey('tokenBadges.id') 
     	ownerId = fkey('users.id')
+	regionId = Column(Integer, default = 0)
+	mapId  = Column(Integer, default = 0)		# Would get rid of this but don't know how
     	tokensNum = Column(Integer, default = 0)
     	holeInTheGround = Column(Boolean, default = False)
     	encampment = Column(Integer, default = 0)
@@ -244,19 +229,36 @@ class RegionState(Base):
     	owner = relationship(User, backref=backref('regions'))
     	region = relationship(Region, backref=backref('states'))
 
+    	__table_args__ = (ForeignKeyConstraint([regionId, mapId], [Region.id, Region.mapId]), {})
+
 	def __init__(self, region, game):
 		self.region = region
         	self.game = game
         	self.tokensNum = region.defTokensNum
 
 
-	def checkIfImmune(self):
+	def checkIfImmune(self, enchanting=False):
 		if self.holeInTheGround or self.dragon or self.hero:
 			raise BadFieldException('regionIsImmune')
+		if enchanting:
+			if self.encampment: raise BadFieldException('regionIsImmune')
+			if not self.tokensNum: 	raise BadFieldException('nothingToEnchant')
+			if self.tokensNum > 1: 	raise BadFieldException('cannotEnchantMoreThanOneToken')
+			if self.inDecline: raise BadFieldException('cannotEnchantDeclinedRace')
 
-	def checkRegionIsCorrect(self, tokenBadge):
-		if tokenBadge != self.tokenBadge:
-			raise BadFieldException('badRegion')
+
+class Adjacency(Base):
+	__tablename__ = 'adjacentRegions'
+
+	regId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
+	neighborId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
+	mapId = Column(Integer, ForeignKey('regions.mapId'), primary_key=True)
+
+
+	def __init__(self, n1, n2):
+      		self.regId = n1
+          	self.neighborId = n2
+        	
 
 class Message(Base):
     __tablename__ = 'chat'

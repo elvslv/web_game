@@ -30,7 +30,6 @@ class TestFromFile(unittest.TestCase):
 		f = open(self.ansFile)
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
-		dbi.clear()
 		self.testDescr = out['description']
 		self.assertListEqual(out['result'], json.loads(ans))
 		                

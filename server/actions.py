@@ -83,7 +83,6 @@ def act_uploadMap(data):
 			regInfo = data['regions'][i]			
 			dbi.addNeighbors(reg, map(lambda x: Adjacency(reg.id, x), regInfo['adjacent']))
         		i += 1
-        	
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
 

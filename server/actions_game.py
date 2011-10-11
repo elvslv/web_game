@@ -42,15 +42,14 @@ def act_selectRace(data):
 		raise BadFieldException('badStage')
 	game = user.game	
 	game.checkStage(GAME_SELECT_RACE, user)
-	
 	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
 	price = dbi.query(TokenBadge).filter(TokenBadge.pos >position).count()
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId
-	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum
-	addUnits =  callRaceMethod(raceId, 'turnStartReinforcements', user)
+	addUnits = callRaceMethod(raceId, 'turnStartReinforcements', user)
+	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum					
 	user.coins += chosenBadge.bonusMoney - price
 	user.currentTokenBadge = chosenBadge
 	user.tokensInHand = tokensNum + addUnits
@@ -72,10 +71,11 @@ def act_conquer(data):
 	owner = regState.owner
 	if owner == user and not regState.inDecline: 
 		raise BadFieldException('badRegion')
-	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
+	tokenBadge = user.currentTokenBadge
+	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
 	user.checkForFriends(owner)
-	f1 = callRaceMethod(raceId, 'canConquer', region, user.currentTokenBadge)
-	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  user.currentTokenBadge)
+	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
+	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
 	if not (f1 or f2):
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
@@ -84,31 +84,31 @@ def act_conquer(data):
 	if regState.tokenBadge:
 		attackedRace = regState.tokenBadge.raceId
 		attackedSpecialPower = regState.tokenBadge.specPowId
-	additionalTokensNum = 0
+	enemyDefenseBonus = 0
 	if attackedRace:
 		enemyDefenseBonus = callRaceMethod(attackedRace, 'defenseBonus')
 	defense = regState.tokensNum
 	unitPrice = max(misc.BASIC_CONQUER_COST + defense + region.mountain + 
-		regState.encampment + regState.fortress + additionalTokensNum + 
-		callRaceMethod(raceId, 'conquerBonus', region, regState.tokenBadge) + 
-		callSpecialPowerMethod(specialPowerId, 'conquerBonus', region, regState.tokenBadge)
+		regState.encampment + regState.fortress +  enemyDefenseBonus +
+		callRaceMethod(raceId, 'attackBonus', region, tokenBadge) + 
+		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
 			, 1)
 	unitsNum = user.tokensInHand
-	dice = user.game.history[-1].dice
+	dice = user.game.getLastState() == GAME_THROW_DICE and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = throwDice()
 	unitPrice -= dice if dice else 0				# How do I turn None into 0? int() doesn't seem to work
 	if unitsNum < unitPrice:
 		dbi.updateHistory(user, GAME_UNSUCCESSFULL_CONQUER, user.currentTokenBadge.id)
 		return {'result': 'badTokensNum', 'dice': dice}
-	clearFromRace(regState)
+	clearFromRace(regState)					# Not sure if it's necessary
 	victimBadgeId = regState.tokenBadgeId
 	regState.owner = user
 	regState.tokenBadge = user.currentTokenBadge
 	regState.inDecline = False
 	regState.tokensNum = unitPrice
-	callRaceMethod(raceId, 'conquered', regState, user.currentTokenBadge)
-	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, dice, 
+	callRaceMethod(raceId, 'conquered', regState, tokenBadge)
+	dbi.updateWarHistory(user, victimBadgeId, tokenBadge.id, dice, 
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
@@ -134,7 +134,8 @@ def act_redeploy(data):
 	if not tokenBadge: raise BadFieldException('badStage')
 	user.game.checkStage(GAME_REDEPLOY, user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	unitsNum = tokenBadge.totalTokensNum + callRaceMethod(raceId, 'turnEndReinforcements', user)
+	tokenBadge.totalTokensNum += callRaceMethod(raceId, 'turnEndReinforcements', user)
+	unitsNum = tokenBadge.totalTokensNum
 	if not unitsNum: raise BadFieldException('noTokensForRedeployment')
 	if not tokenBadge.regions:
 		raise BadFieldException('userHasNoRegions')
@@ -171,6 +172,7 @@ def act_redeploy(data):
 	for region in emptyRegions:
 		callRaceMethod(raceId, 'flee', region)
 		region.owner = None
+		region.tokenBadge = None
 
 	dbi.updateHistory(user, GAME_REDEPLOY, user.currentTokenBadge.id)
 	return {'result': 'ok'}
@@ -182,7 +184,11 @@ def act_finishTurn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
 	game.checkStage(GAME_FINISH_TURN, user)
-	income =len(user.regions)
+	tokenBadge = user.currentTokenBadge
+	if tokenBadge and callRaceMethod(tokenBadge.raceId, 'needRedeployment') and\
+				game.getLastState() !=GAME_REDEPLOY:  raise BadFieldException('badStage')
+		
+	income = len(user.regions)
 	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
 	for race in races:
 		income += callRaceMethod(race.raceId, 'incomeBonus', race)
@@ -249,10 +255,15 @@ def act_dragonAttack(data):
 
 def act_enchant(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	if not currentTser.tokenBadge: raise BadFieldException('badStage')
+	if not user.currentTokenBadge: raise BadFieldException('badStage')
 	user.game.checkStage(GAME_ENCHANT, user)
-	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge.id, data['regionId'])
-
+	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
+	victimBadgeId = reg.tokenBadge.id
+	reg.checkIfImmune(True)
+	clearFromRace(reg)
+	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge, reg)
+	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
+			reg.region.id, 1, ATTACK_ENCHANT)
 	return {'result': 'ok'}	
 
 def act_getVisibleTokenBadges(data):
@@ -269,11 +280,13 @@ def act_getVisibleTokenBadges(data):
 def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadgeId : raise BadFieldException('badStage')
-	checkStage(GAME_THROW_DICE, user)
-	
-	specialPowerId =user.currentTokenBadge.specPowerId
-	dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
-	dbi.add(History(user.id, game.id, GAME_THROW_DICE, user.tokenBadge.id))
+	user.game.checkStage(GAME_THROW_DICE, user)
+	if TEST_MODE: 
+		dice = data['dice'] if 'dice' in data else 0
+	else:
+		specialPowerId =user.currentTokenBadge.specPowId
+		dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
+	dbi.updateHistory(user, GAME_THROW_DICE, user.currentTokenBadge.id, dice)
 	return {'result': 'ok', 'dice': dice}	
 
 

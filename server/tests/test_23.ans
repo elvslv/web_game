@@ -20,7 +20,8 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1
+		"gameId": 1,
+		"regions": [1, 2, 3, 4]
 	},
 	{
 		"result": "ok"
@@ -49,7 +50,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 1
+		"coins" : 2
 	}
 
 ]
