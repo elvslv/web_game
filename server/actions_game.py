@@ -79,8 +79,9 @@ def act_selectRace(data):
 		TokensInHand=%s WHERE Sid=%s""", tokenBadgeId, price, bonusMoney, 
 		tokensNum + addUnits, sid)
 	query("""UPDATE TokenBadges SET OwnerId=%s, InDecline=False, 
-		TotalTokensNum=%s, Position=NULL WHERE TokenBadgeId=%s""", userId,
-		tokensNum, tokenBadgeId)	
+		TotalTokensNum=%s, Position=NULL, TotalSpecialPowerBonusNum=%s WHERE 
+		TokenBadgeId=%s""", userId,	tokensNum, callSpecialPowerMethod(
+		specialPowerId, 'getTotalBonusNum'), tokenBadgeId)	
 
 	updateRacesOnDesk(gameId, position)
 	updateGameHistory(gameId, data)
@@ -89,7 +90,6 @@ def act_selectRace(data):
 def act_conquer(data):
 	raceId, specialPowerId, tokenBadgeId, userId, gameId = getStandardFields(data, 
 		GAME_CONQUER)
-
 	regionId = data['regionId']
 
 	if not query("""SELECT 1 From Games, Users, Regions WHERE Users.Id=%s AND 
@@ -115,7 +115,7 @@ def act_conquer(data):
 
 	mountain = regInfo['mountain']
 	encampment = regInfo['encampment']
-	fortress = regInfo['fortress']
+	fortress = regInfo['fortifield']
 
 	attackedRace = None
 	attackedSpecialPower = None
@@ -130,7 +130,7 @@ def act_conquer(data):
 		encampment + fortress + additionalTokensNum + callRaceMethod(raceId, 
 		'countConquerBonus', regionId, tokenBadgeId) + callSpecialPowerMethod(
 		specialPowerId, 'countConquerBonus', regionId, tokenBadgeId), 1)
-		
+
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
 
@@ -145,14 +145,12 @@ def act_conquer(data):
 	elif unitsNum < unitPrice : 
 		dice = throwDice()
 		unitPrice -= dice
-		
 	if unitsNum < unitPrice:
 		updateHistory(userId, gameId, GAME_UNSUCCESSFULL_CONQUER, tokenBadgeId)
 		return {'result': 'badTokensNum', 'dice': dice}
 
 	if attackedTokenBadgeId:
 		attackedTokensNum += clearRegionFromRace(regionId, attackedTokenBadgeId)
-
 	query("""UPDATE CurrentRegionState SET OwnerId=%s, TokensNum=%s, 
 		InDecline=False, TokenBadgeId=%s WHERE RegionId=%s AND GameId=%s""", 
 		userId, unitPrice, tokenBadgeId, regionId, gameId) 
@@ -164,6 +162,7 @@ def act_conquer(data):
 	updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadgeId if 
 		attackedTokensNum else None, attackedTokensNum, dice, ATTACK_CONQUER)
 	updateGameHistory(gameId, data)
+
 	return {'result': 'ok', 'dice': dice} if dice != -1 else {'result': 'ok'}
 		
 def act_decline(data):
@@ -279,7 +278,6 @@ def act_finishTurn(data):
 		income += callRaceMethod(rec[0], 'countAdditionalCoins', userId, gameId)
 		income += callSpecialPowerMethod(rec[1], 'countAdditionalCoins', userId, 
 			gameId, rec[0])
-
 	query('UPDATE Users SET Coins=Coins+%s, TokensInHand=0 WHERE Sid=%s',  income, 
 		sid)
 	query('SELECT Coins FROM Users WHERE Id=%s', userId)

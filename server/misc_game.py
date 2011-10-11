@@ -287,7 +287,7 @@ def clearGameStateAtTheEndOfTurn(gameId):
 def getGameIdByTokenBadge(tokenBadgeId):
 	query("""SELECT a.GameId FROM Users a, TokenBadges b WHERE a.Id=b.OwnerId 
 		AND b.TokenBadgeId=%s""", tokenBadgeId)
-	return fetchone()[0]
+	return int(fetchone()[0])
 
 def getMapIdByTokenBadge(tokenBadgeId):
 	query("""SELECT MapId FROM Games WHERE GameId=%s""", 

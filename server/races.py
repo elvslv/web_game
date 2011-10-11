@@ -15,8 +15,9 @@ class BaseRace:
 
 	def tryToConquerRegion(self, regionId, tokenBadgeId):
 		isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
+		gameId = getGameIdByTokenBadge(tokenBadgeId)
 		regionInfo = getRegionInfoById(regionId, 
-			getGameIdByTokenBadge(tokenBadgeId))
+			gameId)
 		ans = (not regions and (regionInfo['coast'] or regionInfo['border'])
 			) or regions
 		return ans
@@ -320,6 +321,9 @@ class BaseSpecialPower:
 	def getInitBonusNum(self):
 		return 0
 
+	def getTotalBonusNum(self):
+		return 0
+
 	def updateBonusStateAtTheAndOfTurn(self, tokenBadgeId):
 		pass
 
@@ -344,7 +348,7 @@ class BaseSpecialPower:
 	def setEncampments(self, tokenBadgeId, encampments):
 		raise BadFieldException('badSpecialPower')
 
-	def setFortifield(self, tokenBadgeId, regionId):
+	def setFortifield(self, tokenBadgeId, fortifield):
 		raise BadFieldException('badSpecialPower')
 
 	def setHero(self, tokenBadgeId, heroes):
@@ -526,14 +530,16 @@ class SpecialPowerFortifield(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 1
 
+	def getTotalBonusNum(self):
+		return 6
+	
 	def countAdditionalCoins(self, userId, gameId, raceId):
 		query("""SELECT InDecline FROM TokenBadges WHERE OwnerId=%s AND 
 			RaceId=%s""", userId, raceId)
-		query("""SELECT COUNT(*) FROM CurrentRegionState, Regions WHERE 
-			CurrentRegionState.TokenBadgeId=%s AND 
-			CurrentRegionState.RegionId=Regions.RegionId AND 
-			CurrentRegionState.Fortifield=TRUE""", 
-			getTokenBadgeIdByRaceAndUser(raceId, userId))
+		if fetchone()[0]:
+			return 0
+		query("""SELECT COUNT(*) FROM CurrentRegionState WHERE TokenBadgeId=%s AND	
+			Fortifield=TRUE""", getTokenBadgeIdByRaceAndUser(raceId, userId))
 		return int(fetchone()[0])
 
 	def clearRegion(self, tokenBadgeId, regionId):
@@ -542,8 +548,8 @@ class SpecialPowerFortifield(BaseSpecialPower):
 		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
 			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
 
-	def setFortifield(self, tokenBadgeId, regionId):
-		if not('regionId' in fortifield and isinstance(fortifield['regionId'])):
+	def setFortifield(self, tokenBadgeId, fortifield):
+		if not('regionId' in fortifield and isinstance(fortifield['regionId'], int)):
 			raise BadFieldException('badRegionId')
 
 		regionId, gameId, ownerBadgeId, hasFortifield = extractValues(
