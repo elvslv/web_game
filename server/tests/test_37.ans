@@ -46,32 +46,24 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok"
-	},
+
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 4
+		"coins" : 3
 	},
 	{
 		"result": "ok",
 		"tokenBadgeId": 5
 	},
 	{
-		"result": "cannotEnchantMoreThanOneToken"
-	},
-	{
-		"result": "badRegion"
-	},
-	{
 		"result": "ok"
 	},
 	{
-		"result": "ok"
+		"result": "bad"
 	},
 	{
 		"result": "ok"
@@ -79,24 +71,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 3
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 8
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "bad"
+		"coins" : 4
 	}
 
 ]
