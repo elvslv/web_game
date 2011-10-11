@@ -58,8 +58,9 @@ def act_getMessages(data):
 	return {'result': 'ok', 'messages': messages}
 
 def act_createDefaultMaps(data):
-	for map_ in misc.defaultMaps:
-		act_uploadMap(map_)
+	if not misc.TEST_MODE: 
+		for map_ in misc.defaultMaps:
+			act_uploadMap(map_)
 	return {'result': 'ok'}
 
 def act_uploadMap(data):
@@ -199,6 +200,6 @@ def doAction(data):
 		res = globals()[func](data)
 		dbi.commit()
 		return res
-	except BadFieldException, e:			##Temporary
+	except Exception, e:			##Temporary
 		dbi.rollback()
 		raise e

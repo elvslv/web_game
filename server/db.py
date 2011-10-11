@@ -360,7 +360,9 @@ class _Database:
     		meta = MetaData()
     		meta.reflect(bind=self.engine)
     		for table in reversed(meta.sorted_tables):
-			self.engine.drop(table)
+    		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
+    			if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
+				self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
 
 	def getXbyY(self, x, y, value, mandatory=True):
