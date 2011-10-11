@@ -1,0 +1,69 @@
+[	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok",
+		"gameId": 1
+	},
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 6
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 2
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 5
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	}
+
+]
