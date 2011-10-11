@@ -90,25 +90,17 @@
 					{
 						"userId": 1,
 						"username": "user1",
-						"state": 1,
-						"sid": 1,
+						"isReady": 1,
 						"priority": 1
 					},
 					{
 						"userId": 4,
 						"username": "user4",
-						"state": 1,
-						"sid": 4,
+						"isReady": 1,
 						"priority": 2
 					}
 				],
-				"map":
-				{
-					"mapId": 1,
-					"mapName": "defaultMap1",
-					"playersNum": 2,
-					"turnsNum": 5
-				},
+				"mapId": 1,
 				"playersNum": 2,
 				"state": 2,
 				"turn": 0
@@ -122,18 +114,11 @@
 					{
 						"userId": 3,
 						"username": "user3",
-						"state": 0,
-						"sid": 3,
+						"isReady": 0,
 						"priority": 1
 					}
 				],
-				"map":
-				{
-					"mapId": 2,
-					"mapName": "defaultMap2",
-					"playersNum": 3,
-					"turnsNum": 5
-				},
+				"mapId": 2,
 				"playersNum": 1,
 				"state": 1,
 				"turn": null
