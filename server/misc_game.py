@@ -25,7 +25,7 @@ def checkForFriends(userId, attackedUserId):
 		a.Turn=b.Turn-%s AND a.State=%s AND a.UserId=%s AND a.Friend=%s""", 
 		1 if attackingPriority < attackedPriority else 0, GAME_CHOOSE_FRIEND, 
 		attackedUserId, userId):
-			raise BadFieldException('UsersAreFriends')
+			raise BadFieldException('usersAreFriends')
 
 def updateHistory(userId, gameId, state, tokenBadgeId, dice = None):
 	query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, Dice) 

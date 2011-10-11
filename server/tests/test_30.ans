@@ -84,6 +84,6 @@
 		"coins" : 3
 	},
 	{
-		"result": "bad"
+		"result": "usersAreFriends"
 	}
 ]

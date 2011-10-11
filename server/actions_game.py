@@ -126,7 +126,6 @@ def act_conquer(data):
 	if attackedRace:
 		additionalTokensNum = callRaceMethod(attackedRace, 
 			'countAdditionalConquerPrice')
-	print attackedTokensNum, mountain, encampment, fortress, additionalTokensNum
 	unitPrice = max(misc.BASIC_CONQUER_COST + attackedTokensNum + mountain + 
 		encampment + fortress + additionalTokensNum + callRaceMethod(raceId, 
 		'countConquerBonus', regionId, tokenBadgeId) + callSpecialPowerMethod(
@@ -179,7 +178,6 @@ def act_decline(data):
 
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(specialPowerId, 'tryToGoInDecline', gameId)
-	print specialPowerId, userId
 	callSpecialPowerMethod(specialPowerId, 'decline', userId)
 	callRaceMethod(raceId, 'decline', userId)	
 	query("""UPDATE Users SET DeclinedTokenBadge=%s, CurrentTokenBadge=NULL, 
@@ -230,7 +228,6 @@ def act_redeploy(data):
 
 		query("""UPDATE CurrentRegionState SET TokensNum=%s WHERE RegionId=%s 
 			AND GameId=%s""", region['tokensNum'], region['regionId'], gameId)
-		print region['tokensNum'], region['regionId']
 		unitsNum -= tokensNum
 
 	if unitsNum:
@@ -416,7 +413,10 @@ def act_getVisibleTokenBadges(data):
 
 def act_selectFriend(data):
 	fields = getStandardFields(data, GAME_CHOOSE_FRIEND)
-	callSpecialPowerMethod(fields[1], 'selectFriend', data)
+	callSpecialPowerMethod(fields[1], 'selectFriend', fields[3], fields[4], 
+		fields[2], data)
+	updateGameHistory(fields[4], data)
+	return {'result': 'ok'}
 
 def prepareForNextTurn(gameId, newActPlayer, newTokenBadgeId):
 	query('UPDATE Games SET ActivePlayer=%s WHERE GameId=%s', newActPlayer, gameId)

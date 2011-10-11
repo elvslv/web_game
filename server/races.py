@@ -350,7 +350,7 @@ class BaseSpecialPower:
 	def setHero(self, tokenBadgeId, heroes):
 		raise BadFieldException('badSpecialPower')
 	
-	def selectFriend(self, data):
+	def selectFriend(self, userId, gameId, tokenBadgeId, data):
 		raise BadFieldException('badSpecialPower')
 	
 
@@ -382,12 +382,10 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		pass
 
 	def decline(self, userId):
-		print 'decline', userId
 		query("""UPDATE CurrentRegionState SET Encampment=0 WHERE OwnerId=%s""",
 			userId)
 
 	def setEncampments(self, tokenBadgeId, encampments):
-		print 'encampments'
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
@@ -403,8 +401,6 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 
 			if not query("""SELECT 1 FROM CurrentRegionState WHERE RegionId=%s 
 				AND TokenBadgeId=%s""", regionId, tokenBadgeId):
-				print 'badRegion'
-				print regionId
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
 				raise BadFieldException('notEnoughEncampentsForRedeployment')
@@ -432,7 +428,7 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 	def decline(self, userId):
 		pass
 
-	def selectFriend(self, data):
+	def selectFriend(self, userId, gameId, tokenBadgeId, data):
 		if not('friendId' in data and isinstance(data['friendId'], int)):
 			raise BadFieldException('badFriendId')
 
@@ -443,9 +439,9 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 			raise BadFieldException('badFriend')
 			
 		if not query("""SELECT 1 FROM Users a, Users b WHERE a.Id=%s AND b.Id=%s
-			AND a.GameId=b.GameId"""):
+			AND a.GameId=b.GameId""", userId, friendId):
 			raise BadFieldException('badFriend')
-			
+
 		if query("""SELECT 1 FROM AttackingHistory a, History b, Games c, 
 			TokenBadges d WHERE a.AttackingTokenBadgeId=%s AND 
 			a.AttackedTokenBadgeId=%s AND a.HistoryId=b.HistoryId AND 
@@ -455,9 +451,8 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 			raise BadFieldException('badFriend')
 
 		query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, 
-			Friend) SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", 
-			userId, gameId, GAME_CHOOSE_FRIEND, tokenBadgeId, gameId, friendId)
-
+			Friend) SELECT %s, %s, %s, %s, Turn, %s FROM Games WHERE GameId=%s""", 
+			userId, gameId, GAME_CHOOSE_FRIEND, tokenBadgeId, friendId, gameId)
 
 class SpecialPowerDragonMaster(BaseSpecialPower):
 	def __init__(self):
