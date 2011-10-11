@@ -126,7 +126,7 @@ def act_conquer(data):
 	if attackedRace:
 		additionalTokensNum = callRaceMethod(attackedRace, 
 			'countAdditionalConquerPrice')
-
+	print attackedTokensNum, mountain, encampment, fortress, additionalTokensNum
 	unitPrice = max(misc.BASIC_CONQUER_COST + attackedTokensNum + mountain + 
 		encampment + fortress + additionalTokensNum + callRaceMethod(raceId, 
 		'countConquerBonus', regionId, tokenBadgeId) + callSpecialPowerMethod(
@@ -179,7 +179,7 @@ def act_decline(data):
 
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	callSpecialPowerMethod(specialPowerId, 'tryToGoInDecline', gameId)
-
+	print specialPowerId, userId
 	callSpecialPowerMethod(specialPowerId, 'decline', userId)
 	callRaceMethod(raceId, 'decline', userId)	
 	query("""UPDATE Users SET DeclinedTokenBadge=%s, CurrentTokenBadge=NULL, 
@@ -227,31 +227,12 @@ def act_redeploy(data):
 
 		if tokensNum > unitsNum:
 			raise BadFieldException('notEnoughTokensForRedeployment')
-		regions.append({'regionId': regionId, 'tokensNum': tokensNum})
-		unitsNum -= tokensNum
 
-	specAbilities = [
-	{'name': 'encampments', 'tryCmd': 'tryToSetEncampments', 'setCmd': 
-		'setEncampments'},
-	{'name': 'fortifield', 'tryCmd': 'tryToSetFortifield', 'setCmd': 
-		'setFortifield'},
-	{'name': 'heroes', 'tryCmd': 'tryToSetHeroes', 'setCmd': 'setHeroes'}]
-	specAbilityRegions = dict()
-	for specAbility in specAbilities:
-		if specAbility['name'] in data:
-			specAbilityRegions[specAbility['name']] = callSpecialPowerMethod(
-				specialPowerId, specAbility['tryCmd'], data[specAbility['name']], 
-				tokenBadgeId)
-
-	for specAbility in specAbilities:
-		if specAbility['name'] in data:
-			callSpecialPowerMethod(specialPowerId, specAbility['setCmd'], 
-				tokenBadgeId, specAbilityRegions[specAbility['name']])
-	
-	for region in regions:
 		query("""UPDATE CurrentRegionState SET TokensNum=%s WHERE RegionId=%s 
 			AND GameId=%s""", region['tokensNum'], region['regionId'], gameId)
-	
+		print region['tokensNum'], region['regionId']
+		unitsNum -= tokensNum
+
 	if unitsNum:
 		query("""UPDATE CurrentRegionState SET TokensNum=TokensNum+%s WHERE 
 			RegionId=%s AND GameId=%s""", unitsNum, regionId, gameId)
@@ -267,6 +248,16 @@ def act_redeploy(data):
 		TokensNum=0""")
 	query("""UPDATE TokenBadges SET TotalTokensNum=TotalTokensNum+%s WHERE 
 		TokenBadgeId=%s""", addUnits, tokenBadgeId)
+
+	specAbilities = [
+	{'name': 'encampments', 'cmd': 'setEncampments'},
+	{'name': 'fortifield', 'cmd': 'setFortifield'},
+	{'name': 'heroes', 'cmd': 'setHeroes'}]
+	for specAbility in specAbilities:
+		if specAbility['name'] in data:
+			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], 
+				tokenBadgeId, data[specAbility['name']])
+	
 	updateHistory(userId, gameId, GAME_REDEPLOY, tokenBadgeId)
 	updateGameHistory(gameId, data)
 	return {'result': 'ok'}

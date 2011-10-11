@@ -82,6 +82,14 @@
 			"encampments": [{"regionId": 2, "encampmentsNum": 5}]
 		},
 		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 1, "tokensNum": 0},
+				{"regionId": 2, "tokensNum": 13},
+				{"regionId": 3, "tokensNum": 0}],
+			"encampments": [{"regionId": 2, "encampmentsNum": 5}]
+		},
+		{
 			"action": "finishTurn",
 			"sid" : 1
 		},

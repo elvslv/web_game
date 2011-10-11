@@ -33,6 +33,8 @@ def rollback():
 	db.rollback()
 
 def createTables():
+	cursor.execute('SET storage_engine=INNODB')
+	cursor.execute('SET AUTOCOMMIT=0')
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Users(
 			Id INT PRIMARY KEY AUTO_INCREMENT, 
 			UserName VARCHAR(%s) UNIQUE, 

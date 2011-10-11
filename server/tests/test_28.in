@@ -85,18 +85,18 @@
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 0},
-				{"regionId": 2, "tokensNum": 0},
-				{"regionId": 3, "tokensNum": 13}],
+			"regions": [{"regionId": 1, "tokensNum": 1},
+				{"regionId": 2, "tokensNum": 1},
+				{"regionId": 3, "tokensNum": 11}],
 			"encampments": [{"regionId": 1, "encampmentsNum": 3},
 				{"regionId": 2, "encampmentsNum": 3}]
 		},
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 0},
-				{"regionId": 2, "tokensNum": 0},
-				{"regionId": 3, "tokensNum": 13}],
+			"regions": [{"regionId": 1, "tokensNum": 1},
+				{"regionId": 2, "tokensNum": 1},
+				{"regionId": 3, "tokensNum": 11}],
 			"encampments": [{"regionId": 1, "encampmentsNum": 2},
 				{"regionId": 2, "encampmentsNum": 3}]
 		},

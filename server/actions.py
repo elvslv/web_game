@@ -278,8 +278,10 @@ def doAction(data):
 			raise BadFieldException('badAction')
 		checkFieldsCorrectness(data);
 		res = globals()[func](data)
+		print 'commit'
 		commit()
 		return res
-	except MySQLdb.Error, e:
+	except (MySQLdb.Error, BadFieldException), e:
+		print 'rollback'
 		rollback()
-		return e
+		return {'result': e.value}
