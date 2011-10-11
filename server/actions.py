@@ -67,22 +67,23 @@ def act_uploadMap(data):
 	playersNum = int(data['playersNum'])
 	newMap = Map(name, playersNum, data['turnsNum'])
 	result = list()
+	dbi.addUnique(newMap, 'mapName')
+	mapId = newMap.id
 	if 'regions' in data:
 		regions = data['regions']
+		curId = 1
 		for regInfo in regions:
 			try:	
-				dbi.addRegion(newMap, regInfo)
+				dbi.addRegion(curId, newMap, regInfo)
 			except KeyError:
 				raise BadFieldException('badRegion')
+			curId += 1
 		i = 0
 		for reg in newMap.regions:			#This is quite bad but I didn't manage to find the other way
 			regInfo = data['regions'][i]			
 			dbi.addNeighbors(reg, map(lambda x: Adjacency(reg.id, x), regInfo['adjacent']))
         		i += 1
         	
-
-	dbi.addUnique(newMap, 'mapName')
-	mapId = newMap.id
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
 

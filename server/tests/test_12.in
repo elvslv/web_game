@@ -59,12 +59,12 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId" : 6
+			"regionId" : 2
 		},
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 6, "tokensNum": 9}]
+			"regions": [{"regionId": 2, "tokensNum": 9}]
 		},
 		{
 			"action": "finishTurn",
@@ -84,12 +84,12 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId" : 7
+			"regionId" : 3
 		},
 		{
 			"action": "redeploy",
 			"sid": 2,
-			"regions": [{"regionId": 7, "tokensNum": 7}]
+			"regions": [{"regionId": 3, "tokensNum": 7}]
 		},
 		{
 			"action": "finishTurn",

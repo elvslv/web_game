@@ -154,7 +154,7 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId": 24
+			"regionId": 26
 		},
 		{
 			"action": "redeploy",
@@ -174,7 +174,7 @@
 					"tokensNum": 3
 				}, 
 				{
-					"regionId": 24,
+					"regionId": 26,
 					"tokensNum": 3
 				}
 			],
@@ -193,7 +193,7 @@
 					"encampmentsNum": 1
 				}, 
 				{
-					"regionId": 24,
+					"regionId": 26,
 					"encampmentsNum": 2
 				}
 			]
@@ -250,13 +250,14 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId": 26 
+			"regionId": 24 
 		},
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId": 23
+			"regionId": 27
 		},
+		
 		{
 			"action": "redeploy",
 			"sid": 2,
@@ -283,7 +284,7 @@
 					"tokensNum": 2
 				}, 
 				{
-					"regionId": 23,
+					"regionId": 27,
 					"tokensNum": 4
 				}
 			],
@@ -298,15 +299,17 @@
 					"encampmentsNum": 1
 				}, 
 				{
-					"regionId": 23,
+					"regionId": 24,
 					"encampmentsNum": 3
 				}
 			]
 		},
+		
 		{
 			"action": "finishTurn",
 			"sid": 2
 		},
+		
 		{
 			"action": "selectRace",
 			"sid": 1,
@@ -337,7 +340,7 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId": 5
+			"regionId": 30
 		},
 		{
 			"action": "redeploy",
@@ -354,7 +357,7 @@
 				}, 
 				{
 					"regionId": 10, 
-					"tokensNum": 1
+					"tokensNum": 4
 				}, 
 				{
 					"regionId": 24,
@@ -365,12 +368,12 @@
 					"tokensNum": 1
 				}, 
 				{
-					"regionId": 23,
+					"regionId": 27,
 					"tokensNum": 1
 				}, 
 				{
-					"regionId": 5,
-					"tokensNum": 4
+					"regionId": 30,
+					"tokensNum": 1
 				}
 			],
 			"encampments": 
@@ -384,7 +387,7 @@
 					"encampmentsNum": 1
 				}, 
 				{
-					"regionId": 23,
+					"regionId": 27,
 					"encampmentsNum": 2
 				}
 			]
@@ -401,7 +404,7 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 5
+			"regionId": 10
 		},
 		{
 			"action": "conquer",
@@ -416,7 +419,7 @@
 		{
 			"action": "defend",
 			"sid": 2,
-			"regions": [{"regionId": 3, "tokensNum": 2}] 
+			"regions": [{"regionId": 11, "tokensNum": 2}] 
 		},
 		{
 			"action": "defend",
@@ -441,48 +444,20 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 4
+			"regionId": 8
 		},	
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 6
+			"regionId": 7
 		},
 		{
 			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 4, "tokensNum": 4}, {"regionId": 5, "tokensNum": 4}, {"regionId": 6, "tokensNum": 5}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 4, "tokensNum": 4}, {"regionId": 5, "tokensNum": 4}, {"regionId": 6, "tokensNum": 2}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "decline",
 			"sid": 1
 		},
 		{
 			"action": "decline",
 			"sid": 2
-		},
-		{
-			"action": "redeploy",
-			"sid":2,
-			"regions": []
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1,
-			"position": 65
 		},
 		{
 			"action": "finishTurn",
@@ -502,173 +477,9 @@
 			"action": "conquer",
 			"sid": 1,
 			"regionId": 24
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 26
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 55, "tokensNum": 2}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 1, "tokensNum": 2}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 2}, {"regionId": 5, "tokensNum": 2}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 2}, {"regionId": 24, "tokensNum": 2}, {"regionId": 26, "tokensNum": 2}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "selectRace",
-			"sid": 2,
-			"position": 4
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 25
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 27
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 29
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 20
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [
-				{"regionId": 20, "tokensNum": 8}, 
-				{"regionId": 29, "tokensNum": 1},
-				{"regionId": 25, "tokensNum": 1},
-				{"regionId": 27, "tokensNum": 1}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2 
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 25 
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 7
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 8
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
-				{"regionId": 7, "tokensNum": 3}, {"regionId": 8, "tokensNum": 3}]
-		},		
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 1}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
-				{"regionId": 7, "tokensNum": 3}, {"regionId": 8, "tokensNum": 3}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 19
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 21
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [
-				{"regionId": 20, "tokensNum": 3}, 
-				{"regionId": 29, "tokensNum": 1},
-				{"regionId": 25, "tokensNum": 1},
-				{"regionId": 27, "tokensNum": 1},
-				{"regionId": 19, "tokensNum": 4},
-				{"regionId": 21, "tokensNum": 1}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 10
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
-				{"regionId": 7, "tokensNum": 1}, {"regionId": 8, "tokensNum": 2}, {"regionId": 10, "tokensNum": 2}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 2
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 16
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [
-				{"regionId": 20, "tokensNum": 1}, 
-				{"regionId": 29, "tokensNum": 1},
-				{"regionId": 25, "tokensNum": 1},
-				{"regionId": 27, "tokensNum": 1},
-				{"regionId": 19, "tokensNum": 1},
-				{"regionId": 21, "tokensNum": 1},
-				{"regionId": 2, "tokensNum": 4},
-				{"regionId": 16, "tokensNum": 1}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
 		}
+		
+		
 	],
-	"description": "full game process"
+	"description": "orc with special Power alchemy fights with human with special power fortified then goes into decline and chooses wizards and gets special power wealthy and then I got tired"
 }

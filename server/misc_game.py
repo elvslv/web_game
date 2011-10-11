@@ -43,7 +43,7 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	raceId, specPowerId = getNextRaceAndPowerFromStack(game, vRace, vSpecialPower)
-	tokenBadgesInStack = filter(lambda x: not x.owner and x.pos < lastIndex, game.tokenBadges) 
+	tokenBadgesInStack = filter(lambda x: not x.owner and not x.inDecline and x.pos < lastIndex, game.tokenBadges) 
 	for tokenBadge in tokenBadgesInStack: tokenBadge.pos += 1
 	dbi.add(TokenBadge(raceId, specPowerId, game.id))
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 

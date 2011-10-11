@@ -33,7 +33,7 @@ def act_setReadinessStatus(data):
                         for i in range(misc.VISIBLE_RACES):
                                 showNextRace(game, misc.VISIBLE_RACES - 1)
 			
-	dbi.updateHistory(user.id, game.id, GAME_START, None)
+	dbi.updateHistory(user, GAME_START, None)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
@@ -57,10 +57,9 @@ def act_selectRace(data):
 	chosenBadge.inDecline = False
 	chosenBadge.bonusMoney = 0
 	chosenBadge.totalTokensNum = tokensNum
+	chosenBadge.specPowNum = races.specialPowerList[specialPowerId].bonusNum
 	updateRacesOnDesk(game, position)
-
-	dbi.updateHistory(user.id, game.id, GAME_SELECT_RACE, chosenBadge.id)
-
+	dbi.updateHistory(user, GAME_SELECT_RACE, chosenBadge.id)
 	return {'result': 'ok', 'tokenBadgeId': chosenBadge.id}
 
 def act_conquer(data):
@@ -100,16 +99,16 @@ def act_conquer(data):
 		dice = throwDice()
 	unitPrice -= dice if dice else 0				# How do I turn None into 0? int() doesn't seem to work
 	if unitsNum < unitPrice:
-		dbi.updateHistory(user.id, game.id, GAME_UNSUCCESSFULL_CONQUER, user.currentTokenBadge.id)
+		dbi.updateHistory(user, GAME_UNSUCCESSFULL_CONQUER, user.currentTokenBadge.id)
 		return {'result': 'badTokensNum', 'dice': dice}
 	clearFromRace(regState)
+	victimBadgeId = regState.tokenBadgeId
 	regState.owner = user
 	regState.tokenBadge = user.currentTokenBadge
 	regState.inDecline = False
 	regState.tokensNum = unitPrice
 	callRaceMethod(raceId, 'conquered', regState, user.currentTokenBadge)
-	victimBadgeId = owner.currentTokenBadge.id if owner else None
-	dbi.updateWarHistory(user.id, game.id, victimBadgeId, user.currentTokenBadge.id, dice, 
+	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, dice, 
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
@@ -120,9 +119,13 @@ def act_decline(data):
 	
 	user.game.checkStage(GAME_DECLINE, user)
 	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
+	if user.declinedTokenBadge:
+		user.killRaceInDecline()
+		dbi.delete(user.declinedTokenBadge)
 	callSpecialPowerMethod(specialPowerId, 'decline', user)	
 	callRaceMethod(raceId, 'decline', user)	
-	dbi.updateHistory(user.id, user.game.id, GAME_DECLINE, user.declinedTokenBadge.id)
+	user.currentTokenBadge = None
+	dbi.updateHistory(user, GAME_DECLINE, user.declinedTokenBadge.id)
 	return {'result': 'ok'}
 
 def act_redeploy(data):
@@ -160,7 +163,7 @@ def act_redeploy(data):
 	for specAbility in specAbilities:
 		if specAbility['name'] in data:
 			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], 
-				data[specAbility['name']], tokenBadgeId)
+				data[specAbility['name']], tokenBadge)
 
 			
 	if unitsNum: regState.tokensNum += unitsNum
@@ -169,7 +172,7 @@ def act_redeploy(data):
 		callRaceMethod(raceId, 'flee', region)
 		region.owner = None
 
-	dbi.updateHistory(user.id, user.game.id, GAME_REDEPLOY, user.currentTokenBadge.id)
+	dbi.updateHistory(user, GAME_REDEPLOY, user.currentTokenBadge.id)
 	return {'result': 'ok'}
 		
 def endOfGame(coins): #rewrite!11
@@ -179,12 +182,11 @@ def act_finishTurn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
 	game.checkStage(GAME_FINISH_TURN, user)
-
 	income =len(user.regions)
-	races = dbi.query(TokenBadge).filter_by(owner=user).all()
+	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
 	for race in races:
-		income += callRaceMethod(race.raceId, 'incomeBonus', user)
-		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', user)
+		income += callRaceMethod(race.raceId, 'incomeBonus', race)
+		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
 	user.coins += income
 	user.tokensInHand = 0
 	nextPlayer = dbi.getNextPlayer(game)
@@ -198,24 +200,22 @@ def act_finishTurn(data):
 #		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 #		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 
-	dbi.updateHistory(user.id, game.id, GAME_FINISH_TURN, user.currentTokenBadge.id)
+	dbi.updateHistory(user, GAME_FINISH_TURN, None)
 	prepareForNextTurn(game, nextPlayer)
 	return {'result': 'ok', 'nextPlayer' : nextPlayer.id,'coins': user.coins}
 
-def act_defend(data):
+def act_defend(data):			## Should be renamed to retreat
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	
+	tokenBadge = user.currentTokenBadge
+	if not tokenBadge: raise BadFieldException('badStage')
 	user.game.checkStage(GAME_DEFEND, user)
 	attackedRegion = user.game.getDefendingRegion(user)
-	tokensNum = user.game.history[-1].warHistory.victimTokensNum
-	tokenBadge = user.currentTokenBadge
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	#find not adjacent regions
+	tokensNum = user.game.history[-1].warHistory.victimTokensNum + callRaceMethod(raceId, 'sufferCasualties', tokenBadge)
 	notAdjacentRegions = []
-	for region in tokenBadge.regions:
-		if not region.region.id in attackedRegion.getNeighbors(): 		##~~
-			notAdjacentRegions.extend(region.id)
+	for terr in tokenBadge.regions:
+		if terr.region.id not in attackedRegion.getNeighbors():##~~
+			notAdjacentRegions.append(terr.region.id)
 	for region in data['regions']:
 		if not 'regionId' in region:
 			raise BadFieldException('badJson')				
@@ -231,12 +231,12 @@ def act_defend(data):
 		destState = destination.getState(user.game.id)
 		if  notAdjacentRegions and destination.id not in notAdjacentRegions  or destState.owner.id != user.id:
 			raise BadFieldException('badRegion')
+	
 		
 		destState.tokensNum += region['tokensNum']
 		tokensNum -= region['tokensNum']
 	if tokensNum:  raise BadFieldException('thereAreTokensInTheHand')
-	callRaceMethod(raceId, 'sufferCasualties')
-	dbi.updateHistory(user.id, user.game.id, GAME_DEFEND, user.currentTokenBadge.id)
+	dbi.updateHistory(user, GAME_DEFEND, tokenBadge.id)
 	return {'result': 'ok'}
 
 def act_dragonAttack(data):

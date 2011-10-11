@@ -21,7 +21,8 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1
+		"gameId": 1,
+		"regions": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
 	},
 	{
 		"result": "ok"
@@ -68,8 +69,9 @@
 	{
 		"result": "ok",
 		"nextPlayer": 2,
-		"coins": 9
+		"coins": 13
 	},
+	
 	{
 		"result": "badStage"
 	},
@@ -98,7 +100,7 @@
 	{
 		"result": "ok",
 		"nextPlayer": 1,
-		"coins": 9
+		"coins": 10
 	},
 	{
 		"result": "ok"
@@ -112,7 +114,7 @@
 	{
 		"result": "ok",
 		"nextPlayer": 2,
-		"coins": 18
+		"coins": 23
 	},
 	{
 		"result": "ok"
@@ -128,6 +130,7 @@
 		"nextPlayer": 1,
 		"coins": 17
 	},
+	
 	{
 		"result": "badStage"
 	},
@@ -146,7 +149,7 @@
 	{
 		"result": "ok",
 		"nextPlayer": 2,
-		"coins": 24
+		"coins": 29
 	},
 	{
 		"result": "ok"
@@ -157,7 +160,7 @@
 	{
 		"result": "ok",
 		"nextPlayer": 1,
-		"coins": 26
+		"coins": 25
 	},
 	{
 		"result": "ok",
@@ -194,143 +197,29 @@
 		"result": "ok"
 	},
 	{
-		"result": "badStage"
-	},
-	{
-		"result": "notEnoughTokensForRedeployment"
-	},
-	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"nextPlayer": 2,
-		"coins": 40
-	},
-	{
-		"result": "badStage"
+		"coins": 47
 	},
 	{
 		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},	
-	{
-		"result": "badStage"
 	},
 	{
 		"result": "ok",
 		"nextPlayer": 1,
-		"coins": 34
+		"coins": 32
+	},
+	{
+		"result": "badRegion"
 	},
 	{
 		"result": "badRegion"
 	},
 	{
 		"result": "ok"
-	},	
-	{
-		"result": "ok"
-	},	
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badRegionId"
-	},
-	{
-		"result": "badRegion"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 50
-	},
-	{
-		"result": "ok",
-		"tokenBadgeId": 5
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 40
-	},
-	{
-		"result": "regionIsImmune"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "notEnoughTokensForRedeployment"
-	},
-	{
-		"result": "ok" 
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 62
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 49
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 73
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"coins": 59
 	}
+	
+
 ]
 			 
+

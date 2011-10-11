@@ -1,4 +1,5 @@
 from gameExceptions import BadFieldException
+from checkFields import  checkObjectsListCorrection
 from misc_game import *
 from misc import *
 
@@ -18,7 +19,14 @@ class BaseRace:
 		return 0
 	
 	def decline(self, user): 
-		user.decline()
+		curTokenBadge = user.currentTokenBadge
+		user.declinedTokenBadge = curTokenBadge
+		for region in curTokenBadge.regions:
+			region.tokensNum = 1
+			region.inDecline = True
+		curTokenBadge.inDecline = True
+		curTokenBadge.totalTokensNum = len(curTokenBadge.regions)
+		user.tokensInHand = 0
 	
 	def turnEndReinforcements(self, user):
 		return 0
@@ -56,6 +64,7 @@ class BaseRace:
 
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
+		return -1
 
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -104,29 +113,29 @@ class RaceDwarves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
-	def incomeBonus(self, user):
-		return len(filter(lambda x: x.region.mine, user.currentTokenBadge.regions))
+	def incomeBonus(self, tokenBadge):
+		return len(filter(lambda x: x.region.mine, tokenBadge.regions))
 
 class RaceHumans(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
-	def incomeBonus(self, user):
-		return len(filter(lambda x: x.region.farmland, user.currentTokenBadge.regions))
+	def incomeBonus(self, tokenBadge):
+		return len(filter(lambda x: x.region.farmland, tokenBadge.regions))
 
 class RaceOrcs(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Orcs', 5, 10)
 
-	def incomeBonus(self, user):
-		return user.getNonEmptyConqueredRegions()
+	def incomeBonus(self, tokenBadge):
+		return 0 if tokenBadge.inDecline else tokenBadge.owner.getNonEmptyConqueredRegions()
 
 class RaceWizards(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
-	def incomeBonus(self, user):
-		return len(filter(lambda x: x.region.magic, user.currentTokenBadge.regions))
+	def incomeBonus(self, tokenBadge):
+		return len(filter(lambda x: x.region.magic, tokenBadge.regions))
 		
 class RaceAmazons(BaseRace):
 	def __init__(self):
@@ -150,7 +159,7 @@ class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
-	def sufferCasualties(self):
+	def sufferCasualties(self, tokenBadge):
 		return 0
 
 class RaceRatmen(BaseRace):
@@ -217,9 +226,10 @@ for i in range(len(racesList)):
 	racesList[i].setId(i)
 
 class BaseSpecialPower:
-	def __init__(self, name, tokensNum):
+	def __init__(self, name, tokensNum, bonusNum=None):
 		self.name = name
 		self.tokensNum = tokensNum
+		self.bonusNum = bonusNum
 
 	def setId(self, id):
 		self.specialPowerId = id
@@ -230,15 +240,12 @@ class BaseSpecialPower:
 	def conquerBonus(self, regionId, tokenBadgeId):
 		return 0
 
-	def incomeBonus(self, user):
+	def incomeBonus(self, tokenBadge):
 		return 0
 
 	def decline(self, user):
 		if user.game.getLastState() != GAME_FINISH_TURN:
 			raise BadFieldException('badStage')
-
-	def getInitBonusNum(self):
-		return 0
 
 	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
 		pass
@@ -256,10 +263,10 @@ class BaseSpecialPower:
 		raise BadFieldException('badAction')
 
 
-	def setEncampments(encampments, tokenBadgeId):
+	def setEncampments(self, encampments, tokenBadgeId):
 		raise BadFieldException('badSpecialPower')
 
-	def setFortifield(fortifield, tokenBadgeId):
+	def setFortifield(self, fortifield, tokenBadgeId):
 		raise BadFieldException('badSpecialPower')
 	
 
@@ -267,8 +274,8 @@ class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
 
-	def incomeBonus(self, user):
-		return 2 if not user.currentTokenBadge.inDecline else 0		##??
+	def incomeBonus(self, tokenBadge):
+		return 0 if tokenBadge.inDecline else 2	
 
 class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
@@ -280,22 +287,18 @@ class SpecialPowerBerserk(BaseSpecialPower):
 
 class SpecialPowerBivouacking(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Bivouacking', 5)
+		BaseSpecialPower.__init__(self, 'Bivouacking', 5, 5)
 	
-	def getInitBonusNum(self):
-		return 5
-
 	def decline(self, user):
-		BaseSpecialPower.decline(user)
+		BaseSpecialPower.decline(self, user)
 		for region in user.regions:
 			region.encampment = False
-
+		
 	def setEncampments(self, encampments, tokenBadge):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
 		game = tokenBadge.owner.game
-		tokenBadge.region.encampment = 0
 		freeEncampments = 5
 		for encampment in encampments:
 			region = game.map.getRegion(encampment['regionId']).getState(game.id)
@@ -317,11 +320,8 @@ class SpecialPowerCommando(BaseSpecialPower):
 
 class SpecialPowerDiplomat(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Diplomat', 5)
+		BaseSpecialPower.__init__(self, 'Diplomat', 5, 1)
 		
-	def getInitBonusNum(self):
-		return 1
-
 	def selectFriend(data, userId, tokenBadgeId, gameId):
 		pass
 	#	if not('friendId' in data and isinstance(data['friendId'], int)):
@@ -352,10 +352,7 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 
 class SpecialPowerDragonMaster(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Dragon master', 5)
-	
-	def getInitBonusNum(self):
-		return 1
+		BaseSpecialPower.__init__(self, 'Dragon master', 5, 1)
 
 	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
 		pass
@@ -394,7 +391,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	#			-1, ATTACK_DRAGON)
 
 	def decline(self, user):
-		BaseSpecialPower.decline(user)
+		BaseSpecialPower.decline(self, user)
 		for region in user.regions: region.dragon = False
 		
 class SpecialPowerFlying(BaseSpecialPower):
@@ -417,14 +414,12 @@ class SpecialPowerForest(BaseSpecialPower):
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortified', 3)
+		BaseSpecialPower.__init__(self, 'Fortified', 3, 1)
 		self.maxNum = 6
 
-	def getInitBonusNum(self):
-		return 1
 
-	def incomeBonus(self, user):
-		return len(filter(lambda x: x.fortified, user.regions))
+	def incomeBonus(self, tokenBadge):
+		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortified, tokenBadge.regions))
 
 	def clearRegion(self, tokenBadge, region):
 		pass
@@ -464,13 +459,10 @@ class SpecialPowerFortified(BaseSpecialPower):
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Heroic', 5)
-		
-	def getInitBonusNum(self):
-		return 2
+		BaseSpecialPower.__init__(self, 'Heroic', 5, 2)
 
 	def decline(self, user):
-		BaseSpecialPower.decline(user)
+		BaseSpecialPower.decline(self, user)
 		for region in user.regions:
 			region.hero = False
 
@@ -505,8 +497,8 @@ class SpecialPowerHill(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
-	def incomeBonus(self, user):
-		return len(filter(lambda x: x.region.hill, user.currentTokenBadge.regions))
+	def incomeBonus(self, tokenBadge):
+		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.region.hill, tokenBadge.regions))
 
 
 class SpecialPowerMerchant(BaseSpecialPower):
@@ -528,17 +520,18 @@ class SpecialPowerPillaging(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Pillaging', 5)
 	
-	def countAdditionalCoins(self, user): 
-		return user.game.getNonEmptyConqueredRegions(user.tokenBadge)
+	def incomeBonus(self, user): 
+		return user.game.getNonEmptyConqueredRegions()
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
+
+	def incomeBonus(self, tokenBadge): 
+		return len(filter(lambda x: x.region.swamp, tokenBadge.regions))
 	
 	def canConquer(self, region, tokenBadge):
-		return True
-	#	isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
-	#	return (isAdjacent and regions) or not regions 
+		return (not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.isNeighbor(region)
 
 
 class SpecialPowerStout(BaseSpecialPower):
@@ -552,8 +545,8 @@ class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
-	def incomeBonus(self, user): 
-		return len(filter(lambda x: x.region.swamp, user.currentTokenBadge.regions))
+	def incomeBonus(self, tokenBadge): 
+		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.region.swamp, tokenBadge.regions))
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):
@@ -576,17 +569,13 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 	
 class SpecialPowerWealthy(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Wealthy', 4) 
+		BaseSpecialPower.__init__(self, 'Wealthy', 4, 1) 
 	
-	def getInitBonusNum(self):
-		return 1
-
-	def incomeBonus(self, user):
+	def incomeBonus(self, tokenBadge):
+		if tokenBadge.specPowNum == 1:
+			tokenBadge.specPowNum = 0
+			return 7
 		return 0
-#		query("""SELECT b.Turn-a.Turn FROM History a, Games b WHERE a.TokenBadgeId=%s 
-#			AND a.State=%s AND b.GameId=a.GameId""", 
-#			getTokenBadgeIdByRaceAndUser(raceId, userId), GAME_SELECT_RACE)
-#		return 0 if fetchone()[0] else 7
 
 specialPowerList = [
 	SpecialPowerAlchemist(),

@@ -82,7 +82,8 @@ class Game(Base):
 					not victim.inDecline and\
 					battle.attackType != misc.ATTACK_ENCHANT and\
 					battle.victimTokensNum > 1
-				badStage |= canDefend != (state == misc.GAME_DEFEND)
+				badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
+						     (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
    					
 		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
 			raise BadFieldException('badStage')
@@ -110,6 +111,7 @@ class TokenBadge(Base):
     	bonusMoney = Column(Integer, default = 0)
     	inDecline = Column(Boolean, default=False)
     	totalTokensNum = Column(Integer, default = 0)
+    	specPowNum = Column(Integer, default = 0)
 
     	game = relationship(Game, backref=backref('tokenBadges'))
 
@@ -156,23 +158,13 @@ class User(Base):
 		if histEntry and histEntry.user == self 	and histEntry.friend == attackedUser:
 			raise BadFieldException('UsersAreFriends')
 
-	def decline(self):
-		if self.declinedTokenBadge:
-			for declinedRegion in self.declinedTokenBadge.regions:
-				declinedRegion.owner = None
-				declinedRegion.inDecline = False
-		self.declinedTokenBadge = self.currentTokenBadge
-		for region in self.regions:
-			region.tokensNum = 1
-			region.inDecline = True
-		self.currentTokenBadge.inDecline = True
-		self.currentTokenBadge.totalTokensNum = len(self.regions)
-		self.currentTokenBadge = None
-		self.tokensInHand = 0
-
+	def killRaceInDecline(self):
+		for declinedRegion in self.declinedTokenBadge.regions:
+			declinedRegion.owner = None
+			declinedRegion.inDecline = False
 	
 	def getNonEmptyConqueredRegions(self):
-		conqHist = filter(lambda x: x.turn == self.game.turn and x.state == misc.GAME_CONQUER, self.game.history) 
+		conqHist = filter(lambda x: x.turn == self.game.turn and x.state == misc.GAME_CONQUER, self.game.history)
 		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
 			
 class Region(Base):
@@ -207,7 +199,7 @@ class Region(Base):
     		return state[0]
 
     	def getNeighbors(self):
-    		return  map(lambda x : x.neighborId, filter(lambda x: x.mapId == self.mapId, self.neighbors)) #Uh-huh  
+    		return  map(lambda x : x.neighborId, self.neighbors) #Uh-huh  
 
     	def adjacent(self, region):
     		return region.id in self.getNeighbors() 
@@ -294,12 +286,13 @@ class HistoryEntry(Base):
     	game = relationship(Game, backref=backref('history', order_by=id))
    	user = relationship(User, backref=backref('history'))
 
-    	def __init__(self, userId, gameId, state, tokenBadgeId, dice = None): 
-    		self.userId = userId
-    		self.gameId = gameId
+    	def __init__(self, user, state, tokenBadgeId, dice = None): 
+    		self.userId = user.id
+    		self.gameId = user.game.id
         	self.state = state
         	self.tokenBadgeId = tokenBadgeId
         	self.dice = dice
+        	self.turn = user.game.turn
 
 class WarHistoryEntry(Base):
     __tablename__ = 'warHistory'
@@ -419,11 +412,11 @@ class _Database:
     		except NoResultFound:
     			raise BadFieldException('badUsernameOrPassword')
 
-    	def updateHistory(self, userId, gameId, state, tokenBadgeId, dice = None): 
-    		self.add(HistoryEntry(userId,  gameId, state, tokenBadgeId, dice))
+    	def updateHistory(self, user, state, tokenBadgeId, dice = None): 
+    		self.add(HistoryEntry(user,  state, tokenBadgeId, dice))
 
-    	def updateWarHistory(	self, userId, gameId, victimBadgeId, agressorBadgeId, dice, regionId, defense, attackType):
-    		hist = HistoryEntry(userId, gameId, misc.GAME_CONQUER, agressorBadgeId, dice)
+    	def updateWarHistory(	self, user, victimBadgeId, agressorBadgeId, dice, regionId, defense, attackType):
+    		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
     		self.add(hist)
     		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, defense, dice, attackType))
 
