@@ -149,7 +149,7 @@ class RaceAmazons(BaseRace):
 	
 class RaceSkeletons(BaseRace):
 	def __init__(self):
-		BaseRace.__init__(self, 'Skeletons', 5, 18)
+		BaseRace.__init__(self, 'Skeletons', 6, 18)
 
 	def turnEndReinforcements(self, user):
 		return user.getNonEmptyConqueredRegions() / 2

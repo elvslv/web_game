@@ -6,9 +6,6 @@
 			"randseed": 423656574
 		},
 		{
-			"action": "createDefaultMaps"
-		},
-		{
 			"action": "register",
 			"username": "user1",
 			"password": "111111"

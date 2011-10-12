@@ -5,9 +5,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"sid": 1
 	},
@@ -20,8 +17,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1,
-		"regions": [1, 2, 3, 4]
+		"gameId": 1
 	},
 	{
 		"result": "ok"

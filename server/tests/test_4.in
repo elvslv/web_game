@@ -4,9 +4,6 @@
 			"action": "resetServer"
 		},
 		{
-			"action": "createDefaultMaps"
-		},
-		{
 			"action": "setReadinessStatus",
 			"sid": 5,
 			"isReady": 0

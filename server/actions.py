@@ -15,9 +15,7 @@ from misc import *
 
 dbi = Database()
 
-def createDefaultRaces(): 
-	pass
-		
+	
 def act_register(data):
 	username = data['username']
 	passwd = data['password']
@@ -57,12 +55,6 @@ def act_getMessages(data):
 		messages.append({'userId': rec.sender, 'text': rec.text, 'time': rec.time})
 	return {'result': 'ok', 'messages': messages}
 
-def act_createDefaultMaps(data):
-	if not misc.TEST_MODE: 
-		for map_ in misc.defaultMaps:
-			act_uploadMap(map_)
-	return {'result': 'ok'}
-
 def act_uploadMap(data):
 	name = data['mapName']
 	playersNum = int(data['playersNum'])
@@ -88,12 +80,9 @@ def act_uploadMap(data):
 	
 
 def initRegions(map, game):
-	result = list()
 	for region in map.regions:
 		regState = RegionState(region, game)
 		dbi.add(regState)
-		result.append(region.id)
-	return result
 
 def act_createGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
@@ -104,10 +93,10 @@ def act_createGame(data):
 		descr = data['gameDescr']
 	newGame = Game(data['gameName'], descr, map_)
 	dbi.addUnique(newGame, 'gameName')
-	regionIds =  initRegions(map_, newGame)
+	initRegions(map_, newGame)
 	user.game = newGame
 	user.priority = 1
-	return {'result': 'ok', 'gameId': newGame.id, 'regions': regionIds}
+	return {'result': 'ok', 'gameId': newGame.id}
 	
 def act_getGameList(data):
 	result = {'result': 'ok'}

@@ -63,19 +63,9 @@
 		{
 			"action": "createGame", 
 			"sid": 1,
-			"gameName": "game1",
-			"gameDescr": "game1",
-			"mapId": 3			
-		},
-		{
-			"action": "createGame", 
-			"sid": 1,
 			"gameName": "game1"
 		},
-		{
-			"action": "createDefaultMaps"
-		},
-		
+	
 		{
 			"action": "createGame", 
 			"sid": 1,

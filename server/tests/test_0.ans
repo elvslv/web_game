@@ -41,21 +41,14 @@
 		"result": "badUserSid"		
 	},
 	{
-		"result": "badMapId"		
-	},
-	{
 		"result": "badJson"		
-	},
-	{
-		"result": "ok"
 	},
 	{
 		"result": "badGameName"
 	},
 	{
 		"result": "ok",
-		"gameId": 1,
-		"regions": []
+		"gameId": 1
 	},
 	{
 		"result": "gameNameTaken"
@@ -65,8 +58,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 3,
-		"regions": []
+		"gameId": 3
 	},
 	{
 		"result": "alreadyInGame"

@@ -5,9 +5,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"sid": 1
 	},
@@ -22,8 +19,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 1,
-		"regions": []
+		"gameId": 1
 	},
 	{
 		"result": "alreadyInGame"
@@ -42,8 +38,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 2,
-		"regions": [1, 2, 3, 4]
+		"gameId": 2
 	},
 	{
 		"result": "alreadyInGame"
