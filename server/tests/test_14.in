@@ -5,9 +5,6 @@
 			"action": "resetServer"
 		},
 		{
-			"action": "createDefaultMaps"
-		},
-		{
 			"action": "register",
 			"username": "user1",
 			"password": "111111"
@@ -79,21 +76,10 @@
 			"regionId" : 4
 		},
 		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 14}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 10}]
-		},
-
-		{
 			"action": "finishTurn",
-			"sid" : 1
-			
+			"sid": 1
 		}
+		
 
 	],
 	"description": "race Amazons"

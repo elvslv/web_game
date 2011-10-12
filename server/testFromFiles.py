@@ -1,12 +1,14 @@
 import unittest
 import parseJson
-import editDb
 import os
 import sys
 import json
 import random
 import misc
 import actions
+import db
+
+dbi = db.Database()
 
 class TestFromFile(unittest.TestCase):
 	def __init__(self, inFile, ansFile):
@@ -24,14 +26,12 @@ class TestFromFile(unittest.TestCase):
 		misc.LAST_SID = 0
 		misc.LAST_TIME = 0
 		misc.TEST_MODE = True
-		editDb.clearDb()
-		actions.createDefaultRaces()
 		f = open(self.ansFile)
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
 		self.testDescr = out['description']
 		self.assertListEqual(out['result'], json.loads(ans))
-                
+		                
 def suite():
 	suite = unittest.TestSuite()
 	suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))

@@ -1,0 +1,26 @@
+[
+	{
+		"action": "register",
+		"username": "rewtgh",
+		"password": "wqtewy"
+	},
+	{
+		"action": "login",
+		"username": "rewtgh",
+		"password": "wqtewy"
+	},
+	{
+		"action": "login",
+		"username": "rewtgh",
+		"password": "wqtewy"
+	},
+	{
+		"action": "logout",
+		"sid": 458024697
+	},
+	{
+		"action": "login",
+		"username": "rewtgh",
+		"password": "wqtewy"
+	}
+]

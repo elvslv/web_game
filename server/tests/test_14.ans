@@ -5,9 +5,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"sid": 1
 	},
@@ -50,15 +47,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "notEnoughTokensForRedeployment"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 1
+		"result": "badStage"
 	}
+	
 
 ]

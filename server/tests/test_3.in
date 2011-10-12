@@ -4,9 +4,6 @@
 			"action": "resetServer"
 		},
 		{
-			"action": "createDefaultMaps"
-		},
-		{
 			"action": "register",
 			"username": "user1",
 			"password": "pswd55"

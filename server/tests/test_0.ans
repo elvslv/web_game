@@ -38,16 +38,10 @@
 		"sid": 5
 	},
 	{
-		"result": "badSid"		
-	},
-	{
-		"result": "badMapId"		
+		"result": "badUserSid"		
 	},
 	{
 		"result": "badJson"		
-	},
-	{
-		"result": "ok"
 	},
 	{
 		"result": "badGameName"
@@ -57,14 +51,17 @@
 		"gameId": 1
 	},
 	{
-		"result": "badGameName"
+		"result": "gameNameTaken"
 	},
 	{
 		"result": "alreadyInGame"
 	},
 	{
 		"result": "ok",
-		"gameId": 2
+		"gameId": 3
+	},
+	{
+		"result": "alreadyInGame"
 	},
 	{
 		"result": "alreadyInGame"

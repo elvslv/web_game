@@ -45,14 +45,21 @@ ATTACK_DRAGON = 1
 ATTACK_ENCHANT = 2
 
 possiblePrevCmd = {
-	GAME_FINISH_TURN: [GAME_DECLINE, GAME_REDEPLOY],
+	GAME_FINISH_TURN: [GAME_DECLINE, GAME_REDEPLOY, GAME_CHOOSE_FRIEND, GAME_CONQUER],
 	GAME_SELECT_RACE: [GAME_START, GAME_FINISH_TURN],
 	GAME_CONQUER: [GAME_CONQUER, GAME_SELECT_RACE, GAME_FINISH_TURN, 
 		GAME_THROW_DICE, GAME_DEFEND],
 	GAME_DECLINE: [GAME_FINISH_TURN, GAME_REDEPLOY],
-	GAME_REDEPLOY: [GAME_CONQUER, GAME_THROW_DICE, GAME_DEFEND, GAME_UNSUCCESSFULL_CONQUER],
-	GAME_THROW_DICE: [GAME_SELECT_RACE, GAME_FINISH_TURN, GAME_CONQUER, GAME_DEFEND],
-	GAME_DEFEND: [GAME_CONQUER]
+	GAME_REDEPLOY: [GAME_CONQUER, GAME_THROW_DICE, 
+		GAME_DEFEND, GAME_UNSUCCESSFULL_CONQUER, GAME_FINISH_TURN],
+	GAME_THROW_DICE: [GAME_SELECT_RACE, GAME_FINISH_TURN, GAME_CONQUER, 
+		GAME_DEFEND],
+#	GAME_DRAGON_ATTACK: [GAME_FINISH_TURN, GAME_SELECT_RACE, GAME_CONQUER, 
+#		GAME_ENCHANT, GAME_DEFEND],
+#	GAME_ENCHANT: [GAME_FINISH_TURN, GAME_SELECT_RACE, GAME_CONQUER, 
+#		GAME_ENCHANT, GAME_DEFEND],
+	GAME_DEFEND: [GAME_CONQUER],
+	GAME_CHOOSE_FRIEND: [GAME_REDEPLOY]
 }
 
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
@@ -60,7 +67,7 @@ pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
 def generateSidForTest():
 	global LAST_SID
-	LAST_SID = LAST_SID + 1
+ 	LAST_SID = LAST_SID + 1
 	return LAST_SID
 	
 def generateSids(n):
@@ -207,13 +214,14 @@ actionFields = {
 	'finishTurn': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
-	'doSmth': [
+	'doSmtn': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
 	'redeploy': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},
-		{'name': 'regions', 'type': list, 'mandatory': True}
+		{'name': 'regions', 'type': list, 'mandatory': True},
+		{'name': 'encampments', 'type': list, 'mandatory': False}
 	],
 	'defend': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
@@ -226,9 +234,14 @@ actionFields = {
 	'getVisibleTokenBadges': [
 		{'name': 'gameId', 'type': int, 'mandatory': True}
 	],
-	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}],
 	'throwDice': [{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'dice', 'type': int, 'mandatory': False}]
+			     {'name': 'dice', 'type': int, 'mandatory': False}
+	],
+	 'enchant': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'regionId', 'type': int, 'mandatory': True}
+	],
+	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}]
 }
 
 possibleLandDescription = [
@@ -269,7 +282,7 @@ defaultMaps = [
 	 		{
 	 			'population' : 1,
 	 			'landDescription' : ['sea'],
-	 			'adjacent' : [1, 4] 
+	 			'adjacent' : [4] 
 	 		},
 	 		{
 	 			'population' : 1,
@@ -291,137 +304,138 @@ defaultMaps = [
 	 	[
 	 		{
 	 			'landDescription' : ['sea', 'border'], #1
-	 			'adjacent' : [1, 16, 17] 
+	 			'adjacent' : [2, 17, 18] 
 	 		},
 	 		{
 	 			'landDescription' : ['mine', 'border', 'coast', 'forest'], #2
-	 			'adjacent' : [0, 17, 18, 2] 
+	 			'adjacent' : [1, 18, 19, 3] 
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'mountain'], #3
-	 			'adjacent' : [1, 18, 20, 3] 
+	 			'adjacent' : [2, 19, 21, 4] 
 	 		},
 	 		{
 	 			'landDescription' : ['farmland', 'border'], #4
-	 			'adjacent' : [2, 20, 21, 4] 
+	 			'adjacent' : [3, 22, 21, 5] 
 	 		},
 	 		{
 	 			'landDescription' : ['cavern', 'border', 'swamp'], #5
-	 			'adjacent' : [3, 21, 22, 5] 
+	 			'adjacent' : [4, 22, 23, 6] 
 	 		},
 			{
 				'population': 1,
 	 			'landDescription' : ['forest', 'border'], #6
-	 			'adjacent' : [4, 22, 6] 
+	 			'adjacent' : [5, 23, 7] 
 	 		},
 			{
 	 			'landDescription' : ['mine', 'border', 'swamp'], #7
-	 			'adjacent' : [5, 22, 7, 23, 25] 
+	 			'adjacent' : [6, 8, 24, 26] 
 	 		},
 	 		{
-	 			'landDescription' : ['border', 'mountain', 'coast'], #8
-	 			'adjacent' : [6, 25, 9, 8, 23] 
+	 			'landDescription' : ['border',  'coast'], #8
+	 			'adjacent' : [7, 26, 10, 9, 24] 
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'sea'], #9
-	 			'adjacent' : [7, 9, 10] 
+	 			'adjacent' : [8, 11, 10] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['cavern', 'coast'], #10
-	 			'adjacent' : [8, 7, 10, 25] 
+	 			'adjacent' : [9, 8, 11, 26] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['mine', 'coast', 'forest', 'border'], #11
-	 			'adjacent' : [9, 25, 26, 11] 
+	 			'adjacent' : [10, 27, 26, 12] 
 	 		},
 	 		{
 	 			'landDescription' : ['forest', 'border'], #12
-	 			'adjacent' : [10, 26, 29, 12] 
+	 			'adjacent' : [11, 27, 30, 13] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain', 'border'], #13
-	 			'adjacent' : [11, 29, 27, 13] 
+	 			'adjacent' : [12, 30, 28, 14] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain', 'border'], #14
-	 			'adjacent' : [12, 27, 15, 14] 
+	 			'adjacent' : [13, 28, 16, 15] 
 	 		},
 	 		{
 	 			'landDescription' : ['hill', 'border'], #15
-	 			'adjacent' : [13, 15] 
+	 			'adjacent' : [14, 16] 
 	 		},
 	 		{
 	 			'landDescription' : ['farmland', 'magic', 'border'], #16
-	 			'adjacent' : [14, 19, 27, 16] 
+	 			'adjacent' : [15, 20, 28, 17] 
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'mountain', 'cavern', 'mine', #17 
 	 				'coast'],
-	 			'adjacent' : [15, 19, 0, 17] 
+	 			'adjacent' : [16, 20, 1, 18] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['farmland', 'magic', 'coast'], #18
-	 			'adjacent' : [16, 19, 0, 18] 
+	 			'adjacent' : [17, 20, 1, 19] 
 	 		},
 	 		{
 	 			'landDescription' : ['swamp'], #19
-	 			'adjacent' : [17, 2, 20, 1, 19] 
+	 			'adjacent' : [18, 3, 21, 2, 20] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['swamp'], #20
-	 			'adjacent' : [18, 27, 28, 20] 
+	 			'adjacent' : [19, 28, 29, 21] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['hill', 'magic'], #21
-	 			'adjacent' : [19, 28, 2, 3, 21] 
+	 			'adjacent' : [20, 29, 3, 4, 22] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain', 'mine'], #22
-	 			'adjacent' : [20, 24, 28, 3, 4, 22] 
+	 			'adjacent' : [21, 25, 29, 4, 5, 23] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['farmland'], #23
-	 			'adjacent' : [21, 24, 5, 4, 23] 
+	 			'adjacent' : [22, 25, 5, 6, 24] 
 	 		},
 	 		{
 	 			'landDescription' : ['hill', 'magic'], #24
-	 			'adjacent' : [22, 25, 6, 24, 7] 
+	 			'adjacent' : [23, 26, 8, 25, 7] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain', 'cavern'], #25
-	 			'adjacent' : [23, 21, 22, 28] 
+	 			'adjacent' : [24, 22, 23, 29] 
 	 		},
 	 		{
-	 			'population': 1,
-	 			'landDescription' : ['farmland'], #26
-	 			'adjacent' : [24, 23, 6, 7, 9, 10, 26] 
+
+		 		'landDescription' : ['farmland'], #26
+	 			'adjacent' : [24, 8, 7, 11, 27] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['swamp', 'magic'], #27
-	 			'adjacent' : [25, 10, 11, 29, 28] 
+	 			'adjacent' : [26, 11, 12, 30, 29] 
 	 		},
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['forest', 'cavern'], #28
-	 			'adjacent' : [28, 29, 12, 13, 15, 19] 
+	 			'adjacent' : [29, 30, 13, 14, 16, 20] 
 	 		},
 	 		{
 	 			'landDescription' : ['sea'],
-	 			'adjacent' : [27, 19, 20, 21, 24, 26, 29]  #29
+	 			'adjacent' : [28, 20, 21, 22, 25, 27, 30]  #29
 	 		},
 	 		{
 	 			'landDescription' : ['hill'],  #30
-	 			'adjacent' : [28, 27, 12, 11, 26] 
+	 			'adjacent' : [28, 29, 13, 12, 27] 
 	 		},
 	 	]
-	},	{
+	},	
+	{
 		'mapName': 'defaultMap7', 
 		'playersNum': 2, 
 		'turnsNum': 5,

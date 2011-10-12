@@ -2,10 +2,7 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
-		"result": "badSid"
+		"result": "badUserSid"
 	},
 	{
 		"result": "ok"

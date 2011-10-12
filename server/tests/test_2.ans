@@ -5,9 +5,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"sid": 1
 	},
@@ -15,7 +12,7 @@
 		"result": "badGameId"
 	},
 	{
-		"result": "badSid"
+		"result": "badUserSid"
 	},
 	{
 		"result": "notInGame"

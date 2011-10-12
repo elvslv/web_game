@@ -3,7 +3,9 @@ import actions
 from gameExceptions import BadFieldException
 import misc
 import random
+import sys
 import httplib
+from db import _database as dbi
 
 def parseJsonObj(obj):
 	try:
@@ -20,7 +22,6 @@ def parseInputData(data):
 		object = json.loads(data)
 	except (TypeError, ValueError), e:
 		return {"result": "badJson"}
-	
 	if isinstance(object, list):
 		return {"result": "badJson"}
 	else:
@@ -49,7 +50,6 @@ def parseDataFromFile(fileName):
 		random.seed(misc.TEST_RANDSEED)
 	object = object['test']
 	result = list()
-
 	conn = httplib.HTTPConnection("localhost:80")
 	if isinstance(object, list):
 		for obj in object:

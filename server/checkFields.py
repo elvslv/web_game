@@ -1,4 +1,3 @@
-from editDb import query, fetchone
 from gameExceptions import BadFieldException
 import misc
 import sys
