@@ -47,12 +47,15 @@
 		"result": "ok"
 	},
 	{
+		"result": "badRegion"
+	},
+	{
 		"result": "ok"
 	},
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 3
+		"coins" : 1
 	},
 	{
 		"result": "ok",
@@ -75,14 +78,10 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 5
+		"coins" : 2
 	},
 	{
 		"result": "ok"
-	},
-	{
-		"result": "badTokensNum",
-		"dice": 0
 	}
 
 ]

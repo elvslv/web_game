@@ -47,6 +47,12 @@
 		"result": "ok"
 	},
 	{
+		"result": "badRegion"
+	},
+	{
+		"result": "notEnoughEncampentsForRedeployment"
+	},
+	{
 		"result": "ok"
 	},
 	{
@@ -62,27 +68,11 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
+		"dice": 0,
+		"result": "badTokensNum"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 4
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 5
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badTokensNum",
-		"dice": 0
+		"result": "badSpecialPower"
 	}
 
 ]

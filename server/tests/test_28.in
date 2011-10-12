@@ -49,8 +49,8 @@
 			"action": "setReadinessStatus",
 			"sid": 2,
 			"isReady": 1,
-			"visibleRaces": ["Trolls", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Bivouacking", "Dragon master", "Forest", "Berserk", "Commando", "Diplomat"]
+			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
+			"visibleSpecialPowers": ["Bivouacking", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -76,9 +76,29 @@
 		{
 			"action": "redeploy",
 			"sid": 1,
+			"regions": [{"regionId": 1, "tokensNum": 0},
+				{"regionId": 2, "tokensNum": 0},
+				{"regionId": 3, "tokensNum": 13}],
+			"encampments": [{"regionId": 4, "encampmentsNum": 2},
+				{"regionId": 2, "encampmentsNum": 3}]
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
 			"regions": [{"regionId": 1, "tokensNum": 1},
 				{"regionId": 2, "tokensNum": 1},
-				{"regionId": 3, "tokensNum": 7}]
+				{"regionId": 3, "tokensNum": 11}],
+			"encampments": [{"regionId": 1, "encampmentsNum": 3},
+				{"regionId": 2, "encampmentsNum": 3}]
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 1, "tokensNum": 1},
+				{"regionId": 2, "tokensNum": 1},
+				{"regionId": 3, "tokensNum": 11}],
+			"encampments": [{"regionId": 1, "encampmentsNum": 2},
+				{"regionId": 2, "encampmentsNum": 3}]
 		},
 		{
 			"action": "finishTurn",
@@ -95,18 +115,18 @@
 			"regionId" : 1
 		},
 		{
-			"action": "defend",
-			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 1}]
-		},
-		{
 			"action": "conquer",
 			"sid": 2,
 			"regionId" : 2
+		},
+		{
+			"action": "redeploy",
+			"sid": 2,
+			"regions": [{"regionId": 1, "tokensNum": 7}],
+			"encampments": [{"regionId": 1, "encampmentsNum": 2}]
 		}
-
 	],
-	"description": "race Trolls"
+	"description": "special power Bivouacking"
 }
 
 

@@ -63,9 +63,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "badTokensNum",
 		"dice": 0
 	}

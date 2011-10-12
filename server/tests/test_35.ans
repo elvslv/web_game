@@ -47,12 +47,9 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 3
+		"coins" : 2
 	},
 	{
 		"result": "ok",
@@ -65,24 +62,12 @@
 		"result": "ok"
 	},
 	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
 		"nextPlayer" : 1,
 		"coins" : 4
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 5
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badTokensNum",
-		"dice": 0
 	}
 
 ]

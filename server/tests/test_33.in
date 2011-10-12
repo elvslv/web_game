@@ -49,8 +49,8 @@
 			"action": "setReadinessStatus",
 			"sid": 2,
 			"isReady": 1,
-			"visibleRaces": ["Trolls", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Bivouacking", "Dragon master", "Forest", "Berserk", "Commando", "Diplomat"]
+			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
+			"visibleSpecialPowers": ["Fortifield", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -76,9 +76,10 @@
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 1},
-				{"regionId": 2, "tokensNum": 1},
-				{"regionId": 3, "tokensNum": 7}]
+			"regions": [{"regionId": 1, "tokensNum": 0},
+				{"regionId": 2, "tokensNum": 0},
+				{"regionId": 3, "tokensNum": 11}],
+			"fortifield": {"regionId": 3}
 		},
 		{
 			"action": "finishTurn",
@@ -95,18 +96,12 @@
 			"regionId" : 1
 		},
 		{
-			"action": "defend",
-			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 1}]
-		},
-		{
-			"action": "conquer",
+			"action": "redeploy",
 			"sid": 2,
-			"regionId" : 2
+			"regions": [{"regionId": 1, "tokensNum": 7}]
 		}
-
 	],
-	"description": "race Trolls"
+	"description": "special power Fortifield"
 }
 
 
