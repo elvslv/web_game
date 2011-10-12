@@ -63,7 +63,7 @@
 		"result": "ok"
 	},
 	{
-		"result": "bad"
+		"result": "regionIsImmune"
 	},
 	{
 		"result": "ok"

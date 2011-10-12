@@ -330,7 +330,7 @@ class BaseSpecialPower:
 	def turnFinished(self, tokenBadgeId):
 		pass
 
-	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
+	def dragonAttack(self, tokenBadgeId, regionId):
 		raise BadFieldException('badAction') ###
 
 	def clearRegion(self, tokenBadgeId, regionId):
@@ -465,7 +465,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def getInitBonusNum(self):
 		return 1
 
-	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
+	def dragonAttack(self, tokenBadgeId, regionId):
 		regionId, gameId = extractValues('CurrentRegionState', ['RegionId', 'GameId'], 
 			[regionId, getGameIdByTokenBadge(tokenBadgeId)])
 		checkRegionIsImmune(regionId, gameId)
@@ -478,27 +478,34 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			
 		if query("""SELECT 1 FROM History a, AttackingHistory b, TokenBadges c, 
 			Users d, Games e WHERE b.AttackingTokenBadgeId=%s AND 
-			c.TokenBadgeId=b.AttackingTokenBadgeId AND c.UserId=d.Id AND 
+			c.TokenBadgeId=b.AttackingTokenBadgeId AND c.OwnerId=d.Id AND 
 			d.GameId=a.GameId AND e.GameId = a.GameId AND a.Turn=e.Turn AND 
 			a.HistoryId=b.HistoryId AND b.AttackType=%s""", tokenBadgeId, 
 			ATTACK_DRAGON):
 			raise BadFieldException('dragonAlreadyAttackedOnThisTurn')
-			
+
 		query("""SELECT a.TokenBadgeId, a.TokensNum FROM CurrentRegionState a
-			WHERE a.RegionId=%s AND a.GameId""", regionId, gameId)
-		row = fetchone()
-		if row[0] == tokenBadgeId:
+			WHERE a.RegionId=%s AND a.GameId=%s""", regionId, gameId)
+		attackedTokenBadgeId, attackedTokensNum = fetchone()
+		if attackedTokenBadgeId == tokenBadgeId:
 			raise BadFieldException('badRegion')
+		if attackedTokenBadgeId:
+			attackedTokensNum += clearRegionFromRace(regionId, attackedTokenBadgeId)
+		else:
+			attackedTokensNum = 0
 		##check anything else?
 		query('UPDATE CurrentRegionState SET Dragon=FALSE WHERE TokenBadgeId=%s', 
 			tokenBadgeId)
 		query("""UPDATE CurrentRegionState SET TokenBadgeId=%s, Dragon=TRUE, 
-			TokensNum=%s WHERE RegionId=%s AND GameId=%s""", tokenBadgeId, 
-			tokensNum, regionId, gameId)
+			TokensNum=1, OwnerId=%s WHERE RegionId=%s AND GameId=%s""", tokenBadgeId, 
+			getUserIdByTokenBadge(tokenBadgeId), regionId,  gameId)
+		query('UPDATE Users SET TokensInHand=TokensInHand-1 WHERE Id=%s', 
+			getUserIdByTokenBadge(tokenBadgeId))
 
-		updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-		updateConquerHistory(lastId(), tokenBadgeId, regionId, row[0], row[2], 
-			-1, ATTACK_DRAGON)
+		updateHistory(getUserIdByTokenBadge(tokenBadgeId), gameId, GAME_CONQUER, 
+			tokenBadgeId)
+		updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadgeId if 
+			attackedTokensNum else None, attackedTokensNum, -1, ATTACK_DRAGON)
 
 	def decline(self, userId):
  		query("""UPDATE CurrentRegionState SET Dragon=FALSE WHERE OwnerId=%s""", 
@@ -600,7 +607,7 @@ class SpecialPowerHeroic(BaseSpecialPower):
 		result = list()
 		for hero in heroes:
 			regionId, gameId, ownerBadgeId = extractValues('CurrentRegionState', 
-				['RegionId', 'GameId', 'TokenBadgeId'], [heroe['regionId'], 
+				['RegionId', 'GameId', 'TokenBadgeId'], [hero['regionId'], 
 				getGameIdByTokenBadge(tokenBadgeId)])
 
 			if ownerBadgeId != tokenBadgeId:

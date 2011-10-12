@@ -248,7 +248,7 @@ def act_redeploy(data):
 	specAbilities = [
 	{'name': 'encampments', 'cmd': 'setEncampments'},
 	{'name': 'fortifield', 'cmd': 'setFortifield'},
-	{'name': 'heroes', 'cmd': 'setHeroes'}]
+	{'name': 'heroes', 'cmd': 'setHero'}]
 	for specAbility in specAbilities:
 		if specAbility['name'] in data:
 			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], 
@@ -315,7 +315,7 @@ def act_defend(data):
 	
 	checkStage(GAME_DEFEND, gameId)
 	regionId, tokensNum = checkForDefendingPlayer(gameId, tokenBadgeId)
-
+	print tokensNum
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	if not 'regions' in data:
 		raise BadFieldException('badJson')
@@ -386,13 +386,23 @@ def getStandardFields(data, t):
 	
 def act_dragonAttack(data):
 	fields = getStandardFields(data, GAME_CONQUER)
+	if query("""SELECT 1 FROM AttackingHistory a, History b WHERE 
+		a.HistoryId=b.HistoryId AND a.AttackingTokenBadgeId=%s AND 
+		a.AttackType=%s AND b.Turn=(SELECT MAX(Turn) FROM History)""", fields[2], 
+		ATTACK_DRAGON):
+		raise BadFieldException('badStage')
 	callSpecialPowerMethod(fields[1], 'dragonAttack', fields[2], 
-		data['regionId'], data['tokensNum'])
+		data['regionId'])
 	updateGameHistory(fields[4], data)
 	return {'result': 'ok'}	
 
 def act_enchant(data):
 	fields = getStandardFields(data, GAME_CONQUER)
+	if query("""SELECT 1 FROM AttackingHistory a, History b WHERE 
+		a.HistoryId=b.HistoryId AND a.AttackingTokenBadgeId=%s AND 
+		a.AttackType=%s AND b.Turn=(SELECT MAX(Turn) FROM History)""", fields[2], 
+		ATTACK_ENCHANT):
+		raise BadFieldException('badStage')
 	callRaceMethod(fields[0], 'enchant', fields[2], data['regionId'])
 	updateGameHistory(fields[4], data)
 	return {'result': 'ok'}	
@@ -411,6 +421,9 @@ def act_getVisibleTokenBadges(data):
 
 def act_selectFriend(data):
 	fields = getStandardFields(data, GAME_CHOOSE_FRIEND)
+	if query("""SELECT 1 FROM History WHERE UserId=%s AND State=%s""", fields[3], 
+		GAME_CHOOSE_FRIEND):
+		raise BadFieldException('badStage')
 	callSpecialPowerMethod(fields[1], 'selectFriend', fields[3], fields[4], 
 		fields[2], data)
 	updateGameHistory(fields[4], data)

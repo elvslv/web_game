@@ -237,7 +237,11 @@ actionFields = {
 	'getMapState': [{'name': 'mapId', 'type': int, 'mandatory': True}],
 	'selectFriend': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
-		{'name': 'friendId', 'type': int, 'mandatory': True}]
+		{'name': 'friendId', 'type': int, 'mandatory': True}],
+	'dragonAttack': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'regionId', 'type': int, 'mandatory': True}
+	]
 }
 
 possibleLandDescription = [
