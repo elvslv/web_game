@@ -50,54 +50,54 @@ class Map(Base):
 class Game(Base):
 	__tablename__ = 'games'
 
-    	id = pkey()
-    	name = uniqString(MAX_GAMENAME_LEN)
-    	descr = string(MAX_GAMEDESCR_LEN)
-    	state = Column(Integer)
-    	turn = Column(Integer, default=0)
-    	activePlayerId = Column(Integer)
-    	mapId = fkey('maps.id')
-    	  
-    	map = relationship(Map)
-    	
-    	
-    	def __init__(self, name, descr, map): 
-    		self.name = name
-        	self.descr = descr
-        	self.state = misc.GAME_WAITING
-        	self.map = map
+	id = pkey()
+	name = uniqString(MAX_GAMENAME_LEN)
+	descr = string(MAX_GAMEDESCR_LEN)
+	state = Column(Integer)
+	turn = Column(Integer, default=0)
+	activePlayerId = Column(Integer)
+	mapId = fkey('maps.id')
 
-        def getTokenBadge(self, position):
-        	tokenBadge = filter(lambda x: x.pos == position, self.tokenBadges)
-        	if not tokenBadge: raise BadFieldException('badPosition')
-        	return tokenBadge[0]
+	map = relationship(Map)
+	
+	
+	def __init__(self, name, descr, map): 
+		self.name = name
+		self.descr = descr
+		self.state = misc.GAME_WAITING
+		self.map = map
 
-        def checkStage(self, state, user):
-        	lastEvent = self.history[-1]
+	def getTokenBadge(self, position):
+		tokenBadge = filter(lambda x: x.pos == position, self.tokenBadges)
+		if not tokenBadge: raise BadFieldException('badPosition')
+		return tokenBadge[0]
+
+	def checkStage(self, state, user):
+		lastEvent = self.history[-1]
+		print lastEvent.state
 		badStage = lastEvent.state not in misc.possiblePrevCmd[state] 
 		if lastEvent.state == misc.GAME_CONQUER:
-				battle = lastEvent.warHistory
-				victim = battle.victimBadge
-				canDefend = victim != None  and\
-					not victim.inDecline and\
-					battle.attackType != misc.ATTACK_ENCHANT and\
-					battle.victimTokensNum > 1
-				badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
-						     (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
-   					
+			battle = lastEvent.warHistory
+			print 'vict1'
+			victim = battle.victimBadge
+			print 'vict2'
+			canDefend = victim != None  and\
+				not victim.inDecline and\
+				battle.attackType != misc.ATTACK_ENCHANT and\
+				battle.victimTokensNum > 1
+			badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
+						
 		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
 			raise BadFieldException('badStage')
-			
+		
 
-
-
-        def getDefendingRegion(self, player):
-        	lastWarHistoryEntry = self.history[-1].warHistory
+	def getDefendingRegion(self, player):
+		lastWarHistoryEntry = self.history[-1].warHistory
 		return lastWarHistoryEntry.conqRegion.region
 
 
-        def getLastState(self):
-        	return self.history[-1].state
+	def getLastState(self):
+		return self.history[-1].state
 
 
 class TokenBadge(Base):
@@ -361,7 +361,7 @@ class _Database:
     		meta.reflect(bind=self.engine)
     		for table in reversed(meta.sorted_tables):
     		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
-    			if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
+    		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
 				self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
 

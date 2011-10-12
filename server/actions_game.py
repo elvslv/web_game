@@ -252,16 +252,28 @@ def act_dragonAttack(data):
 	return {'result': 'ok'}	
 
 def act_enchant(data):
+	print 'enchant1'
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	user.game.checkStage(GAME_ENCHANT, user)
+	print 'enchant2'
+	if not user.currentTokenBadge: 
+		raise BadFieldException('badStage')
+	print 'enchant3'
+	user.game.checkStage(GAME_CONQUER, user)
+	print 'enchant4'
 	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
+	print 'enchant5'
 	victimBadgeId = reg.tokenBadge.id
+	print 'enchant6'
 	reg.checkIfImmune(True)
+	print 'enchant7'
 	clearFromRace(reg)
-	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge, reg)
+	print 'enchant8'
+	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge,
+		reg)
+	print 'enchant9'
 	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
 			reg.region.id, 1, ATTACK_ENCHANT)
+	print 'enchant10'
 	return {'result': 'ok'}	
 
 def act_getVisibleTokenBadges(data):

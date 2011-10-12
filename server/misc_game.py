@@ -22,11 +22,6 @@ def clearFromRace(reg):
 		callRaceMethod(reg.tokenBadge.raceId, 'clearRegion', reg.tokenBadge, reg)
 		callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
 
-def createDefaultMaps():				
-	if not misc.TEST_MODE or not dbi.query(Map).count(): 					
-		for map_ in misc.defaultMaps:
-			act_uploadMap(map_)
-			
 def throwDice():
 	if misc.TEST_MODE: return 0
 	dice = random.randint(1, 6)

@@ -413,6 +413,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 
 
 	def clearRegion(self, tokenBadgeId, regionId):
+		pass
 #		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
 #			TokenBadgeId=%s""", tokenBadgeId)
 #		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,

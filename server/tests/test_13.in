@@ -5,6 +5,9 @@
 			"action": "resetServer",
 			"randseed": 423656574
 		},
+				{
+			"action": "createDefaultMaps"
+		},
 		{
 			"action": "register",
 			"username": "user1",

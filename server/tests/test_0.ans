@@ -1,6 +1,9 @@
 	[
 		{
 		"result": "ok"
+	},		
+	{
+		"result": "ok"
 	},
 	{
 		"result": "ok"
@@ -58,7 +61,7 @@
 	},
 	{
 		"result": "ok",
-		"gameId": 3
+		"gameId": 2
 	},
 	{
 		"result": "alreadyInGame"

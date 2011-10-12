@@ -167,6 +167,12 @@ def act_doSmtn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	return {'result': 'ok'}
 
+def act_createDefaultMaps(data):				
+##	if not misc.TEST_MODE or not dbi.query(Map).count(): 					
+	for map_ in misc.defaultMaps:
+		act_uploadMap(map_)
+	return {'result': 'ok'}
+
 def act_resetServer(data):
 	misc.LAST_SID = 0
 	misc.LAST_TIME = 0
@@ -176,7 +182,7 @@ def act_resetServer(data):
 	else:
 		misc.TEST_RANDSEED = 21425364547
 	random.seed(misc.TEST_RANDSEED)
-	createDefaultRaces()
+	#createDefaultRaces()
 	dbi.clear()
 	return {'result': 'ok'}
 
