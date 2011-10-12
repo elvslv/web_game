@@ -108,7 +108,26 @@
 		{
 			"action": "finishTurn",
 			"sid" : 2
+		},
+		{
+			"action": "decline",
+			"sid" : 1
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 1
+		},
+		{
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 2
+		},
+		{
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 3
 		}
+
 	],
 	"description": "special power Hero"
 }

@@ -68,6 +68,38 @@
 		"result": "ok",
 		"nextPlayer" : 1,
 		"coins" : 4
+	},
+	{
+		"result": "regionIsImmune"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 3
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 1,
+		"coins" : 7
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 4
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "regionIsImmune"
 	}
 
 ]

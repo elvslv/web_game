@@ -50,7 +50,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Forest",  "Dragon master","Fortifield", "Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Dragon master", "Forest", "Fortifield", "Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -64,15 +64,15 @@
 			"regionId" : 1
 		},
 		{
-			"action": "conquer",
+			"action": "dragonAttack",
 			"sid": 1,
 			"regionId" : 2
 		},
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 10},
-				{"regionId": 2, "tokensNum": 2}]
+			"regions": [{"regionId": 1, "tokensNum": 1},
+				{"regionId": 2, "tokensNum": 12}]
 		},		
 		{
 			"action": "finishTurn",
@@ -84,28 +84,18 @@
 			"position" : 1
 		},
 		{
-			"action": "dragonAttack",
+			"action": "conquer",
 			"sid": 2,
 			"regionId" : 1
-		},
-		{
-			"action": "defend",
-			"sid": 1,
-			"regions": [{"regionId": 2, "tokensNum": 9}]
 		},
 		{
 			"action": "redeploy",
 			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 8}]
+			"regions": [{"regionId": 1, "tokensNum": 7}]
 		},
 		{
 			"action": "finishTurn",
 			"sid" : 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 1
 		},
 		{
 			"action": "decline",
@@ -116,36 +106,12 @@
 			"sid" : 1
 		},
 		{
-			"action": "dragonAttack",
-			"sid": 2,
-			"regionId" : 2
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 1}, {"regionId": 2, "tokensNum": 7}]
-		},
-		{
-			"action": "finishTurn",
-			"sid" : 2
-		},
-		{
-			"action": "selectRace",
-			"sid": 1,
-			"position" : 2
-		},
-		{
 			"action": "conquer",
-			"sid": 1,
-			"regionId" : 1
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
+			"sid": 2,
 			"regionId" : 2
 		}
 	],
-	"description": "special power Dragon master"
+	"description": "special power Dragon master - region is not immune after decline"
 }
 
 

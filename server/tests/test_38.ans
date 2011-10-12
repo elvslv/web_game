@@ -46,9 +46,7 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok"
-	},
+
 	{
 		"result": "ok"
 	},
@@ -73,13 +71,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 3
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
+		"coins" : 4
 	},
 	{
 		"result": "ok"
@@ -87,34 +79,9 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 3
+		"coins" : 2
 	},
 	{
-		"result": "usersAreFriends"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 6
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
-	},
-	{
-		"result": "ok"
+		"result": "badRegion"
 	}
 ]

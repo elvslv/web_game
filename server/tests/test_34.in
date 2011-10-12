@@ -50,7 +50,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Forest",  "Dragon master","Fortifield", "Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Fortifield", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -69,11 +69,17 @@
 			"regionId" : 2
 		},
 		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 3
+		},
+		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 10},
-				{"regionId": 2, "tokensNum": 2}]
-		},		
+			"regions": [{"regionId": 1, "tokensNum": 0},
+				{"regionId": 2, "tokensNum": 0},
+				{"regionId": 3, "tokensNum": 11}]
+		},
 		{
 			"action": "finishTurn",
 			"sid" : 1
@@ -84,19 +90,19 @@
 			"position" : 1
 		},
 		{
-			"action": "dragonAttack",
+			"action": "conquer",
 			"sid": 2,
 			"regionId" : 1
 		},
 		{
-			"action": "defend",
-			"sid": 1,
-			"regions": [{"regionId": 2, "tokensNum": 9}]
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 2
 		},
 		{
 			"action": "redeploy",
 			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 8}]
+			"regions": [{"regionId": 1, "tokensNum": 1}, {"regionId": 2, "tokensNum": 6}]
 		},
 		{
 			"action": "finishTurn",
@@ -105,47 +111,50 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId" : 1
+			"regionId" : 4
 		},
 		{
-			"action": "decline",
-			"sid": 1
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 3, "tokensNum": 0}, {"regionId": 4, "tokensNum": 11}],
+			"fortifield": {"regionId": 4}
 		},
 		{
 			"action": "finishTurn",
 			"sid" : 1
 		},
 		{
-			"action": "dragonAttack",
+			"action": "conquer",
 			"sid": 2,
-			"regionId" : 2
+			"regionId" : 3
 		},
 		{
 			"action": "redeploy",
 			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 1}, {"regionId": 2, "tokensNum": 7}]
+			"regions": [{"regionId": 1, "tokensNum": 1}, 
+				{"regionId": 2, "tokensNum": 1},
+				{"regionId": 3, "tokensNum": 5}]
 		},
 		{
 			"action": "finishTurn",
 			"sid" : 2
 		},
 		{
-			"action": "selectRace",
-			"sid": 1,
-			"position" : 2
+			"action": "decline",
+			"sid" : 1
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 1
 		},
 		{
 			"action": "conquer",
-			"sid": 1,
-			"regionId" : 1
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 2
+			"sid": 2,
+			"regionId" : 4
 		}
+
 	],
-	"description": "special power Dragon master"
+	"description": "special power Fortifield - defence effect and 1 bonus coin are over after decline"
 }
 
 

@@ -46,9 +46,7 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok"
-	},
+
 	{
 		"result": "ok"
 	},
@@ -73,10 +71,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 3
-	},
-	{
-		"result": "ok"
+		"coins" : 5
 	},
 	{
 		"result": "ok"
@@ -88,9 +83,6 @@
 		"result": "ok",
 		"nextPlayer" : 2,
 		"coins" : 3
-	},
-	{
-		"result": "usersAreFriends"
 	},
 	{
 		"result": "ok"
@@ -101,10 +93,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 6
-	},
-	{
-		"result": "ok"
+		"coins" : 10
 	},
 	{
 		"result": "ok"
@@ -112,7 +101,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 6
+		"coins" : 4
 	},
 	{
 		"result": "ok"
