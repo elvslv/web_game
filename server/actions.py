@@ -98,40 +98,6 @@ def act_createGame(data):
 	user.priority = 1
 	return {'result': 'ok', 'gameId': newGame.id}
 	
-def act_getGameList(data):
-	result = {'result': 'ok'}
-	games = dbi.query(Game)
-	result['games'] = list()
-
-	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn']
-	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum']
-	playerAttrs = ['id', 'name', 'sid']
-	for game in games:
-		curGame = dict()
-
-		for i in range(len(gameAttrs)):
-			if gameAttrs[i] == 'descr':
-				continue
-			curGame[gameAttrs[i]] = getattr(game, gameAttrs[i]) 
-		map_ = game.map
-		players = game.players
-		curGame['playersNum'] = len(players)
-		curGame['map'] = dict()
-		for i in range(len(mapAttrs)):
-			curGame['map'][mapAttrs[i]] = getattr(map_, mapAttrs[i])
-
-		resPlayers = list()
-		priority = 0
-		for player in players:
-			curPlayer = dict()
-			for i in range(len(playerAttrs)):
-				curPlayer[playerAttrs[i]] = getattr(player, playerAttrs[i])
-			priority += 1	
-			curPlayer['priority'] = priority
-			resPlayers.append(curPlayer)
-		curGame['players'] = resPlayers
-		result['games'].append(curGame)
-	return result
 
 def act_joinGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
@@ -208,6 +174,132 @@ def act_loadGame(data):
 #	for act in data:
 #		doAction(act)
 
+def getMapState(mapId, gameId = None):
+	map_ = dbi.getXbyY('Map', 'id', mapId)
+	result = dict()
+	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum']
+	mapAttrNames = ['mapId', 'mapName', 'playersNum', 'turnsNum']
+	for i in range(len(mapAttrs)):
+		result[mapAttrNames[i]] = getattr(map_, mapAttrs[i])
+	result['regions'] = list()
+	constRegionAttrs = ['id', 'defTokensNum', 'border', 'coast', 'mountain', 
+		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
+	constRegionAttrNames = ['regionId', 'defaultTokensNum', 'border', 'coast', 
+		'mountain', 'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 
+		'swamp', 'cavern']
+	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
+		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
+
+	for region in map_.regions:
+		curReg = dict()
+		for i in range(len(constRegionAttrs)):
+			curReg[constRegionAttrNames[i]] = getattr(region, constRegionAttrs[i])
+		curReg['adjacentRegions'] = region.getNeighbors()
+		if gameId:
+			curRegState = region.getState()
+			for i in range(len(curRegionAttrs)):
+				curReg[curRegionAttrs[i]] = getattr(curRegState, curRegionAttrs[i])
+		result['regions'].append(curReg)
+	return result
+
+def act_getMapState(data):
+	return {'result': 'ok', 'mapState': getMapState(data['mapId'])}
+
+def act_getGameList(data):
+	result = {'result': 'ok'}
+	games = dbi.query(Game)
+	result['games'] = list()
+
+	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
+		'mapId']
+	gameAttrNames = [ 'activePlayer', 'gameId', 'gameName', 'gameDescr', 'state', 
+		'turn', 'mapId']
+
+	playerAttrs = ['id', 'name', 'isReady']
+	playerAttrNames = ['userId', 'username', 'isReady']
+	for game in games:
+		curGame = dict()
+
+		for i in range(len(gameAttrs)):
+			if gameAttrs[i] == 'descr':
+				continue
+			curGame[gameAttrNames[i]] = getattr(game, gameAttrs[i]) 
+
+		players = game.players
+		resPlayers = list()
+		priority = 0
+		for player in players:
+			curPlayer = dict()
+			for i in range(len(playerAttrs)):
+				curPlayer[playerAttrNames[i]] = getattr(player, playerAttrs[i])
+			priority += 1	
+			curPlayer['priority'] = priority
+			resPlayers.append(curPlayer)
+		curGame['players'] = resPlayers
+		curGame['playersNum'] = len(players)
+		result['games'].append(curGame)
+	return result
+
+def act_getGameState(data):
+	game = dbi.getXbyY('Game', 'id', data['gameId'])
+	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
+	gameNameAttrs = ['gameId', 'gameName', 'gameDescription', 'state', 
+		'currentTurn', 'activePlayerId']
+
+	result = dict()
+	for i in range(len(gameResFields)):
+		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
+		
+	result['map'] = getMapState(game.map.id)
+
+	playerAttrs = ['id', 'name', 'isReady', 'coins', 'tokensInHand']
+	playerAttrNames = ['userId', 'username', 'isReady', 'coins', 'tokensInHand']
+
+	players = game.players
+	resPlayers = list()
+	priority = 0
+	for player in players:
+		curPlayer = dict()
+		for i in range(len(playerAttrs)):
+			curPlayer[playerAttrs[i]] = getattr(player, playerAttrs[i])
+
+		priority += 1	
+		curPlayer['priority'] = priority
+		
+		if player.currentTokenBadge:
+			curTokenBadge = dict()
+			curTokenBadge['race'] =  races.racesList[player.currentTokenBadge.raceId].name
+			curTokenBadge['specialPower'] =  races.specialPowerList[player.currentTokenBadge.specialPowerId].name
+			curPlayer['currentTokenBadge'] = curTokenBadge
+			
+		if player.declinedTokenBadge:
+			declinedTokenBadge = dict()
+			declinedTokenBadge['race'] =  races.racesList[player.declinedTokenBadge.raceId].name
+			declinedTokenBadge['specialPower'] =  races.specialPowerList[player.declinedTokenBadge.specialPowerId].name
+			curPlayer['declinedTokenBadge'] = declinedTokenBadge
+			
+		resPlayers.append(curPlayer)
+	result['players'] = resPlayers
+	
+	result['visibleTokenBadges'] = getVisibleTokenBadges(gameId) 
+	
+	return {'result': ok, 'gameState': result}
+
+def getVisibleTokensBadges(gameId):
+	game = dbi.getXbyY('Game', 'id', gameId)
+	rows = game.tokenBadges()
+	result = list()
+	for tokenBadge in filter(lambda x: x.position > 0, rows):
+		result.append({
+			'raceId': races.racesList[tokenBadge.raceId].name, 
+			'specialPowerId': races.specialPowerList[tokenBadge.specPowerId].name,
+			'position': tokenBadge.position})
+	return result
+
+def act_getVisibleTokenBadges(data):
+
+	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokensBadges(data['gameId'])}
+
 def doAction(data):
 	try:
 		func = 'act_%s' % data['action'] 
@@ -218,5 +310,6 @@ def doAction(data):
 		dbi.commit()
 		return res
 	except Exception, e:			##Temporary
+		print e
 		dbi.rollback()
 		raise e

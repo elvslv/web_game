@@ -1,85 +1,86 @@
-[	{
-		"result": "ok"
+[ 
+	{
+	"result": "ok"
 	},
 	{
-		"result": "ok"
+	"result": "ok"
 	},
 	{
-		"result": "ok"
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 1
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 2
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 3
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 4
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 5
+	},
+	{
+	"result": "ok",
+	"gameId": 1
+	},
+	{
+	"result": "ok",
+	"gameId": 2
+	},
+	{
+	"result": "alreadyInGame"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "tooManyPlayers"
+	},
+	{
+	"result": "notInGame"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "notInGame"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "badGameState"
 	},
 	{
 		"result": "ok",
-		"sid": 1
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"sid": 2
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"sid": 3
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"sid": 4
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"sid": 5
-	},
-	{
-		"result": "ok",
-		"gameId": 1
-	},
-	{
-		"result": "ok",
-		"gameId": 2
-	},
-	{
-		"result": "alreadyInGame"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "tooManyPlayers"
-	},
-	{
-		"result": "notInGame"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "notInGame"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badGameState"
-	},
-	{
-		"result": "ok",
-		"games": 
+		"games":
 		[
 			{
 				"activePlayer": 1,
@@ -90,19 +91,19 @@
 					{
 						"userId": 1,
 						"username": "user1",
-						"isReady": 1,
+						"isReady": true,
 						"priority": 1
 					},
 					{
 						"userId": 4,
 						"username": "user4",
-						"isReady": 1,
+						"isReady": true,
 						"priority": 2
 					}
 				],
 				"mapId": 1,
 				"playersNum": 2,
-				"state": 2,
+				"state": 0,
 				"turn": 0
 			},
 			{
@@ -114,16 +115,15 @@
 					{
 						"userId": 3,
 						"username": "user3",
-						"isReady": 0,
+						"isReady": false,
 						"priority": 1
 					}
 				],
 				"mapId": 2,
 				"playersNum": 1,
 				"state": 1,
-				"turn": null
+				"turn": 0
 			}
 		]
-	
 	}
 ]

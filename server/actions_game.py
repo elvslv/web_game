@@ -24,14 +24,14 @@ def act_setReadinessStatus(data):
 		game.state = GAME_START
 		#generate first 6 races
 		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
-                        vRaces = data['visibleRaces']
-                        vSpecialPowers = data['visibleSpecialPowers']
-                        for i in range(misc.VISIBLE_RACES):
-                                showNextRace(game, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], 
-                                	vSpecialPowers[misc.VISIBLE_RACES-i-1])
-                else:
-                        for i in range(misc.VISIBLE_RACES):
-                                showNextRace(game, misc.VISIBLE_RACES - 1)
+			vRaces = data['visibleRaces']
+			vSpecialPowers = data['visibleSpecialPowers']
+			for i in range(misc.VISIBLE_RACES):
+				showNextRace(game, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], 
+				vSpecialPowers[misc.VISIBLE_RACES-i-1])
+		else:
+			for i in range(misc.VISIBLE_RACES):
+				showNextRace(game, misc.VISIBLE_RACES - 1)
 			
 	dbi.updateHistory(user, GAME_START, None)
 	return {'result': 'ok'}
@@ -252,40 +252,19 @@ def act_dragonAttack(data):
 	return {'result': 'ok'}	
 
 def act_enchant(data):
-	print 'enchant1'
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	print 'enchant2'
 	if not user.currentTokenBadge: 
 		raise BadFieldException('badStage')
-	print 'enchant3'
 	user.game.checkStage(GAME_CONQUER, user)
-	print 'enchant4'
 	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
-	print 'enchant5'
 	victimBadgeId = reg.tokenBadge.id
-	print 'enchant6'
 	reg.checkIfImmune(True)
-	print 'enchant7'
 	clearFromRace(reg)
-	print 'enchant8'
 	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge,
 		reg)
-	print 'enchant9'
 	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
 			reg.region.id, 1, ATTACK_ENCHANT)
-	print 'enchant10'
 	return {'result': 'ok'}	
-
-def act_getVisibleTokenBadges(data):
-	game = dbi.getXbyY('Game', 'id', data['gameId'])
-	rows = game.tokenBadges()
-	result = list()
-	for tokenBadge in filter(lambda x: x.position > 0, rows):
-		result.append({
-			'raceId': races.racesList[tokenBadge.raceId].name, 
-			'specialPowerId': races.specialPowerList[tokenBadge.specPowerId].name,
-			'position': tokenBadge.position})
-	return {'result': result}
 
 def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])

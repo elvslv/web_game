@@ -33,19 +33,22 @@ class Map(Base):
 	__tablename__ = 'maps'
 
 	id = pkey()
-    	name = uniqString(MAX_MAPNAME_LEN)
-   	playersNum = Column(Integer)
-    	turnsNum = Column(Integer)
+	name = uniqString(MAX_MAPNAME_LEN)
+	playersNum = Column(Integer)
+	turnsNum = Column(Integer)
     
-    	def __init__(self, name, playersNum, turnsNum): 
-    		self.name = name
-    		self.playersNum = playersNum
-    		self.turnsNum = turnsNum
+	def __init__(self, name, playersNum, turnsNum): 
+		self.name = name
+		self.playersNum = playersNum
+		self.turnsNum = turnsNum
 
 	def getRegion(self, regionId):
 		region = filter(lambda x: x.id == regionId, self.regions)
 		if not region: raise BadFieldException('badRegionId')
 		return region[0]
+
+	def getRegions(self):
+		return self.regions
 
 class Game(Base):
 	__tablename__ = 'games'
@@ -74,13 +77,10 @@ class Game(Base):
 
 	def checkStage(self, state, user):
 		lastEvent = self.history[-1]
-		print lastEvent.state
 		badStage = lastEvent.state not in misc.possiblePrevCmd[state] 
 		if lastEvent.state == misc.GAME_CONQUER:
 			battle = lastEvent.warHistory
-			print 'vict1'
 			victim = battle.victimBadge
-			print 'vict2'
 			canDefend = victim != None  and\
 				not victim.inDecline and\
 				battle.attackType != misc.ATTACK_ENCHANT and\
@@ -170,25 +170,25 @@ class User(Base):
 class Region(Base):
 	__tablename__ = 'regions'
 
-    	id = Column(Integer, primary_key=True, autoincrement=False)
-    	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
-    	defTokensNum = Column(Integer, default = 0)
+	id = Column(Integer, primary_key=True, autoincrement=False)
+	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+	defTokensNum = Column(Integer, default = 0)
 
-    	border = Column(Boolean, default=False)
-    	coast = Column(Boolean, default=False)
-    	mountain = Column(Boolean, default=False)
-    	sea = Column(Boolean, default=False) 
-    	mine = Column(Boolean, default=False) 
-    	farmland = Column(Boolean, default=False) 
-   	magic = Column(Boolean, default=False) 
-    	forest = Column(Boolean, default=False) 
-    	hill = Column(Boolean, default=False) 
-    	swamp = Column(Boolean, default=False) 
-    	cavern = Column(Boolean, default=False)
+	border = Column(Boolean, default=False)
+	coast = Column(Boolean, default=False)
+	mountain = Column(Boolean, default=False)
+	sea = Column(Boolean, default=False) 
+	mine = Column(Boolean, default=False) 
+	farmland = Column(Boolean, default=False) 
+	magic = Column(Boolean, default=False) 
+	forest = Column(Boolean, default=False) 
+	hill = Column(Boolean, default=False) 
+	swamp = Column(Boolean, default=False) 
+	cavern = Column(Boolean, default=False)
 
-    	map = relationship(Map, backref=backref('regions', order_by=id))
-    	neighbors = relationship('Adjacency'  ,primaryjoin='and_(Region.id==Adjacency.regId,\
-               								 Region.mapId==Adjacency.mapId)')
+	map = relationship(Map, backref=backref('regions', order_by=id))
+	neighbors = relationship('Adjacency'  ,primaryjoin='and_(Region.id==Adjacency.regId,\
+		 Region.mapId==Adjacency.mapId)')
 
 	def __init__(self, id, defTokensNum, map_): 
     		self.id = id
@@ -209,32 +209,31 @@ class Region(Base):
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
 	
-    	id = pkey()
-    	gameId = fkey('games.id')
+	id = pkey()
+	gameId = fkey('games.id')
 	tokenBadgeId = fkey('tokenBadges.id') 
-    	ownerId = fkey('users.id')
+	ownerId = fkey('users.id')
 	regionId = Column(Integer, default = 0)
 	mapId  = Column(Integer, default = 0)		# Would get rid of this but don't know how
-    	tokensNum = Column(Integer, default = 0)
-    	holeInTheGround = Column(Boolean, default = False)
-    	encampment = Column(Integer, default = 0)
-    	dragon = Column(Boolean, default = False) 
-    	fortress = Column(Boolean, default = False) 
-    	hero = Column(Boolean, default = False) 
-    	fortified = Column(Boolean, default = False) 
-    	inDecline = Column(Boolean, default = False) 
+	tokensNum = Column(Integer, default = 0)
+	holeInTheGround = Column(Boolean, default = False)
+	encampment = Column(Integer, default = 0)
+	dragon = Column(Boolean, default = False) 
+	fortress = Column(Boolean, default = False) 
+	hero = Column(Boolean, default = False) 
+	inDecline = Column(Boolean, default = False) 
 
-    	game = relationship(Game)
-    	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
-    	owner = relationship(User, backref=backref('regions'))
-    	region = relationship(Region, backref=backref('states'))
+	game = relationship(Game)
+	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
+	owner = relationship(User, backref=backref('regions'))
+	region = relationship(Region, backref=backref('states'))
 
-    	__table_args__ = (ForeignKeyConstraint([regionId, mapId], [Region.id, Region.mapId]), {})
+	__table_args__ = (ForeignKeyConstraint([regionId, mapId], [Region.id, Region.mapId]), {})
 
 	def __init__(self, region, game):
 		self.region = region
-        	self.game = game
-        	self.tokensNum = region.defTokensNum
+		self.game = game
+		self.tokensNum = region.defTokensNum
 
 
 	def checkIfImmune(self, enchanting=False):
@@ -256,9 +255,9 @@ class Adjacency(Base):
 
 
 	def __init__(self, n1, n2):
-      		self.regId = n1
-          	self.neighborId = n2
-        	
+		self.regId = n1
+		self.neighborId = n2
+
 
 class Message(Base):
     __tablename__ = 'chat'
