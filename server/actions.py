@@ -251,33 +251,38 @@ def act_resetServer(data):
 	return {'result': 'ok'}
 
 def act_saveGame(data):
-	gameId = extractValues('Games', ['GameId'], data['gameId'])
-	query("""SELECT Actions FROM GameHistory WHERE GameId=%s ORDER BY 
-		GameHistoryId ASC""")
+	gameId = extractValues('Games', ['GameId'], [data['gameId']])
+	query("""SELECT Action FROM GameHistory WHERE GameId=%s ORDER BY 
+		GameHistoryId ASC""" % gameId)
 	row = fetchall()
 	result = list()
 	for action in row:
 		result.append(action[0])
-
 	return {'result': 'ok', 'actions': result}
 
 def act_loadGame(data):
-	for act in data:
+	userId, gameId = getIdBySid(data['sid'])
+	query('UPDATE Users SET GameId=NULL WHERE GameId=%s', gameId)
+	editDb.clearGame(gameId)
+	for act in data['actions']:
+		if act['action'] in ('register', 'uploadMap', 'login', 'logout', 'saveGame', 'loadGame', 'resetServer', 'createDefaultMaps'):
+			raise BadFieldException('illegalAction')
 		if 'userId' in act:
-			sid = extractValues('Users', ['Id', 'Sid'], [data['userId']])[1]
+			sid = extractValues('Users', ['Id', 'Sid'], [act['userId']])[1]
 			del act['userId']
 			act['sid'] = sid
-
-	for act in data:
-		doAction(act)
+			
+	for act in data['actions']:
+		res = doAction(act)
+	return {'result': 'ok'}
 
 def doAction(data):
 	try:
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
-		checkFieldsCorrectness(data);
-		res = globals()[func](data)
+	#	checkFieldsCorrectness(data)			
+		res = globals()[func](data) 
 		commit()
 		return res
 	except (MySQLdb.Error, BadFieldException), e:

@@ -1,0 +1,84 @@
+[	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok",
+		"gameId": 1
+	},
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 6
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 1
+	},
+	{
+		"actions": 
+			[
+				{"action": "createGame", "userId": 1, "gameName": "game1", "mapId": 7, "playersNum": 2},
+                {"action": "joinGame", "gameId": 1, "userId": 2},
+				{"action": "setReadinessStatus", "isReady": 1, "userId": 1},
+                {"visibleRaces": 
+						["Ratmen", "Wizards", 
+							"Amazons", "Elves", "Giants", "Halflings"
+						], 
+						"isReady": 1, "userId": 2, 
+						"action": "setReadinessStatus", 
+						"visibleSpecialPowers": 
+						["Heroic", "Forest", "Fortifield", 
+						"Berserk", "Commando", "Diplomat"]},
+                {"action": "selectRace", "position": 0, "userId": 1},
+                {"action": "conquer", "regionId": 1, "userId": 1},
+                {"action": "conquer", "regionId": 2, "userId": 1},
+                {"action": "conquer", "regionId": 3, "userId": 1},
+                {"action": "redeploy", "regions": [{"regionId": 1, "tokensNum": 0}, {"regionId": 2, "tokensNum": 0}, {"regionId": 3, "tokensNum": 13}], "userId": 1},
+                {"action": "finishTurn", "userId": 1}
+   
+			],
+		"result": "ok"
+	}
+	
+]

@@ -49,8 +49,8 @@
 			"action": "setReadinessStatus",
 			"sid": 2,
 			"isReady": 1,
-			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Fortifield", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
+			"visibleRaces": ["Ratmen", "Wizards", "Amazons", "Elves", "Giants", "Halflings"],
+			"visibleSpecialPowers": ["Heroic", "Forest", "Fortifield", "Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -78,46 +78,46 @@
 			"sid": 1,
 			"regions": [{"regionId": 1, "tokensNum": 0},
 				{"regionId": 2, "tokensNum": 0},
-				{"regionId": 3, "tokensNum": 11}],
-			"fortifield": {"regionId": 3}
-		},
+				{"regionId": 3, "tokensNum": 13}]
+		},		
 		{
 			"action": "finishTurn",
 			"sid" : 1
 		},
 		{
+			"action": "loadGame",
+			"sid" : 1,
+			"actions": 
+			[
+				{"action": "createGame", "userId": 1, "gameName": "game1", "mapId": 7, "playersNum": 2},
+                {"action": "joinGame", "gameId": 1, "userId": 2},
+				{"action": "setReadinessStatus", "isReady": 1, "userId": 1},
+                {"visibleRaces": 
+						["Ratmen", "Wizards", 
+							"Amazons", "Elves", "Giants", "Halflings"
+						], 
+						"isReady": 1, "userId": 2, 
+						"action": "setReadinessStatus", 
+						"visibleSpecialPowers": 
+						["Heroic", "Forest", "Fortifield", 
+						"Berserk", "Commando", "Diplomat"]},
+                {"action": "selectRace", "position": 0, "userId": 1},
+                {"action": "conquer", "regionId": 1, "userId": 1},
+                {"action": "conquer", "regionId": 2, "userId": 1},
+                {"action": "conquer", "regionId": 3, "userId": 1},
+                {"action": "redeploy", "regions": [{"regionId": 1, "tokensNum": 0}, {"regionId": 2, "tokensNum": 0}, {"regionId": 3, "tokensNum": 13}], "userId": 1},
+                {"action": "finishTurn", "userId": 1}   
+			]
+		},
+		{
 			"action": "selectRace",
 			"sid": 2,
-			"position" : 1
+			"position" : 0
 		},
 		{
 			"action": "conquer",
 			"sid": 2,
 			"regionId" : 1
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 7}]
-		},
-		{
-			"action": "finishTurn",
-			"sid" : 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 4
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 0}, {"regionId": 4, "tokensNum": 11}],
-			"fortifield": {"regionId": 4}
-		},
-		{
-			"action": "finishTurn",
-			"sid" : 1
 		},
 		{
 			"action": "conquer",
@@ -127,35 +127,15 @@
 		{
 			"action": "redeploy",
 			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 1}, {"regionId": 2, "tokensNum": 6}]
+			"regions": [{"regionId": 1, "tokensNum": 9}]
 		},
 		{
 			"action": "finishTurn",
 			"sid" : 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 3
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 1}, 
-				{"regionId": 4, "tokensNum": 10}]
-		},
-		{
-			"action": "finishTurn",
-			"sid" : 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId" : 3
 		}
 	],
-	"description": "special power Fortifield"
+		
+	"description": "Loading"
 }
-
 
 

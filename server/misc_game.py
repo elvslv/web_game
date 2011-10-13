@@ -11,7 +11,7 @@ def updateGameHistory(gameId, data):
 	if 'sid' in data:
 		userId = getIdBySid(data['sid'])
 		del data['sid']
-		data['userId'] = userId
+		data['userId'] = userId[0]
 	query('INSERT INTO GameHistory(GameId, Action) VALUES(%s, %s)', gameId, 
 		json.dumps(data))
 
