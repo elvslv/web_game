@@ -2,8 +2,7 @@
 	"test":
 	[
 		{
-			"action": "resetServer",
-			"randseed": 423656574
+			"action": "resetServer"
 		},
 		{
 			"action": "createDefaultMaps"
@@ -32,7 +31,7 @@
 			"action": "createGame",
 			"sid": 1,
 			"gameName": "game1",
-			"mapId": 6,
+			"mapId": 7,
 			"playersNum": 2
 		},
 		{
@@ -40,6 +39,7 @@
 			"sid": 2,
 			"gameId": 1		
 		},
+		
 		{
 			"action": "setReadinessStatus",
 			"sid": 1,
@@ -48,627 +48,53 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 2,
-			"isReady": 1
+			"isReady": 1,
+			"visibleRaces": ["Amazons", "Dwarves", "Elves", "Giants", "Halflings", "Humans"],
+			"visibleSpecialPowers": ["Forest", "Berserk", "Bivouacking", "Commando", "Diplomat", "Dragon master"]
 		},
 		{
 			"action": "selectRace",
 			"sid": 1,
-			"position":  3
+			"position" : 0
 		},
+
 		{
-			"action": "selectRace",
+			"action": "conquer",
 			"sid": 1,
-			"position":  2
-		},
-		{
-			"action": "selectRace",
-			"sid": 2,
-			"position":  2
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
+			"regionId" : 1
 		},
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 2
+			"regionId" : 2
 		},
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 3
+			"regionId" : 3
 		},
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId": 19
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 4
+			"regionId" : 4
 		},
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": 
-			[
-				{
-					"regionId": 2, 
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 3, 
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 19, 
-					"tokensNum": 3
-				}, 
-				{
-					"regionId": 4, 
-					"tokensNum": 2
-				}
-			]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 12
-		},
-		{
-			"action": "selectRace",
-			"sid": 2,
-			"position": 4
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 12 
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 11
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 10,
-			"pos": 25
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 10 
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 24
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": 
-			[
-				{
-					"regionId": 12,
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 11, 
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 10, 
-					"tokensNum": 3
-				}, 
-				{
-					"regionId": 24,
-					"tokensNum": 3
-				}
-			],
-			"encampments": 
-			[
-				{
-					"regionId": 12,
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 11, 
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 10, 
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 24,
-					"encampmentsNum": 2
-				}
-			]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 21
-		},
-		{
-			"action": "conquer",
-			"sid": 1, 
-			"regionId": 5
+			"regions": [{"regionId": 3, "tokensNum": 14}]
 		},
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": 
-			[
-				{
-					"regionId": 2, 
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 3, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 19, 
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 4, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 21, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 5, 
-					"tokensNum": 2
-				}
-			]
+			"regions": [{"regionId": 3, "tokensNum": 10}]
 		},
+
 		{
 			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 26 
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 23
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": 
-			[
-				{
-					"regionId": 12,
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 11, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 10, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 24,
-					"tokensNum": 1
-				}	, 
-				{
-					"regionId": 26, 
-					"tokensNum": 2
-				}, 
-				{
-					"regionId": 23,
-					"tokensNum": 4
-				}
-			],
-			"encampments": 
-			[
-				{
-					"regionId": 12,
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 11, 
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 23,
-					"encampmentsNum": 3
-				}
-			]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "selectRace",
-			"sid": 1,
-			"position": 0
-		},
-		{
-			"action": "decline",
-			"sid": 1
-		},
-		{
-			"action": "defend",
-			"sid": 1,
-			"regions": []
-		},
-		{
-			"action": "decline",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"regionId": 5,
-			"sid": 1
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1 
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 5
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": 
-			[
-				{
-					"regionId": 12,
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 11, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 10, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 24,
-					"tokensNum": 1
-				}	, 
-				{
-					"regionId": 26, 
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 23,
-					"tokensNum": 1
-				}, 
-				{
-					"regionId": 5,
-					"tokensNum": 4
-				}
-			],
-			"encampments": 
-			[
-				{
-					"regionId": 12,
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 11, 
-					"encampmentsNum": 1
-				}, 
-				{
-					"regionId": 23,
-					"encampmentsNum": 2
-				}
-			]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "selectRace",
-			"position": 5,
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 5
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 6
-		},
-		{
-			"action": "defend",
-			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 3}]
-		},
-		{
-			"action": "defend",
-			"sid": 2,
-			"regions": [{"regionId": 3, "tokensNum": 2}] 
-		},
-		{
-			"action": "defend",
-			"sid": 2,
-			"regions": [{"regionId": 24, "tokensNum": 4}]
-		},
-		{
-			"action": "defend",
-			"sid": 2,
-			"regions": [{"regionId": 24, "tokensNum": 2}]
-		},
-		{
-			"action": "defend",
-			"sid": 2,
-			"regions": [{"regionId": 24, "tokensNum": 3}]
-		},
-		{
-			"action": "defend",
-			"sid": 2,
-			"regions": [{"regionId": 24, "tokensNum": 3}]
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 4
-		},	
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 6
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 4, "tokensNum": 4}, {"regionId": 5, "tokensNum": 4}, {"regionId": 6, "tokensNum": 5}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 4, "tokensNum": 4}, {"regionId": 5, "tokensNum": 4}, {"regionId": 6, "tokensNum": 2}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "decline",
-			"sid": 1
-		},
-		{
-			"action": "decline",
-			"sid": 2
-		},
-		{
-			"action": "redeploy",
-			"sid":2,
-			"regions": []
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1,
-			"position": 65
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 4
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 23
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 24
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 26
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 55, "tokensNum": 2}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 1, "tokensNum": 2}]
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 2}, {"regionId": 5, "tokensNum": 2}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 2}, {"regionId": 24, "tokensNum": 2}, {"regionId": 26, "tokensNum": 2}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "selectRace",
-			"sid": 2,
-			"position": 4
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 25
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 27
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 29
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 20
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [
-				{"regionId": 20, "tokensNum": 8}, 
-				{"regionId": 29, "tokensNum": 1},
-				{"regionId": 25, "tokensNum": 1},
-				{"regionId": 27, "tokensNum": 1}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2 
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 25 
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 7
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 8
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
-				{"regionId": 7, "tokensNum": 3}, {"regionId": 8, "tokensNum": 3}]
-		},		
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 1}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
-				{"regionId": 7, "tokensNum": 3}, {"regionId": 8, "tokensNum": 3}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 19
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 21
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [
-				{"regionId": 20, "tokensNum": 3}, 
-				{"regionId": 29, "tokensNum": 1},
-				{"regionId": 25, "tokensNum": 1},
-				{"regionId": 27, "tokensNum": 1},
-				{"regionId": 19, "tokensNum": 4},
-				{"regionId": 21, "tokensNum": 1}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId": 10
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [
-				{"regionId": 4, "tokensNum": 1}, {"regionId": 5, "tokensNum": 1}, {"regionId": 6, "tokensNum": 2}, 			{"regionId": 23, "tokensNum": 1}, {"regionId": 24, "tokensNum": 1}, {"regionId": 26, "tokensNum": 1},
-				{"regionId": 7, "tokensNum": 1}, {"regionId": 8, "tokensNum": 2}, {"regionId": 10, "tokensNum": 2}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 1
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 2
-		},
-		{
-			"action": "conquer",
-			"sid": 2,
-			"regionId": 16
-		},
-		{
-			"action": "redeploy",
-			"sid": 2,
-			"regions": [
-				{"regionId": 20, "tokensNum": 1}, 
-				{"regionId": 29, "tokensNum": 1},
-				{"regionId": 25, "tokensNum": 1},
-				{"regionId": 27, "tokensNum": 1},
-				{"regionId": 19, "tokensNum": 1},
-				{"regionId": 21, "tokensNum": 1},
-				{"regionId": 2, "tokensNum": 4},
-				{"regionId": 16, "tokensNum": 1}]
-		},
-		{
-			"action": "finishTurn",
-			"sid": 2
+			"sid" : 1
+			
 		}
+
 	],
-	"description": "full game process"
+	"description": "race Amazons"
 }

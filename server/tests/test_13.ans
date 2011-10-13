@@ -1,8 +1,4 @@
-[
-	{
-		"result": "ok"
-	},
-	{
+[	{
 		"result": "ok"
 	},
 	{
@@ -10,10 +6,15 @@
 	},
 	{
 		"result": "ok",
+		"id": 1
+	},
+	{
+		"result": "ok",
 		"sid": 1
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id": 2
 	},
 	{
 		"result": "ok",
@@ -36,16 +37,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 3
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "badStage"
+		"tokenBadgeId": 6
 	},
 	{
 		"result": "ok"
@@ -55,146 +47,9 @@
 	},
 	{
 		"result": "ok"
-	},
+	},	
 	{
 		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 9
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok",
-		"tokenBadgeId": 2
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 9
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 18
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 17
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 24
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 26
-	},
-	{
-		"result": "ok",
-		"tokenBadgeId": 1
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "badStage" 
-	},
-	{
-		"result": "badRegion"
-	},
-	{
-		"result": "notEnoughTokens"
-	},
-	{
-		"result": "thereAreTokensInTheHand"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
 	},
 	{
 		"result": "notEnoughTokensForRedeployment"
@@ -204,133 +59,8 @@
 	},
 	{
 		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 40
-	},
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badStage"
-	},	
-	{
-		"result": "badStage"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 34
-	},
-	{
-		"result": "badRegion"
-	},
-	{
-		"result": "ok"
-	},	
-	{
-		"result": "ok"
-	},	
-	{
-		"result": "ok"
-	},
-	{
-		"result": "badRegionId"
-	},
-	{
-		"result": "badRegion"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 50
-	},
-	{
-		"result": "ok",
-		"tokenBadgeId": 5
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 40
-	},
-	{
-		"result": "regionIsImmune"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "notEnoughTokensForRedeployment"
-	},
-	{
-		"result": "ok" 
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 62
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 1,
-		"coins": 49
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer": 2,
-		"coins": 73
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"coins": 59
+		"nextPlayer" : 2,
+		"coins" : 1
 	}
+
 ]
-			 

@@ -29,7 +29,7 @@ def act_register(data):
 		raise BadFieldException('usernameTaken')
 	query('INSERT INTO Users(Username, Password) VALUES (%s, %s)',
 		username, passwd)
-	return {'result': 'ok'}
+	return {'result': 'ok', 'id': lastId()}
 
 def act_login(data):
 	username = data['username']

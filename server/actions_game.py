@@ -315,7 +315,6 @@ def act_defend(data):
 	
 	checkStage(GAME_DEFEND, gameId)
 	regionId, tokensNum = checkForDefendingPlayer(gameId, tokenBadgeId)
-	print tokensNum
 	raceId, specialPowerId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)
 	if not 'regions' in data:
 		raise BadFieldException('badJson')

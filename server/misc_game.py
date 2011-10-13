@@ -67,7 +67,7 @@ def isRegionAdjacent(regionId, tokenBadgeId):
 	playerRegions = fetchall()
 	playerBorderline = False	
 	for plRegion in playerRegions:
-		query("""SELECT COUNT(*) FROM AdjacentRegions a, Regions b,
+		query("""SELECT 1 FROM AdjacentRegions a, Regions b,
 			Regions c WHERE b.RegionId=a.FirstRegionId AND a.MapId=b.MapId AND
 			a.MapId=c.MapId AND a.MapId=%s AND c.RegionId=a.SecondRegionId AND
 			b.RegionId=%s AND c.RegionId=%s""", getMapIdByTokenBadge(tokenBadgeId), 

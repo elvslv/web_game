@@ -8,7 +8,8 @@
 		"result": "badSid"
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id" : 1
 	},
 	{
 		"result": "ok",
