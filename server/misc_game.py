@@ -322,12 +322,27 @@ def getRegionState(regionId, scndFields, scndField, regionParams, offset):
 	return result
 
 def getCurrentRegionState(regionId, gameId):
-	return getRegionState(regionId, ['gameId', 'ownerId', 'tokenBadgeId', 
-		'tokensNum'], gameId, possibleLandDescription[11:], 11)
+	queryList = list()
+	queryList.extend(['regionId', 'gameId', 'ownerId', 'tokenBadgeId', 
+		'tokensNum', 'inDecline'])
+	queryList.extend(possibleLandDescription[11:])
+	regionDescr = extractValues('CurrentRegionState', queryList, [regionId, gameId])
+	result = dict()
+	for i in range(2, len(queryList)):
+		result[queryList[i]] = regionDescr[i]
+	return {'currentRegionDescription': result}
 	
 def getConstRegionState(regionId, mapId):
-	return getRegionState(regionId, ['mapId'], mapId, 
-		possibleLandDescription[:11], 0)
+	queryList = list()
+	queryList.extend(['regionId', 'mapId'])
+	queryList.extend(possibleLandDescription[:11])
+	regionDescr = extractValues('Regions', queryList, [regionId, mapId])
+	result = list()
+	for i in range(2, len(queryList)):
+		if regionDescr[i]: result.append(queryList[i])
+	return {'constGameDescription': result}
+
+
 	
 def getMapState(mapId, gameId=None):
 	mapQueryFields = ['mapId', 'mapName', 'turnsNum', 'playersNum']
@@ -353,17 +368,17 @@ def getMapState(mapId, gameId=None):
 		region['adjacentRegions'].append(adjacentadjacent)
 		
 		regions.append(region)
-	return regions
+	mapRes['regions'] = regions
+	return mapRes
 
 def getTokenBadgeState(tokenBadgeId):
-	tokenBadgeQueryFields = ['tokenBadgeId', 'raceId', 'specialPowerId', 
-		'totalTokensNum']
+	tokenBadgeQueryFields = ['tokenBadgeId', 'totalTokensNum', 'raceId', 'specialPowerId']
 	tokenBadge = extractValues('TokenBadges', tokenBadgeQueryFields, tokenBadgeId)
 	result = dict()
-	for i in range(len(tokenBadgeQueryFields)):
+	for i in range(2):
 		result[tokenBadgeQueryFields[i]] = tokenBadge[i]
-	result['raceName'] = races.racesList[tokenBadge[1]].name
-	result['specialPower'] = races.specialPowerList[tokenBadge[2]].name
+	result['raceName'] = races.racesList[tokenBadge[2]].name
+	result['specialPowerName'] = races.specialPowerList[tokenBadge[3]].name
 	return result
 
 def getUserIdByTokenBadge(tokenBadgeId):

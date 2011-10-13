@@ -20,7 +20,6 @@ class BaseRace:
 			gameId)
 		ans = (not regions and (regionInfo['coast'] or regionInfo['border'])
 			) or regions
-		print regionId, ans
 		return ans
 	
 	def countConquerBonus(self, regionId, tokenBadgeId):
@@ -307,7 +306,6 @@ class BaseSpecialPower:
 		regionInfo = getRegionInfoById(regionId, getGameIdByTokenBadge(
 			tokenBadgeId))
 		ans = (isAdjacent or not regions) and not regionInfo['sea']
-		print regionId, isAdjacent, ans
 		return ans
 		
 	def countConquerBonus(self, regionId, tokenBadgeId):

@@ -186,7 +186,7 @@ def act_getGameState(data):
 	usersDescr = fetchall()
 	for user in usersDescr:
 		users.append(getUserState(user[0]))
-	result['users'] = users
+	result['players'] = users
 	
 	result['visibleTokenBadges'] = getVisibleTokenBadges(gameId) 
 	
