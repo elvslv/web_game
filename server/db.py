@@ -44,7 +44,8 @@ class Map(Base):
 
 	def getRegion(self, regionId):
 		region = filter(lambda x: x.id == regionId, self.regions)
-		if not region: raise BadFieldException('badRegionId')
+		if not region: 
+			raise BadFieldException('badRegionId')
 		return region[0]
 
 	def getRegions(self):

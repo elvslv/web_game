@@ -258,7 +258,6 @@ possibleLandDescription = [
 	'fortress',
 	'hero'
 ]
-
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5},
@@ -278,7 +277,7 @@ defaultMaps = [
 	 		{
 	 			'population' : 1,
 	 			'landDescription' : ['sea'],
-	 			'adjacent' : [4] 
+	 			'adjacent' : [1, 4] 
 	 		},
 	 		{
 	 			'population' : 1,
@@ -312,7 +311,7 @@ defaultMaps = [
 	 		},
 	 		{
 	 			'landDescription' : ['farmland', 'border'], #4
-	 			'adjacent' : [3, 22, 21, 5] 
+	 			'adjacent' : [3, 21, 22, 5] 
 	 		},
 	 		{
 	 			'landDescription' : ['cavern', 'border', 'swamp'], #5
@@ -325,15 +324,15 @@ defaultMaps = [
 	 		},
 			{
 	 			'landDescription' : ['mine', 'border', 'swamp'], #7
-	 			'adjacent' : [6, 8, 24, 26] 
+	 			'adjacent' : [6, 23, 8, 24, 26] 
 	 		},
 	 		{
-	 			'landDescription' : ['border',  'coast'], #8
+	 			'landDescription' : ['border', 'mountain', 'coast'], #8
 	 			'adjacent' : [7, 26, 10, 9, 24] 
 	 		},
 	 		{
 	 			'landDescription' : ['border', 'sea'], #9
-	 			'adjacent' : [8, 11, 10] 
+	 			'adjacent' : [8, 10, 11] 
 	 		},
 	 		{
 	 			'population': 1,
@@ -343,7 +342,7 @@ defaultMaps = [
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['mine', 'coast', 'forest', 'border'], #11
-	 			'adjacent' : [10, 27, 26, 12] 
+	 			'adjacent' : [10, 26, 27, 12] 
 	 		},
 	 		{
 	 			'landDescription' : ['forest', 'border'], #12
@@ -396,20 +395,19 @@ defaultMaps = [
 	 		{
 	 			'population': 1,
 	 			'landDescription' : ['farmland'], #23
-	 			'adjacent' : [22, 25, 5, 6, 24] 
+	 			'adjacent' : [22, 25, 6, 5, 24] 
 	 		},
 	 		{
 	 			'landDescription' : ['hill', 'magic'], #24
-	 			'adjacent' : [23, 26, 8, 25, 7] 
+	 			'adjacent' : [23, 26, 7, 25, 8] 
 	 		},
 	 		{
 	 			'landDescription' : ['mountain', 'cavern'], #25
 	 			'adjacent' : [24, 22, 23, 29] 
 	 		},
 	 		{
-
-		 		'landDescription' : ['farmland'], #26
-	 			'adjacent' : [24, 8, 7, 11, 27] 
+	 			'landDescription' : ['farmland'], #26
+	 			'adjacent' : [25, 24, 7, 8, 10, 11, 27] 
 	 		},
 	 		{
 	 			'population': 1,
@@ -427,11 +425,10 @@ defaultMaps = [
 	 		},
 	 		{
 	 			'landDescription' : ['hill'],  #30
-	 			'adjacent' : [28, 29, 13, 12, 27] 
+	 			'adjacent' : [29, 28, 13, 12, 27] 
 	 		},
 	 	]
-	},	
-	{
+	},	{
 		'mapName': 'defaultMap7', 
 		'playersNum': 2, 
 		'turnsNum': 5,

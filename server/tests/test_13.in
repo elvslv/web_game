@@ -5,7 +5,7 @@
 			"action": "resetServer",
 			"randseed": 423656574
 		},
-				{
+		{
 			"action": "createDefaultMaps"
 		},
 		{
@@ -318,11 +318,6 @@
 		{
 			"action": "decline",
 			"sid": 1
-		},
-		{
-			"action": "defend",
-			"sid": 1,
-			"regions": []
 		},
 		{
 			"action": "decline",

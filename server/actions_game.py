@@ -76,7 +76,7 @@ def act_conquer(data):
 	user.checkForFriends(owner)
 	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
 	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
-	if not (f1 or f2):
+	if not (f1 and f2):
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
 	attackedRace = None
@@ -94,6 +94,7 @@ def act_conquer(data):
 		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
 			, 1)
 	unitsNum = user.tokensInHand
+	print 'units', unitsNum, unitPrice
 	dice = user.game.getLastState() == GAME_THROW_DICE and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = throwDice()
@@ -167,7 +168,10 @@ def act_redeploy(data):
 				data[specAbility['name']], tokenBadge)
 
 			
-	if unitsNum: regState.tokensNum += unitsNum
+	if unitsNum: 
+		if not regState:
+			raise BadFieldException('thereAreTokensInHand')
+		regState.tokensNum += unitsNum
 	emptyRegions = filter( lambda x: not x.tokensNum, tokenBadge.regions)
 	for region in emptyRegions:
 		clearFromRace(region)	
@@ -186,7 +190,8 @@ def act_finishTurn(data):
 	game.checkStage(GAME_FINISH_TURN, user)
 	tokenBadge = user.currentTokenBadge
 	if tokenBadge and callRaceMethod(tokenBadge.raceId, 'needRedeployment') and\
-				game.getLastState() !=GAME_REDEPLOY:  raise BadFieldException('badStage')
+		game.getLastState() !=GAME_REDEPLOY:  
+		raise BadFieldException('badStage')
 		
 	income = len(user.regions)
 	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))

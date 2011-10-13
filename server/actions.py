@@ -310,6 +310,5 @@ def doAction(data):
 		dbi.commit()
 		return res
 	except Exception, e:			##Temporary
-		print e
 		dbi.rollback()
 		raise e

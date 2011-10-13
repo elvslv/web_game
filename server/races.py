@@ -13,17 +13,11 @@ class BaseRace:
 	def setId(self, id):
 		self.raceId = id
 
-	def tryToConquerRegion(self, regionId, tokenBadgeId):
-		isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
-		regionInfo = getRegionInfoById(regionId, 
-			getGameIdByTokenBadge(tokenBadgeId))
-		ans = (not regions and (regionInfo['coast'] or regionInfo['border'])
-			) or regions
-		return ans
-	
 	def canConquer(self, region, tokenBadge):
-		return not region.sea and ((not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.isNeighbor(region))
-
+		ans = (not tokenBadge.regions and (region.coast or region.border)
+			) or tokenBadge.regions
+		return ans
+		
 	def attackBonus(self, region, tokenBadge):
 		return 0
 	
@@ -84,7 +78,6 @@ class RaceHalflings(BaseRace):
 	def canConquer(self, region, tokenBadge):
 		return True
 
-	
 	def getInitBonusNum(self):
 		return 2
 
@@ -226,7 +219,8 @@ class BaseSpecialPower:
 		self.specialPowerId = id
 
 	def canConquer(self, region, tokenBadge):
-		return False
+		return (tokenBadge.isNeighbor(region) or not tokenBadge.regions) and\
+			not region.sea
 		
 	def attackBonus(self, regionId, tokenBadgeId):
 		return 0
@@ -393,11 +387,8 @@ class SpecialPowerFlying(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
 	def canConquer(self, region, tokenBadge):
-		return True
-#		isAdjacent, regions = isRegionAdjacent(regionId, tokenBadgeId)
-#		regionInfo = getRegionInfoById(regionId, getGameIdByTokenBadge(tokenBadgeId))
-#		return ((not isAdjacent and regions) or not regions) and not regionInfo['sea']
-
+		return ((not tokenBadge.isNeighbor(region) and tokenBadge.regions) or\
+			not tokenBadge.regions) and not region.sea
 
 class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
@@ -448,7 +439,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 #			RegionId=%s AND GameId=%s""", regionId, gameId)
 
 	def incomeBonus(self, tokenBadge):
-		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortified, tokenBadge.regions))
+		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortress, tokenBadge.regions))
 
 
 
@@ -530,7 +521,8 @@ class SpecialPowerSeafaring(BaseSpecialPower):
 		return len(filter(lambda x: x.region.swamp, tokenBadge.regions))
 	
 	def canConquer(self, region, tokenBadge):
-		return (not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.isNeighbor(region)
+		return (tokenBadge.isNeighbor(region) and tokenBadge.regions) or not\
+			tokenBadge.regions 
 
 
 class SpecialPowerStout(BaseSpecialPower):
@@ -552,18 +544,15 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Underworld', 5) 
 
 	def canConquer(self, region, tokenBadge):
-		return True
-#		if BaseSpecialPower.tryToConquerRegion(self, regionId, tokenBadgeId):
-#			return True
-#		query("""SELECT a.Cavern, b.Cavern FROM Regions a, Regions b, 
-#			CurrentRegionState c WHERE a.RegionId=%s 
-#			AND c.TokenBadgeId=%s AND b.RegionId=c.RegionId AND b.MapId=%s 
-#			AND a.MapId=b.MapId""", attackedRegion, tokenBadgeId, 
-#			getMapIdByTokenBadge(tokenBadgeId))
-#		cavern1, cavern2 = fetchone()
-#		
-#
-#		return (cavern1 and cavern2)
+		if BaseSpecialPower.canConquer(self, region, tokenBadge):
+			return True
+		cav = False
+		for reg in tokenBadge.regions:
+			if reg.cavern:
+				cav = True
+				break
+
+		return (region.cavern and cav)
 		
 
 	def attackBonus(self, region, tokenBadge):
