@@ -182,6 +182,10 @@ def checkDefendingPlayerNotExists(gameId):
 	if row[1] == ATTACK_ENCHANT:
 		return
 	if row[0]:
+		attackedTokensNum = row[2] + callRaceMethod(getRaceAndPowerIdByTokenBadge(
+			row[0])[0], 'countAddDefendingTokensNum')
+		if attackedTokensNum <= 0:
+			return
 		query('SELECT InDecline FROM TokenBadges WHERE TokenBadgeId=%s', row[0])
 		if not fetchone()[0]:
 			raise BadFieldException('badStage')

@@ -133,7 +133,6 @@ def act_conquer(data):
 
 	query('SELECT TokensInHand FROM Users WHERE Id=%s', userId)
 	unitsNum = fetchone()[0]
-
 	dice = -1
 	query("""SELECT Dice FROM History WHERE HistoryId=(SELECT MAX(HistoryId) 
 		FROM History) AND State=%s""", GAME_THROW_DICE)		
@@ -159,8 +158,8 @@ def act_conquer(data):
 		userId)
 
 	updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-	updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadgeId if 
-		attackedTokensNum else None, attackedTokensNum, dice, ATTACK_CONQUER)
+	updateConquerHistory(lastId(), tokenBadgeId, regionId, attackedTokenBadgeId, 
+		attackedTokensNum, dice, ATTACK_CONQUER)
 	updateGameHistory(gameId, data)
 
 	return {'result': 'ok', 'dice': dice} if dice != -1 else {'result': 'ok'}

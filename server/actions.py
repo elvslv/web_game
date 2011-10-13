@@ -34,7 +34,8 @@ def act_register(data):
 def act_login(data):
 	username = data['username']
 	passwd = data['password']
-	if not query('SELECT 1 FROM Users WHERE Username=%s AND Password=%s', username, passwd):
+	if not query('SELECT 1 FROM Users WHERE Username=%s AND Password=%s', 
+username, passwd):
 		raise BadFieldException('badUsernameOrPassword')
 
 	while 1:
@@ -75,6 +76,10 @@ def act_getMessages(data):
 	return {'result': 'ok', 'messages': messages}
 
 def act_createDefaultMaps(data):
+	createDefaultMaps()
+	return {'result': 'ok'}
+
+def createDefaultMaps():
 	for map in misc.defaultMaps:
 		act_uploadMap(map)
 	return {'result': 'ok'}
@@ -82,7 +87,8 @@ def act_createDefaultMaps(data):
 def act_uploadMap(data):
 	name = checkIsUnique('Maps', 'MapName', data['mapName'])
 	players = int(data['playersNum'])
-	query('INSERT INTO Maps(MapName, PlayersNum, TurnsNum) VALUES(%s, %s, %s)', name, 
+	query('INSERT INTO Maps(MapName, PlayersNum, TurnsNum) VALUES(%s, %s, %s)', 
+name, 
 		players, data['turnsNum'])
 	mapId = lastId()
 	if 'regions' in data:
@@ -125,7 +131,8 @@ def act_createGame(data):
 		VALUES(%s, %s, %s, %s, %s)""", name, descr, mapId, 1, GAME_WAITING)
 	gameId = lastId()
 	addNewRegions(mapId, gameId)
-	query('UPDATE Users SET GameId=%s, isReady=0, Priority=1 WHERE Id=%s', gameId, userId)
+	query('UPDATE Users SET GameId=%s, isReady=0, Priority=1 WHERE Id=%s', gameId
+, userId)
 	updateGameHistory(gameId, data)
 	return {'result': 'ok', 'gameId': gameId}
 	
@@ -169,7 +176,8 @@ def act_getMapState(data):
 def act_getGameState(data):
 	gameQueryFields = ['GameId', 'GameName', 'GameDescr', 'PlayersNum', 'State', 
 		'Turn', 'ActivePlayer', 'MapId']
-	gameResFields = ['gameId', 'gameName', 'gameDescription', 'currentPlayersNum', 
+	gameResFields = ['gameId', 'gameName', 'gameDescription', 'currentPlayersNum'
+, 
 		'state', 'currentTurn', 'activePlayerId']
 		
 	game = extractValues('Games', gameFields, data['gameId'])
@@ -247,7 +255,6 @@ def act_resetServer(data):
 		misc.TEST_RANDSEED = 21425364547
 	random.seed(misc.TEST_RANDSEED)
 	editDb.clearDb()
-	createDefaultRaces()
 	return {'result': 'ok'}
 
 def act_saveGame(data):
@@ -257,15 +264,16 @@ def act_saveGame(data):
 	row = fetchall()
 	result = list()
 	for action in row:
-		result.append(action[0])
+		result.append(json.loads(action[0]))
 	return {'result': 'ok', 'actions': result}
 
 def act_loadGame(data):
 	userId, gameId = getIdBySid(data['sid'])
 	query('UPDATE Users SET GameId=NULL WHERE GameId=%s', gameId)
-	editDb.clearGame(gameId)
+	if gameId: editDb.clearGame(gameId)
 	for act in data['actions']:
-		if act['action'] in ('register', 'uploadMap', 'login', 'logout', 'saveGame', 'loadGame', 'resetServer', 'createDefaultMaps'):
+		if act['action'] in ('register', 'uploadMap', 'login', 'logout', 'saveGame'
+, 'loadGame', 'resetServer', 'createDefaultMaps'):
 			raise BadFieldException('illegalAction')
 		if 'userId' in act:
 			sid = extractValues('Users', ['Id', 'Sid'], [act['userId']])[1]
@@ -273,18 +281,20 @@ def act_loadGame(data):
 			act['sid'] = sid
 			
 	for act in data['actions']:
-		res = doAction(act)
+		res = doAction(act, False)
 	return {'result': 'ok'}
 
-def doAction(data):
+def doAction(data, check = True):
 	try:
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
-	#	checkFieldsCorrectness(data)			
+		if check: checkFieldsCorrectness(data)			
 		res = globals()[func](data) 
 		commit()
 		return res
 	except (MySQLdb.Error, BadFieldException), e:
 		rollback()
+		#raise e
 		return {'result': e.value}
+

@@ -5,14 +5,16 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id": 1
 	},
 	{
 		"result": "ok",
 		"sid": 1
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id": 2
 	},
 	{
 		"result": "ok",
@@ -56,6 +58,7 @@
 		"coins" : 1
 	},
 	{
+		"result": "ok",
 		"actions": 
 			[
 				{"action": "createGame", "userId": 1, "gameName": "game1", "mapId": 7, "playersNum": 2},
@@ -77,8 +80,7 @@
                 {"action": "redeploy", "regions": [{"regionId": 1, "tokensNum": 0}, {"regionId": 2, "tokensNum": 0}, {"regionId": 3, "tokensNum": 13}], "userId": 1},
                 {"action": "finishTurn", "userId": 1}
    
-			],
-		"result": "ok"
+			]
 	}
 	
 ]

@@ -26,7 +26,8 @@
 		"result": "alreadyInGame"
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id": 2
 	},
 	{
 		"result": "ok",

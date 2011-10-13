@@ -5,14 +5,16 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id": 1
 	},
 	{
 		"result": "ok",
 		"sid": 1
 	},
 	{
-		"result": "ok"
+		"result": "ok",
+		"id": 2
 	},
 	{
 		"result": "ok",
@@ -104,6 +106,7 @@
 		"coins" : 4
 	},
 	{
-		"result": "ok"
+		"result": "badTokensNum",
+		"dice": 0
 	}
 ]
