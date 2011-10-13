@@ -1,0 +1,38 @@
+{
+	"test":
+	[
+			{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "%^%&^)000",
+			"password": "wqtewy"
+		},
+		{
+			"action": "register",
+			"username": "a",
+			"password": "wqtewy"
+		},
+		{
+			"action": "register",
+			"username": "aetyer",
+			"password": "aa"
+		},
+		{
+			"action": "register",
+			"username": "trdaHFJHGJ",
+			"password": "&nksgj"
+		},
+		{
+			"action": "register",
+			"username": "",
+			"password": "dsakgjks"
+		},
+		{
+			"action": "register",
+			"username": "wte4yyy",
+			"password": ""
+		}
+	]
+}

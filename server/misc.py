@@ -211,6 +211,14 @@ actionFields = {
 	'doSmth': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
+	'saveGame': [
+		{'name': 'sid', 'type': int, 'mandatory': False},
+		{'name': 'gameId', 'type': int, 'mandatory': True}
+	],
+	'loadGame': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'actions', 'type': list, 'mandatory': True}
+	],
 	'redeploy': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},

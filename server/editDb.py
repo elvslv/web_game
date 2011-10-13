@@ -9,7 +9,7 @@ DATABASE_PASSWD = "12345"
 DATABASE_PORT = 3306
 
 tables = ['Users', 'Games', 'Chat', 'Maps', 'Regions', 'CurrentRegionState', 
-	'AdjacentRegions', 'TokenBadges', 'History', 'AttackingHistory']
+	'AdjacentRegions', 'TokenBadges', 'History', 'AttackingHistory', 'GameHistory']
 
 def fetchone():
 	return cursor.fetchone()
@@ -50,14 +50,15 @@ def createTables():
 			(MAX_USERNAME_LEN, MAX_PASSWORD_LEN))
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Games(
-			GameId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
+			GameId INT UNSIGNED AUTO_INCREMENT, 
 			GameName VARCHAR(%s), 
 			GameDescr VARCHAR(%s),
 			PlayersNum INT UNSIGNED DEFAULT 0,
 			State INT UNSIGNED, 
 			Turn TINYINT UNSIGNED, 
 			ActivePlayer INT UNSIGNED,
-			MapId INT UNSIGNED REFERENCES Maps(MapId))""", 
+			MapId INT UNSIGNED REFERENCES Maps(MapId),
+			PRIMARY KEY(GameId, GameName))""", 
 			(MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN))
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Maps(
@@ -86,7 +87,7 @@ def createTables():
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS CurrentRegionState(
 			RegionId INT UNSIGNED REFERENCES Regions(RegionId),
-			GameId INT UNSIGNED REFERENCES Games(GameId),
+			GameId INT UNSIGNED REFERENCES Games(GameId) ON DELETE CASCADE ON UPDATE CASCADE,
 			TokenBadgeId INT UNSIGNED, 
 			TokensNum INT UNSIGNED DEFAULT 0, 
 			OwnerId INT UNSIGNED, 
@@ -106,16 +107,17 @@ def createTables():
 			UNIQUE(FirstRegionId, SecondRegionId, MapId))""")
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS TokenBadges(
-			TokenBadgeId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT, 
+			TokenBadgeId INT UNSIGNED AUTO_INCREMENT, 
 			RaceId INT UNSIGNED, 
 			SpecialPowerId INT UNSIGNED,
-			GameId INT UNSIGNED REFERENCES Games(GameId), 
+			GameId INT UNSIGNED REFERENCES Games(GameId) ON DELETE CASCADE ON UPDATE CASCADE, 
 			Position TINYINT, 
 			BonusMoney TINYINT, 
 			OwnerId INT UNSIGNED, 
 			InDecline BOOL DEFAULT FALSE, 
 			TotalTokensNum INT UNSIGNED DEFAULT 0,
-			TotalSpecialPowerBonusNum INT UNSIGNED DEFAULT 0)""")
+			TotalSpecialPowerBonusNum INT UNSIGNED DEFAULT 0,
+			PRIMARY KEY(TokenBadgeId, GameId))""")
 			
 	cursor.execute("""CREATE TABLE IF NOT EXISTS Chat(
 			Id INT PRIMARY KEY AUTO_INCREMENT, 
@@ -124,35 +126,49 @@ def createTables():
 			Time INT)""")
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS History(
-			HistoryId INT PRIMARY KEY AUTO_INCREMENT,
+			HistoryId INT AUTO_INCREMENT,
 			UserId INT REFERENCES Users(Id),
-			GameId INT REFERENCES Games(GameId),
+			GameId INT REFERENCES Games(GameId) ON DELETE CASCADE ON UPDATE CASCADE,
 			State INT UNSIGNED,
 			TokenBadgeId INT UNSIGNED,
 			Turn INT UNSIGNED,
 			Dice INT UNSIGNED, 
-			Friend INT UNSIGNED)""")
+			Friend INT UNSIGNED,
+			PRIMARY KEY(HistoryId, GameId))""")
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS AttackingHistory(
-			AttackingHistoryId INT PRIMARY KEY AUTO_INCREMENT,
-			HistoryId INT UNSIGNED REFERENCES History(HistoryId),
+			AttackingHistoryId INT AUTO_INCREMENT,
+			HistoryId INT UNSIGNED REFERENCES History(HistoryId) ON DELETE CASCADE ON UPDATE CASCADE,
 			AttackingTokenBadgeId INT UNSIGNED REFERENCES TokenBadges(TokenBadgeId),
 			ConqueredRegion INT UNSIGNED, 
 			AttackedTokenBadgeId INT UNSIGNED, 
 			AttackedTokensNum INT UNSIGNED DEFAULT 0, 
 			Dice INT UNSIGNED,
-			AttackType INT UNSIGNED DEFAULT 0)""")
+			AttackType INT UNSIGNED DEFAULT 0,
+			PRIMARY KEY(AttackingHistoryId, HistoryId))""")
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS GameHistory(
 			GameHistoryId INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-			GameId INT UNSIGNED REFERENCES Games(GameId),
+			GameId INT UNSIGNED REFERENCES Games(GameId) ON DELETE CASCADE ON UPDATE CASCADE,
 			Action TEXT 
 		)""")
 	        
 def clearDb():		
 	for t in tables:
 		cursor.execute("TRUNCATE TABLE %s" % t)
-		
+
+def clearGame(gameId):	
+	cursor.execute("DELETE FROM Games WHERE GameId=%s" % gameId)
+	cursor.execute("DELETE FROM TokenBadges WHERE GameId=%s" % gameId)
+	cursor.execute("DELETE FROM CurrentRegionState WHERE GameId=%s" % gameId)
+	cursor.execute("DELETE FROM History WHERE GameId=%s" % gameId)
+	cursor.execute("DELETE FROM GameHistory WHERE GameId=%s" % gameId)
+	cursor.execute("ALTER TABLE Games AUTO_INCREMENT=1")
+	cursor.execute("ALTER TABLE AttackingHistory AUTO_INCREMENT=1")
+	cursor.execute("ALTER TABLE History AUTO_INCREMENT=1")
+	cursor.execute("ALTER TABLE CurrentRegionState AUTO_INCREMENT=1" )
+	cursor.execute("ALTER TABLE TokenBadges AUTO_INCREMENT=1")
+	cursor.execute("ALTER TABLE GameHistory AUTO_INCREMENT=1")
 
 db = MySQLdb.connect(host = DATABASE_HOST, user = DATABASE_USER, passwd = DATABASE_PASSWD,
 					port = int(DATABASE_PORT))

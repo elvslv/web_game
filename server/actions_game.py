@@ -47,7 +47,7 @@ def act_setReadinessStatus(data):
 				showNextRace(gameId, misc.VISIBLE_RACES - 1)
 			
 		updateHistory(userId, gameId, GAME_START, None)
-	updateGameHistory(gameId, data)	
+	updateGameHistory(gameId, data)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
