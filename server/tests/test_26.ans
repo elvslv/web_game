@@ -63,6 +63,9 @@
 		"result": "ok"
 	},
 	{
+		"result": "badStage"
+	},
+	{
 		"result": "badTokensNum",
 		"dice": 0
 	}
