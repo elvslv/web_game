@@ -273,13 +273,13 @@ def act_getGameState(data):
 		if player.currentTokenBadge:
 			curTokenBadge = dict()
 			curTokenBadge['race'] =  races.racesList[player.currentTokenBadge.raceId].name
-			curTokenBadge['specialPower'] =  races.specialPowerList[player.currentTokenBadge.specialPowerId].name
+			curTokenBadge['specialPower'] =  races.specialPowerList[player.currentTokenBadge.specPowId].name
 			curPlayer['currentTokenBadge'] = curTokenBadge
 			
 		if player.declinedTokenBadge:
 			declinedTokenBadge = dict()
 			declinedTokenBadge['race'] =  races.racesList[player.declinedTokenBadge.raceId].name
-			declinedTokenBadge['specialPower'] =  races.specialPowerList[player.declinedTokenBadge.specialPowerId].name
+			declinedTokenBadge['specialPower'] =  races.specialPowerList[player.declinedTokenBadge.specPowId].name
 			curPlayer['declinedTokenBadge'] = declinedTokenBadge
 			
 		resPlayers.append(curPlayer)

@@ -18,9 +18,11 @@ import db
 dbi = Database()
 
 def clearFromRace(reg):
+	ans = 0
 	if reg.tokenBadge:
-		callRaceMethod(reg.tokenBadge.raceId, 'clearRegion', reg.tokenBadge, reg)
+		ans = callRaceMethod(reg.tokenBadge.raceId, 'clearRegion', reg.tokenBadge, reg)
 		callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
+	return ans
 
 def throwDice():
 	if misc.TEST_MODE: return 0
@@ -38,23 +40,22 @@ def prepareForNextTurn(game, newActPlayer):
 			region.tokensNum = 1
 		
 def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
-        if vRace != None and vSpecialPower !=None:
-                race = filter(lambda x: x.name == vRace, races.racesList) 
-                if not race: raise BadFieldException('badRace')
-                raceId = races.racesList.index(race[0])
-                specialPower = filter(lambda x: x.name == vSpecialPower, races.specialPowerList) 
-                if not specialPower: 
-                	print vSpecialPower
-                	raise BadFieldException('badSpecialPower')
-                specialPowerId = races.specialPowerList.index(specialPower[0])
-        else:
-                racesInStack = range(0, misc.RACE_NUM)
-                specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-                for tokenBadge in game.tokenBadges:
-                        racesInStack.remove(tokenBadge.raceId)
-                        specialPowersInStack.remove(tokenBadge.specPowId)
-                raceId = random.choice(racesInStack)
-                specialPowerId = random.choice(specialPowersInStack)
+	if vRace != None and vSpecialPower !=None:
+		race = filter(lambda x: x.name == vRace, races.racesList) 
+		if not race: raise BadFieldException('badRace')
+		raceId = races.racesList.index(race[0])
+		specialPower = filter(lambda x: x.name == vSpecialPower, races.specialPowerList) 
+		if not specialPower: 
+			raise BadFieldException('badSpecialPower')
+		specialPowerId = races.specialPowerList.index(specialPower[0])
+	else:
+		racesInStack = range(0, misc.RACE_NUM)
+		specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
+		for tokenBadge in game.tokenBadges:
+			racesInStack.remove(tokenBadge.raceId)
+			specialPowersInStack.remove(tokenBadge.specPowId)
+		raceId = random.choice(racesInStack)
+		specialPowerId = random.choice(specialPowersInStack)
 	return raceId, specialPowerId
 
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):

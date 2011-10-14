@@ -76,9 +76,15 @@ class Game(Base):
 		if not tokenBadge: raise BadFieldException('badPosition')
 		return tokenBadge[0]
 
-	def checkStage(self, state, user):
+	def checkStage(self, state, user, attackType = None):
 		lastEvent = self.history[-1]
 		badStage = not (lastEvent.state in misc.possiblePrevCmd[state]) 
+		if attackType:
+			curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
+				x.userId == user.id and x.state == misc.GAME_CONQUER, 
+				user.game.history)
+			if curTurnHistory:
+				badStage = filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory)
 		if lastEvent.state == misc.GAME_CONQUER:
 			battle = lastEvent.warHistory
 			victim = battle.victimBadge
@@ -418,7 +424,7 @@ class _Database:
 	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
 		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
 
-	def updateWarHistory(	self, user, victimBadgeId, agressorBadgeId, dice, regionId, 
+	def updateWarHistory(self, user, victimBadgeId, agressorBadgeId, dice, regionId, 
 		defense, attackType):
 		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
 		self.add(hist)

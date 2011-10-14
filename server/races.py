@@ -1,3 +1,4 @@
+import misc_game
 from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry
 from gameExceptions import BadFieldException
 from checkFields import  checkObjectsListCorrection
@@ -64,6 +65,7 @@ class BaseRace:
 		region.dragon = False
 		region.holeInTheGround = False
 		region.hero = False
+		return -1
 
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
@@ -164,6 +166,9 @@ class RaceElves(BaseRace):
 	def sufferCasualties(self, tokenBadge):
 		return 0
 
+	def clearRegion(self, tokenBadge, region):
+		return 0
+		
 class RaceRatmen(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Ratmen', 8, 13)
@@ -346,42 +351,34 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Dragon master', 5, 1)
 
-	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
-		pass
-	#	regionId, gameId = extractValues('CurrentRegionState', ['RegionId', 'GameId'], 
-	#		[regionId, getGameIdByTokenBadge(tokenBadgeId)])
-	#	checkRegionIsImmune(regionId, gameId)
-	#	checkRegionIsCorrect(regionId, tokenBadgeId)
-	#	raceId = getRaceAndPowerIdByTokenBadge(tokenBadgeId)[0]
-	#	
-	#	if not(racesList[raceId].tryToConquerRegion(regionId, tokenBadgeId) 
-	#		and self.tryToConquerRegion(regionId, tokenBadgeId)):
-	#		
-	#	if query("""SELECT 1 FROM History a, AttackingHistory b, TokenBadges c, 
-	#		Users d, Games e WHERE b.AttackingTokenBadgeId=%s AND 
-	#		c.TokenBadgeId=b.AttackingTokenBadgeId AND c.UserId=d.Id AND 
-	#		d.GameId=a.GameId AND e.GameId = a.GameId AND a.Turn=e.Turn AND 
-	#		a.HistoryId=b.HistoryId AND b.AttackType=%s""", tokenBadgeId, 
-	#		ATTACK_DRAGON):
-	#		raise BadFieldException('dragonAlreadyAttackedOnThisTurn')
-	#		
-	#	query("""SELECT a.TokenBadgeId, a.TokensNum FROM CurrentRegionState a
-	#		WHERE a.RegionId=%s AND a.GameId""", regionId, gameId)
-	#	row = fetchone()
-	#	if row[0] == tokenBadgeId:
-	#		raise BadFieldException('badRegion')
-	#	##check anything else?
-	#	query('UPDATE CurrentRegionState SET Dragon=FALSE WHERE TokenBadgeId=%s', 
-	#		tokenBadgeId)
-	#	query("""UPDATE CurrentRegionState SET TokenBadgeId=%s, Dragon=TRUE, 
-	#		TokensNum=%s WHERE RegionId=%s AND GameId=%s""", tokenBadgeId, 
-	#		tokensNum, regionId, gameId)
+	def dragonAttack(self, tokenBadge, regState):
+		regState.checkIfImmune()
+		if not(racesList[tokenBadge.raceId].canConquer(regState.region, tokenBadge) 
+			and self.canConquer(regState.region, tokenBadge)):
+			raise BadFieldException('badRegion')
+			
+		attackedTokenBadge = regState.tokenBadge
+		attackedTokensNum = regState.tokensNum
+		if attackedTokenBadge.id == tokenBadge.id:
+			raise BadFieldException('badRegion')
+			
+		misc_game.clearFromRace(regState)
+		if attackedTokenBadge:
+			attackedTokenBadge.totalTokensNum += racesList[attackedTokenBadge.raceId].sufferCasualties(
+				attackedTokenBadge)
+		else:
+			attackedTokensNum = 0
+		##check anything else?
+		for region in tokenBadge.regions: 
+			region.dragon = False
+		regState.tokenBadge = tokenBadge
+		regState.dragon= True
+		regState.tokensNum = 1
+		regState.owner = tokenBadge.owner
+		tokenBadge.owner.tokensInHand -= 1
+		dbi.updateWarHistory(tokenBadge.owner, attackedTokenBadge.id, tokenBadge.id, 
+			None, regState.regionId, attackedTokensNum, ATTACK_DRAGON)
 
-	#	updateHistory(userId, gameId, GAME_CONQUER, tokenBadgeId)
-	#	updateConquerHistory(lastId(), tokenBadgeId, regionId, row[0], row[2], 
-	#		-1, ATTACK_DRAGON)
-
-		
 	def clearRegion(self, tokenBadge, region):
 		tokenBadge.specPowNum -= 1
 		region.dragon = False
