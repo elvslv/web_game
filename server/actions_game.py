@@ -34,6 +34,7 @@ def act_setReadinessStatus(data):
 				showNextRace(game, misc.VISIBLE_RACES - 1)
 			
 	dbi.updateHistory(user, GAME_START, None)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
@@ -59,6 +60,7 @@ def act_selectRace(data):
 	chosenBadge.specPowNum = races.specialPowerList[specialPowerId].bonusNum
 	updateRacesOnDesk(game, position)
 	dbi.updateHistory(user, GAME_SELECT_RACE, chosenBadge.id)
+	dbi.updateGameHistory(game, data)
 	return {'result': 'ok', 'tokenBadgeId': chosenBadge.id}
 
 def act_conquer(data):
@@ -111,6 +113,7 @@ def act_conquer(data):
 	dbi.updateWarHistory(user, victimBadgeId, tokenBadge.id, dice, 
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
+	dbi.updateGameHistory(game, data)
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
 		
 def act_decline(data):
@@ -126,6 +129,7 @@ def act_decline(data):
 	callRaceMethod(raceId, 'decline', user)	
 	user.currentTokenBadge = None
 	dbi.updateHistory(user, GAME_DECLINE, user.declinedTokenBadge.id)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 
 def act_redeploy(data):
@@ -177,6 +181,7 @@ def act_redeploy(data):
 		region.tokenBadge = None
 
 	dbi.updateHistory(user, GAME_REDEPLOY, user.currentTokenBadge.id)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 		
 def endOfGame(coins): 
@@ -210,6 +215,7 @@ def act_finishTurn(data):
 #		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 
 	dbi.updateHistory(user, GAME_FINISH_TURN, None)
+	dbi.updateGameHistory(game, data)
 	prepareForNextTurn(game, nextPlayer)
 	return {'result': 'ok', 'nextPlayer' : nextPlayer.id,'coins': user.coins}
 
@@ -244,6 +250,7 @@ def act_defend(data):			## Should be renamed to retreat
 		tokensNum -= region['tokensNum']
 	if tokensNum:  raise BadFieldException('thereAreTokensInTheHand')
 	dbi.updateHistory(user, GAME_DEFEND, tokenBadge.id)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 
 def act_dragonAttack(data):
@@ -253,6 +260,7 @@ def act_dragonAttack(data):
 	callSpecialPowerMethod(user.currentTokenBadge.specPowId, 'dragonAttack', 
 		user.currentTokenBadge, user.game.map.getRegion(data['regionId']).getState(
 		user.game.id))
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}	
 
 def act_enchant(data):
@@ -269,6 +277,7 @@ def act_enchant(data):
 		reg)
 	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
 			reg.region.id, 1, ATTACK_ENCHANT)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}	
 
 def act_selectFriend(data):
@@ -278,6 +287,7 @@ def act_selectFriend(data):
 	user.game.checkStage(GAME_CHOOSE_FRIEND, user)
 	callSpecialPowerMethod(user.currentTokenBadge.specPowId, 'selectFriend',
 		user, data)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 
 
@@ -291,5 +301,6 @@ def act_throwDice(data):
 		specialPowerId = user.currentTokenBadge.specPowId
 		dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
 	dbi.updateHistory(user, GAME_THROW_DICE, user.currentTokenBadge.id, dice)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'dice': dice}	
 

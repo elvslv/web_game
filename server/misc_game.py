@@ -1,15 +1,6 @@
 from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, TokenBadge
 import races
 import misc
-
-#def updateGameHistory(gameId, data):
-#	if 'sid' in data:
-#		userId = getIdBySid(data['sid'])
-#		del data['sid']
-#		data['userId'] = userId
-#	query('INSERT INTO GameHistory(GameId, Action) VALUES(%s, %s)', gameId, 
-#		json.dumps(data))
-
 from gameExceptions import BadFieldException
 import random
 import sys

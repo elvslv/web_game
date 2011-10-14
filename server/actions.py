@@ -5,6 +5,7 @@ import math
 import MySQLdb
 import sys
 import random
+import json
 
 from gameExceptions import BadFieldException
 from sqlalchemy import func 
@@ -96,6 +97,7 @@ def act_createGame(data):
 	initRegions(map_, newGame)
 	user.game = newGame
 	user.priority = 1
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'gameId': newGame.id}
 	
 
@@ -111,6 +113,7 @@ def act_joinGame(data):
 	maxPriority = max(game.players, key=lambda x: x.priority).priority
 	user.game = game
 	user.priority = maxPriority + 1
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 	
 def act_leaveGame(data):
@@ -127,6 +130,7 @@ def act_leaveGame(data):
 		region.Hero = False
 	if game.players == []:
 		game.state = GAME_ENDED
+	dbi.updateGameHistory(game, data)
 	return {'result': 'ok'}
 
 def act_doSmtn(data):
@@ -157,26 +161,32 @@ def act_resetServer(data):
 	return {'result': 'ok'}
 
 def act_saveGame(data):
-#	gameId = extractValues('Games', ['GameId'], data['gameId'])
-#	query("""SELECT Actions FROM GameHistory WHERE GameId=%s ORDER BY 
-#		GameHistoryId ASC""")
-#	row = fetchall()
 	result = list()
-#	for action in row:
-#		result.append(action[0])
-
+	game = dbi.getXbyY('Game', 'id', data['gameId'])
+	row = filter(lambda x: x.gameId == game.id, game.gameHistory)
+	for action in row:
+		result.append(json.loads(action.action))
+	print {'result': 'ok', 'actions': result}
 	return {'result': 'ok', 'actions': result}
 
 def act_loadGame(data):
-	pass
-#	for act in data:
-#		if 'userId' in act:
-#			sid = extractValues('Users', ['Id', 'Sid'], [data['userId']])[1]
-#			del act['userId']
-#			act['sid'] = sid
-#
-#	for act in data:
-#		doAction(act)
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	game = user.game
+	for player in game.players:
+		player.game = None
+	game.clear()
+	for act in data['actions']:
+		if act['action'] in ('register', 'uploadMap', 'login', 'logout', 'saveGame'
+, 'loadGame', 'resetServer', 'createDefaultMaps'):
+			raise BadFieldException('illegalAction')
+		if 'userId' in act:
+			user = dbi.getXbyY('User', 'id', data['userId'])
+			del act['userId']
+			act['sid'] = user.sid
+			
+	for act in data['actions']:
+		res = doAction(act)
+	return {'result': 'ok'}
 
 def getMapState(mapId, gameId = None):
 	map_ = dbi.getXbyY('Map', 'id', mapId)

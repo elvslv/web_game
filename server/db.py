@@ -9,6 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import misc
 import checkFields
 import sys
+import json
 
 DATABASE_HOST = "localhost"
 DATABASE_USER = "admin"
@@ -96,12 +97,18 @@ class Game(Base):
 			badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
 		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
 			raise BadFieldException('badStage')
-		
 
 	def getDefendingRegion(self, player):
 		lastWarHistoryEntry = self.history[-1].warHistory
 		return lastWarHistoryEntry.conqRegion.region
 
+
+	def clear(self):
+		tables = ['Games', 'TokenBadges', 'CurrentRegionState', 'History', 'GameHistory', 'WarHistory']
+		for table in tables:
+			self.engine.execute("DELETE FROM %s WHERE GameId=%s", table, id)
+		for table in tables:
+			self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=1", table)
 
 	def getLastState(self):
 		return self.history[-1].state
@@ -306,6 +313,19 @@ class HistoryEntry(Base):
 		self.turn = user.game.turn
 		self.friend = friend
 
+class GameHistoryEntry(Base):
+	__tablename__ = 'gameHistory'
+
+	id = pkey()
+	gameId = fkey('games.id')
+	action = Column(Text)
+
+	game = relationship(Game, backref=backref('gameHistory', order_by=id))
+
+	def __init__(self, game, action): 
+		self.gameId = game.id
+		self.action = action
+
 class WarHistoryEntry(Base):
 	__tablename__ = 'warHistory'
 
@@ -371,6 +391,7 @@ class _Database:
 			self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
 
+	
 	def getXbyY(self, x, y, value, mandatory=True):
 		try:
 			cls = globals()[x]
@@ -424,6 +445,13 @@ class _Database:
 
 	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
 		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
+
+	def updateGameHistory(self, game, data):
+		if 'sid' in data:
+			user = self.getXbyY('User', 'sid', data['sid'])
+			del data['sid']
+			data['userId'] = user.id
+		self.add(GameHistoryEntry(game, json.dumps(data)))
 
 	def updateWarHistory(self, user, victimBadgeId, agressorBadgeId, dice, regionId, 
 		defense, attackType):
