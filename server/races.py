@@ -359,7 +359,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			
 		attackedTokenBadge = regState.tokenBadge
 		attackedTokensNum = regState.tokensNum
-		if attackedTokenBadge.id == tokenBadge.id:
+		if attackedTokenBadge and attackedTokenBadge.id == tokenBadge.id:
 			raise BadFieldException('badRegion')
 			
 		misc_game.clearFromRace(regState)
@@ -376,8 +376,9 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		regState.tokensNum = 1
 		regState.owner = tokenBadge.owner
 		tokenBadge.owner.tokensInHand -= 1
-		dbi.updateWarHistory(tokenBadge.owner, attackedTokenBadge.id, tokenBadge.id, 
-			None, regState.regionId, attackedTokensNum, ATTACK_DRAGON)
+		dbi.updateWarHistory(tokenBadge.owner, attackedTokenBadge.id if 
+			attackedTokenBadge else None, tokenBadge.id, None, regState.regionId,
+			attackedTokensNum, ATTACK_DRAGON)
 
 	def clearRegion(self, tokenBadge, region):
 		tokenBadge.specPowNum -= 1

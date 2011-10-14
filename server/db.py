@@ -84,7 +84,8 @@ class Game(Base):
 				x.userId == user.id and x.state == misc.GAME_CONQUER, 
 				user.game.history)
 			if curTurnHistory:
-				badStage = filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory)
+				if filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory):
+					badStage = True
 		if lastEvent.state == misc.GAME_CONQUER:
 			battle = lastEvent.warHistory
 			victim = battle.victimBadge
