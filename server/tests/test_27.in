@@ -76,7 +76,7 @@
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 1},
+			"regions": [{"regionId": 1, "tokensNum": 2},
 				{"regionId": 2, "tokensNum": 1},
 				{"regionId": 3, "tokensNum": 7}]
 		},
