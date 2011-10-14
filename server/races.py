@@ -263,10 +263,10 @@ class BaseSpecialPower:
 	def throwDice(self):
 		raise BadFieldException('badAction')
 
-	def setEncampments(self, encampments, tokenBadgeId):
+	def setEncampments(self, tokenBadge, encampments):
 		raise BadFieldException('badSpecialPower')
 
-	def setFortifield(self, fortifield, tokenBadgeId):
+	def setFortifield(self, tokenBadge, fortifield):
 		raise BadFieldException('badSpecialPower')
 
 	def selectFriend(self, user, data):
@@ -328,14 +328,14 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 		if not('friendId' in data and isinstance(data['friendId'], int)):
 			raise BadFieldException('badFriendId')
 		friend = dbi.getXbyY('User', 'id', data['friendId'])
-
+		print friend
 		if friend.id == user.id or friend.game.id != user.game.id:
 			raise BadFieldException('badFriend')
 
 		curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
 			x.userId == user.id and x.state == GAME_CONQUER, user.game.history)
 		if curTurnHistory:
-			if filter(lambda x: x.warHistory.victimBadgeId == 
+			if friend.currentTokenBadge and filter(lambda x: x.warHistory.victimBadgeId == 
 				friend.currentTokenBadge.id, curTurnHistory):
 				raise BadFieldException('badFriend')
 
@@ -407,49 +407,34 @@ class SpecialPowerForest(BaseSpecialPower):
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortified', 3, 1)
+		BaseSpecialPower.__init__(self, 'Fortifield', 3, 1)
 		self.maxNum = 6
 
+	def clearRegion(self, tokenBadge, region):
+		tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 
-	def clearRegion(self, tokenBadgeId, regionId):
-		pass
-#		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
-#			TokenBadgeId=%s""", tokenBadgeId)
-#		query("""UPDATE TokenBadges SET TotalSpecialPowerBonusNum=GREATEST(%s-1,
-#			0) WHERE TokenBadgeId=%s""", fetchone()[0], tokenBadgeId)
+	def setFortifield(self, tokenBadge, fortifield):
+		if not('regionId' in fortifield and isinstance(fortifield['regionId'], int)):
+			raise BadFieldException('badRegionId')
+		user = tokenBadge.owner
+		regionId = fortifield['regionId']
+		regState = user.game.map.getRegion(regionId).getState(user.game.id)
 
-	def setFortified(fortifield, tokenBadgeId):
-		pass
-#		if not('regionId' in fortifield and isinstance(fortifield['regionId'])):			
-#			raise BadFieldException('badRegionId')
+		if regState.ownerId != tokenBadge.owner.id:
+			raise BadFieldException('badRegion')
 
-#		regionId, gameId, ownerBadgeId, hasFortifield = extractValues(
-#			'CurrentRegionState', ['RegionId', 'GameId', 'TokenBadgeId', 
-#			'Fortifield'], [fortifield['regionId'], 
-#			getGameIdByTokenBadge(tokenBadgeId)])
-#
-#		if ownerBadgeId != tokenBadgeId:
-#			raise BadFieldException('badRegion')
+		if regState.fortress:
+			raise BadFieldException('tooManyFortifieldsInRegion')
 
-#		if hasFortifield:
-#			raise BadFieldException('tooManyFortifieldsInRegion')
-
-#		query("""SELECT COUNT(*) FROM CurrentRegionState WHERE Fortifield=True 
-#			AND TokenBadgeId=%s""", tokenBadgeId)
-#		fortifieldsOnMap = fetchone()[0]
-#		if fortifieldsOnMap >= self.maxNum:
-#			raise BadFieldException('tooManyFortifieldsOnMap')
-#		query("""SELECT TotalSpecialPowerBonusNum FROM TokenBadges WHERE 
-#			TokenBadgeId=%s""", tokenBadgeId)
-#		if fortifieldsOnMap == fetchone()[0]:
-#			raise BadFieldException('tooManyFortifields')
-#		query("""UPDATE CurrentRegionState SET Fortifield=True WHERE 
-#			RegionId=%s AND GameId=%s""", regionId, gameId)
+		fortifieldsOnMap = len(filter(lambda x: x.fortress == True, tokenBadge.regions))
+		if fortifieldsOnMap >= self.maxNum:
+			raise BadFieldException('tooManyFortifieldsOnMap')
+		if fortifieldsOnMap == tokenBadge.specPowNum:
+			raise BadFieldException('tooManyFortifields')
+		regState.fortress = True
 
 	def incomeBonus(self, tokenBadge):
 		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortress, tokenBadge.regions))
-
-
 
 
 class SpecialPowerHeroic(BaseSpecialPower):

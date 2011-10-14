@@ -144,7 +144,7 @@ class User(Base):
 	
 	game = relationship(Game, backref=backref('players', order_by=priority))
 	currentTokenBadge = relationship(TokenBadge, backref=backref('owner', uselist=False), 
-		primaryjoin=currentTokenBadgeId==TokenBadge.id)
+	primaryjoin=currentTokenBadgeId==TokenBadge.id)
 	declinedTokenBadge = relationship(TokenBadge, primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
 	def __init__(self, username, password):
@@ -194,20 +194,20 @@ class Region(Base):
 		 Region.mapId==Adjacency.mapId)')
 
 	def __init__(self, id, defTokensNum, map_): 
-    		self.id = id
-        	self.defTokensNum = defTokensNum
-        	self.map = map_
+		self.id = id
+		self.defTokensNum = defTokensNum
+		self.map = map_
 
-    	def getState(self, gameId):
-    		state = filter(lambda x : x.gameId == gameId, self.states)
-    		if not state: raise BadFieldException('badGameId')
-    		return state[0]
+	def getState(self, gameId):
+		state = filter(lambda x : x.gameId == gameId, self.states)
+		if not state: raise BadFieldException('badGameId')
+		return state[0]
 
-    	def getNeighbors(self):
-    		return  map(lambda x : x.neighborId, self.neighbors) 
+	def getNeighbors(self):
+		return  map(lambda x : x.neighborId, self.neighbors) 
 
-    	def adjacent(self, region):
-    		return region.id in self.getNeighbors() 
+	def adjacent(self, region):
+		return region.id in self.getNeighbors() 
 
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
@@ -341,27 +341,27 @@ class _Database:
 		self.session.rollback()
 
 	def add(self, obj):
-   		self.session.add(obj)
-   		self.commit()
+		self.session.add(obj)
+		self.commit()
 
-    	def addAll(self, objs):
-    		self.session.add_all(objs)
-    		self.commit()
+	def addAll(self, objs):
+		self.session.add_all(objs)
+		self.commit()
 
-    	def delete(self, *args, **kwargs):
-    		self.session.delete(*args, **kwargs)
-    		self.commit()
+	def delete(self, *args, **kwargs):
+		self.session.delete(*args, **kwargs)
+		self.commit()
 
-    	def query(self, *args, **kwargs):
-    		return self.session.query(*args, **kwargs)
+	def query(self, *args, **kwargs):
+		return self.session.query(*args, **kwargs)
 
-    	def clear(self):
-    		meta = MetaData()
-    		meta.reflect(bind=self.engine)
-    		for table in reversed(meta.sorted_tables):
-    		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
-    		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
-				self.engine.drop(table)
+	def clear(self):
+		meta = MetaData()
+		meta.reflect(bind=self.engine)
+		for table in reversed(meta.sorted_tables):
+		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
+		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
+			self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
 
 	def getXbyY(self, x, y, value, mandatory=True):
@@ -374,32 +374,32 @@ class _Database:
 				raise BadFieldException("""bad%s""" % n)
 			return None
 
-   	def getNextPlayer(self, game):
-        	try:
-        		activePlayer = self.query(User).get(game.activePlayerId)
-        		return self.query(User).filter(User.priority > activePlayer.priority).one()
-        	except NoResultFound:
-        		return None
+	def getNextPlayer(self, game):
+		try:
+			activePlayer = self.query(User).get(game.activePlayerId)
+			return self.query(User).filter(User.priority > activePlayer.priority).one()
+		except NoResultFound:
+			return None
 
 
-    	def addUnique(self, obj, name):
-    		try:
-    			self.add(obj)
-    		except IntegrityError:
-    			raise BadFieldException("""%sTaken""" % name)
+	def addUnique(self, obj, name):
+		try:
+			self.add(obj)
+		except IntegrityError:
+			raise BadFieldException("""%sTaken""" % name)
     
-    	def addRegion(self, id, map_, regInfo):
-    		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
-    		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
-    		if not 'population' in regInfo:
-    			regInfo['population'] = 0
+	def addRegion(self, id, map_, regInfo):
+		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
+		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
+		if not 'population' in regInfo:
+			regInfo['population'] = 0
 
-        	reg = Region(id, regInfo['population'], map_)
-        	self.add(reg)
-        	for descr in regInfo['landDescription']:
-        		if not descr in misc.possibleLandDescription[:11]:
-        			raise BadFieldException('unknownLandDescription')
-        		setattr(reg, descr, 1)
+		reg = Region(id, regInfo['population'], map_)
+		self.add(reg)
+		for descr in regInfo['landDescription']:
+			if not descr in misc.possibleLandDescription[:11]:
+				raise BadFieldException('unknownLandDescription')
+			setattr(reg, descr, 1)
 
 	def addNeighbors(self, reg, nodes):
 		for node in nodes:

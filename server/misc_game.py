@@ -43,7 +43,9 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
                 if not race: raise BadFieldException('badRace')
                 raceId = races.racesList.index(race[0])
                 specialPower = filter(lambda x: x.name == vSpecialPower, races.specialPowerList) 
-                if not specialPower: raise BadFieldException('badSpecialPower')
+                if not specialPower: 
+                	print vSpecialPower
+                	raise BadFieldException('badSpecialPower')
                 specialPowerId = races.specialPowerList.index(specialPower[0])
         else:
                 racesInStack = range(0, misc.RACE_NUM)

@@ -158,13 +158,12 @@ def act_redeploy(data):
 	specAbilities = [
 	{'name': 'encampments', 'cmd': 'setEncampments'},
 	{'name': 'fortifield', 'cmd': 'setFortifield'},
-	{'name': 'heroes', 'cmd': 'setHeroes'},
-	{'name': 'selectFriend', 'cmd': 'selectFriend'}]
+	{'name': 'heroes', 'cmd': 'setHeroes'}]
 
 	for specAbility in specAbilities:
 		if specAbility['name'] in data:
-			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], 
-				data[specAbility['name']], tokenBadge)
+			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], tokenBadge, 
+				data[specAbility['name']])
 
 			
 	if unitsNum: 
