@@ -4,9 +4,7 @@
 		{
 			"action": "resetServer"
 		},
-				{
-			"action": "createDefaultMaps"
-		},
+		
 		{
 			"action": "register",
 			"username": "user1",
@@ -146,14 +144,17 @@
 		{
 			"action": "enchant",
 			"sid": 2,
-			"regionId" : 2,
-			"pos": 27
+			"regionId" : 2
 		},
+
 		{
 			"action": "enchant",
 			"sid": 2,
 			"regionId" : 3
 		}
+
+
+
 	],
 	"description": "race Sorcerers"
 }

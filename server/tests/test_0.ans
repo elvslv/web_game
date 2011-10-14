@@ -6,9 +6,6 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok"
-	},
-	{
 		"result": "ok", 
 		"sid": 1
 	},
@@ -44,8 +41,11 @@
 		"result": "badUserSid"		
 	},
 	{
-		"result": "badJson"		
+		"result": "badMapId"		
 	},
+	{
+		"result": "badJson"
+	},	
 	{
 		"result": "badGameName"
 	},
@@ -62,9 +62,6 @@
 	{
 		"result": "ok",
 		"gameId": 2
-	},
-	{
-		"result": "alreadyInGame"
 	},
 	{
 		"result": "alreadyInGame"

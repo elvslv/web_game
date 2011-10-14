@@ -94,7 +94,6 @@ def act_conquer(data):
 		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
 			, 1)
 	unitsNum = user.tokensInHand
-	print 'units', unitsNum, unitPrice
 	dice = user.game.getLastState() == GAME_THROW_DICE and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = throwDice()
@@ -190,7 +189,7 @@ def act_finishTurn(data):
 	game.checkStage(GAME_FINISH_TURN, user)
 	tokenBadge = user.currentTokenBadge
 	if tokenBadge and callRaceMethod(tokenBadge.raceId, 'needRedeployment') and\
-		game.getLastState() !=GAME_REDEPLOY:  
+		game.getLastState() != GAME_REDEPLOY and game.getLastState() != GAME_CHOOSE_FRIEND :  
 		raise BadFieldException('badStage')
 		
 	income = len(user.regions)
@@ -263,7 +262,6 @@ def act_enchant(data):
 	user.game.checkStage(GAME_CONQUER, user)
 	curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
 		x.userId == user.id and x.state == GAME_CONQUER, user.game.history)
-	print curTurnHistory
 	if curTurnHistory:
 		if filter(lambda x: x.warHistory.attackType == ATTACK_ENCHANT, curTurnHistory):
 			raise BadFieldException('badStage')
@@ -278,6 +276,16 @@ def act_enchant(data):
 			reg.region.id, 1, ATTACK_ENCHANT)
 	return {'result': 'ok'}	
 
+def act_selectFriend(data):
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not user.currentTokenBadgeId : 
+		raise BadFieldException('badStage')
+	user.game.checkStage(GAME_CHOOSE_FRIEND, user)
+	callSpecialPowerMethod(user.currentTokenBadge.specPowId, 'selectFriend',
+		user, data)
+	return {'result': 'ok'}
+
+
 def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadgeId : raise BadFieldException('badStage')
@@ -285,7 +293,7 @@ def act_throwDice(data):
 	if TEST_MODE: 
 		dice = data['dice'] if 'dice' in data else 0
 	else:
-		specialPowerId =user.currentTokenBadge.specPowId
+		specialPowerId = user.currentTokenBadge.specPowId
 		dice = callSpecialPowerMethod(specialPowerId, 'throwDice')
 	dbi.updateHistory(user, GAME_THROW_DICE, user.currentTokenBadge.id, dice)
 	return {'result': 'ok', 'dice': dice}	

@@ -21,11 +21,11 @@
 	},
 	{
 		"result": "ok", 
-		"mapId": 1
+		"mapId": 8
 	},
 	{
 		"result": "ok",
-		"mapId": 2
+		"mapId": 9
 	},
 	{
 		"result": "mapNameTaken"

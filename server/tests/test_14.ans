@@ -1,6 +1,4 @@
-[	{
-		"result": "ok"
-	},
+[	
 	{
 		"result": "ok"
 	},
@@ -50,8 +48,15 @@
 		"result": "ok"
 	},
 	{
-		"result": "badStage"
+		"result": "notEnoughTokensForRedeployment"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 1
 	}
 	
-
 ]

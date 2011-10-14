@@ -3,9 +3,7 @@
 		{
 			"action": "resetServer"
 		},
-		{
-			"action": "createDefaultMaps"
-		},
+
 		{
 			"action": "register",
 			"username": "user1",

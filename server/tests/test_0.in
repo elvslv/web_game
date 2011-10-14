@@ -4,9 +4,6 @@
 			"action": "resetServer"
 		},
 		{
-			"action": "createDefaultMaps"
-		},
-		{
 			"action": "register", 
 			"username": "user1", 
 			"password": "325glh"
@@ -66,16 +63,22 @@
 		{
 			"action": "createGame", 
 			"sid": 1,
+			"gameName": "game1",
+			"gameDescr": "game1",
+			"mapId": 9			
+		},
+		{
+			"action": "createGame", 
+			"sid": 1,
 			"gameName": "game1"
 		},
-	
+
 		{
 			"action": "createGame", 
 			"sid": 1,
 			"gameName": "sjkgjskdhjskdsghhhhhhhhhhhhsdgsgdsagjklllllhkhkjhjfsgsdhdfhkhjkhjkhjkhjhkkkkkj",
 			"mapId": 1
 		},
-		
 		{
 			"action": "createGame", 
 			"sid": 1,
@@ -106,11 +109,6 @@
 			"gameName": "game2",
 			"mapId": 2,
 			"gameDescr": "game description"
-		},
-		{
-			"action": "joinGame",
-			"sid": 1,
-			"gameId": 2
 		}
 	], 
 	"description": "test createGame function"

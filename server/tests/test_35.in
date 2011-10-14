@@ -4,9 +4,7 @@
 		{
 			"action": "resetServer"
 		},
-		{
-			"action": "createDefaultMaps"
-		},
+
 		{
 			"action": "register",
 			"username": "user1",
@@ -101,6 +99,48 @@
 		{
 			"action": "finishTurn",
 			"sid" : 2
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+		{
+			"action": "decline",
+			"sid": 1
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 1
+		},
+		{
+			"action": "dragonAttack",
+			"sid": 2,
+			"regionId" : 2
+		},
+		{
+			"action": "redeploy",
+			"sid": 2,
+			"regions": [{"regionId": 1, "tokensNum": 1}, {"regionId": 2, "tokensNum": 7}]
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 2
+		},
+		{
+			"action": "selectRace",
+			"sid": 1,
+			"position" : 2
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 1
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 2
 		}
 	],
 	"description": "special power Dragon master"

@@ -1,6 +1,4 @@
-[	{
-		"result": "ok"
-	},
+[	
 	{
 		"result": "ok"
 	},
@@ -49,7 +47,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 2
+		"coins" : 1
 	}
 
 ]

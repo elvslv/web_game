@@ -187,7 +187,8 @@ actionFields = {
 			'max': 1
 		},
                 {'name': 'visibleRaces', 'type': list, 'mandatory': False},
-                {'name': 'visibleSpecialPowers', 'type': list, 'mandatory': False}
+                {'name': 'visibleSpecialPowers', 'type': list, 'mandatory': 
+False}
 	],
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -202,7 +203,8 @@ actionFields = {
 	'conquer': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
 		{'name': 'regionId', 'type': int, 'mandatory': True},
-		{'name': 'raceId', 'type': int, 'min': 0, 'max': RACE_NUM, 'mandatory': False}
+		{'name': 'raceId', 'type': int, 'min': 0, 'max': RACE_NUM, 'mandatory': 
+False}
 	],
 	'decline':[
 		{'name': 'sid', 'type': int, 'mandatory': True}
@@ -210,14 +212,24 @@ actionFields = {
 	'finishTurn': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
 	],
-	'doSmtn': [
+	'doSmth': [
 		{'name': 'sid', 'type': int, 'mandatory': True}
+	],
+	'saveGame': [
+		{'name': 'sid', 'type': int, 'mandatory': False},
+		{'name': 'gameId', 'type': int, 'mandatory': True}
+	],
+	'loadGame': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'actions', 'type': list, 'mandatory': True}
 	],
 	'redeploy': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'raceId', 'type': int, 'mandatory': False},
 		{'name': 'regions', 'type': list, 'mandatory': True},
-		{'name': 'encampments', 'type': list, 'mandatory': False}
+		{'name': 'encampments', 'type': list, 'mandatory': False},
+		{'name': 'fortifield', 'type': dict, 'mandatory': False},
+		{'name': 'heroes', 'type': list, 'mandatory': False}
 	],
 	'defend': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
@@ -230,14 +242,18 @@ actionFields = {
 	'getVisibleTokenBadges': [
 		{'name': 'gameId', 'type': int, 'mandatory': True}
 	],
+	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}],
 	'throwDice': [{'name': 'sid', 'type': int, 'mandatory': True}, 
-			     {'name': 'dice', 'type': int, 'mandatory': False}
-	],
-	 'enchant': [
+		{'name': 'dice', 'type': int, 'mandatory': False}],
+	'getGameState': [{'name': 'gameId', 'type': int, 'mandatory': True}],
+	'getMapState': [{'name': 'mapId', 'type': int, 'mandatory': True}],
+	'selectFriend': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'friendId', 'type': int, 'mandatory': True}],
+	'dragonAttack': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'regionId', 'type': int, 'mandatory': True}
-	],
-	'resetServer': [{'name': 'sid', 'type': int, 'mandatory': False}]
+	]
 }
 
 possibleLandDescription = [

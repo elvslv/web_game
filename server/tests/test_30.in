@@ -4,9 +4,7 @@
 		{
 			"action": "resetServer"
 		},
-		{
-			"action": "createDefaultMaps"
-		},
+
 		{
 			"action": "register",
 			"username": "user1",
@@ -49,7 +47,7 @@
 			"action": "setReadinessStatus",
 			"sid": 2,
 			"isReady": 1,
-			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
+			"visibleRaces": [ "Amazons", "Dwarves", "Ratmen", "Elves", "Giants", "Halflings"],
 			"visibleSpecialPowers": ["Diplomat", "Forest",  "Dragon master","Berserk", "Commando", "Stout"]
 		},
 		{
@@ -74,11 +72,17 @@
 			"regionId" : 3
 		},
 		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 4
+		},
+		{
 			"action": "redeploy",
 			"sid": 1,
 			"regions": [{"regionId": 1, "tokensNum": 0},
 				{"regionId": 2, "tokensNum": 0},
-				{"regionId": 3, "tokensNum": 13}]
+				{"regionId": 3, "tokensNum": 0},
+				{"regionId": 4, "tokensNum": 11}]
 		},
 		{
 			"action": "finishTurn",
@@ -95,9 +99,14 @@
 			"regionId" : 1
 		},
 		{
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 2
+		},
+		{
 			"action": "redeploy",
 			"sid": 2,
-			"regions": [{"regionId": 1, "tokensNum": 7}]
+			"regions": [{"regionId": 2, "tokensNum": 7}]
 		},
 		{
 			"action": "finishTurn",
@@ -106,13 +115,13 @@
 		{
 			"action": "conquer",
 			"sid": 1,
-			"regionId" : 2
+			"regionId" : 3
 		},
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 2, "tokensNum": 1},
-				{"regionId": 3, "tokensNum": 12}]
+			"regions": [{"regionId": 3, "tokensNum": 1},
+				{"regionId": 4, "tokensNum": 10}]
 		},
 		{
 			"action": "selectFriend",
@@ -126,10 +135,45 @@
 		{
 			"action": "conquer",
 			"sid": 2,
-			"regionId" : 2
+			"regionId" : 3
+		},
+		{
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 1
+		},
+		{
+			"action": "redeploy",
+			"sid": 2,
+			"regions": [{"regionId": 1, "tokensNum": 1}, {"regionId": 2, "tokensNum": 6}]
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 2
+		},
+		{
+			"action": "conquer",
+			"sid": 1,
+			"regionId" : 5
+		},
+		{
+			"action": "redeploy",
+			"sid": 1,
+			"regions": [{"regionId": 3, "tokensNum": 1},
+				{"regionId": 4, "tokensNum": 9},
+				{"regionId": 5, "tokensNum": 1}]
+		},
+		{
+			"action": "finishTurn",
+			"sid" : 1
+		},
+		{
+			"action": "conquer",
+			"sid": 2,
+			"regionId" : 3
 		}
 	],
-	"description": "special power Diplomat after decline"
+	"description": "special power Diplomat"
 }
 
 

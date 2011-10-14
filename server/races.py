@@ -1,8 +1,11 @@
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry
 from gameExceptions import BadFieldException
 from checkFields import  checkObjectsListCorrection
 from misc_game import *
 from misc import *
 from checkFields import *
+
+dbi = Database()
 
 class BaseRace:
 	def __init__(self, name, initialNum, maxNum):
@@ -265,7 +268,9 @@ class BaseSpecialPower:
 
 	def setFortifield(self, fortifield, tokenBadgeId):
 		raise BadFieldException('badSpecialPower')
-	
+
+	def selectFriend(self, user, data):
+		raise BadFieldException('badSpecialPower')
 
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
@@ -318,34 +323,24 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Diplomat', 5, 1)
 		
-			
 
-#	def selectFriend(data, userId, tokenBadgeId, gameId):
-#		if not('friendId' in data and isinstance(data['friendId'], int)):
-#			raise BadFieldException('badFriendId')
-#
-#		friendId, friendBadgeId = extractValues('Users', ['Id', 
-#			'CurrentTokenBadge'], [data['friendId']])
-#
-#		if friendId == userId:
-#			raise BadFieldException('badFriend')
-			
-#		if not query("""SELECT 1 FROM Users a, Users b WHERE a.Id=%s AND b.Id=%s
-#			AND a.GameId=b.GameId"""):
-#			raise BadFieldException('badFriend')
-			
-#		if query("""SELECT 1 FROM AttackingHistory a, History b, Games c, 
-#			TokenBadges d WHERE a.AttackingTokenBadgeId=%s AND 
-#			a.AttackedTokenBadgeId=%s AND a.HistoryId=b.HistoryId AND 
-#			b.GameId=c.GameId AND b.Turn=c.Turn	AND c.GameId=d.GameId AND 
-#			d.TokenBadgeId=%s AND d.InDecline=False""", tokenBadgeId, 
-#			friendBadgeId, friendBadgeId):
-#			raise BadFieldException('badFriend')
+	def selectFriend(self, user, data):
+		if not('friendId' in data and isinstance(data['friendId'], int)):
+			raise BadFieldException('badFriendId')
+		friend = dbi.getXbyY('User', 'id', data['friendId'])
 
-#		query("""INSERT INTO History(UserId, GameId, State, TokenBadgeId, Turn, 
-#			Friend) SELECT %s, %s, %s, %s, Turn FROM Games WHERE GameId=%s""", 
-#			userId, gameId, GAME_CHOOSE_FRIEND, tokenBadgeId, gameId, friendId)
+		if friend.id == user.id or friend.game.id != user.game.id:
+			raise BadFieldException('badFriend')
 
+		curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
+			x.userId == user.id and x.state == GAME_CONQUER, user.game.history)
+		if curTurnHistory:
+			if filter(lambda x: x.warHistory.victimBadgeId == 
+				friend.currentTokenBadge.id, curTurnHistory):
+				raise BadFieldException('badFriend')
+
+		dbi.updateHistory(user, GAME_CHOOSE_FRIEND, user.currentTokenBadge.id, 
+			None, friend.id)
 
 class SpecialPowerDragonMaster(BaseSpecialPower):
 	def __init__(self):
