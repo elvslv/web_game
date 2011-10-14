@@ -158,7 +158,7 @@ def act_redeploy(data):
 	specAbilities = [
 	{'name': 'encampments', 'cmd': 'setEncampments'},
 	{'name': 'fortifield', 'cmd': 'setFortifield'},
-	{'name': 'heroes', 'cmd': 'setHeroes'}]
+	{'name': 'heroes', 'cmd': 'setHero'}]
 
 	for specAbility in specAbilities:
 		if specAbility['name'] in data:

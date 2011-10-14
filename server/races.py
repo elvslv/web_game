@@ -277,6 +277,9 @@ class BaseSpecialPower:
 	def selectFriend(self, user, data):
 		raise BadFieldException('badSpecialPower')
 
+	def setHero(self, tokenBadgeId, heroes):
+		raise BadFieldException('badSpecialPower')
+
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
@@ -441,31 +444,24 @@ class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Heroic', 5, 2)
 
- 	def setHero(heroes, tokenBadgeId):
-		pass
-#		checkObjectsListCorrection(heroes, 
-#			[{'name': 'regionId', 'type': int, 'min': 1}])
+ 	def setHero(self, tokenBadge, heroes):
+		checkObjectsListCorrection(heroes, 
+			[{'name': 'regionId', 'type': int, 'min': 1}])
 
-#		if len(heroes) > 2:
-#			raise BadFieldException('badSetHeroCommand')
-#
-#		query('UPDATE CurrentRegionState SET Hero=False WHERE TokenBadgeId=%s',
-#			tokenBadgeId)
-#		for hero in heroes:
-#			regionId, gameId, ownerBadgeId = extractValues('CurrentRegionState', 
-#				['RegionId', 'GameId', 'TokenBadgeId'], [heroe['regionId'], 
-#				getGameIdByTokenBadge(tokenBadgeId)])
+		if len(heroes) > 2:
+			raise BadFieldException('badSetHeroCommand')
+		
+		for region in tokenBadge.regions:
+			region.hero = False
+		user = tokenBadge.owner
+		for hero in heroes:
+			regState = user.game.map.getRegion(hero['regionId']).getState(
+				user.game.id)
+			
+			if regState.owner.currentTokenBadge != tokenBadge:
+				raise BadFieldException('badRegion')
 
-#			if ownerBadgeId != tokenBadgeId:
-#				raise BadFieldException('badRegion')
-
-#			query("""SELECT 1 FROM CurrentRegionState WHERE RegionId=%s 
-#				AND TokenBadgeId=%s""", regionId, tokenBadgeId)
-#			if not fetchone():
-#				raise BadFieldException('badRegion')
-
-#			query('UPDATE CurrentRegionState SET Hero=True WHERE TokenBadgeId=%s',
-#				tokenBadgeId)
+			regState.hero = True
 
 	def decline(self, user):
 		BaseSpecialPower.decline(self, user)
