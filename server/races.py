@@ -411,7 +411,8 @@ class SpecialPowerFortified(BaseSpecialPower):
 		self.maxNum = 6
 
 	def clearRegion(self, tokenBadge, region):
-		tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
+		if region.fortress:
+			tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 
 	def setFortifield(self, tokenBadge, fortifield):
 		if not('regionId' in fortifield and isinstance(fortifield['regionId'], int)):
@@ -430,6 +431,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 		if fortifieldsOnMap >= self.maxNum:
 			raise BadFieldException('tooManyFortifieldsOnMap')
 		if fortifieldsOnMap == tokenBadge.specPowNum:
+			print fortifieldsOnMap, tokenBadge.specPowNum
 			raise BadFieldException('tooManyFortifields')
 		regState.fortress = True
 
