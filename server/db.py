@@ -327,7 +327,7 @@ class WarHistoryEntry(Base):
 
 
 class _Database:
-	engine = create_engine(DB_STRING, echo=True)
+	engine = create_engine(DB_STRING, echo=False)
 
 
 	def __init__(self):

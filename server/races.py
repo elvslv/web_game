@@ -179,8 +179,22 @@ class RaceSorcerers(BaseRace):
 	def enchant(self, tokenBadge, regState):
 		game =  tokenBadge.owner.game
 		victimBadge = regState.tokenBadge
-		if victimBadge == tokenBadge: raise BadFieldException('badAttackedRace')			
-		if tokenBadge.totalTokensNum == self.maxNum: raise BadFieldException('noMoreTokensInStorageTray')
+		regState.checkIfImmune(True)
+		if not (self.canConquer(regState.region, tokenBadge) and 
+			specialPowerList[tokenBadge.specPowId].canConquer(regState.region, 
+			tokenBadge)):
+			raise BadFieldException('badRegion')
+		if victimBadge == tokenBadge: 
+			raise BadFieldException('badAttackedRace')			
+		if not regState.tokensNum:
+			raise BadFieldException('nothingToEnchant')
+		if regState.tokensNum > 1:
+			raise BadFieldException('cannotEnchantMoreThanOneToken')
+		if regState.inDecline:
+			raise BadFieldException('cannotEnchantDeclinedRace')
+		if tokenBadge.totalTokensNum == self.maxNum: 
+			raise BadFieldException('noMoreTokensInStorageTray')
+		
 		victimBadge.totalTokensNum -= 1
 		tokenBadge.totalTokensNum += 1
 		raceId, specialPowerId  = victimBadge.raceId, victimBadge.specPowId
@@ -188,7 +202,6 @@ class RaceSorcerers(BaseRace):
 		regState.owner = tokenBadge.owner
 		regState.tokensNum = 1
 
-	
 racesList = [
 	RaceAmazons(),
 	RaceDwarves(),

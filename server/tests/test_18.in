@@ -146,17 +146,14 @@
 		{
 			"action": "enchant",
 			"sid": 2,
-			"regionId" : 2
+			"regionId" : 2,
+			"pos": 27
 		},
-
 		{
 			"action": "enchant",
 			"sid": 2,
 			"regionId" : 3
 		}
-
-
-
 	],
 	"description": "race Sorcerers"
 }

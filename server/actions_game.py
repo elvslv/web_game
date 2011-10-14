@@ -251,7 +251,7 @@ def act_defend(data):			## Should be renamed to retreat
 def act_dragonAttack(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	user.game.checkStage(GAME_DRAGON_ATTACK, user)
+	user.game.checkStage(GAME_CONQUER, user)
 	callSpecialPowerMethod(user.currentTokenBadge.specialPower.id, 'dragonAttack', tokenBadgeId, data['regionId'], 
 		data['tokensNum'])
 	return {'result': 'ok'}	
@@ -261,6 +261,13 @@ def act_enchant(data):
 	if not user.currentTokenBadge: 
 		raise BadFieldException('badStage')
 	user.game.checkStage(GAME_CONQUER, user)
+	curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
+		x.userId == user.id and x.state == GAME_CONQUER, user.game.history)
+	print curTurnHistory
+	if curTurnHistory:
+		if filter(lambda x: x.warHistory.attackType == ATTACK_ENCHANT, curTurnHistory):
+			raise BadFieldException('badStage')
+	
 	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
 	victimBadgeId = reg.tokenBadge.id
 	reg.checkIfImmune(True)
