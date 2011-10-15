@@ -29,6 +29,122 @@ pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 requiredInteger = lambda: Column(Integer, nullable=False)
 
+class _Database:
+	engine = create_engine(DB_STRING, echo=False)
+
+
+	def __init__(self):
+		Base.metadata.create_all(self.engine)
+		Session = sessionmaker(bind=self.engine)
+		self.session = Session()
+
+	def commit(self):
+		self.session.commit()
+
+	def rollback(self):
+		self.session.rollback()
+
+	def add(self, obj):
+		self.session.add(obj)
+		self.commit()
+
+	def addAll(self, objs):
+		self.session.add_all(objs)
+		self.commit()
+
+	def delete(self, *args, **kwargs):
+		self.session.delete(*args, **kwargs)
+		self.commit()
+
+	def query(self, *args, **kwargs):
+		return self.session.query(*args, **kwargs)
+
+	def clear(self):
+		meta = MetaData()
+		meta.reflect(bind=self.engine)
+		for table in reversed(meta.sorted_tables):
+		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
+		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
+			self.engine.drop(table)
+		Base.metadata.create_all(self.engine)
+
+	
+	def getXbyY(self, x, y, value, mandatory=True):
+		try:
+			cls = globals()[x]
+			return self.query(cls).filter(getattr(cls, y) == value).one()
+		except NoResultFound:
+			if mandatory:    	
+				n =  x + y[0].upper() + y[1:]
+				raise BadFieldException("""bad%s""" % n)
+			return None
+
+	def getNextPlayer(self, game):
+		try:
+			activePlayer = self.query(User).get(game.activePlayerId)
+			return self.query(User).filter(User.priority > activePlayer.priority).one()
+		except NoResultFound:
+			return None
+
+
+	def addUnique(self, obj, name):
+		try:
+			self.add(obj)
+		except IntegrityError:
+			raise BadFieldException("""%sTaken""" % name)
+    
+	def addRegion(self, id, map_, regInfo):
+		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
+		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
+		if not 'population' in regInfo:
+			regInfo['population'] = 0
+
+		reg = Region(id, regInfo['population'], map_)
+		self.add(reg)
+		for descr in regInfo['landDescription']:
+			if not descr in misc.possibleLandDescription[:11]:
+				raise BadFieldException('unknownLandDescription')
+			setattr(reg, descr, 1)
+
+	def addNeighbors(self, reg, nodes):
+		for node in nodes:
+			node.mapId = reg.mapId
+			self.add(node)
+
+  
+	def getUserByNameAndPwd(self, username, password):
+		try:
+			return self.session.query(User).\
+				filter(User.name == username).\
+				filter(User.password == password).one()
+		except NoResultFound:
+			raise BadFieldException('badUsernameOrPassword')
+
+	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
+		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
+
+	def updateGameHistory(self, game, data):
+		if 'sid' in data:
+			user = self.getXbyY('User', 'sid', data['sid'])
+			del data['sid']
+			data['userId'] = user.id
+		self.add(GameHistoryEntry(game, json.dumps(data)))
+
+	def updateWarHistory(self, user, victimBadgeId, agressorBadgeId, dice, regionId, 
+		defense, attackType):
+		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
+		self.add(hist)
+		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
+			defense, dice, attackType))
+
+
+_database = _Database()
+
+
+def Database():
+    return _database
+
+dbi = Database()
 
 class Map(Base):
 	__tablename__ = 'maps'
@@ -104,11 +220,13 @@ class Game(Base):
 
 
 	def clear(self):
-		tables = ['Games', 'TokenBadges', 'CurrentRegionState', 'History', 'GameHistory', 'WarHistory']
+		tables = ['Games', 'TokenBadges', 'CurrentRegionStates', 'History', 'GameHistory', 
+			'WarHistory']
 		for table in tables:
-			self.engine.execute("DELETE FROM %s WHERE GameId=%s", table, id)
+			queryStr = 'DELETE FROM %s WHERE id=%%s' % table
+			dbi.engine.execute(queryStr, id)
 		for table in tables:
-			self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=1", table)
+			dbi.engine.execute("ALTER TABLE %s AUTO_INCREMENT=1" % table)
 
 	def getLastState(self):
 		return self.history[-1].state
@@ -131,8 +249,8 @@ class TokenBadge(Base):
 
  	def __init__(self, raceId, specPowId, gameId): 
  		self.raceId = raceId
-        	self.specPowId = specPowId
-        	self.gameId = gameId
+		self.specPowId = specPowId
+		self.gameId = gameId
 
         def isNeighbor(self, region):
          	for reg in self.regions:
@@ -171,7 +289,6 @@ class User(Base):
 		histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND and\
 			x.userId == attackedUser.id, self.game.history)
 		if histEntry:
-			print histEntry[0].friend, attackedUser.id
 			if histEntry[0].friend == self.id:
 				raise BadFieldException('usersAreFriends')
 
@@ -351,120 +468,5 @@ class WarHistoryEntry(Base):
 		self.diceRes = diceRes
 		self.attackType = attackType
 		self.victimTokensNum = victimTokensNum
-
-class _Database:
-	engine = create_engine(DB_STRING, echo=False)
-
-
-	def __init__(self):
-		Base.metadata.create_all(self.engine)
-		Session = sessionmaker(bind=self.engine)
-		self.session = Session()
-
-	def commit(self):
-		self.session.commit()
-
-	def rollback(self):
-		self.session.rollback()
-
-	def add(self, obj):
-		self.session.add(obj)
-		self.commit()
-
-	def addAll(self, objs):
-		self.session.add_all(objs)
-		self.commit()
-
-	def delete(self, *args, **kwargs):
-		self.session.delete(*args, **kwargs)
-		self.commit()
-
-	def query(self, *args, **kwargs):
-		return self.session.query(*args, **kwargs)
-
-	def clear(self):
-		meta = MetaData()
-		meta.reflect(bind=self.engine)
-		for table in reversed(meta.sorted_tables):
-		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
-		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
-			self.engine.drop(table)
-		Base.metadata.create_all(self.engine)
-
-	
-	def getXbyY(self, x, y, value, mandatory=True):
-		try:
-			cls = globals()[x]
-			return self.query(cls).filter(getattr(cls, y) == value).one()
-		except NoResultFound:
-			if mandatory:    	
-				n =  x + y[0].upper() + y[1:]
-				raise BadFieldException("""bad%s""" % n)
-			return None
-
-	def getNextPlayer(self, game):
-		try:
-			activePlayer = self.query(User).get(game.activePlayerId)
-			return self.query(User).filter(User.priority > activePlayer.priority).one()
-		except NoResultFound:
-			return None
-
-
-	def addUnique(self, obj, name):
-		try:
-			self.add(obj)
-		except IntegrityError:
-			raise BadFieldException("""%sTaken""" % name)
-    
-	def addRegion(self, id, map_, regInfo):
-		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
-		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
-		if not 'population' in regInfo:
-			regInfo['population'] = 0
-
-		reg = Region(id, regInfo['population'], map_)
-		self.add(reg)
-		for descr in regInfo['landDescription']:
-			if not descr in misc.possibleLandDescription[:11]:
-				raise BadFieldException('unknownLandDescription')
-			setattr(reg, descr, 1)
-
-	def addNeighbors(self, reg, nodes):
-		for node in nodes:
-			node.mapId = reg.mapId
-			self.add(node)
-
-  
-	def getUserByNameAndPwd(self, username, password):
-		try:
-			return self.session.query(User).\
-				filter(User.name == username).\
-				filter(User.password == password).one()
-		except NoResultFound:
-			raise BadFieldException('badUsernameOrPassword')
-
-	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
-		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
-
-	def updateGameHistory(self, game, data):
-		if 'sid' in data:
-			user = self.getXbyY('User', 'sid', data['sid'])
-			del data['sid']
-			data['userId'] = user.id
-		self.add(GameHistoryEntry(game, json.dumps(data)))
-
-	def updateWarHistory(self, user, victimBadgeId, agressorBadgeId, dice, regionId, 
-		defense, attackType):
-		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
-		self.add(hist)
-		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
-			defense, dice, attackType))
-
-
-_database = _Database()
-
-
-def Database():
-    return _database
 
 

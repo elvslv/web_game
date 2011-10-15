@@ -166,7 +166,6 @@ def act_saveGame(data):
 	row = filter(lambda x: x.gameId == game.id, game.gameHistory)
 	for action in row:
 		result.append(json.loads(action.action))
-	print {'result': 'ok', 'actions': result}
 	return {'result': 'ok', 'actions': result}
 
 def act_loadGame(data):
@@ -180,12 +179,12 @@ def act_loadGame(data):
 , 'loadGame', 'resetServer', 'createDefaultMaps'):
 			raise BadFieldException('illegalAction')
 		if 'userId' in act:
-			user = dbi.getXbyY('User', 'id', data['userId'])
+			user = dbi.getXbyY('User', 'id', act['userId'])
 			del act['userId']
 			act['sid'] = user.sid
 			
 	for act in data['actions']:
-		res = doAction(act)
+		res = doAction(act, False)
 	return {'result': 'ok'}
 
 def getMapState(mapId, gameId = None):
@@ -314,12 +313,12 @@ def act_getVisibleTokenBadges(data):
 
 	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokensBadges(data['gameId'])}
 
-def doAction(data):
+def doAction(data, check = True):
 	try:
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
-		checkFieldsCorrectness(data)
+		if check: checkFieldsCorrectness(data)
 		res = globals()[func](data)
 		dbi.commit()
 		return res

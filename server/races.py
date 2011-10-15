@@ -304,7 +304,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		for region in user.regions:
 			region.encampment = False
 		
-	def setEncampments(self, encampments, tokenBadge):
+	def setEncampments(self, tokenBadge, encampments):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
@@ -336,7 +336,6 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 		if not('friendId' in data and isinstance(data['friendId'], int)):
 			raise BadFieldException('badFriendId')
 		friend = dbi.getXbyY('User', 'id', data['friendId'])
-		print friend
 		if friend.id == user.id or friend.game.id != user.game.id:
 			raise BadFieldException('badFriend')
 
@@ -408,7 +407,7 @@ class SpecialPowerForest(BaseSpecialPower):
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortifield', 3, 1)
+		BaseSpecialPower.__init__(self, 'Fortifield', 3, 6)
 		self.maxNum = 6
 
 	def clearRegion(self, tokenBadge, region):
@@ -432,13 +431,11 @@ class SpecialPowerFortified(BaseSpecialPower):
 		if fortifieldsOnMap >= self.maxNum:
 			raise BadFieldException('tooManyFortifieldsOnMap')
 		if fortifieldsOnMap == tokenBadge.specPowNum:
-			print fortifieldsOnMap, tokenBadge.specPowNum
 			raise BadFieldException('tooManyFortifields')
 		regState.fortress = True
 
 	def incomeBonus(self, tokenBadge):
 		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortress, tokenBadge.regions))
-
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
