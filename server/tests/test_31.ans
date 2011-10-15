@@ -1,5 +1,4 @@
-[	
-	{
+[	{
 		"result": "ok"
 	},
 	{
@@ -50,7 +49,33 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 4
+		"coins" : 1
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 5
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 1,
+		"coins" : 5
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badFriend"
 	}
-
 ]

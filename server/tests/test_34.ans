@@ -1,0 +1,107 @@
+[	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2
+	},
+	{
+		"result": "ok",
+		"gameId": 1
+	},
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 6
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 1
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 5
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 1,
+		"coins" : 5
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 3
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 1,
+		"coins" : 10
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 4
+	},
+	{
+		"result": "badTokensNum",
+		"dice": 0
+	}
+]
