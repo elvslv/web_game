@@ -31,7 +31,7 @@ requiredInteger = lambda: Column(Integer, nullable=False)
 
 class _Database:
 	engine = create_engine(DB_STRING, echo=False)
-
+	mysql_engine='InnoDB'
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
@@ -170,7 +170,8 @@ class Map(Base):
 
 class Game(Base):
 	__tablename__ = 'games'
-
+	mysql_engine='InnoDB'
+	
 	id = pkey()
 	name = uniqString(MAX_GAMENAME_LEN)
 	descr = string(MAX_GAMEDESCR_LEN)
@@ -218,15 +219,26 @@ class Game(Base):
 		lastWarHistoryEntry = self.history[-1].warHistory
 		return lastWarHistoryEntry.conqRegion.region
 
+	def clear(self): ##must be reworked!
+		gameId = self.id
+		tables = ['History', 'GameHistory', 'CurrentRegionStates', 'TokenBadges']
+		dbi.engine.execute("""UPDATE Users SET GameId=Null, IsReady=False, 
+			currentTokenBadgeId=Null, declinedTokenBadgeId=Null, coins=%s,
+			priority=Null WHERE GameId=%s""" , misc.INIT_COINS_NUM, gameId)
 
-	def clear(self):
-		tables = ['Games', 'TokenBadges', 'CurrentRegionStates', 'History', 'GameHistory', 
-			'WarHistory']
+		for hist in self.history:
+			dbi.engine.execute("""DELETE FROM WarHistory WHERE MainHistEntryId=%s""", 
+				hist.id)
 		for table in tables:
-			queryStr = 'DELETE FROM %s WHERE id=%%s' % table
-			dbi.engine.execute(queryStr, id)
-		for table in tables:
-			dbi.engine.execute("ALTER TABLE %s AUTO_INCREMENT=1" % table)
+			queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table
+			dbi.engine.execute(queryStr, gameId)
+		dbi.engine.execute('DELETE FROM Games WHERE Id=%s', gameId)
+		dbi.engine.execute("ALTER TABLE Games AUTO_INCREMENT=1")
+		dbi.engine.execute("ALTER TABLE WarHistory AUTO_INCREMENT=1")
+		dbi.engine.execute("ALTER TABLE History AUTO_INCREMENT=1")
+		dbi.engine.execute("ALTER TABLE CurrentRegionStates AUTO_INCREMENT=1" )
+		dbi.engine.execute("ALTER TABLE TokenBadges AUTO_INCREMENT=1")
+		dbi.engine.execute("ALTER TABLE GameHistory AUTO_INCREMENT=1")
 
 	def getLastState(self):
 		return self.history[-1].state
@@ -234,29 +246,30 @@ class Game(Base):
 
 class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
+	mysql_engine='InnoDB'
+	
+	id = pkey()
+	gameId = fkey('games.id')
+	raceId = Column(Integer)
+	specPowId = Column(Integer)
+	pos = Column(Integer, default=0)
+	bonusMoney = Column(Integer, default = 0)
+	inDecline = Column(Boolean, default=False)
+	totalTokensNum = Column(Integer, default = 0)
+	specPowNum = Column(Integer, default = 0)
 
-    	id = pkey()
-    	gameId = fkey('games.id')
-    	raceId = Column(Integer)
-    	specPowId = Column(Integer)
-    	pos = Column(Integer, default=0)
-    	bonusMoney = Column(Integer, default = 0)
-    	inDecline = Column(Boolean, default=False)
-    	totalTokensNum = Column(Integer, default = 0)
-    	specPowNum = Column(Integer, default = 0)
+	game = relationship(Game, backref=backref('tokenBadges'))
 
-    	game = relationship(Game, backref=backref('tokenBadges'))
-
- 	def __init__(self, raceId, specPowId, gameId): 
- 		self.raceId = raceId
+	def __init__(self, raceId, specPowId, gameId): 
+		self.raceId = raceId
 		self.specPowId = specPowId
 		self.gameId = gameId
 
-        def isNeighbor(self, region):
-         	for reg in self.regions:
-        		if region.adjacent(reg.region):
-        			return True
-        	return False
+	def isNeighbor(self, region):
+		for reg in self.regions:
+			if region.adjacent(reg.region):
+				return True
+		return False
         
 class User(Base):
 	__tablename__ = 'users'
@@ -296,11 +309,12 @@ class User(Base):
 		for declinedRegion in self.declinedTokenBadge.regions:
 			declinedRegion.owner = None
 			declinedRegion.inDecline = False
-	
-	def getNonEmptyConqueredRegions(self):
-		conqHist = filter(lambda x: x.turn == self.game.turn and x.state == misc.GAME_CONQUER, self.game.history)
-		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
 
+	def getNonEmptyConqueredRegions(self):
+		conqHist = filter(lambda x: x.turn == self.game.turn and 
+			x.state == misc.GAME_CONQUER and x.userId == self.id, self.game.history)
+		return len(filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist))
+		
 class Region(Base):
 	__tablename__ = 'regions'
 
@@ -342,7 +356,8 @@ class Region(Base):
 
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
-	
+	mysql_engine='InnoDB'
+
 	id = pkey()
 	gameId = fkey('games.id')
 	tokenBadgeId = fkey('tokenBadges.id') 
@@ -357,7 +372,7 @@ class RegionState(Base):
 	hero = Column(Boolean, default = False) 
 	inDecline = Column(Boolean, default = False) 
 
-	game = relationship(Game)
+	game = relationship(Game, backref=backref('regions'))
 	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
 	owner = relationship(User, backref=backref('regions'))
 	region = relationship(Region, backref=backref('states'))
@@ -382,7 +397,8 @@ class RegionState(Base):
 
 class Adjacency(Base):
 	__tablename__ = 'adjacentRegions'
-
+	mysql_engine='InnoDB'
+	
 	regId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	neighborId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	mapId = Column(Integer, ForeignKey('regions.mapId'), primary_key=True)
@@ -408,7 +424,8 @@ class Message(Base):
 
 class HistoryEntry(Base):
 	__tablename__ = 'history'
-
+	mysql_engine='InnoDB'
+	
 	id = pkey()
 	userId = fkey('users.id')
 	gameId = fkey('games.id')
@@ -432,7 +449,8 @@ class HistoryEntry(Base):
 
 class GameHistoryEntry(Base):
 	__tablename__ = 'gameHistory'
-
+	mysql_engine='InnoDB'
+	
 	id = pkey()
 	gameId = fkey('games.id')
 	action = Column(Text)
@@ -445,7 +463,8 @@ class GameHistoryEntry(Base):
 
 class WarHistoryEntry(Base):
 	__tablename__ = 'warHistory'
-
+	mysql_engine='InnoDB'
+	
 	id = pkey()
 	mainHistEntryId = fkey('history.id')
 	agressorBadgeId = fkey('tokenBadges.id')

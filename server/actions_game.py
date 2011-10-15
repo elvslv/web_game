@@ -195,7 +195,7 @@ def act_finishTurn(data):
 	if tokenBadge and callRaceMethod(tokenBadge.raceId, 'needRedeployment') and\
 		game.getLastState() != GAME_REDEPLOY and game.getLastState() != GAME_CHOOSE_FRIEND :  
 		raise BadFieldException('badStage')
-		
+
 	income = len(user.regions)
 	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
 	for race in races:

@@ -497,7 +497,7 @@ class SpecialPowerPillaging(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Pillaging', 5)
 	
 	def incomeBonus(self, user): 
-		return user.game.getNonEmptyConqueredRegions()
+		return user.getNonEmptyConqueredRegions()
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
