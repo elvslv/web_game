@@ -558,7 +558,7 @@ class SpecialPowerWealthy(BaseSpecialPower):
 specialPowerList = [
 	SpecialPowerAlchemist(),
 	SpecialPowerBerserk(),
- 	SpecialPowerBivouacking(),
+	SpecialPowerBivouacking(),
 	SpecialPowerCommando(),
 	SpecialPowerDiplomat(),
 	SpecialPowerDragonMaster(),

@@ -1,28 +1,85 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <head>
-		<script type="text/javascript" src="jquery/jquery-1.5.2.js"></script>
-		<script type="text/javascript" src="jquery/jquery-ui-1.8.12.custom.min.js"></script> 
+		<script type="text/javascript" src="client/import/jquery/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="client/import/jquery/jquery-ui-1.8.12.custom.min.js"></script> 
+		<script type="text/javascript" src="client/import/scripts/menu-collapsed.js"></script>
+		<script type="text/javascript" src="client/data.js"></script> 
+		<script type="text/javascript" src="client/main.js"></script> 
+		<script type="text/javascript" src="client/interface.js"></script> 
+		<script type="text/javascript" src="client/callServer.js"></script> 
+		<script type="text/javascript" src="client/serverResponses.js"></script> 
 		<link rel="stylesheet" type="text/css" href="styles/jquery-ui-1.8.12.custom.css">
+		<link rel="stylesheet" type="text/css" href="styles/styles.css">
 </head>
-<script type="text/javascript">
-	$(function() {
-		$( "#post" ).button();
-		$( "#post" ).click(function() { 
-			//alert($("#json").val());
-			$.ajax({
-				type: "POST",
-				url: "http://localhost/small_worlds/",
-				data: $("#json").val(),
-				success: function(msg){
-					alert( "Data Saved: " + msg );
-				}
-			});
-		});
-	});
-</script>
-<body>
-<textarea id = "json"></textarea>
-<button id = "post">Post</button>
+
+<body> 
+	<table id = "tmain" height = "100%" width = "100%" style="ui-widget">
+		<tr id = "tmain_1">
+			<td id = "tmain_1_1" rowspan = "3" valign = "top">
+				<table id = "tableGames" width = 100%>
+					<tr id = "tableGames_1">
+						<td id = "tableGames_1_1">
+							<p id = "gameListInfo">Game list</p>
+						</td>
+						<td id = "tableGames_1_2" align = "right"  width = "70%">
+							<button id = "getGameList"></button>
+						</td>
+					</tr>
+					<tr id = "tableGames_2">
+						<td id = "tableGames_2_1"  colspan = "2">
+							<ul id = "gameList">
+							</ul>	
+						</td>
+					</tr>
+					<tr id = "tableGames_3">
+						<td id = "tableGames_3_1"  colspan = "2">
+							<button id = "createGame" style = "display:none">Create new game</button>
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td id = "tmain_1_2" valign = "top" align = "right">
+				<p id = "userInfo">You're not logged in, please login or register</p>
+				<div>
+					<button id = "register">Register</button>
+					<button id = "login">Login</button>
+					<button id = "logout" style = "display:none">Logout</button>
+				</div>
+			</td>
+		</tr>
+		<tr id = "tmain_2">
+			<td id = "tmain_2_1">
+			</td>
+		</tr>
+		<tr id = "tmain_3">
+			<td id = "tmain_3_1">
+			</td>
+		</tr>
+	</table>
+	<div id = "registerLoginForm" style = "display: none">
+		<p id = "dialogInfo">Please enter unique username and valid password</p>
+		<form>
+			<fieldset>
+				<label for="username">Username</label>
+				<input type="text" name="username" id = "username" class="text ui-widget-content ui-corner-all" /><br>
+				<label for="password">Password</label>
+				<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+			</fieldset>
+		</form>
+	</div>
+	<div id = "createGameForm" style = "display: none">
+		<p id = "dialogInfo">Please enter unique username and valid password</p>
+		<form>
+			<fieldset>
+				<label for="gameName">Game name</label>
+				<input type="text" name="gameName" id = "gameName" class="text ui-widget-content ui-corner-all" /><br>
+				<label for="gameDescription">Game description</label>
+				<input type="text" name="gameDescription" id="gameDescription" value="" class="text ui-widget-content ui-corner-all" /><br>
+				<label for="mapId">Map id</label>
+				<input type="text" name="mapId" id = "mapId" class="text ui-widget-content ui-corner-all" />
+			</fieldset>
+		</form>
+	</div>
 </body>
 </html>
