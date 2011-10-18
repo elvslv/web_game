@@ -37,11 +37,11 @@ $(function() {
 				{
 					var gameName = $('#gameName'),
 						gameDescription = $('#gameDescription'),
-						mapId = $('#mapId');
-					responseGame = defaultResponseGame;
-					responseGame['gameName'] = gameName.val();
-					responseGame['gameDescr'] = gameDescription.val();
-					responseGame['mapId'] = mapId.val();
+						mapId = $('#mapId'),
+						sid = Client.currentUser.sid;
+					Client.currGameState.name = gameName.val();
+					Client.currGameState.descr  = gameDescription.val();
+					Client.currGameState.mapId = mapId.val();
 					query = '{"action": "createGame", "sid": ' + sid + ', "gameName": "' + gameName.val() + '", "gameDescr": "' + gameDescription.val() + '", "mapId": ' + mapId.val() + '}';
 					sendQuery(query, createGameResponse);
 				},
@@ -54,7 +54,7 @@ $(function() {
 		$('#register')
 			.button()
 			.click(function() {
-				$('#dialogInfo').text('Please enter unique username and valid password');
+				$('#dialogInfo').text('Please enter username and password');
 				$('#registerLoginForm').prop('register', true);
 				$('#registerLoginForm').prop('login', false);
 				$('#registerLoginForm').dialog('option', 'title', 'Register');
@@ -64,7 +64,7 @@ $(function() {
 		$('#login')
 			.button()
 			.click(function() {
-				$('#dialogInfo').text("Please enter unique username and valid password");
+				$('#dialogInfo').text("Please enter username and password");
 				$('#registerLoginForm').prop('register', false);
 				$('#registerLoginForm').prop('login', true);
 				$('#registerLoginForm').dialog('option', 'title', 'Login');
@@ -73,7 +73,7 @@ $(function() {
 		$('#logout')
 			.button()
 			.click(function() {
-				query = '{"action": "logout", "sid": ' + sid +'}';
+				query = '{"action": "logout", "sid": ' + Client.currentUser.sid +'}';
 				sendQuery(query, logoutResponse);
 			});
 		$('#getGameList')

@@ -1,12 +1,48 @@
-var sid = undefined;
-var username = undefined;
-var gameId = undefined;
-var userId = undefined;
-var mapId = undefined;
-var gamesList = undefined;
-var gameFields = ['gameId', 'gameName', 'gameDescr', 'mapId', 'playersNum', 'activePlayer', 'state', 'turn', 'players']
-var gameFieldDescriptions = ['Game id', 'Game name', 'Game description', 'Map id', 'Number of players', 'Active player', 
-'State', 'Turn', 'Players list']
-var responseGameId = undefined;
-var defaultResponseGame = {'playersNum': 1, 'activePlayer': 0, 'state': 1, 'turn': 0}
-var responseGame = undefined;
+var Client = {};
+
+Client.currentUser = {};
+
+Client.gameList = [];
+Client.newUser = function(name, id) {
+	return {
+		"username" : name,
+		"userId" : id
+	};
+};
+
+Client.currGameState = {
+	"name" : '',
+	"descr" : '',
+	"mapId" : 0,
+	"id" : 0
+};
+
+
+Client.newGame = function(id) {
+	var playersNum = 1,
+		state = 'waiting';
+	return {
+		"gameName" : Client.currGameState.name,
+		"gameId"   : id,
+		"state" : state,
+		"turn"  : 0,
+		"playersNum" : playersNum,
+		"gameDescr" : Client.currGameState.descr,
+		"mapId" : Client.currGameState.mapId
+	};
+};
+
+Client.states = [
+	'start',
+	'waiting',
+	'??',
+	'finished',
+];
+	
+Client.gameProperties = [
+	"gameId", "gameName", "gameDescr", 
+	"mapId", "playersNum", "activePlayer", 
+	"state", "turn", "players"
+];
+
+

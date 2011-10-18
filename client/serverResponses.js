@@ -16,15 +16,16 @@ function registerResponse(data)
 			break;
 		case 'ok':
 			alert("You're were registered, congratulations!");
-			$('#registerLoginForm').dialog('close');
+			Interface.changeOnRegistration();
 			break;
 		default:
-			$('#dialogInfo').text('Unknown server response');
+			$('#dialogInfo').text('Unknown server response' + data);
 	}
 }
 
 function loginResponse(data)
 {
+	var sid, username;
 	switch(data['result'])
 	{
 		case 'badUsernameOrPassword':
@@ -35,11 +36,14 @@ function loginResponse(data)
 			break;
 		case 'ok':
 			sid = data['sid'];
+			id = data['id'];
 			username = $('#username').val();
-			changeOnLogin();
+			Client.currentUser = Client.newUser(username, id);
+			Client.currentUser.sid = sid;
+			Interface.changeOnLogin();
 			break;
 		default:
-			$('#dialogInfo').text('Unknown server response');
+			$('#dialogInfo').text('Unknown server response' + data);
 	}
 }
 
@@ -47,21 +51,18 @@ function logoutResponse(data)
 {
 	switch(data['result'])
 	{
-		case 'badSid':
+		case 'badUserSid':
 			alert('Invalid sid'); //?!!!
 			break;
 		case 'badJson': //may it be???
 			alert('Invalid data');
 			break;
 		case 'ok':
-			sid = undefined;
-			username = undefined;
-			$('#userInfo').text("You're not logged in, please login or register");
-			$('#login').show();
-			$('#logout').hide();
+			delete Client.currentUser;
+			Interface.changeOnLogout();
 			break;
 		default:
-			alert('Unknown server response');
+			alert('Unknown server response' + data);
 	}
 }
 
@@ -72,15 +73,15 @@ function getGameListResponse(data)
 		alert("Unknown server response: " + data);
 		return;
 	}
-	gamesList = data['games'];
-	fillGameList();
+	Client.gameList = data['games'];
+	Interface.fillGameList();
 }
 
 function joinGameResponse(data)
 {
 	switch(data['result'])
 	{
-		case 'badSid':
+		case 'badUserSid':
 			alert('Invalid sid'); //?!!!
 			break;
 		case 'badJson': //may it be???
@@ -93,15 +94,15 @@ function joinGameResponse(data)
 			alert('You can not join game that have been already started or finished');
 			break;
 		case 'alreadyInGame': 
-			alert('You have been already joined to game');
+			alert("You're already in game");
 			break;
 		case 'tooManyPlayers': 
 			alert('There is no free space on map');
 			break;
 		case 'ok':
-			gameId = responseGameId;
-			responseGameId = undefined;
-			changeOnJoin();
+			Client.currentUser.gameId = Client.currGameState.id;
+			delete Client.currGameState.id;
+			Interface.changeOnJoin();
 			break;
 		default:
 			alert('Unknown server response');
@@ -112,7 +113,7 @@ function leaveGameResponse(data)
 {
 	switch(data['result'])
 	{
-		case 'badSid':
+		case 'badUserSid':
 			alert('Invalid sid'); //?!!!
 			break;
 		case 'badJson': //may it be???
@@ -122,9 +123,8 @@ function leaveGameResponse(data)
 			alert("You're not playing");
 			break;
 		case 'ok':
-			gameId = undefined;
-			responseGameId = undefined;
-			changeOnLeave();
+			delete Client.currentUser.gameId;
+			Interface.changeOnLeave();
 			break;
 		default:
 			alert('Unknown server response');
@@ -133,11 +133,10 @@ function leaveGameResponse(data)
 
 function createGameResponse(data)
 {
-	response = responseGame;
-	responseGame = undefined;
+	var game;
 	switch(data['result'])
 	{
-		case 'badSid':
+		case 'badUserSid':
 			alert('Invalid sid'); //?!!!
 			break;
 		case 'badJson': //may it be???
@@ -147,16 +146,20 @@ function createGameResponse(data)
 			alert('Invalid map id');
 			break;
 		case 'badGameName': 
+		case 'gameNameTaken': 
 			alert('Invalid game name');
 			break;
 		case 'badGameDescription': 
 			alert('Invalid game description');
 			break;
 		case 'alreadyInGame': 
-			alert('You have been already joined to game');
+			alert("You're already playing");
 			break;
 		case 'ok':
-			changeOnCreateGame(response);
+			game = Client.newGame(data['gameId']);
+			Client.currentUser.gameId = game.gameId;
+			Client.gameList.push(game);
+			Interface.changeOnCreateGame(game);
 			$('#createGameForm').dialog('close');
 			break;
 		default:
