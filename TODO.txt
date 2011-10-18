@@ -1,6 +1,4 @@
-1. add set ready status
 2. add chat
 3. add upload map
-4. add getting current game after logging on
 5. add list of players in game description
 6. make good design

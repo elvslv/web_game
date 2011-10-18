@@ -8,14 +8,14 @@
 	},
 	{
 		"result": "ok",
-		"sid": 1
+		"sid": 1,  "userId": 1
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok",
-		"sid": 2
+		"sid": 2,  "userId": 2
 	},
 	{
 		"result": "ok",

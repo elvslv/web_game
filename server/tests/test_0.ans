@@ -7,35 +7,35 @@
 	},
 	{
 		"result": "ok", 
-		"sid": 1
+		"sid": 1,  "userId": 1
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok", 
-		"sid": 2
+		"sid": 2,  "userId": 2
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok", 
-		"sid": 3
+		"sid": 3,  "userId": 3
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok", 
-		"sid": 4
+		"sid": 4,  "userId": 4
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok", 
-		"sid": 5
+		"sid": 5,  "userId": 5
 	},
 	{
 		"result": "badUserSid"		

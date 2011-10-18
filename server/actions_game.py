@@ -115,19 +115,12 @@ def act_conquer(data):
 	user.tokensInHand -= unitPrice
 	dbi.updateGameHistory(game, data)
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
-		
+
 def act_decline(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	
 	user.game.checkStage(GAME_DECLINE, user)
-	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
-	if user.declinedTokenBadge:
-		user.killRaceInDecline()
-		dbi.delete(user.declinedTokenBadge)
-	callSpecialPowerMethod(specialPowerId, 'decline', user)	
-	callRaceMethod(raceId, 'decline', user)	
-	user.currentTokenBadge = None
+	makeDecline(user)
 	dbi.updateHistory(user, GAME_DECLINE, user.declinedTokenBadge.id)
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
@@ -184,8 +177,6 @@ def act_redeploy(data):
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 		
-def endOfGame(coins): 
-	return {'result': 'ok', 'coins': coins}
 
 def act_finishTurn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
@@ -196,20 +187,10 @@ def act_finishTurn(data):
 		game.getLastState() != GAME_REDEPLOY and game.getLastState() != GAME_CHOOSE_FRIEND :  
 		raise BadFieldException('badStage')
 
-	income = len(user.regions)
-	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
-	for race in races:
-		income += callRaceMethod(race.raceId, 'incomeBonus', race)
-		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
-	user.coins += income
+	countCoins(user)
 	user.tokensInHand = 0
-	nextPlayer = dbi.getNextPlayer(game)
-	if not nextPlayer:
-		nextPlayer = game.players[0]
-		game.turn += 1
-		if game.turn == game.map.turnsNum:
-			return endOfGame(coins)
-
+	nextPlayer = game.getNextPlayer()
+	print 'afterGetNextPlayer'
 #	for rec in races:
 #		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 #		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)

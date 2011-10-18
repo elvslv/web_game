@@ -79,14 +79,6 @@ class _Database:
 				raise BadFieldException("""bad%s""" % n)
 			return None
 
-	def getNextPlayer(self, game):
-		try:
-			activePlayer = self.query(User).get(game.activePlayerId)
-			return self.query(User).filter(User.priority > activePlayer.priority).one()
-		except NoResultFound:
-			return None
-
-
 	def addUnique(self, obj, name):
 		try:
 			self.add(obj)
@@ -189,6 +181,9 @@ class Game(Base):
 		self.state = misc.GAME_WAITING
 		self.map = map
 
+	def playersInGame(self):
+		return filter(lambda x: x.inGame == True, self.players)
+
 	def getTokenBadge(self, position):
 		tokenBadge = filter(lambda x: x.pos == position, self.tokenBadges)
 		if not tokenBadge: raise BadFieldException('badPosition')
@@ -243,6 +238,27 @@ class Game(Base):
 	def getLastState(self):
 		return self.history[-1].state
 
+	def getNextPlayer(self):
+		print 'getNextPlayer'
+		activePlayer = dbi.getXbyY('User', 'id', self.activePlayerId)
+		curPlayer = activePlayer
+		while True:
+			nextPlayer = filter(lambda x: x.priority > curPlayer.priority, 
+				self.players)
+			if not len(nextPlayer):
+				break
+			nextPlayer = nextPlayer[0]
+			if not nextPlayer.inGame:
+				countCoins(nextPlayer)
+				curPlayer = nextPlayer
+			else:
+				return nextPlayer
+		self.turn += 1
+		if (self.turn == self.map.turnsNum):
+			return endOfGame(self, activePlayer.coins)
+		
+		return filter(lambda x: x.priority >= 0 and x.inGame == True, self.players)[0]
+
 
 class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
@@ -285,7 +301,7 @@ class User(Base):
 	coins = Column(Integer, default=misc.INIT_COINS_NUM)
 	tokensInHand = Column(Integer, default = 0)
 	priority = Column(Integer)
-
+	inGame = Column(Boolean, default=False)
 	
 	game = relationship(Game, backref=backref('players', order_by=priority))
 	currentTokenBadge = relationship(TokenBadge, backref=backref('owner', uselist=False), 

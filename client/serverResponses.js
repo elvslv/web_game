@@ -35,6 +35,7 @@ function loginResponse(data)
 			break;
 		case 'ok':
 			sid = data['sid'];
+			userId = data['userId'];
 			username = $('#username').val();
 			changeOnLogin();
 			break;
@@ -56,9 +57,9 @@ function logoutResponse(data)
 		case 'ok':
 			sid = undefined;
 			username = undefined;
-			$('#userInfo').text("You're not logged in, please login or register");
-			$('#login').show();
-			$('#logout').hide();
+			isReady = undefined;
+			gameId = undefined;
+			changeOnLogout();
 			break;
 		default:
 			alert('Unknown server response');
@@ -158,6 +159,33 @@ function createGameResponse(data)
 		case 'ok':
 			changeOnCreateGame(response);
 			$('#createGameForm').dialog('close');
+			break;
+		default:
+			alert('Unknown server response');
+	}
+}
+
+function setRadinessStatusResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badSid':
+			alert('Invalid sid'); //?!!!
+			break;
+		case 'badJson': //may it be???
+			alert('Invalid data');
+			break;
+		case 'notInGame': 
+			alert("You didn't join to any game");
+			break;
+		case 'badGameState': 
+			alert('You cannot change your status, because game is already started');
+			break;
+		case 'badReadinessStatus': 
+			alert('Invalid status');//
+			break;
+		case 'ok':
+			changeOnSetReadinessStatus();
 			break;
 		default:
 			alert('Unknown server response');

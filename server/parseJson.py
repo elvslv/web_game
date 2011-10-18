@@ -63,6 +63,7 @@ def parseDataFromFile(fileName):
 
 	return {'result': result, 'description': description}
 	
-#if __name__ == "__main__":
-#    import sys
-#    parseDataFromFile(str(sys.argv[1]))
+if __name__ == "__main__":
+	import sys
+	if len(sys.argv) > 0 and sys.argv[1] == 'resetServer':
+		parseInputData(parseJsonObj({'action': 'resetServer'}))

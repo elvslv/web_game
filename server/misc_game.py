@@ -84,6 +84,141 @@ def generateTokenBadges(randSeed, num):
 		specialPowersInStack.remove(specialPowerId)
 	return result
 
+def countCoins(user):
+	income = len(user.regions)
+	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
+	for race in races:
+		income += callRaceMethod(race.raceId, 'incomeBonus', race)
+		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
+	user.coins += income
+
+def getGameState(game):
+	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
+	gameNameAttrs = ['gameId', 'gameName', 'gameDescription', 'state', 
+		'currentTurn', 'activePlayerId']
+
+	result = dict()
+	for i in range(len(gameResFields)):
+		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
+		
+	result['map'] = getMapState(game.map.id)
+
+	playerAttrs = ['id', 'name', 'isReady', 'coins', 'tokensInHand', 'inGame']
+	playerAttrNames = ['userId', 'username', 'isReady', 'coins', 'tokensInHand', 
+		'inGame']
+
+	players = game.players
+	resPlayers = list()
+	priority = 0
+	for player in players:
+		curPlayer = dict()
+		for i in range(len(playerAttrs)):
+			curPlayer[playerAttrs[i]] = getattr(player, playerAttrs[i])
+
+		priority += 1	
+		curPlayer['priority'] = priority
+		
+		if player.currentTokenBadge:
+			curTokenBadge = dict()
+			curTokenBadge['race'] =  races.racesList[player.currentTokenBadge.raceId].name
+			curTokenBadge['specialPower'] =  races.specialPowerList[player.currentTokenBadge.specPowId].name
+			curPlayer['currentTokenBadge'] = curTokenBadge
+			
+		if player.declinedTokenBadge:
+			declinedTokenBadge = dict()
+			declinedTokenBadge['race'] =  races.racesList[player.declinedTokenBadge.raceId].name
+			declinedTokenBadge['specialPower'] =  races.specialPowerList[player.declinedTokenBadge.specPowId].name
+			curPlayer['declinedTokenBadge'] = declinedTokenBadge
+			
+		resPlayers.append(curPlayer)
+	result['players'] = resPlayers
+	result['visibleTokenBadges'] = getVisibleTokenBadges(gameId)
+	return result
+
+def endOfGame(game, coins = None): 
+	print 'endOfGame'
+	game.state = GAME_ENDED
+	if misc.TEST_MODE:
+		return {'result': 'ok', 'coins': coins}
+	else:
+		gameState = getGameState(game)
+		dbi.engine.execute("""UPDATE Users SET GameId=Null, IsReady=False, 
+			currentTokenBadgeId=Null, declinedTokenBadgeId=Null, coins=%s,
+			priority=Null WHERE GameId=%s""" , misc.INIT_COINS_NUM, game.id)
+		tables = ['CurrentRegionStates', 'TokenBadges']
+		for table in tables:
+			queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table
+			dbi.engine.execute(queryStr, gameId)
+		return {'result': 'ok', 'gameState': gameState}
+
+
+def getMapState(mapId, gameId = None):
+	map_ = dbi.getXbyY('Map', 'id', mapId)
+	result = dict()
+	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum']
+	mapAttrNames = ['mapId', 'mapName', 'playersNum', 'turnsNum']
+	for i in range(len(mapAttrs)):
+		result[mapAttrNames[i]] = getattr(map_, mapAttrs[i])
+	result['regions'] = list()
+	constRegionAttrs = ['id', 'defTokensNum', 'border', 'coast', 'mountain', 
+		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
+	constRegionAttrNames = ['regionId', 'defaultTokensNum', 'border', 'coast', 
+		'mountain', 'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 
+		'swamp', 'cavern']
+	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
+		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
+
+	for region in map_.regions:
+		curReg = dict()
+		for i in range(len(constRegionAttrs)):
+			curReg[constRegionAttrNames[i]] = getattr(region, constRegionAttrs[i])
+		curReg['adjacentRegions'] = region.getNeighbors()
+		if gameId:
+			curRegState = region.getState()
+			for i in range(len(curRegionAttrs)):
+				curReg[curRegionAttrs[i]] = getattr(curRegState, curRegionAttrs[i])
+		result['regions'].append(curReg)
+	return result
+
+def leave(user):
+	user.inGame = False;
+	if user.game:
+		if user.game.state == misc.GAME_WAITING:
+			if len(user.game.playersInGame()) == 0:
+				user.game.state = misc.GAME_ENDED
+			user.game = None
+		else:
+			if user.currentTokenBadge:
+				makeDecline(user)
+			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
+					endOfGame(user.game)
+
+def getVisibleTokensBadges(gameId):
+	game = dbi.getXbyY('Game', 'id', gameId)
+	rows = game.tokenBadges()
+	result = list()
+	for tokenBadge in filter(lambda x: x.position > 0, rows):
+		result.append({
+			'raceName': races.racesList[tokenBadge.raceId].name, 
+			'specialPowerName': races.specialPowerList[tokenBadge.specPowerId].name,
+			'position': tokenBadge.position,
+			'bonusMoney': tokenBadge.bonusMoney})
+	return result
+
+def initRegions(map, game):
+	for region in map.regions:
+		regState = RegionState(region, game)
+		dbi.add(regState)
+
+def makeDecline(user):
+	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
+	if user.declinedTokenBadge:
+		user.killRaceInDecline()
+		dbi.delete(user.declinedTokenBadge)
+	callSpecialPowerMethod(specialPowerId, 'decline', user)	
+	callRaceMethod(raceId, 'decline', user)	
+	user.currentTokenBadge = None
+
 def clearGameStateAtTheEndOfTurn(gameId):
 	pass
 
