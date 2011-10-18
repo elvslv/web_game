@@ -37,7 +37,12 @@ def checkFieldsCorrectness(data):
 	for field in fields:
 		if not field['name'] in data:
 			continue
-		msg = 'bad' + field['name'][0].upper() + field['name'][1:]
+		if field['name'] == 'sid':
+                        msg = 'badUser' + field['name'][0].upper() + field['name'][1:]
+                elif field['name'] == 'text':
+                        msg = 'badMessage' + field['name'][0].upper() + field['name'][1:]
+                else:
+                        msg = 'bad' + field['name'][0].upper() + field['name'][1:]
 		if not isinstance(data[field['name']], field['type']):
 			raise BadFieldException(msg)
 		minValue = field['min'] if 'min' in field else 0

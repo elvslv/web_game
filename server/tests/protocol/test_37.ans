@@ -7,14 +7,14 @@
 	},
 	{
 		"result": "ok",
-		"sid": 1
+		"sid": 1,
+		"userId": 1
+	},
+	{
+		"result": "ok"
 	},
 	{
 		"result": "ok",
-		"time": 1
-	},
-	{
-		"result": "ok",
-		"messages": [{"userId": 1, "text": "hello!", "time": 1}]
+		"messages": [{"id": 1, "text": "hello!", "time": 1, "userId": 1}]
 	}
 ]

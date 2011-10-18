@@ -4,7 +4,9 @@
 		{
 			"action": "resetServer"
 		},
-
+		{
+			"action": "createDefaultMaps"
+		},
 		{
 			"action": "register",
 			"username": "user1",
@@ -89,8 +91,8 @@
 
 		{
 			"action": "finishTurn",
-			"sid": 1
-		
+			"sid" : 1
+			
 		}
 
 	],

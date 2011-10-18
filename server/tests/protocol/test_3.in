@@ -1,7 +1,6 @@
 {
-	"test":
-	[
-			{
+	"test":[
+		{
 			"action": "resetServer"
 		},
 		{

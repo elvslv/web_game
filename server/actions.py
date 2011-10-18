@@ -35,7 +35,7 @@ def act_login(data):
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
 		if not dbi.getXbyY('User', 'sid', sid, False): break
 	user.sid = sid
-	return {'result': 'ok', 'sid': sid}
+	return {'result': 'ok', 'sid': sid, 'userId': user.id}
 
 def act_logout(data):
 	dbi.getXbyY('User', 'sid', data['sid']).sid = None
@@ -46,14 +46,14 @@ def act_sendMessage(data):
 	msgTime = misc.generateTimeForTest() if misc.TEST_MODE else math.trunc(time.time())
 	text = data['text']
 	dbi.add(Message(userId, text, msgTime))
-	return {'result': 'ok', 'time': msgTime}
+	return {'result': 'ok'}
 
 def act_getMessages(data):
 	since = data['since']
-	records =  dbi.query(Message).filter(Message.time > since).order_by(Message.time).all()[-100:]
+	records =  dbi.query(Message).filter(Message.id > since).order_by(Message.id).all()[-100:]
 	messages = []
 	for rec in records:
-		messages.append({'userId': rec.sender, 'text': rec.text, 'time': rec.time})
+		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 'userId': rec.sender})
 	return {'result': 'ok', 'messages': messages}
 
 def act_uploadMap(data):

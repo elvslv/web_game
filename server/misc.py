@@ -115,7 +115,7 @@ actionFields = {
 	],
 	'sendMessage': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
-		{'name': 'text', 'type': unicode, 'mandatory': True}
+		{'name': 'text', 'type': unicode, 'mandatory': True, 'max':300}
 	],
 	'getMessages': [
 		{'name': 'since', 'type': int, 'mandatory': True}

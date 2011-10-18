@@ -3,7 +3,6 @@
 	[
 		{
 			"action": "resetServer"
-			
 		},
 		{
 			"action": "register",
@@ -28,14 +27,12 @@
 		{
 			"action": "sendMessage",
 			"sid": 1,
-			"text": "hello user2!",
-			"simpletime": true
+			"text": "hello user2!"
 		},
 		{
 			"action": "sendMessage",
 			"sid": 2,
-			"text": "hello user1!",
-			"simpletime": true
+			"text": "hello user1!"
 		}
 	],
 	"description": "sending 2 messages from 2 users"

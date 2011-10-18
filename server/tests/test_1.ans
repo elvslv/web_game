@@ -21,13 +21,13 @@
 	},
 	{
 		"result": "ok", 
-		"mapId": 8
+		"mapId": 1
 	},
 	{
 		"result": "ok",
-		"mapId": 9
+		"mapId": 2
 	},
 	{
-		"result": "mapNameTaken"
+		"result": "badMapName"
 	}
 ]
