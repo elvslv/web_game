@@ -15,3 +15,9 @@ function sendQuery(query, callback)
 		}
 	});
 }
+
+updateGameList = function()
+{
+	sendQuery('{"action": "getGameList"}', getGameListResponse);
+}
+

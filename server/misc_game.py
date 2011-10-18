@@ -103,9 +103,9 @@ def getGameState(game):
 		
 	result['map'] = getMapState(game.map.id)
 
-	playerAttrs = ['id', 'name', 'isReady', 'coins', 'tokensInHand', 'inGame']
-	playerAttrNames = ['userId', 'username', 'isReady', 'coins', 'tokensInHand', 
-		'inGame']
+	playerAttrs = ['id', 'name', 'isReady', 'inGame', 'coins', 'tokensInHand']
+	playerAttrNames = ['userId', 'username', 'isReady', 'inGame' 'coins', 
+		'tokensInHand']
 
 	players = game.players
 	resPlayers = list()

@@ -181,6 +181,7 @@ def act_getMapState(data):
 def act_getGameList(data):
 	result = {'result': 'ok'}
 	games = dbi.query(Game)
+	games = filter(lambda x: x.state != GAME_ENDED, games)
 	result['games'] = list()
 
 	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
@@ -188,8 +189,8 @@ def act_getGameList(data):
 	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescr', 'state', 
 		'turn', 'mapId']
 
-	playerAttrs = ['id', 'name', 'isReady']
-	playerAttrNames = ['userId', 'username', 'isReady']
+	playerAttrs = ['id', 'name', 'isReady', 'inGame']
+	playerAttrNames = ['userId', 'username', 'isReady', 'inGame']
 	for game in games:
 		curGame = dict()
 
@@ -205,8 +206,6 @@ def act_getGameList(data):
 			curPlayer = dict()
 			for i in range(len(playerAttrs)):
 				curPlayer[playerAttrNames[i]] = getattr(player, playerAttrs[i])
-			priority += 1	
-			curPlayer['priority'] = priority
 			resPlayers.append(curPlayer)
 		curGame['players'] = resPlayers
 		curGame['maxPlayersNum'] = game.map.playersNum

@@ -38,7 +38,7 @@ function loginResponse(data)
 			sid = data['sid'];
 			userId = data['userId'];
 			username = $('#username').val();
-			Client.currentUser = Client.newUser(username, id);
+			Client.currentUser = Client.newUser(username, userId);
 			Client.currentUser.sid = sid;
 			Interface.changeOnLogin();
 			break;
@@ -77,6 +77,20 @@ function getGameListResponse(data)
 	Interface.fillGameList();
 }
 
+function setGame(gameId)
+{
+	fields = ['gameId', 'gameName', 'mapId', 'activePlayerId', 'state', 'turn', 'turnsNum', 'maxPlayersNum']
+	for (var i = 0; i < Client.gameList.length; ++i)
+	{
+		if (Client.gameList[i].gameId == gameId)
+		{
+			
+			for (var j = 0; j < fields.length; ++j)
+				Client.currGameState[fields[j]] = Client.gameList[i][fields[j]]
+		}
+	}
+}
+
 function joinGameResponse(data)
 {
 	switch(data['result'])
@@ -101,6 +115,7 @@ function joinGameResponse(data)
 			break;
 		case 'ok':
 			Client.currentUser.gameId = Client.currGameState.id;
+			setGame(Client.currentUser.gameId)
 			delete Client.currGameState.id;
 			Interface.changeOnJoin();
 			break;
@@ -157,10 +172,43 @@ function createGameResponse(data)
 			break;
 		case 'ok':
 			game = Client.newGame(data['gameId']);
+			game.players = [
+			{
+				'userId': Client.currentUser.userId,
+				'username': Client.currentUser.userId, 
+				'isReady': false,
+				'inGame': true
+			}];
 			Client.currentUser.gameId = game.gameId;
 			Client.gameList.push(game);
 			Interface.changeOnCreateGame(game);
 			$('#createGameForm').dialog('close');
+			break;
+		default:
+			alert('Unknown server response');
+	}
+}
+
+function setReadinessStatusResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badUserSid':
+			alert('Invalid sid'); //?!!!
+			break;
+		case 'badJson': //may it be???
+		case 'badReadinessStatus': 
+			alert('Invalid data');
+			break;
+		case 'notInGame': 
+			alert("You're not playing");
+			break;
+		case 'badGameState': 
+			alert('You can not join game that have been already started or finished');
+			break;
+		case 'ok':
+			Client.currentUser.isReady = true;
+			Interface.changeOnSetReadinessStatus();
 			break;
 		default:
 			alert('Unknown server response');

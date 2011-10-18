@@ -40,9 +40,9 @@ Client.states = [
 ];
 	
 Client.gameProperties = [
-	"gameId", "gameName", "gameDescr", 
-	"mapId", "playersNum", "activePlayer", 
-	"state", "turn", "players"
+	"gameName", "gameDescr", "mapId", "activePlayer", "state", "turn", 
+	"turnsNum", "maxPlayersNum", "players"
 ];
 
+Client.playerProperties = ["username", "isReady", "inGame"]
 

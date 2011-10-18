@@ -1,61 +1,81 @@
 var Interface = {};
 
-Interface.fillGameList = function() {
+Interface.fillGameList = function() 
+{
 	var gamesList = Client.gameList;
 	$('#gameList').empty();
+	$('#gameListInfo').html('There are no avaliable games');
 	for (var i = 0; i < gamesList.length; ++i)
 	{
-		$('#gameList').append('<li id = "game' + gamesList[i].gameId + '"><a href="#">' + gamesList[i].gameName + '</a></li>');
-		$('#game' + gamesList[i].gameId).append('<ul id = "game' + gamesList[i].gameId + 'Descr"></ul>')
+		if (gamesList[i].state == 3/*finished*/)
+			continue;
+		$('#gameListInfo').html('Games:');
+		$('#gameList').append('<li id = "game' + gamesList[i].gameId + '"><a href="#">' + 
+			gamesList[i].gameName + '</a></li>');
+		$('#game' + gamesList[i].gameId).append('<ul id = "game' + gamesList[i].gameId + 
+			'Descr"></ul>')
 		game = $('#game' + gamesList[i].gameId  + 'Descr');
 		for (var j = 0; j < Client.gameProperties.length - 1; ++j)
 		{
-			if (Client.gameProperties[j] !== 'gameDescr' || gamesList[i].gameDescr) {
+			if (Client.gameProperties[j] !== 'gameDescr' || gamesList[i].gameDescr) 
+			{
 				val = Client.gameProperties[j] === 'state' ? 
 					Client.states[gamesList[i][Client.gameProperties[j]]] : 
 					gamesList[i][Client.gameProperties[j]];
 				game.append('<p>' + Client.gameProperties[j] + ': ' + val + '</p>');
+			}
 		}
-		game.append('<div id = "players' + gamesList[i]['gameId'] +'">Players:</div>');
+		game.append('<p>Players:</p><div id = "players' + gamesList[i].gameId +'" class="user"></div>');
 		for (var j = 0; j < gamesList[i].players.length; ++j)
-		{
-			$('#players' + gamesList[i]['gameId']).append('<p>' + 
-				playerFieldDescription[j] + ': ' + gamesList[i]['players'][playerFields[j]] + '</p>');
-		}
-		game.append('<button id = "join' + gamesList[i].gameId + '" style = "display: none">Join</button>');
+			for (var k = 0; k < Client.playerProperties.length; ++k)	
+				$('#players' + gamesList[i].gameId).append('<p>' + Client.playerProperties[k] + 
+					': ' + gamesList[i].players[j][Client.playerProperties[k]] + '</p>');
+		game.append('<button id = "join' + gamesList[i].gameId + 
+			'" style = "display: none">Join</button>');
 		$('#join' + gamesList[i].gameId).prop('gameId', gamesList[i].gameId);
 		$('#join' + gamesList[i].gameId)
 			.button()
 			.click(function()
 			{
 				Client.currGameState.id = $(this).prop('gameId');
-				sendQuery('{"action": "joinGame", "sid": ' + Client.currentUser.sid +', "gameId": ' + $(this).prop('gameId') + '}', joinGameResponse);
+				sendQuery('{"action": "joinGame", "sid": ' + Client.currentUser.sid +
+					', "gameId": ' + $(this).prop('gameId') + '}', joinGameResponse);
 			});
-		game.append('<button id = "leave' + gamesList[i].gameId + '" style = "display: none">Leave</button>');
+		game.append('<button id = "leave' + gamesList[i].gameId + 
+			'" style = "display: none">Leave</button>');
 		$('#leave' + gamesList[i].gameId)
 			.button()
 			.click(function()
 			{
-				sendQuery('{"action": "leaveGame", "sid": ' + Client.currentUser.sid +'}', leaveGameResponse);
+				sendQuery('{"action": "leaveGame", "sid": ' + Client.currentUser.sid +'}', 
+					leaveGameResponse);
 			});
-		game.append('<button id = "setReadinesStatus' + gamesList[i]['gameId'] + 
+		game.append('<button id = "setReadinesStatus' + gamesList[i].gameId + 
 			'" style = "display: none">I am ready</button>');
-		$('#setReadinesStatus' + gamesList[i]['gameId']).prop('isReady', 0);
-		$('#setReadinesStatus' + gamesList[i]['gameId'])
+		$('#setReadinesStatus' + gamesList[i].gameId).prop('isReady', 0);
+		$('#setReadinesStatus' + gamesList[i].gameId).prop('gameId', gamesList[i].gameId);
+		$('#setReadinesStatus' + gamesList[i].gameId)
 			.button()
 			.click(function()
 			{
-				sendQuery('{"action": "setReadinessStatus", "sid": ' + sid + ', "isReady": ' + 
-					(1 - $('#setReadinesStatus' + gamesList[i]['gameId']).prop('isReady', 0)) 
-					+ '}', setRadinessStatusResponse);
+				gameId = $(this).prop('gameId');
+				sendQuery('{"action": "setReadinessStatus", "sid": ' + Client.currentUser.sid +
+					', "isReady": ' + (1 - $(this).prop('isReady')) + '}', setReadinessStatusResponse);
 			});		
-		if (Client.currentUser.sid && gamesList[i].playersNum > 1)
+		if (Client.currentUser && Client.currentUser.sid)
 		{
 			if (!Client.currentUser.gameId)
-				$('#join' + Client.currentUser.gameId).show();
+				$('[id*=join]').show();
 			else
 			{
-				$('#setReadinesStatus' + gameId).show();
+				if (Client.currGameState.state == 1)
+				{
+					$('#setReadinesStatus' + gamesList[i].gameId).prop('isReady', 
+						Client.currentUser.isReady);
+					$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
+						'I am not ready' : 'I am ready');
+					$('#setReadinesStatus' + Client.currentUser.gameId).show();
+				}
 				$('#leave' + Client.currentUser.gameId).show();
 			}
 		}
@@ -65,48 +85,66 @@ Interface.fillGameList = function() {
 }
 
 
-Interface.changeOnRegistration = function() { 
+Interface.changeOnRegistration = function() 
+{ 
 	$('#username').val('');
 	$('#password').val('');
 	$('#registerLoginForm').dialog('close');
 }
 
-Interface.changeOnLogin = function() {
+Interface.changeOnLogin = function() 
+{
 	$('#userInfo').text('Hi, ' + Client.currentUser.username + '!');
 	$('#login').hide();
 	$('#logout').show();
 	$('#register').hide();
 	$('#createGame').show();
 	$('#registerLoginForm').dialog('close');
-	isReady = undefined;
-	gameId = undefined;
-	if (gamesList)
-		for (var i = 0; i < gamesList.length; ++i)
+	Client.currentUser.isReady = undefined;
+	Client.currentUser.gameId = undefined;
+	if (Client.gameList)
+	{
+		for (var i = 0; i < Client.gameList.length; ++i)
 		{
-			for (var j = 0; j < gamesList[i].players; ++j)
-				if (gamesList[i].players[j].userId == userId)
+			for (var j = 0; j < Client.gameList[i].players.length; ++j)
+				if (Client.gameList[i].players[j].userId == 
+						Client.currentUser.userId)
 				{
-					isReady = gamesList[i].players[j].isReady;
-					gameId = gamesList[i].gameId;
+					Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
+					Client.currentUser.gameId = Client.gameList[i].gameId;
+					setGame(Client.currentUser.gameId);
 					break;
 				}
-			if (gameId)
+			if (Client.currentUser.gameId)
+			{
+				$('#createGame').hide();
 				break;
+			}
 		}
-
-	if (gameId)
+	}
+	updateGameList();
+	/*if (Client.currentUser.gameId)
 	{
-		$('#setReadinessStatus' + gameId).prop('isReady', !isReady);
-		changeOnJoin();
+		$('#setReadinessStatus' + Client.currentUser.gameId).prop('isReady', 
+			Client.currentUser.isReady);
+		$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
+		'I am not ready' : 'I am ready');
+		$('[id*=join]').hide();
+		$('#leave' + Client.currentUser.gameId).show();
+		$('#setReadinesStatus' + Client.currentUser.gameId).show();
+		$('#createGame').hide();
 	}
 	else
 	{
 		$('[id*=join]').show();
 		$('[id*=leave]').hide();
-	$('[id=register]').hide();
-	}
+		$('[id=register]').hide();
+	}*/
+}
 		
-Interface.changeOnLogout = function() {
+Interface.changeOnLogout = function() 
+{
+	updateGameList();
 	$('#userInfo').text("You're not logged in, please login or register");
 	$('#username').val('');
 	$('#password').val('');
@@ -119,44 +157,40 @@ Interface.changeOnLogout = function() {
 
 }
 
-Interface.changeOnJoin = function() {
+Interface.changeOnJoin = function() 
+{
+	updateGameList();
 	$('[id*=join]').hide();
 	$('#leave' + Client.currentUser.gameId).show();
-	$('#setReadinesStatus' + gameId).show();
+	$('#setReadinesStatus' + Client.currentUser.gameId).show();
 	$('#createGame').hide();
 }
 
-Interface.changeOnLeave = function() {
+Interface.changeOnLeave = function() 
+{
+	updateGameList();
 	$('[id*=join]').show();
 	$('[id*=leave]').hide();
-	$('#setReadinesStatus' + gameId).hide();
+	$('#setReadinesStatus' + Client.currentUser.gameId).hide();
 	$('#createGame').show();
 }
 
-function addGame(game)
+Interface.changeOnCreateGame = function(game)
 {
-	newGame = {};
-	for (var i = 0; i < gameFields.length; ++i)
-		if (game[gameFields[i]] != undefined)
-		{
-			newGame[gameFields[i]] = game[gameFields[i]]
-		}
-	gamesList.push(newGame);
-}
-
-function changeOnCreateGame(game)
-{
-	addGame(game); //must be rewritten!!!
-	fillGameList();
-	gameId = game['gameId'];
+	updateGameList();
+	Client.currentUser.gameId = game['gameId'];
 	$('[id*=join]').hide();
-	$('#leave' + gameId).show();
+	$('#leave' + Client.currentUser.gameId).show();
 	$('#createGame').hide();
 }
 
-function changeOnSetReadinessStatus()
+Interface.changeOnSetReadinessStatus = function()
 {
-	isReady = 1 - $('#setReadinesStatus' + gameId).prop('isReady');
-	$('#setReadinesStatus' + gameId).prop('isReady', isReady);
-	$('#setReadinesStatus' + gameId).html(isReady ? 'I am not ready' : 'I am ready');
+	updateGameList();
+	Client.currentUser.isReady = 1 - $('#setReadinesStatus' + 
+		Client.currentUser.gameId).prop('isReady');
+	$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
+		Client.currentUser.isReady);
+	$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
+		'I am not ready' : 'I am ready');
 }

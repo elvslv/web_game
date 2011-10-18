@@ -2,3 +2,6 @@ BODY{
 	font-family: 'Times New Roman', Verdana,Arial,sans-serif; 
 	font-size: 0.9em;
 }
+.user{
+	margin-left: 10px;
+}
