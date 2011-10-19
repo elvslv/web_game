@@ -38,13 +38,15 @@ $(function() {
 			{
 				var gameName = $('#gameName'),
 					gameDescription = $('#gameDescription'),
-					mapId = $('#mapId'),
+					mapId = Client.mapList[$('#mapList').prop('selectedIndex')].mapId,
 					sid = Client.currentUser.sid;
 				Client.currGameState.name = gameName.val();
 				Client.currGameState.descr  = gameDescription.val();
-				Client.currGameState.mapId = mapId.val();
+				Client.currGameState.mapId = mapId
 				Client.currGameState.state = 1;
-				query = '{"action": "createGame", "sid": ' + sid + ', "gameName": "' + gameName.val() + '", "gameDescr": "' + gameDescription.val() + '", "mapId": ' + mapId.val() + '}';
+				query = '{"action": "createGame", "sid": ' + sid + ', "gameName": "' + 
+					gameName.val() + '", "gameDescr": "' + gameDescription.val() + '", "mapId": ' +
+					mapId + '}';
 				sendQuery(query, createGameResponse);
 			},
 			Cancel: function() 
@@ -96,7 +98,7 @@ $(function() {
 	$('#createGame')
 		.button()
 		.click(function() {
-			$('#createGameForm').dialog('open');
+			updateMapList(true);
 		});
 	$('#refreshChat')
 		.button()

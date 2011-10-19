@@ -28,3 +28,11 @@ updateChat = function()
 		getMessagesResponse);
 }
 
+updateMapList = function(beforeCreateGame)
+{
+	sendQuery('{"action": "getMapList"}', function(data) 
+	{
+		getMapListResponse(data, beforeCreateGame)
+	});
+}
+

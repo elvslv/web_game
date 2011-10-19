@@ -49,3 +49,4 @@ Client.playerProperties = ["username", "isReady", "inGame"];
 
 Client.messages = [];
 
+Client.mapList = [];

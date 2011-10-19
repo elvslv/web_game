@@ -77,6 +77,19 @@ function getGameListResponse(data)
 	Interface.fillGameList();
 }
 
+function getMapListResponse(data, beforeCreateGame)
+{
+	if (data['result'] != 'ok' || !data['maps'])
+	{
+		alert("Unknown server response: " + data.toString());
+		return;
+	}
+	Client.mapList = data['maps'];
+	$('#mapChooseTemplate').tmpl(Client.mapList).appendTo('#mapList');
+	if (beforeCreateGame)
+		$('#createGameForm').dialog('open');
+}
+
 function setGame(gameId)
 {
 	fields = ['gameId', 'gameName', 'mapId', 'activePlayerId', 'state', 'turn', 'turnsNum', 

@@ -65,6 +65,9 @@
 		</table>
 	</div>
 </script>
+<script id="mapChooseTemplate" type="text/x-jquery-tmpl"> 
+	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
+</script>
 	<table id = "tmain" height = "100%" width = "100%" style="ui-widget">
 		<tr id = "tmain_1">
 			<td id = "tmain_1_1" rowspan = "3" valign = "top">
@@ -144,16 +147,14 @@
 	</div>
 	<div id = "createGameForm" style = "display: none">
 		<p id = "dialogInfo">Please enter unique username and valid password</p>
-		<form>
 			<fieldset>
 				<label for="gameName">Game name</label>
 				<input type="text" name="gameName" id = "gameName" class="text ui-widget-content ui-corner-all" /><br>
 				<label for="gameDescription">Game description</label>
 				<input type="text" name="gameDescription" id="gameDescription" value="" class="text ui-widget-content ui-corner-all" /><br>
-				<label for="mapId">Map id</label>
-				<input type="text" name="mapId" id = "mapId" class="text ui-widget-content ui-corner-all" />
+				<label for="mapList">Map</label>
+				<select id = "mapList" class="text ui-widget-content ui-corner-all" ></select>
 			</fieldset>
-		</form>
 	</div>
 </body>
 </html>
