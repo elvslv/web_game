@@ -171,6 +171,14 @@ def act_loadGame(data):
 def act_getMapState(data):
 	return {'result': 'ok', 'mapState': getMapState(data['mapId'])}
 
+def act_getMapList(data):
+	result = {'result': 'ok'}
+	result['maps'] = list()
+	maps = dbi.query(Map)
+	for map_ in maps:
+		result['maps'].append(getShortMapState(map_))
+	return result
+
 def act_getGameList(data):
 	result = {'result': 'ok'}
 	games = dbi.query(Game)

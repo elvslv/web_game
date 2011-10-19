@@ -22,7 +22,7 @@ A = 9995326
 C = 235286786
 M = 7486379941
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=False
+TEST_MODE=True
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -168,6 +168,9 @@ actionFields = {
 		}
 	],
 	'getGameList': [
+		{'name': 'sid', 'type': int, 'mandatory': False}
+	],
+	'getMapList': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
 	],
 	'joinGame': [

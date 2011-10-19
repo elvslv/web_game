@@ -150,13 +150,17 @@ def endOfGame(game, coins = None):
 		return {'result': 'ok', 'gameState': gameState}
 
 
-def getMapState(mapId, gameId = None):
-	map_ = dbi.getXbyY('Map', 'id', mapId)
+def getShortMapState(map_):
 	result = dict()
 	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum']
 	mapAttrNames = ['mapId', 'mapName', 'playersNum', 'turnsNum']
 	for i in range(len(mapAttrs)):
 		result[mapAttrNames[i]] = getattr(map_, mapAttrs[i])
+	return result
+
+def getMapState(mapId, gameId = None):
+	map_ = dbi.getXbyY('Map', 'id', mapId)
+	result = getShortMapState(map_)
 	result['regions'] = list()
 	constRegionAttrs = ['id', 'defTokensNum', 'border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
