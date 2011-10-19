@@ -3,13 +3,19 @@ var Interface = {};
 Interface.fillGameList = function() 
 {
 	$('#gameList').empty();
-	$('#gameListTemplate').tmpl(Client.gameList, 
+	if(Client.gameList)
 	{
-		join: function(gameId)
+		$('#gameListInfo').html('Games:')
+		$('#gameListTemplate').tmpl(Client.gameList, 
 		{
-			'join'.concat(gameId)
-		}
-	}).appendTo('#gameList');
+			join: function(gameId)
+			{
+				'join'.concat(gameId)
+			}
+		}).appendTo('#gameList');
+	}
+	else
+		$('#gameListInfo').html('There are no avaliable games');
 	initGameList();
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
