@@ -3,7 +3,7 @@ var Interface = {};
 Interface.fillGameList = function() 
 {
 	$('#gameList').empty();
-	if(Client.gameList)
+	if(Client.gameList.length)
 	{
 		$('#gameListInfo').html('Games:')
 		$('#gameListTemplate').tmpl(Client.gameList, 
@@ -74,6 +74,13 @@ Interface.fillGameList = function()
 }
 
 
+Interface.changeOnGetMessages = function()
+{
+	$('#chat').empty();
+	$('#chatTemplate').tmpl(Client.messages, {
+		UTC: function(time){d = new Date(time * 1000); return d.toUTCString()}}).appendTo('#chat');
+}
+
 Interface.changeOnRegistration = function() 
 { 
 	$('#username').val('');
@@ -89,6 +96,7 @@ Interface.changeOnLogin = function()
 	$('#register').hide();
 	$('#createGame').show();
 	$('#registerLoginForm').dialog('close');
+	$('#sendMessage').show();
 	Client.currentUser.isReady = undefined;
 	Client.currentUser.gameId = undefined;
 	if (Client.gameList)
@@ -112,23 +120,6 @@ Interface.changeOnLogin = function()
 		}
 	}
 	updateGameList();
-	/*if (Client.currentUser.gameId)
-	{
-		$('#setReadinessStatus' + Client.currentUser.gameId).prop('isReady', 
-			Client.currentUser.isReady);
-		$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
-		'I am not ready' : 'I am ready');
-		$('[id*=join]').hide();
-		$('#leave' + Client.currentUser.gameId).show();
-		$('#setReadinesStatus' + Client.currentUser.gameId).show();
-		$('#createGame').hide();
-	}
-	else
-	{
-		$('[id*=join]').show();
-		$('[id*=leave]').hide();
-		$('[id=register]').hide();
-	}*/
 }
 		
 Interface.changeOnLogout = function() 
@@ -143,7 +134,7 @@ Interface.changeOnLogout = function()
 	$('[id*=join]').hide();
 	$('[id*=leave]').hide();
 	$('#createGame').hide();
-
+	$('#sendMessage').hide();
 }
 
 Interface.changeOnJoin = function() 

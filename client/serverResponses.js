@@ -121,7 +121,7 @@ function joinGameResponse(data)
 			Interface.changeOnJoin();
 			break;
 		default:
-			alert('Unknown server response');
+			alert('Unknown server response' + data);
 	}
 }
 
@@ -143,7 +143,7 @@ function leaveGameResponse(data)
 			Interface.changeOnLeave();
 			break;
 		default:
-			alert('Unknown server response');
+			alert('Unknown server response' + data);
 	}
 }
 
@@ -177,7 +177,7 @@ function createGameResponse(data)
 			$('#createGameForm').dialog('close');
 			break;
 		default:
-			alert('Unknown server response');
+			alert('Unknown server response' + data);
 	}
 }
 
@@ -202,6 +202,40 @@ function setReadinessStatusResponse(data)
 			Interface.changeOnSetReadinessStatus();
 			break;
 		default:
-			alert('Unknown server response');
+			alert('Unknown server response' + data);
+	}
+}
+
+function getMessagesResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': //may it be???
+			alert('Invalid data');
+			break;
+		case 'ok':
+			Client.messages = Client.messages.concat(data['messages']);
+			Interface.changeOnGetMessages();
+			break;
+		default:
+			alert('Unknown server response' + data);
+	}
+}
+function sendMessageResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': //may it be???
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); //?!!!
+			break;
+		case 'ok':
+			$('#messageBox').val('');
+			updateChat();
+			break;
+		default:
+			alert('Unknown server response' + data);
 	}
 }

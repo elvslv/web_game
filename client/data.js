@@ -44,5 +44,7 @@ Client.gameProperties = [
 	"turnsNum", "maxPlayersNum", "players"
 ];
 
-Client.playerProperties = ["username", "isReady", "inGame"]
+Client.playerProperties = ["username", "isReady", "inGame"];
+
+Client.messages = [];
 

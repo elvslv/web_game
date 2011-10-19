@@ -1,5 +1,6 @@
 $(function() {
 	updateGameList();
+	updateChat();
 	$("#registerLoginForm").dialog(
 	{
 		autoOpen: false,
@@ -96,5 +97,16 @@ $(function() {
 		.button()
 		.click(function() {
 			$('#createGameForm').dialog('open');
+		});
+	$('#refreshChat')
+		.button()
+		.click(function() {
+			updateChat();
+		});
+	$('#sendMessage')
+		.button()
+		.click(function() {
+			sendQuery('{"action": "sendMessage", "text": "' + $('#messageBox').val() + 
+				'", "sid": ' + Client.currentUser.sid+'}', sendMessageResponse);
 		});
 });

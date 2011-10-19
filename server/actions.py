@@ -53,7 +53,8 @@ def act_getMessages(data):
 	records =  dbi.query(Message).filter(Message.id > since).order_by(Message.id).all()[-100:]
 	messages = []
 	for rec in records:
-		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 'userId': rec.sender})
+		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 
+			'username': dbi.getXbyY('User', 'id', rec.sender).name})
 	return {'result': 'ok', 'messages': messages}
 
 def act_uploadMap(data):

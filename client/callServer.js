@@ -4,6 +4,7 @@ function sendQuery(query, callback)
 		type: "POST",
 		url: "http://localhost/small_worlds/",
 		data: query,
+		async: false, 
 		success: function(result){
 			data = $.parseJSON(result);
 			if (!data['result'])
@@ -19,5 +20,11 @@ function sendQuery(query, callback)
 updateGameList = function()
 {
 	sendQuery('{"action": "getGameList"}', getGameListResponse);
+}
+
+updateChat = function()
+{
+	sendQuery('{"action": "getMessages", "since": ' + Client.messages.length + '}', 
+		getMessagesResponse);
 }
 

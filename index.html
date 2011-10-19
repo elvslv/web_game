@@ -46,6 +46,25 @@
 		
 	</div>
 </script>
+<script id="chatTemplate" type="text/x-jquery-tmpl"> 
+	<div class = "chat">
+		<table>
+			<tr>
+				<td>
+					${username}, 
+				</td>
+				<td>
+					{{html $item.UTC($item.data.time)}}:
+				</td>
+			</tr>
+			<tr>
+				<td colspan = "2">
+					${text}
+				</td>
+			</tr>
+		</table>
+	</div>
+</script>
 	<table id = "tmain" height = "100%" width = "100%" style="ui-widget">
 		<tr id = "tmain_1">
 			<td id = "tmain_1_1" rowspan = "3" valign = "top">
@@ -81,7 +100,30 @@
 			</td>
 		</tr>
 		<tr id = "tmain_2">
-			<td id = "tmain_2_1">
+			<td id = "tmain_2_1" rowspan="2" width = "300px" valign = "top">
+				<table width = "100%">
+					<tr>
+						<td colspan = "2">
+							<div id = "chat" class = "ui-widget-content ui-corner-all" style = 
+								"overflow-y: auto; height: 100px">
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan = "2">
+							<textarea id = "messageBox" class = "ui-widget-content ui-corner-all" style = 
+								"width: 100%; overflow-y: auto"></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<button id = "sendMessage" style = "display: none">Send message</button>
+						</td>
+						<td align = "right">
+							<button id = "refreshChat">Refresh chat</button>
+						</td>
+					</tr>
+				</table>
 			</td>
 		</tr>
 		<tr id = "tmain_3">

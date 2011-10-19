@@ -30,7 +30,7 @@ fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelet
 requiredInteger = lambda: Column(Integer, nullable=False)
 
 class _Database:
-	engine = create_engine(DB_STRING, echo=False)
+	engine = create_engine(DB_STRING, echo=False, convert_unicode=True, encoding="utf-8")
 	mysql_engine='InnoDB'
 
 	def __init__(self):
@@ -426,17 +426,17 @@ class Adjacency(Base):
 
 
 class Message(Base):
-    __tablename__ = 'chat'
+	__tablename__ = 'chat'
 
-    id = pkey()
-    sender = fkey('users.id')
-    text = Column(Text)
-    time = Column(Integer)
+	id = pkey()
+	sender = fkey('users.id')
+	text = Column(Text)
+	time = Column(Integer)
 
-    def __init__(self, sender, text, time): 
-        self.sender = sender
-        self.text = text
-        self.time = time
+	def __init__(self, sender, text, time): 
+		self.sender = sender
+		self.text = text
+		self.time = time
 
 class HistoryEntry(Base):
 	__tablename__ = 'history'
