@@ -55,6 +55,20 @@ $(function() {
 			}
 		}
 	});
+	$("#browseMapsForm").dialog(
+	{
+		autoOpen: false,
+		height: 300,
+		width: 350,
+		modal: true,
+		title: 'Maps',
+		buttons: {
+			Cancel: function() 
+			{
+				$(this).dialog('close');
+			}
+		}
+	});
 	$('#register')
 		.button()
 		.click(function() {
@@ -111,4 +125,21 @@ $(function() {
 			sendQuery('{"action": "sendMessage", "text": "' + $('#messageBox').val() + 
 				'", "sid": ' + Client.currentUser.sid+'}', sendMessageResponse);
 		});
+	$('#browseMaps')
+		.button()
+		.click(function() {
+			$('#mapListTemplate').tmpl(Client.mapList).appendTo('#browseMapsList');
+			for (var i = 0; i < Client.mapList.length; ++i)
+			{
+				$('#chooseMap' + Client.mapList[i].mapId).prop('mapId', Client.mapList[i].mapId);
+				$('#chooseMap' + Client.mapList[i].mapId)
+					.button()
+					.click(function() {
+						$('#map' + $(this).prop('mapId')).prop('selected', true);
+						$('#browseMapsForm').dialog('close');
+					})
+			}
+			$('#browseMapsForm').dialog('open');
+		});
+		
 });

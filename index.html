@@ -38,6 +38,17 @@
 		</ul>
 	</li>
 </script>
+<script id="mapListTemplate" type="text/x-jquery-tmpl"> 
+	<li><a href="#">${mapName}</a>
+		<ul>
+			<p>Number of turns: ${turnsNum}</p>
+			<p>Maximum players number: ${playersNum}</p>
+			<button id = {{html 'chooseMap'.concat($item.data.mapId)}}>
+				Choose map
+			</button>
+		</ul>
+	</li>
+</script>
 <script id="userListTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
 		<p>${username}{{if $item.data.userId == $item.activePlayer}} -- active player{{/if}}</p>
@@ -154,7 +165,12 @@
 				<input type="text" name="gameDescription" id="gameDescription" value="" class="text ui-widget-content ui-corner-all" /><br>
 				<label for="mapList">Map</label>
 				<select id = "mapList" class="text ui-widget-content ui-corner-all" ></select>
+				<button id = "browseMaps">Browse maps</button>
 			</fieldset>
+	</div>
+	<div id = "browseMapsForm" style = "display: none">
+		<p id = "dialogInfo">Maps:</p>
+		<div id = "browseMapsList"></div>
 	</div>
 </body>
 </html>
