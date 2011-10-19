@@ -3,6 +3,7 @@
 <head>
 		<script type="text/javascript" src="client/import/jquery/jquery-1.6.4.min.js"></script>
 		<script type="text/javascript" src="client/import/jquery/jquery-ui-1.8.12.custom.min.js"></script> 
+		<script src="client/import/jquery/jquery.tmpl.js" type="text/javascript"></script>
 		<script type="text/javascript" src="client/import/scripts/menu-collapsed.js"></script>
 		<script type="text/javascript" src="client/data.js"></script> 
 		<script type="text/javascript" src="client/main.js"></script> 
@@ -14,6 +15,37 @@
 </head>
 
 <body> 
+<script id="gameListTemplate" type="text/x-jquery-tmpl"> 
+	<li><a href="#">${gameName}</a>
+		<ul>
+			{{if $item.data.gameDescr != undefined}}<p>Game description: ${gameDescr}</p>{{/if}}
+			<p>Map Id: ${mapId}</p>
+			<p>State: ${state}</p>
+			<p>Turn: ${turn}</p>
+			<p>Number of turns: ${turnsNum}</p>
+			<p>Maximum players number: ${maxPlayersNum}</p>
+			<p>Players:</p>
+			{{tmpl(players, {activePlayer: $item.data.activePlayerId}) "#userListTemplate"}}
+			<button id = {{html 'join'.concat($item.data.gameId)}} style = "display: none">
+				Join
+			</button>
+			<button id = {{html 'leave'.concat($item.data.gameId)}} style = "display: none">
+				Leave
+			</button>
+			<button id = {{html 'setReadinesStatus'.concat($item.data.gameId)}} style = "display: none">
+				I am ready
+			</button>
+		</ul>
+	</li>
+</script>
+<script id="userListTemplate" type="text/x-jquery-tmpl"> 
+	<div class = "user">
+		<p>${username}{{if $item.data.userId == $item.activePlayer}} -- active player{{/if}}</p>
+		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
+		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
+		
+	</div>
+</script>
 	<table id = "tmain" height = "100%" width = "100%" style="ui-widget">
 		<tr id = "tmain_1">
 			<td id = "tmain_1_1" rowspan = "3" valign = "top">

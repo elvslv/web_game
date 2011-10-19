@@ -79,7 +79,8 @@ function getGameListResponse(data)
 
 function setGame(gameId)
 {
-	fields = ['gameId', 'gameName', 'mapId', 'activePlayerId', 'state', 'turn', 'turnsNum', 'maxPlayersNum']
+	fields = ['gameId', 'gameName', 'mapId', 'activePlayerId', 'state', 'turn', 'turnsNum', 
+		'maxPlayersNum']
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
 		if (Client.gameList[i].gameId == gameId)
@@ -171,16 +172,7 @@ function createGameResponse(data)
 			alert("You're already playing");
 			break;
 		case 'ok':
-			game = Client.newGame(data['gameId']);
-			game.players = [
-			{
-				'userId': Client.currentUser.userId,
-				'username': Client.currentUser.userId, 
-				'isReady': false,
-				'inGame': true
-			}];
-			Client.currentUser.gameId = game.gameId;
-			Client.gameList.push(game);
+			Client.currentUser.gameId = game.data['gameId'];
 			Interface.changeOnCreateGame(game);
 			$('#createGameForm').dialog('close');
 			break;
@@ -207,7 +199,6 @@ function setReadinessStatusResponse(data)
 			alert('You can not join game that have been already started or finished');
 			break;
 		case 'ok':
-			Client.currentUser.isReady = true;
 			Interface.changeOnSetReadinessStatus();
 			break;
 		default:

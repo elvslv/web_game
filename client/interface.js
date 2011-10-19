@@ -2,38 +2,19 @@ var Interface = {};
 
 Interface.fillGameList = function() 
 {
-	var gamesList = Client.gameList;
 	$('#gameList').empty();
-	$('#gameListInfo').html('There are no avaliable games');
-	for (var i = 0; i < gamesList.length; ++i)
+	$('#gameListTemplate').tmpl(Client.gameList, 
 	{
-		if (gamesList[i].state == 3/*finished*/)
-			continue;
-		$('#gameListInfo').html('Games:');
-		$('#gameList').append('<li id = "game' + gamesList[i].gameId + '"><a href="#">' + 
-			gamesList[i].gameName + '</a></li>');
-		$('#game' + gamesList[i].gameId).append('<ul id = "game' + gamesList[i].gameId + 
-			'Descr"></ul>')
-		game = $('#game' + gamesList[i].gameId  + 'Descr');
-		for (var j = 0; j < Client.gameProperties.length - 1; ++j)
+		join: function(gameId)
 		{
-			if (Client.gameProperties[j] !== 'gameDescr' || gamesList[i].gameDescr) 
-			{
-				val = Client.gameProperties[j] === 'state' ? 
-					Client.states[gamesList[i][Client.gameProperties[j]]] : 
-					gamesList[i][Client.gameProperties[j]];
-				game.append('<p>' + Client.gameProperties[j] + ': ' + val + '</p>');
-			}
+			'join'.concat(gameId)
 		}
-		game.append('<p>Players:</p><div id = "players' + gamesList[i].gameId +'" class="user"></div>');
-		for (var j = 0; j < gamesList[i].players.length; ++j)
-			for (var k = 0; k < Client.playerProperties.length; ++k)	
-				$('#players' + gamesList[i].gameId).append('<p>' + Client.playerProperties[k] + 
-					': ' + gamesList[i].players[j][Client.playerProperties[k]] + '</p>');
-		game.append('<button id = "join' + gamesList[i].gameId + 
-			'" style = "display: none">Join</button>');
-		$('#join' + gamesList[i].gameId).prop('gameId', gamesList[i].gameId);
-		$('#join' + gamesList[i].gameId)
+	}).appendTo('#gameList');
+	initGameList();
+	for (var i = 0; i < Client.gameList.length; ++i)
+	{
+		$('#join' + Client.gameList[i].gameId).prop('gameId', Client.gameList[i].gameId);
+		$('#join' + Client.gameList[i].gameId)
 			.button()
 			.click(function()
 			{
@@ -41,20 +22,17 @@ Interface.fillGameList = function()
 				sendQuery('{"action": "joinGame", "sid": ' + Client.currentUser.sid +
 					', "gameId": ' + $(this).prop('gameId') + '}', joinGameResponse);
 			});
-		game.append('<button id = "leave' + gamesList[i].gameId + 
-			'" style = "display: none">Leave</button>');
-		$('#leave' + gamesList[i].gameId)
+		$('#leave' + Client.gameList[i].gameId)
 			.button()
 			.click(function()
 			{
 				sendQuery('{"action": "leaveGame", "sid": ' + Client.currentUser.sid +'}', 
 					leaveGameResponse);
 			});
-		game.append('<button id = "setReadinesStatus' + gamesList[i].gameId + 
-			'" style = "display: none">I am ready</button>');
-		$('#setReadinesStatus' + gamesList[i].gameId).prop('isReady', 0);
-		$('#setReadinesStatus' + gamesList[i].gameId).prop('gameId', gamesList[i].gameId);
-		$('#setReadinesStatus' + gamesList[i].gameId)
+		$('#setReadinesStatus' + Client.gameList[i].gameId).prop('isReady', 0);
+		$('#setReadinesStatus' + Client.gameList[i].gameId).prop('gameId', 
+			Client.gameList[i].gameId);
+		$('#setReadinesStatus' + Client.gameList[i].gameId)
 			.button()
 			.click(function()
 			{
@@ -62,26 +40,31 @@ Interface.fillGameList = function()
 				sendQuery('{"action": "setReadinessStatus", "sid": ' + Client.currentUser.sid +
 					', "isReady": ' + (1 - $(this).prop('isReady')) + '}', setReadinessStatusResponse);
 			});		
-		if (Client.currentUser && Client.currentUser.sid)
-		{
-			if (!Client.currentUser.gameId)
-				$('[id*=join]').show();
-			else
-			{
-				if (Client.currGameState.state == 1)
-				{
-					$('#setReadinesStatus' + gamesList[i].gameId).prop('isReady', 
-						Client.currentUser.isReady);
-					$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
-						'I am not ready' : 'I am ready');
-					$('#setReadinesStatus' + Client.currentUser.gameId).show();
-				}
-				$('#leave' + Client.currentUser.gameId).show();
-			}
-		}
 
 	}
-	initGameList();
+	if (Client.currentUser && Client.currentUser.sid)
+	{
+		if (!Client.currentUser.gameId)
+		{
+			for (var i = 0; i < Client.gameList.length; ++i)
+			{
+				if (Client.gameList[i].state == 1)
+					$('#join' + Client.gameList[i].gameId).show();
+			}
+		}
+		else
+		{
+			if (Client.currGameState.state == 1)
+			{
+				$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
+					Client.currentUser.isReady);
+				$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
+					'I am not ready' : 'I am ready');
+				$('#setReadinesStatus' + Client.currentUser.gameId).show();
+			}
+			$('#leave' + Client.currentUser.gameId).show();
+		}
+	}
 }
 
 
