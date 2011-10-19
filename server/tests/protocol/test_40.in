@@ -2,6 +2,9 @@
 	"test":
 	[
 		{
+			"action": "resetServer"
+		},
+		{
 			"action": "register",
 			"username": "user1",
 			"password": "fhjdgj"
@@ -14,8 +17,7 @@
 		{
 			"action": "sendMessage",
 			"sid": 1,
-			"text": "hello!",
-			"simpletime": true
+			"text": "hello!"
 		},
 		{
 			"action": "getMessages",

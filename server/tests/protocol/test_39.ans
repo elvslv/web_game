@@ -3,26 +3,30 @@
 		"result": "ok"
 	},
 	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
-		"sid": 1
+		"sid": 1,
+		"userId": 1
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok",
-		"sid": 2
+		"sid": 2,
+		"userId": 2
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
 	},
 	{
 		"result": "ok",
-		"time": 1 
-	},
-	{
-		"result": "ok",
-		"time": 2 
-	},
-	{
-		"result": "ok",
-		"messages": [{"userId": 1, "text": "hello user2!", "time": 1}, {"userId": 2, "text": "hello user1!", "time": 2}]
+		"messages": [{"id": 1, "text": "hello user2!", "time": 1, "userId": 1}, 
+				{"id": 2, "text": "hello user1!", "time": 2, "userId": 2}]
 	}
 ]

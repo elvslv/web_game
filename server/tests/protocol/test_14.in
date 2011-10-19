@@ -3,7 +3,6 @@
 	[
 		{
 			"action": "resetServer"
-			
 		},
 		{
 			"action": "register",
@@ -24,29 +23,9 @@
 			"action": "login",
 			"username": "rewtgh555",
 			"password": "365757"
-		},
-		{
-			"action": "doSmtn",
-			"sid": 1
-		},
-		{
-			"action": "doSmtn",
-			"sid": 1
-		},
-		{
-			"action": "doSmtn",
-			"sid": 2
 		},
 		{
 			"action": "logout",
-			"sid": 2
-		},
-		{
-			"action": "doSmtn",
-			"sid": 1
-		},
-		{
-			"action": "doSmtn",
 			"sid": 2
 		},
 		{

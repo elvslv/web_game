@@ -1,5 +1,8 @@
 [
 	{
-		"result": "badSid"
+		"result": "ok"
+	},
+	{
+		"result": "badUserSid"
 	}
 ]

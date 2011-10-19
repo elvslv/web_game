@@ -2,6 +2,9 @@
 	"test":
 	[
 		{
+			"action": "resetServer"
+		},
+		{
 			"action": "logout",
 			"sid": 2
 		}

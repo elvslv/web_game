@@ -91,14 +91,14 @@
 						"username": "user1",
 						"isReady": true,
 						"priority": 1,
-						"inGame": 1
+						"inGame": true
 					},
 					{
 						"userId": 4,
 						"username": "user4",
 						"isReady": true,
 						"priority": 2,
-						"inGame": 1
+						"inGame": true
 					}
 				],
 				"mapId": 1,
@@ -118,7 +118,7 @@
 						"username": "user3",
 						"isReady": false,
 						"priority": 1,
-						"inGame": 1
+						"inGame": true
 					}
 				],
 				"mapId": 2,
