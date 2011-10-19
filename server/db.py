@@ -332,7 +332,7 @@ class User(Base):
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 
 			x.state == misc.GAME_CONQUER and x.userId == self.id, self.game.history)
-		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
+		return len(filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist))
 
 
 class Region(Base):
