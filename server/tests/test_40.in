@@ -25,63 +25,6 @@
 			"password": "222222"
 		},
 		{
-			"action": "createGame",
-			"sid": 1,
-			"gameName": "game1",
-			"mapId": 7,
-			"playersNum": 2
-		},
-		{
-			"action": "joinGame",
-			"sid": 2,
-			"gameId": 1		
-		},
-		
-		{
-			"action": "setReadinessStatus",
-			"sid": 1,
-			"isReady": 1
-		},
-		{
-			"action": "setReadinessStatus",
-			"sid": 2,
-			"isReady": 1,
-			"visibleRaces": ["Ratmen", "Wizards", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Heroic", "Forest", "Fortifield", "Berserk", "Commando", "Diplomat"]
-		},
-		{
-			"action": "selectRace",
-			"sid": 1,
-			"position" : 0
-		},
-
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 1
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 2
-		},
-		{
-			"action": "conquer",
-			"sid": 1,
-			"regionId" : 3
-		},
-		{
-			"action": "redeploy",
-			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 0},
-				{"regionId": 2, "tokensNum": 0},
-				{"regionId": 3, "tokensNum": 13}]
-		},		
-		{
-			"action": "finishTurn",
-			"sid" : 1
-		},
-		{
 			"action": "loadGame",
 			"sid" : 1,
 			"actions": 

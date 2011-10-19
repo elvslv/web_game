@@ -187,10 +187,9 @@ def act_finishTurn(data):
 		game.getLastState() != GAME_REDEPLOY and game.getLastState() != GAME_CHOOSE_FRIEND :  
 		raise BadFieldException('badStage')
 
-	countCoins(user)
+	user.coins += countCoins(user)
 	user.tokensInHand = 0
 	nextPlayer = game.getNextPlayer()
-	print 'afterGetNextPlayer'
 #	for rec in races:
 #		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 #		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)

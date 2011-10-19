@@ -496,8 +496,8 @@ class SpecialPowerPillaging(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Pillaging', 5)
 	
-	def incomeBonus(self, user): 
-		return user.getNonEmptyConqueredRegions()
+	def incomeBonus(self, tokenBadge): 
+		return tokenBadge.owner.getNonEmptyConqueredRegions()
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):

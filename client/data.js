@@ -14,23 +14,10 @@ Client.currGameState = {
 	"name" : '',
 	"descr" : '',
 	"mapId" : 0,
-	"id" : 0
+	"id" : 0,
+	"state" : 0,
 };
 
-
-Client.newGame = function(id) {
-	var playersNum = 1,
-		state = 'waiting';
-	return {
-		"gameName" : Client.currGameState.name,
-		"gameId"   : id,
-		"state" : state,
-		"turn"  : 0,
-		"playersNum" : playersNum,
-		"gameDescr" : Client.currGameState.descr,
-		"mapId" : Client.currGameState.mapId
-	};
-};
 
 Client.states = [
 	'start',
@@ -44,5 +31,5 @@ Client.gameProperties = [
 	"turnsNum", "maxPlayersNum", "players"
 ];
 
-Client.playerProperties = ["username", "isReady", "inGame"]
+Client.playerProperties = ["username", "isReady", "inGame"];
 
