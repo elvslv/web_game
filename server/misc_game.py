@@ -90,7 +90,7 @@ def countCoins(user):
 	for race in races:
 		income += callRaceMethod(race.raceId, 'incomeBonus', race)
 		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
-	user.coins += income
+	return income
 
 def getGameState(game):
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
@@ -142,9 +142,7 @@ def endOfGame(game, coins = None):
 		return {'result': 'ok', 'coins': coins}
 	else:
 		gameState = getGameState(game)
-		dbi.engine.execute("""UPDATE Users SET GameId=Null, IsReady=False, 
-			currentTokenBadgeId=Null, declinedTokenBadgeId=Null, coins=%s,
-			priority=Null WHERE GameId=%s""" , misc.INIT_COINS_NUM, game.id)
+		game.resetPlayersState()
 		tables = ['CurrentRegionStates', 'TokenBadges']
 		for table in tables:
 			queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table

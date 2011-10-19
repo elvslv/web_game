@@ -112,6 +112,16 @@ class _Database:
 		except NoResultFound:
 			raise BadFieldException('badUsernameOrPassword')
 
+	def clearGame(self, game):
+		game.resetPlayersState()
+		self.delete(game)
+		self.engine.execute("ALTER TABLE Games AUTO_INCREMENT=1")
+		self.engine.execute("ALTER TABLE WarHistory AUTO_INCREMENT=1")
+		self.engine.execute("ALTER TABLE History AUTO_INCREMENT=1")
+		self.engine.execute("ALTER TABLE CurrentRegionStates AUTO_INCREMENT=1" )
+		self.engine.execute("ALTER TABLE TokenBadges AUTO_INCREMENT=1")
+		self.engine.execute("ALTER TABLE GameHistory AUTO_INCREMENT=1")
+
 	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
 		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
 
@@ -214,26 +224,17 @@ class Game(Base):
 		lastWarHistoryEntry = self.history[-1].warHistory
 		return lastWarHistoryEntry.conqRegion.region
 
-	def clear(self): ##must be reworked!
-		gameId = self.id
-		tables = ['History', 'GameHistory', 'CurrentRegionStates', 'TokenBadges']
-		dbi.engine.execute("""UPDATE Users SET GameId=Null, IsReady=False, 
-			currentTokenBadgeId=Null, declinedTokenBadgeId=Null, coins=%s,
-			priority=Null WHERE GameId=%s""" , misc.INIT_COINS_NUM, gameId)
 
-		for hist in self.history:
-			dbi.engine.execute("""DELETE FROM WarHistory WHERE MainHistEntryId=%s""", 
-				hist.id)
-		for table in tables:
-			queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table
-			dbi.engine.execute(queryStr, gameId)
-		dbi.engine.execute('DELETE FROM Games WHERE Id=%s', gameId)
-		dbi.engine.execute("ALTER TABLE Games AUTO_INCREMENT=1")
-		dbi.engine.execute("ALTER TABLE WarHistory AUTO_INCREMENT=1")
-		dbi.engine.execute("ALTER TABLE History AUTO_INCREMENT=1")
-		dbi.engine.execute("ALTER TABLE CurrentRegionStates AUTO_INCREMENT=1" )
-		dbi.engine.execute("ALTER TABLE TokenBadges AUTO_INCREMENT=1")
-		dbi.engine.execute("ALTER TABLE GameHistory AUTO_INCREMENT=1")
+	def resetPlayersState(self):
+		for player in self.players:
+			player.gameId = None
+			player.isReady = False
+			player.inGame = False
+			player.currentTokenBadge = None
+			player.declinedTokenBadge = None
+			player.coins = misc.INIT_COINS_NUM
+			player.priority = None
+		
 
 	def getLastState(self):
 		return self.history[-1].state
@@ -274,7 +275,7 @@ class TokenBadge(Base):
 	totalTokensNum = Column(Integer, default = 0)
 	specPowNum = Column(Integer, default = 0)
 
-	game = relationship(Game, backref=backref('tokenBadges'))
+	game = relationship(Game, backref=backref('tokenBadges', cascade="all,delete"))
 
 	def __init__(self, raceId, specPowId, gameId): 
 		self.raceId = raceId
@@ -294,7 +295,7 @@ class User(Base):
 	name = uniqString(MAX_USERNAME_LEN)
 	password = string (MAX_PASSWORD_LEN)
 	sid = Column(Integer, unique=True)
-	gameId = fkey('games.id')
+	gameId = Column(Integer, ForeignKey('games.id', onupdate='CASCADE', ondelete='SET NULL'))
 	isReady = Column(Boolean, default=False)
 	currentTokenBadgeId = fkey('tokenBadges.id')
 	declinedTokenBadgeId = fkey('tokenBadges.id')
@@ -304,9 +305,11 @@ class User(Base):
 	inGame = Column(Boolean, default=False)
 	
 	game = relationship(Game, backref=backref('players', order_by=priority))
-	currentTokenBadge = relationship(TokenBadge, backref=backref('owner', uselist=False), 
-	primaryjoin=currentTokenBadgeId==TokenBadge.id)
-	declinedTokenBadge = relationship(TokenBadge, primaryjoin=declinedTokenBadgeId==TokenBadge.id)
+	currentTokenBadge = relationship(TokenBadge, cascade="all,delete", 
+		backref=backref('owner', uselist=False), 
+		primaryjoin=currentTokenBadgeId==TokenBadge.id)
+	declinedTokenBadge = relationship(TokenBadge, cascade="all,delete", 
+			primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
 	def __init__(self, username, password):
 		self.name = username
@@ -329,8 +332,9 @@ class User(Base):
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 
 			x.state == misc.GAME_CONQUER and x.userId == self.id, self.game.history)
-		return len(filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist))
-		
+		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
+
+
 class Region(Base):
 	__tablename__ = 'regions'
 
@@ -351,8 +355,9 @@ class Region(Base):
 	cavern = Column(Boolean, default=False)
 
 	map = relationship(Map, backref=backref('regions', order_by=id))
-	neighbors = relationship('Adjacency'  ,primaryjoin='and_(Region.id==Adjacency.regId,\
-		 Region.mapId==Adjacency.mapId)')
+	neighbors = relationship('Adjacency' , cascade="all,delete", 
+		primaryjoin='and_(Region.id==Adjacency.regId,\
+		Region.mapId==Adjacency.mapId)')
 
 	def __init__(self, id, defTokensNum, map_): 
 		self.id = id
@@ -388,10 +393,10 @@ class RegionState(Base):
 	hero = Column(Boolean, default = False) 
 	inDecline = Column(Boolean, default = False) 
 
-	game = relationship(Game, backref=backref('regions'))
+	game = relationship(Game, backref=backref('regions', cascade = "all,delete"))
 	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
-	owner = relationship(User, backref=backref('regions'))
-	region = relationship(Region, backref=backref('states'))
+	owner = relationship(User, backref=backref('regions', cascade = "all,delete"))
+	region = relationship(Region, backref=backref('states', cascade="all,delete"))
 
 	__table_args__ = (ForeignKeyConstraint([regionId, mapId], [Region.id, Region.mapId]), {})
 
@@ -451,7 +456,7 @@ class HistoryEntry(Base):
 	dice = Column(Integer)
 	friend = Column(Integer)
 
-	game = relationship(Game, backref=backref('history', order_by=id))
+	game = relationship(Game, backref=backref('history', order_by=id, cascade="all,delete"))
 	user = relationship(User, backref=backref('history'))
 
 	def __init__(self, user, state, tokenBadgeId, dice = None, friend = None): 
@@ -471,7 +476,7 @@ class GameHistoryEntry(Base):
 	gameId = fkey('games.id')
 	action = Column(Text)
 
-	game = relationship(Game, backref=backref('gameHistory', order_by=id))
+	game = relationship(Game, backref=backref('gameHistory', order_by=id, cascade="all,delete"))
 
 	def __init__(self, game, action): 
 		self.gameId = game.id
@@ -489,8 +494,9 @@ class WarHistoryEntry(Base):
 	victimTokensNum = Column(Integer, default = 0)
 	diceRes = Column(Integer)
 	attackType = Column(Integer) 
-
-	mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory', uselist=False))
+	mainHistEntry = relationship(HistoryEntry, backref=backref('warHistory', 
+													cascade="all,delete",	
+													uselist=False))
 	agressorBadge = relationship(TokenBadge, primaryjoin=agressorBadgeId==TokenBadge.id)
 	victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id)
 	conqRegion = relationship(RegionState, uselist=False)

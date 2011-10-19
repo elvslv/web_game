@@ -14,7 +14,8 @@ Client.currGameState = {
 	"name" : '',
 	"descr" : '',
 	"mapId" : 0,
-	"id" : 0
+	"id" : 0,
+	"state" : 0,
 };
 
 

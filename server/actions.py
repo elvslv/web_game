@@ -154,12 +154,10 @@ def act_saveGame(data):
 def act_loadGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
-	for player in game.players:
-		player.game = None
-	game.clear()
+	if game: dbi.clearGame(game)
 	for act in data['actions']:
-		if act['action'] in ('register', 'uploadMap', 'login', 'logout', 'saveGame'
-, 'loadGame', 'resetServer', 'createDefaultMaps'):
+		if act['action'] in ('register', 'uploadMap', 'login', 'logout', 'saveGame', 
+							'loadGame', 'resetServer', 'createDefaultMaps'):
 			raise BadFieldException('illegalAction')
 		if 'userId' in act:
 			user = dbi.getXbyY('User', 'id', act['userId'])

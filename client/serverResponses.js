@@ -19,7 +19,7 @@ function registerResponse(data)
 			Interface.changeOnRegistration();
 			break;
 		default:
-			$('#dialogInfo').text('Unknown server response' + data);
+			$('#dialogInfo').text('Unknown server response' + data.toString());
 	}
 }
 
@@ -43,7 +43,7 @@ function loginResponse(data)
 			Interface.changeOnLogin();
 			break;
 		default:
-			$('#dialogInfo').text('Unknown server response' + data);
+			$('#dialogInfo').text('Unknown server response' + data.toString());
 	}
 }
 
@@ -62,7 +62,7 @@ function logoutResponse(data)
 			Interface.changeOnLogout();
 			break;
 		default:
-			alert('Unknown server response' + data);
+			alert('Unknown server response' + data.toString());
 	}
 }
 
@@ -70,7 +70,7 @@ function getGameListResponse(data)
 {
 	if (data['result'] != 'ok' || !data['games'])
 	{
-		alert("Unknown server response: " + data);
+		alert("Unknown server response: " + data.toString());
 		return;
 	}
 	Client.gameList = data['games'];
@@ -117,11 +117,10 @@ function joinGameResponse(data)
 		case 'ok':
 			Client.currentUser.gameId = Client.currGameState.id;
 			setGame(Client.currentUser.gameId)
-			delete Client.currGameState.id;
 			Interface.changeOnJoin();
 			break;
 		default:
-			alert('Unknown server response' + data);
+			alert("Unknown server response: " + data.toString());
 	}
 }
 
@@ -143,13 +142,12 @@ function leaveGameResponse(data)
 			Interface.changeOnLeave();
 			break;
 		default:
-			alert('Unknown server response' + data);
+			alert("Unknown server response: " + data.toString());
 	}
 }
 
 function createGameResponse(data)
 {
-	var game;
 	switch(data['result'])
 	{
 		case 'badUserSid':
@@ -172,12 +170,13 @@ function createGameResponse(data)
 			alert("You're already playing");
 			break;
 		case 'ok':
-			Client.currentUser.gameId = game.data['gameId'];
-			Interface.changeOnCreateGame(game);
+			Client.currentUser.gameId = data.gameId;
+			setGame(Client.currentUser.gameId);
+			Interface.changeOnCreateGame(data);
 			$('#createGameForm').dialog('close');
 			break;
 		default:
-			alert('Unknown server response' + data);
+			alert('Unknown server response' + data.toString());
 	}
 }
 
@@ -202,40 +201,6 @@ function setReadinessStatusResponse(data)
 			Interface.changeOnSetReadinessStatus();
 			break;
 		default:
-			alert('Unknown server response' + data);
-	}
-}
-
-function getMessagesResponse(data)
-{
-	switch(data['result'])
-	{
-		case 'badJson': //may it be???
-			alert('Invalid data');
-			break;
-		case 'ok':
-			Client.messages = Client.messages.concat(data['messages']);
-			Interface.changeOnGetMessages();
-			break;
-		default:
-			alert('Unknown server response' + data);
-	}
-}
-function sendMessageResponse(data)
-{
-	switch(data['result'])
-	{
-		case 'badJson': //may it be???
-			alert('Invalid data');
-			break;
-		case 'badUserSid':
-			alert('Invalid sid'); //?!!!
-			break;
-		case 'ok':
-			$('#messageBox').val('');
-			updateChat();
-			break;
-		default:
-			alert('Unknown server response' + data);
+			alert('Unknown server response' + data.toString());
 	}
 }

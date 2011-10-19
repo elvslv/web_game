@@ -54,13 +54,13 @@ Interface.fillGameList = function()
 		{
 			for (var i = 0; i < Client.gameList.length; ++i)
 			{
-				if (Client.gameList[i].state == 1)
+				if (Client.gameList[i].state === 1)
 					$('#join' + Client.gameList[i].gameId).show();
 			}
 		}
 		else
 		{
-			if (Client.currGameState.state == 1)
+			if (Client.currGameState.state === 1)
 			{
 				$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
 					Client.currentUser.isReady);
@@ -104,7 +104,7 @@ Interface.changeOnLogin = function()
 		for (var i = 0; i < Client.gameList.length; ++i)
 		{
 			for (var j = 0; j < Client.gameList[i].players.length; ++j)
-				if (Client.gameList[i].players[j].userId == 
+				if (Client.gameList[i].players[j].userId === 
 						Client.currentUser.userId)
 				{
 					Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
@@ -158,7 +158,6 @@ Interface.changeOnLeave = function()
 Interface.changeOnCreateGame = function(game)
 {
 	updateGameList();
-	Client.currentUser.gameId = game['gameId'];
 	$('[id*=join]').hide();
 	$('#leave' + Client.currentUser.gameId).show();
 	$('#createGame').hide();
