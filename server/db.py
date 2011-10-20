@@ -155,11 +155,15 @@ class Map(Base):
 	name = uniqString(MAX_MAPNAME_LEN)
 	playersNum = Column(Integer)
 	turnsNum = Column(Integer)
-    
-	def __init__(self, name, playersNum, turnsNum): 
+	thumbSrc = Column(Text)
+	pictureSrc = Column(Text)
+	
+	def __init__(self, name, playersNum, turnsNum, thumbSrc, pictureSrc): 
 		self.name = name
 		self.playersNum = playersNum
 		self.turnsNum = turnsNum
+		self.thumbSrc = thumbSrc
+		self.pictureSrc = pictureSrc
 
 	def getRegion(self, regionId):
 		region = filter(lambda x: x.id == regionId, self.regions)

@@ -1,6 +1,13 @@
 from gameExceptions import BadFieldException
 import misc
 import sys
+import os
+
+path = os.path.dirname(__file__)
+sys.path.append(path)
+os.chdir(path)
+path = os.pardir
+os.chdir(path)
 
 def checkListCorrectness(data, field, type):
 	if not field in data:
@@ -69,3 +76,9 @@ def checkRegionCorrectness(data):
 		queryStr += ', 1'
 	queryStr += ')'
 	return queryStr
+
+def checkFiles(thumbSrc, pictSrc):
+	if not(os.path.exists(thumbSrc) and os.path.exists(pictSrc)):
+		print thumbSrc, pictSrc
+		print path
+		raise BadFieldException("Thumbnail or picture files aren't found")

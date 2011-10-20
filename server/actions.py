@@ -60,7 +60,9 @@ def act_getMessages(data):
 def act_uploadMap(data):
 	name = data['mapName']
 	playersNum = int(data['playersNum'])
-	newMap = Map(name, playersNum, data['turnsNum'])
+	checkFiles(data['thumbnail'], data['picture'])
+	newMap = Map(name, playersNum, data['turnsNum'], data['thumbnail'], 
+		data['picture'])
 	result = list()
 	dbi.addUnique(newMap, 'mapName')
 	mapId = newMap.id

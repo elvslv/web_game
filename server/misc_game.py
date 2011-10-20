@@ -152,8 +152,9 @@ def endOfGame(game, coins = None):
 
 def getShortMapState(map_):
 	result = dict()
-	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum']
-	mapAttrNames = ['mapId', 'mapName', 'playersNum', 'turnsNum']
+	mapAttrs = ['id', 'name', 'playersNum', 'turnsNum', 'thumbSrc', 'pictureSrc']
+	mapAttrNames = ['mapId', 'mapName', 'playersNum', 'turnsNum', 'thumbnail', 
+		'picture']
 	for i in range(len(mapAttrs)):
 		result[mapAttrNames[i]] = getattr(map_, mapAttrs[i])
 	return result

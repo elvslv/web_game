@@ -22,7 +22,7 @@ A = 9995326
 C = 235286786
 M = 7486379941
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=True
+TEST_MODE=False
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -278,10 +278,14 @@ possibleLandDescription = [
 	'hero'
 ]
 defaultMaps = [
-	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5}, 
-	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5},
-	{'mapName': 'defaultMap3', 'playersNum': 4, 'turnsNum': 5},
-	{'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5},
+	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5, 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'}, 
+	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5, 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'},
+	{'mapName': 'defaultMap3', 'playersNum': 4, 'turnsNum': 5, 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'},
+	{'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5, 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'},
 	{
 		'mapName': 'defaultMap5', 
 		'playersNum': 2, 
@@ -308,7 +312,8 @@ defaultMaps = [
 	 			'landDescription' : ['coast'],
 	 			'adjacent' : [1, 2] 
 	 		}
-	 	]
+	 	], 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'
 	},
 	{
 		'mapName': 'defaultMap6', 
@@ -446,7 +451,8 @@ defaultMaps = [
 	 			'landDescription' : ['hill'],  #30
 	 			'adjacent' : [29, 28, 13, 12, 27] 
 	 		},
-	 	]
+	 	], 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'
 	},	{
 		'mapName': 'defaultMap7', 
 		'playersNum': 2, 
@@ -475,7 +481,8 @@ defaultMaps = [
 	 			'landDescription' : ['mountain', 'mine'],
 	 			'adjacent' : [4] 
 	 		}
-	 	]
+	 	], 
+		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'
 	}	
 			
 ]
