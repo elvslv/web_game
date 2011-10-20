@@ -1,0 +1,10 @@
+{
+	"test":
+	[
+		{
+			"action": "getMessages",
+			"since": 0
+		}
+	],
+	"description": "get messages without sending"
+}

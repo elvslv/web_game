@@ -1,0 +1,22 @@
+[{
+		"result": "ok"
+	}, 
+	{
+		"result": "badUsername"
+	}, 
+	{
+		"result": "badUsername"
+	}, 
+	{
+		"result": "badPassword"
+	}, 
+	{
+		"result": "ok"
+	}, 
+	{
+		"result": "badUsername"
+	}, 
+	{
+		"result": "badPassword"
+	}
+] 

@@ -1,0 +1,36 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh555",
+			"password": "365757"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh555",
+			"password": "365757"
+		},
+		{
+			"action": "logout",
+			"sid": 2
+		},
+		{
+			"action": "logout",
+			"sid": 1
+		}
+	]
+}

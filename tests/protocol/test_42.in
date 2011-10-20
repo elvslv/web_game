@@ -1,0 +1,37 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"sid": 1,
+			"text": "hello!"
+		},
+		{
+			"action": "getMessages",
+			"since": 0
+		},
+		{
+			"action": "sendMessage",
+			"sid": 1,
+			"text": "hello again!"
+		},
+		{
+			"action": "getMessages",
+			"since": 0
+		}
+	],
+	"description": "send and get"
+}

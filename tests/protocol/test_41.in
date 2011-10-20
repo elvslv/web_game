@@ -1,0 +1,9 @@
+{
+	"test":
+	[
+		{
+			"action": "getMessages"
+		}
+	],
+	"description": "get messages without since"
+}

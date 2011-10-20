@@ -1,0 +1,115 @@
+{
+	"test":[
+		{
+			"action": "resetServer"
+		},
+		
+		{
+			"action": "setReadinessStatus",
+			"sid": 5,
+			"isReady": 0
+		},
+		{	
+			"action": "register",
+			"username": "user1", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "login",
+			"username": "user1", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "register",
+			"username": "user2", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "login",
+			"username": "user2", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "register",
+			"username": "user3", 
+			"password": "pswd55"
+		},
+		{	
+			"action": "login",
+			"username": "user3", 
+			"password": "pswd55"
+		},
+		{
+			"action": "createGame",
+			"sid": 1,
+			"gameName": "game1",
+			"mapId": 5
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": -10
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": "adsjgk"
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": [0, 1]
+		},
+		{
+			"action": "joinGame",
+			"sid": 2,
+			"gameId": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 2,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 1
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 1,
+			"isReady": 0
+		},
+		{
+			"action": "setReadinessStatus",
+			"sid": 3,
+			"isReady": 0
+		}
+	],
+	"description": "test setReadinessStatus function"
+}

@@ -1,0 +1,12 @@
+{
+	"test":[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "123",
+			"password": [135, 315, 5666]
+		}
+	]
+}

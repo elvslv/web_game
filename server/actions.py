@@ -53,17 +53,16 @@ def act_getMessages(data):
 	records =  dbi.query(Message).filter(Message.id > since).order_by(Message.id).all()[-100:]
 	messages = []
 	for rec in records:
-		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 
-			'username': dbi.getXbyY('User', 'id', rec.sender).name})
+		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 'userId': rec.sender})
 	return {'result': 'ok', 'messages': messages}
 
 def act_uploadMap(data):
 	name = data['mapName']
 	playersNum = int(data['playersNum'])
+	result = list()
 	checkFiles(data['thumbnail'], data['picture'])
 	newMap = Map(name, playersNum, data['turnsNum'], data['thumbnail'], 
 		data['picture'])
-	result = list()
 	dbi.addUnique(newMap, 'mapName')
 	mapId = newMap.id
 	if 'regions' in data:
@@ -176,15 +175,14 @@ def act_getMapState(data):
 def act_getMapList(data):
 	result = {'result': 'ok'}
 	result['maps'] = list()
-	maps = dbi.query(Map)
+	maps = dbi.query(Map).all()
 	for map_ in maps:
 		result['maps'].append(getShortMapState(map_))
 	return result
 
 def act_getGameList(data):
 	result = {'result': 'ok'}
-	games = dbi.query(Game)
-	games = filter(lambda x: x.state != GAME_ENDED, games)
+	games = dbi.query(Game).filter(Game.state != GAME_ENDED).all()
 	result['games'] = list()
 
 	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 

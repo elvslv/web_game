@@ -1,0 +1,23 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "login",
+			"username": "user1",
+			"password": "fhjdgj"
+		},
+		{
+			"action": "sendMessage",
+			"text": "hello!"
+		}
+	],
+	"description": "sending message without sid"
+}

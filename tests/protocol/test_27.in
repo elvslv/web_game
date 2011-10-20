@@ -1,0 +1,19 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh",
+			"password": "wqtewy"
+		}
+
+	]
+}

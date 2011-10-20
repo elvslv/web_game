@@ -1,0 +1,130 @@
+[ 
+	
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 1,  "userId": 1
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 2,  "userId": 2
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 3,  "userId": 3
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 4,  "userId": 4
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok",
+	"sid": 5,  "userId": 5
+	},
+	{
+	"result": "ok",
+	"gameId": 1
+	},
+	{
+	"result": "ok",
+	"gameId": 2
+	},
+	{
+	"result": "alreadyInGame"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "tooManyPlayers"
+	},
+	{
+	"result": "notInGame"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "notInGame"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "ok"
+	},
+	{
+	"result": "badGameState"
+	},
+	{
+		"result": "ok",
+		"games":
+		[
+			{
+				"activePlayerId": 1,
+				"gameId": 1,
+				"gameName": "game1",
+				"players":
+				[
+					{
+						"userId": 1,
+						"username": "user1",
+						"isReady": true,
+						"inGame": true
+					},
+					{
+						"userId": 4,
+						"username": "user4",
+						"isReady": true,
+						"inGame": true
+					}
+				],
+				"mapId": 1,
+				"maxPlayersNum": 2,
+				"state": 0,
+				"turn": 0,
+				"turnsNum": 5
+			},
+			{
+				"activePlayerId": null,
+				"gameId": 2,
+				"gameName": "game2",
+				"players":
+				[
+					{
+						"userId": 3,
+						"username": "user3",
+						"isReady": false,
+						"inGame": true
+					}
+				],
+				"mapId": 2,
+				"maxPlayersNum": 3,
+				"state": 1,
+				"turn": 0,
+				"turnsNum": 5
+			}
+		]
+	
+	}
+]

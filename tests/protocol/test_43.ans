@@ -1,0 +1,17 @@
+[
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1,
+		"userId": 1
+	},
+	{
+		"result": "badMessageText"
+	}
+
+]
