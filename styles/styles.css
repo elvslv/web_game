@@ -5,3 +5,14 @@ BODY{
 .user{
 	margin-left: 10px;
 }
+
+.gallery-img {
+	border: 5px solid #3e3e3e;
+	border-width: 5px 5px 20px;
+}
+.gallery-a:hover img {
+	border: 5px solid #fff;
+	border-width: 5px 5px 20px;
+	color: #fff;
+}
+.gallery-a:hover { color: #fff; }

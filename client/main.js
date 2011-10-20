@@ -138,6 +138,7 @@ $(function() {
 						$('#map' + $(this).prop('mapId')).prop('selected', true);
 						$('#browseMapsForm').dialog('close');
 					})
+				$('#mapPict' + Client.mapList[i].mapId).fancybox();
 			}
 			$('#browseMapsForm').dialog('open');
 		});
