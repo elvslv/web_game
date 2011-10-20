@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="client/import/jquery/jquery.fancybox-1.3.4.pack.js"></script> 
 		<script type="text/javascript" src="client/import/jquery/jquery.blockUI.js"></script>
 		<script type="text/javascript" src="client/import/scripts/menu-collapsed.js"></script>
+		<script type="text/javascript" src="client/import/scripts/jquery.form.js"></script>
 		<script type="text/javascript" src="client/data.js"></script> 
 		<script type="text/javascript" src="client/main.js"></script> 
 		<script type="text/javascript" src="client/interface.js"></script> 
@@ -62,19 +63,25 @@
 	</div>
 </script>
 <script id="chatTemplate" type="text/x-jquery-tmpl"> 
-	<div class = "chat">
+	<div class = "ui-widget-content ui-corner-all">
 		<table>
 			<tr>
 				<td>
-					${username}, 
-				</td>
-				<td>
-					{{html $item.UTC($item.data.time)}}:
+					<table>
+						<tr>
+							<td>
+									<i>${username}</i>, 
+							</td>
+							<td>
+								{{html $item.UTC($item.data.time)}}:
+							</td>
+						</tr>
+					</table>
 				</td>
 			</tr>
 			<tr>
 				<td colspan = "2">
-					${text}
+						${text}
 				</td>
 			</tr>
 		</table>
@@ -83,98 +90,200 @@
 <script id="mapChooseTemplate" type="text/x-jquery-tmpl"> 
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
 </script>
-	<table id = "tmain" height = "100%" width = "100%" style="ui-widget">
-		<tr id = "tmain_1">
-			<td id = "tmain_1_1" rowspan = "3" valign = "top">
-				<table id = "tableGames" width = 100%>
-					<tr id = "tableGames_1">
-						<td id = "tableGames_1_1">
-							<p id = "gameListInfo"></p>
-						</td>
-						<td id = "tableGames_1_2" align = "right"  width = "70%">
-							<button id = "getGameList"></button>
-						</td>
-					</tr>
-					<tr id = "tableGames_2">
-						<td id = "tableGames_2_1"  colspan = "2">
-							<ul id = "gameList">
-							</ul>	
-						</td>
-					</tr>
-					<tr id = "tableGames_3">
-						<td id = "tableGames_3_1"  colspan = "2">
-							<button id = "createGame" style = "display:none">Create new game</button>
-						</td>
-					</tr>
-				</table>
-			</td>
-			<td id = "tmain_1_2" valign = "top" align = "right">
-				<p id = "userInfo">You're not logged in, please login or register</p>
-				<div>
-					<button id = "register">Register</button>
-					<button id = "login">Login</button>
-					<button id = "logout" style = "display:none">Logout</button>
-				</div>
-			</td>
-		</tr>
-		<tr id = "tmain_2">
-			<td id = "tmain_2_1" rowspan="2" width = "300px" valign = "top">
-				<table width = "100%">
-					<tr>
-						<td colspan = "2">
-							<div id = "chat" class = "ui-widget-content ui-corner-all" style = 
-								"overflow-y: auto; height: 100px">
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td colspan = "2">
-							<textarea id = "messageBox" class = "ui-widget-content ui-corner-all" style = 
-								"width: 100%; overflow-y: auto"></textarea>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<button id = "sendMessage" style = "display: none">Send message</button>
-						</td>
-						<td align = "right">
-							<button id = "refreshChat">Refresh chat</button>
-						</td>
-					</tr>
-				</table>
-			</td>
-		</tr>
-		<tr id = "tmain_3">
-			<td id = "tmain_3_1">
-			</td>
-		</tr>
-	</table>
+	<div style = "background: url(styles/images/bg.jpg) no-repeat; background-position: 40% center;">
+		<table id = "tmain" height = "100%" width = "100%" style="ui-widget">
+			<tr>
+				<td rowspan = "4" valign = "top">
+					<table id = "tableGames" width = "400px">
+						<tr>
+							<td>
+								<button id = "getGameList" style = "display: none">Refresh game list</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<p id = "gameListInfo"></p>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<ul id = "gameList">
+								</ul>	
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button id = "createGame" style = "display:none">Create new game</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button id = "createMap"style = "display:none">Create new map</button>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td rowspan = "4" valign = "top">
+					<p style = "margin-left: -130px">Here must be info about the game</p>
+				</td>
+				<td valign = "top" align = "right">
+					<p id = "userInfo">You're not logged in, please login or register</p>
+					<div>
+						<button id = "register" style = "display: none">Register</button>
+						<button id = "login" style = "display: none">Login</button>
+						<button id = "logout" style = "display:none">Logout</button>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td rowspan="3" valign = "top">
+					<table width = "300px" valign = "top" align = "right" style = "margin-top: 0px; height: 100%">
+						<tr>
+							<td colspan = "2">
+								<div id = "chat" class = "ui-widget-content ui-corner-all" style = 
+									"overflow-y: auto; height: 100%; max-height: 300px">
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan = "2">
+								<textarea id = "messageBox" class = "ui-widget-content ui-corner-all" style = 
+									"width: 100%; overflow-y: auto; margin-top:0px; height: 100%"></textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button id = "sendMessage" style = "display: none">Send message</button>
+							</td>
+							<td align = "right">
+								<button id = "refreshChat" style = "display: none">Refresh chat</button>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
 	<div id = "registerLoginForm" style = "display: none">
 		<p id = "dialogInfo">Please enter unique username and valid password</p>
-		<form>
-			<fieldset>
-				<label for="username">Username</label>
-				<input type="text" name="username" id = "username" class="text ui-widget-content ui-corner-all" /><br>
-				<label for="password">Password</label>
-				<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
-			</fieldset>
-		</form>
+		<table>
+			<tr>
+				<td>
+					<label for="username">Username</label>
+				</td>
+				<td>
+					<input type="text" name="username" id = "username" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="password">Password</label>
+				</td>
+				<td>
+					<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+		</table>
 	</div>
 	<div id = "createGameForm" style = "display: none">
 		<p id = "dialogInfo">Please enter unique username and valid password</p>
-			<fieldset>
-				<label for="gameName">Game name</label>
-				<input type="text" name="gameName" id = "gameName" class="text ui-widget-content ui-corner-all" /><br>
-				<label for="gameDescription">Game description</label>
-				<input type="text" name="gameDescription" id="gameDescription" value="" class="text ui-widget-content ui-corner-all" /><br>
-				<label for="mapList">Map</label>
-				<select id = "mapList" class="text ui-widget-content ui-corner-all" ></select>
-				<button id = "browseMaps">Browse maps</button>
-			</fieldset>
+		<table>
+			<tr>
+				<td>
+					<label for="gameName">Game name</label>
+				</td>
+				<td>
+					<input type="text" name="gameName" id = "gameName" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="gameDescription">Game description</label>
+				</td>
+				<td>
+					<input type="text" name="gameDescription" id="gameDescription" value="" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="mapList">Map</label>
+				</td>
+				<td>
+					<select id = "mapList" class="text ui-widget-content ui-corner-all" ></select>
+				</td>
+			</tr>
+		</table>
+		<button id = "browseMaps">Browse maps</button>
 	</div>
 	<div id = "browseMapsForm" style = "display: none">
 		<p id = "dialogInfo">Maps:</p>
 		<div id = "browseMapsList"></div>
 	</div>
+    <div id = "uploadMap" style = "display: none">
+    		<table>
+			<tr>
+				<td>
+					<label for="mapName">Map name</label>
+				</td>
+				<td>
+					<input type="text" name="mapName" id = "mapName" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="playersNum">Number of players</label>
+				</td>
+				<td>
+					<input type="text" name="playersNum" id="playersNum" value="" class="text ui-widget-content ui-corner-all" />			
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="turnsNum">Number of turns</label>
+				</td>
+				<td>
+					<input type="text" name="turnsNum" id="turnsNum" value="" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="regionsList">Regions description</label>
+				</td>
+				<td>
+					<textarea id="regionsList" value="" class="text ui-widget-content ui-corner-all" ></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td colspan = "2">
+				<form id="uploadMapPictures" enctype="multipart/form-data" action="upload_maps.php" method="POST">
+					<table>
+						<tr>
+							<td>
+								<label for="thmbInput">Thumbnail</label>
+							</td>
+							<td>
+								<input name="thmb"  id="thmbInput"  type="file" accept="image/jpeg"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<label for="pictInput">Full picture</label>
+							</td>
+							<td>
+								<input name="pict"  id="pictInput"  type="file" accept="image/jpeg"/>
+							</td>
+						</tr>
+						<tr>
+							<td colspan = "2">
+								<input id = "submitMapPictures" type = "submit" style = "display: none"/>
+							</td>
+						</tr>
+						
+					</table>
+				</form>
+				</td>
+			</tr>
+		</table>
+    </div>
 </body>
 </html>

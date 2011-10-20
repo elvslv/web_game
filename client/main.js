@@ -107,7 +107,7 @@ $(function() {
 	$('#getGameList').button(
 	{
 		icons: {primary:'ui-icon-refresh'},
-		text: false
+		text: true
 	});
 	$('#createGame')
 		.button()
@@ -142,5 +142,65 @@ $(function() {
 			}
 			$('#browseMapsForm').dialog('open');
 		});
-		
+	$('#uploadMap').dialog(
+	{
+		autoOpen: false,
+		height: 300,
+		width: 350,
+		modal: true,
+		title: 'Create new map',
+		buttons: {
+			Ok: function() 
+			{
+				$('#submitThmb').click();
+				var mapName = $('#mapName'),
+					playersNum = $('#playersNum'),
+					turnsNum = $('#turnsNum'),
+					regionList = $('#regionList');
+				query = '{"action": "uploadMap", "mapName": "' + mapName.val() + '", "playersNum": ' + 
+					playersNum.val() +', "turnsNum": ' + turnsNum.val() + ', "regions": ' + regionList.val() + 
+					', "thumbnail": "' + filenames[0] + '", "picture": "' + filenames[1] + '"}';
+				sendQuery(query, uploadMapResponse);
+			},
+			Cancel: function() 
+			{
+				$(this).dialog('close');
+			}
+		}
+	});
+	filenames = [];
+	$('#createMap')
+	.button()
+	.click(function() {
+		$('#uploadMap').dialog('open');
+	});
+	$('#createMap').show();
+	$('#register').show();
+	$('#login').show();
+	$('#refreshChat').show();
+	$('#getGameList').show();
+	$('#submitThmb').click(function() {
+		$(this.form).trigger('submit');
+	}).trigger('click');
+	$('#submitThmb')
+	.submit(function(){
+		var options = 
+		{
+			url: "upload_maps.php",
+			dataType: "json", 
+			success: function(result) 
+			{
+				data = $.parseJSON(result);
+				if (data['result'] != 'ok')
+				{
+					alert(data['error']);
+					return;
+				}
+				filenames.push(data['filename']);
+			},
+				
+		};
+		$("#thmbInput").ajaxForm(options);
+		return false;
+	})
 });

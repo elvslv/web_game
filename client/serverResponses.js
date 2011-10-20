@@ -250,3 +250,33 @@ function sendMessageResponse(data)
 			alert('Unknown server response' + data);
  	}
 }
+
+function uploadMapResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': //may it be???
+			alert('Invalid data');
+			break;
+		case 'mapNameTaken':
+			alert('Map with the same name already exists'); //?!!!
+			break;
+		case 'badMapName':
+			alert('Invalid map name'); 
+			break;
+		case 'badPlayersNum':
+			alert('Invalid number of players'); 
+			break;
+		case 'badTurnsNum':
+			alert('Invalid number of turns'); 
+			break;
+		case 'badRegions':
+			alert('Bad regions description'); 
+			break;
+		case 'ok':
+			updateMapList(false);
+			break;
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}

@@ -173,3 +173,4 @@ Interface.changeOnSetReadinessStatus = function()
 	$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
 		'I am not ready' : 'I am ready');
 }
+

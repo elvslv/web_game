@@ -50,3 +50,7 @@ Client.playerProperties = ["username", "isReady", "inGame"];
 Client.messages = [];
 
 Client.mapList = [];
+
+Client.uploaderParams = [
+	{name: 'uploadThumbnail', maxSize: 500 * 1024}, 
+	{name: 'uploadPicture', maxSize: 5 * 1024 * 1024}]

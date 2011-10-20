@@ -44,6 +44,9 @@ ATTACK_CONQUER = 0
 ATTACK_DRAGON = 1
 ATTACK_ENCHANT = 2
 
+DEFAULT_THUMB = 'maps/mapThumb.jpg'
+DEFAULT_MAP_PICTURE = 'maps/map.jpg'
+
 possiblePrevCmd = {
 	GAME_FINISH_TURN: [GAME_DECLINE, GAME_REDEPLOY, GAME_CHOOSE_FRIEND],
 	GAME_SELECT_RACE: [GAME_START, GAME_FINISH_TURN],
@@ -148,7 +151,18 @@ actionFields = {
 			'type': int,
 			'min': 5,
 			'max': 10
+		},
+		{
+			'name': 'thumbnail',
+			'mandatory': True,
+			'type': str
+		},
+		{
+			'name': 'picture',
+			'mandatory': True,
+			'type': str
 		}
+		
 	],
 	'createGame': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
@@ -279,13 +293,13 @@ possibleLandDescription = [
 ]
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5, 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'}, 
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5, 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'},
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE},
 	{'mapName': 'defaultMap3', 'playersNum': 4, 'turnsNum': 5, 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'},
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE},
 	{'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5, 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'},
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE},
 	{
 		'mapName': 'defaultMap5', 
 		'playersNum': 2, 
@@ -313,7 +327,7 @@ defaultMaps = [
 	 			'adjacent' : [1, 2] 
 	 		}
 	 	], 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE
 	},
 	{
 		'mapName': 'defaultMap6', 
@@ -452,7 +466,7 @@ defaultMaps = [
 	 			'adjacent' : [29, 28, 13, 12, 27] 
 	 		},
 	 	], 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE
 	},	{
 		'mapName': 'defaultMap7', 
 		'playersNum': 2, 
@@ -482,7 +496,7 @@ defaultMaps = [
 	 			'adjacent' : [4] 
 	 		}
 	 	], 
-		'thumbnail': 'maps/mapThumb.jpg', 'picture': 'maps/map.jpg'
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE
 	}	
 			
 ]
