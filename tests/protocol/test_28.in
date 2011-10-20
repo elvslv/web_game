@@ -1,0 +1,38 @@
+{
+	"test":
+	[
+		{
+			"action": "resetServer"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh1",
+			"password": "wqtewy"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh2",
+			"password": "wqtewy"
+		},
+		{
+			"action": "register",
+			"username": "rewtgh3",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh1",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh2",
+			"password": "wqtewy"
+		},
+		{
+			"action": "login",
+			"username": "rewtgh3",
+			"password": "wqtewy"
+		}
+	]
+}

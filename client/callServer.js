@@ -57,4 +57,3 @@ updateMapList = function(beforeCreateGame)
 	});
 }
 
-

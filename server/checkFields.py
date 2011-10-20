@@ -9,6 +9,7 @@ os.chdir(path)
 path = os.pardir
 os.chdir(path)
 
+
 def checkListCorrectness(data, field, type):
 	if not field in data:
 		raise BadFieldException('badJson')
@@ -80,5 +81,5 @@ def checkRegionCorrectness(data):
 def checkFiles(thumbSrc, pictSrc):
 	if not(os.path.exists(thumbSrc) and os.path.exists(pictSrc)):
 		print thumbSrc, pictSrc
-		print path
 		raise BadFieldException("Thumbnail or picture files aren't found")
+

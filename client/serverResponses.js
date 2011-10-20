@@ -38,8 +38,7 @@ function loginResponse(data)
 			sid = data['sid'];
 			userId = data['userId'];
 			username = $('#username').val();
-			Client.currentUser = Client.newUser(username, userId);
-			Client.currentUser.sid = sid;
+			Client.currentUser = Client.newUser(username, userId, sid);
 			Interface.changeOnLogin();
 			break;
 		default:
@@ -90,6 +89,15 @@ function getMapListResponse(data, beforeCreateGame)
 		$('#createGameForm').dialog('open');
 }
 
+
+
+/*
+
+##  Client.lastGame is a temporary variable used
+##  in stuff like createGame and joinGame when we need
+##  to know the last data user entered. There's no real need to update it.
+##  It was only used when checking game state and there was a way to get rid of this 
+
 function setGame(gameId)
 {
 	fields = ['gameId', 'gameName', 'mapId', 'activePlayerId', 'state', 'turn', 'turnsNum', 
@@ -100,10 +108,11 @@ function setGame(gameId)
 		{
 			
 			for (var j = 0; j < fields.length; ++j)
-				Client.currGameState[fields[j]] = Client.gameList[i][fields[j]]
+				Client.lastGame[fields[j]] = Client.gameList[i][fields[j]]
 		}
 	}
 }
+*/
 
 function joinGameResponse(data)
 {
@@ -128,8 +137,8 @@ function joinGameResponse(data)
 			alert('There is no free space on map');
 			break;
 		case 'ok':
-			Client.currentUser.gameId = Client.currGameState.id;
-			setGame(Client.currentUser.gameId)
+			Client.currentUser.gameId = Client.lastGame.id;
+		//	setGame(Client.currentUser.gameId)
 			Interface.changeOnJoin();
 			break;
 		default:
@@ -151,7 +160,7 @@ function leaveGameResponse(data)
 			alert("You're not playing");
 			break;
 		case 'ok':
-			delete Client.currentUser.gameId;
+			Client.currentUser.gameId = null;
 			Interface.changeOnLeave();
 			break;
 		default:
@@ -184,7 +193,7 @@ function createGameResponse(data)
 			break;
 		case 'ok':
 			Client.currentUser.gameId = data.gameId;
-			setGame(Client.currentUser.gameId);
+		//	setGame(Client.currentUser.gameId);
 			Interface.changeOnCreateGame(data);
 			$('#createGameForm').dialog('close');
 			break;

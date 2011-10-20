@@ -40,10 +40,9 @@ $(function() {
 					gameDescription = $('#gameDescription'),
 					mapId = Client.mapList[$('#mapList').prop('selectedIndex')].mapId,
 					sid = Client.currentUser.sid;
-				Client.currGameState.name = gameName.val();
-				Client.currGameState.descr  = gameDescription.val();
-				Client.currGameState.mapId = mapId
-				Client.currGameState.state = 1;
+				Client.lastGame.name = gameName.val();
+				Client.lastGame.descr  = gameDescription.val();
+				Client.lastGame.mapId = mapId
 				query = '{"action": "createGame", "sid": ' + sid + ', "gameName": "' + 
 					gameName.val() + '", "gameDescr": "' + gameDescription.val() + '", "mapId": ' +
 					mapId + '}';

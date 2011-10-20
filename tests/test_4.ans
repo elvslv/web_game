@@ -1,0 +1,72 @@
+[	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badUserSid"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1,  "userId": 1
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 2,  "userId": 2
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 3,  "userId": 3
+	},
+	{
+		"result": "ok", 
+		"gameId": 1
+	},
+	{
+		"result": "badIsReady"
+	},
+	{
+		"result": "badIsReady"
+	},
+	{
+		"result": "badIsReady"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "badGameState"
+	},
+	{
+		"result": "badGameState"
+	},
+	{
+		"result": "notInGame"
+	}
+]

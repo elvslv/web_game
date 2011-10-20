@@ -24,7 +24,7 @@ Interface.fillGameList = function()
 			.button()
 			.click(function()
 			{
-				Client.currGameState.id = $(this).prop('gameId');
+				Client.lastGame.id = $(this).prop('gameId');
 				sendQuery('{"action": "joinGame", "sid": ' + Client.currentUser.sid +
 					', "gameId": ' + $(this).prop('gameId') + '}', joinGameResponse);
 			});
@@ -60,7 +60,8 @@ Interface.fillGameList = function()
 		}
 		else
 		{
-			if (Client.currGameState.state === 1)
+			if (Client.currentUser.gameId === Client.gameList[i].gameId &&
+					 Client.gameList[i].state === 1)
 			{
 				$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
 					Client.currentUser.isReady);

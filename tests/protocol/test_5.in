@@ -1,0 +1,12 @@
+{
+	"test":
+	[
+			{
+			"action": "resetServer"
+		},
+		{
+			"username": "rewtgh",
+			"password": "wqtewy"
+		}
+	]
+}

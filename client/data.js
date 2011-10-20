@@ -3,14 +3,15 @@ var Client = {};
 Client.currentUser = {};
 
 Client.gameList = [];
-Client.newUser = function(name, id) {
+Client.newUser = function(name, id, sid) {
 	return {
 		"username" : name,
-		"userId" : id
+		"userId" : id,
+		"sid" : sid,
 	};
 };
 
-Client.currGameState = {
+Client.lastGame = {
 	"name" : '',
 	"descr" : '',
 	"mapId" : 0,
@@ -20,23 +21,21 @@ Client.currGameState = {
 
 
 Client.newGame = function(id) {
-	var playersNum = 1,
-		state = 'waiting';
 	return {
-		"gameName" : Client.currGameState.name,
+		"gameName" : Client.lastGame.name,
 		"gameId"   : id,
-		"state" : state,
+		"state" : 'waiting',
 		"turn"  : 0,
-		"playersNum" : playersNum,
-		"gameDescr" : Client.currGameState.descr,
-		"mapId" : Client.currGameState.mapId
+		"playersNum" : 1,
+		"gameDescr" : Client.lastGame.descr,
+		"mapId" : Client.lastGame.mapId
 	};
 };
 
 Client.states = [
 	'start',
 	'waiting',
-	'??',
+	'processing',
 	'finished',
 ];
 	

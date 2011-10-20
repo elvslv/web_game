@@ -1,0 +1,47 @@
+[	
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"sid": 1,  "userId": 1
+	},
+	{
+		"result": "badGameId"
+	},
+	{
+		"result": "badUserSid"
+	},
+	{
+		"result": "notInGame"
+	},
+	{
+		"result": "ok",
+		"gameId": 1
+	},
+	{
+		"result": "alreadyInGame"
+	},
+	{
+		"result": "alreadyInGame"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "notInGame"
+	},
+	{
+		"result": "badGameState"
+	},
+	{
+		"result": "ok",
+		"gameId": 2
+	},
+	{
+		"result": "alreadyInGame"
+	}
+]
