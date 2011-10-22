@@ -3,12 +3,6 @@ import misc
 import sys
 import os
 
-path = os.path.dirname(__file__)
-sys.path.append(path)
-os.chdir(path)
-path = os.pardir
-os.chdir(path)
-
 def checkListCorrectness(data, field, type):
 	if not field in data:
 		raise BadFieldException('badJson')
@@ -78,7 +72,13 @@ def checkRegionCorrectness(data):
 	return queryStr
 
 def checkFiles(thumbSrc, pictSrc):
+	path = os.path.dirname(__file__)
+	sys.path.append(path)
+	os.chdir(path)
+	path1 = os.pardir
+	os.chdir(path1)
 	if not(os.path.exists(thumbSrc) and os.path.exists(pictSrc)):
 		print thumbSrc, pictSrc
-		print path
+		print os.getcwd()
 		raise BadFieldException("Thumbnail or picture files aren't found")
+	os.chdir(path)

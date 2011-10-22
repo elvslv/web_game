@@ -5,55 +5,73 @@
 		},
 		{
 			"action": "uploadMap",
-			"mapName": "fgjajjsfhjksjhkljhkljgdfkhldklgdkhjskhjk"
+			"mapName": "fgjajjsfhjksjhkljhkljgdfkhldklgdkhjskhjk",
+			"thumbnail": "mapThumb.jpg",
+			"picture": "map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "fgjajjsfhjksjhkldsagshrtutydsaagsdhghdfjjjfgkitrigfshhdgdttttttttttjhkljgdfkhldklgdkhjskhjk",
 			"playersNum": 2,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "mapThumb.jpg",
+			"picture": "map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map1",
 			"playersNum": 1,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "mapThumb.jpg",
+			"picture": "map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map1",
 			"playersNum": "fdskgkjk",
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "mapThumb.jpg",
+			"picture": "map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map1",
 			"playersNum": -5,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "mapThumb.jpg",
+			"picture": "map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map1",
 			"playersNum": 6,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "maps/mapThumb.jpg",
+			"picture": "maps/map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map1",
 			"playersNum": 2,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "maps/mapThumb.jpg",
+			"picture": "maps/map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map2",
 			"playersNum": 2,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "maps/mapThumb.jpg",
+			"picture": "maps/map.jpg"
 		},
 		{
 			"action": "uploadMap",
 			"mapName": "map1",
 			"playersNum": 3,
-			"turnsNum": 5
+			"turnsNum": 5,
+			"thumbnail": "maps/mapThumb.jpg",
+			"picture": "maps/map.jpg"
 		}
 	],
 	"description": "test uploadMap function"

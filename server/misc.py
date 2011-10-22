@@ -155,12 +155,12 @@ actionFields = {
 		{
 			'name': 'thumbnail',
 			'mandatory': True,
-			'type': str
+			'type': unicode
 		},
 		{
 			'name': 'picture',
 			'mandatory': True,
-			'type': str
+			'type': unicode
 		}
 		
 	],
