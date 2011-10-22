@@ -136,7 +136,6 @@ def getGameState(game):
 	return result
 
 def endOfGame(game, coins = None): 
-	print 'endOfGame'
 	game.state = GAME_ENDED
 	if misc.TEST_MODE:
 		return {'result': 'ok', 'coins': coins}

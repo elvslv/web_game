@@ -244,7 +244,6 @@ class Game(Base):
 		return self.history[-1].state
 
 	def getNextPlayer(self):
-		print 'getNextPlayer'
 		activePlayer = dbi.getXbyY('User', 'id', self.activePlayerId)
 		curPlayer = activePlayer
 		while True:
@@ -254,7 +253,7 @@ class Game(Base):
 				break
 			nextPlayer = nextPlayer[0]
 			if not nextPlayer.inGame:
-				countCoins(nextPlayer)
+				nextPlayer += countCoins(nextPlayer)
 				curPlayer = nextPlayer
 			else:
 				return nextPlayer

@@ -78,7 +78,5 @@ def checkFiles(thumbSrc, pictSrc):
 	path1 = os.pardir
 	os.chdir(path1)
 	if not(os.path.exists(thumbSrc) and os.path.exists(pictSrc)):
-		print thumbSrc, pictSrc
-		print os.getcwd()
 		raise BadFieldException("Thumbnail or picture files aren't found")
 	os.chdir(path)

@@ -197,7 +197,7 @@ def act_finishTurn(data):
 	dbi.updateHistory(user, GAME_FINISH_TURN, None)
 	dbi.updateGameHistory(game, data)
 	prepareForNextTurn(game, nextPlayer)
-	return {'result': 'ok', 'nextPlayer' : nextPlayer.id,'coins': user.coins}
+	return {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins}
 
 def act_defend(data):			## Should be renamed to retreat
 	user = dbi.getXbyY('User', 'sid', data['sid'])
