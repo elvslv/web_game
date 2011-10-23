@@ -3,7 +3,7 @@ function sendQuery(query, callback)
 	$.ajax({
 		type: "POST",
 		url: "http://localhost/small_worlds/",
-		data: query,
+		data: $.toJSON(query),
 		success: function(result)
 		{
 			data = $.parseJSON(result);
@@ -40,21 +40,28 @@ function sendQuery(query, callback)
 
 updateGameList = function()
 {
-	sendQuery('{"action": "getGameList"}', getGameListResponse);
+	sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse);
 }
 
 updateChat = function()
 {
-	sendQuery('{"action": "getMessages", "since": ' + Client.messages.length + '}', 
+	sendQuery(makeQuery(['action', 'since'], ['getMessages', Client.messages.length]), 
 		getMessagesResponse);
 }
 
 updateMapList = function(beforeCreateGame)
 {
-	sendQuery('{"action": "getMapList"}', function(data) 
+	sendQuery(makeQuery(['action'], ['getMapList']), function(data) 
 	{
 		getMapListResponse(data, beforeCreateGame)
 	});
 }
 
+makeQuery = function(fields, values)
+{
+	result = {};
+	for (var i = 0; i < fields.length; ++i)
+		result[fields[i]] = values[i];
+	return result;
+}
 

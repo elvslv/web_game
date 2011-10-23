@@ -1,5 +1,67 @@
 var Interface = {};
 
+Interface.defaultDialogOptions = {
+	'autoOpen': false,
+	'height': 300,
+	'width': 350,
+	'modal': true
+};
+
+Interface.dialogs = [
+	{
+		'name': 'registerLoginForm', 
+		'title': '', 
+		'ok': function() 
+		{
+			var name = $('#username'),
+				password = $('#password'),
+				query = makeQuery(['action', 'username', 'password'], 
+					[$('#registerLoginForm').prop('register') ? 'register' : 'login', name.val(), 
+					password.val()]);
+			sendQuery(query, function(data){
+				if ($('#registerLoginForm').prop('register'))
+					registerResponse(data);
+				else
+					loginResponse(data);
+			});
+		}
+	}, 
+	{
+		'name': 'createGameForm',
+		'title': 'Create new game',
+		'ok': function() 
+		{
+			var gameName = $('#gameName'),
+				gameDescription = $('#gameDescription'),
+				mapId = Client.mapList[$('#mapList').prop('selectedIndex')].mapId,
+				sid = Client.currentUser.sid,
+				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId'],
+					['createGame', sid, gameName.val(), gameDescription.val(), mapId]);
+			sendQuery(query, createGameResponse);
+		}
+	}, 
+	{
+		'name': 'browseMapsForm',
+		'title': 'Maps',
+		'ok': function(){}
+	}, 
+	{
+		'name': 'uploadMap',
+		'title': 'Create new map',
+		'ok':  function() 
+		{
+			$('#submitThmb').click();
+			var mapName = $('#mapName'),
+				playersNum = $('#playersNum'),
+				turnsNum = $('#turnsNum'),
+				regionList = $('#regionList');
+			query = makeQuery(['action', 'mapName', 'playersNum', 'turnsNum', 'regions', 'thumbnail', 
+				'picture'], ['uploadMap', mapName.val(), playersNum.val(), turnsNum.val(), regionList.val(),
+				filenames[0], filenames[1]]);
+			sendQuery(query, uploadMapResponse);
+		}
+	}];
+
 Interface.fillGameList = function() 
 {
 	$('#gameList').empty();
@@ -17,7 +79,8 @@ Interface.fillGameList = function()
 	else
 		$('#gameListInfo').html('There are no avaliable games');
 	initGameList();
-	delete Client.currentUser.gameIndex;
+	if (Client.currentUser.gameIndex)
+		delete Client.currentUser.gameIndex;
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
 		if (Client.currentUser.gameId == Client.gameList[i].gameId)	
@@ -28,14 +91,14 @@ Interface.fillGameList = function()
 			{
 				var gameId = Client.gameList[i].gameId;
 				Client.currentUser.newGameId = gameId;
-				sendQuery('{"action": "joinGame", "sid": ' + Client.currentUser.sid +
-					', "gameId": ' + gameId + '}', joinGameResponse);
+				sendQuery(makeQuery(['action', 'sid', 'gameId'], ['joinGame', Client.currentUser.sid, gameId]), 
+					joinGameResponse);
 			});
 		$('#leave' + Client.gameList[i].gameId)
 			.button()
 			.click(function()
 			{
-				sendQuery('{"action": "leaveGame", "sid": ' + Client.currentUser.sid +'}', 
+				sendQuery(makeQuery(['action', 'sid'], ['leaveGame', Client.currentUser.sid]), 
 					leaveGameResponse);
 			});
 		$('#setReadinesStatus' + Client.gameList[i].gameId).prop('isReady', 0);
@@ -44,8 +107,8 @@ Interface.fillGameList = function()
 			.click(function()
 			{
 				var gameId = Client.gameList[i].gameId;
-				sendQuery('{"action": "setReadinessStatus", "sid": ' + Client.currentUser.sid +
-					', "isReady": ' + (1 - $(this).prop('isReady')) + '}', setReadinessStatusResponse);
+				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
+					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
 			});		
 
 	}

@@ -28,6 +28,10 @@ function loginResponse(data)
 	var sid, username;
 	switch(data['result'])
 	{
+		case 'badPassword':
+			$('#dialogInfo').text('Bad password format');
+		case 'badPassword':
+			$('#dialogInfo').text('Bad username format');
 		case 'badUsernameOrPassword':
 			$('#dialogInfo').text('Invalid username or password');
 			break;
