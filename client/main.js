@@ -40,10 +40,6 @@ $(function() {
 					gameDescription = $('#gameDescription'),
 					mapId = Client.mapList[$('#mapList').prop('selectedIndex')].mapId,
 					sid = Client.currentUser.sid;
-				Client.currGameState.name = gameName.val();
-				Client.currGameState.descr  = gameDescription.val();
-				Client.currGameState.mapId = mapId
-				Client.currGameState.state = 1;
 				query = '{"action": "createGame", "sid": ' + sid + ', "gameName": "' + 
 					gameName.val() + '", "gameDescr": "' + gameDescription.val() + '", "mapId": ' +
 					mapId + '}';
@@ -128,6 +124,7 @@ $(function() {
 	$('#browseMaps')
 		.button()
 		.click(function() {
+			$('#browseMapsList').empty();
 			$('#mapListTemplate').tmpl(Client.mapList).appendTo('#browseMapsList');
 			for (var i = 0; i < Client.mapList.length; ++i)
 			{

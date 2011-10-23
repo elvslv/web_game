@@ -17,16 +17,19 @@ Interface.fillGameList = function()
 	else
 		$('#gameListInfo').html('There are no avaliable games');
 	initGameList();
+	delete Client.currentUser.gameIndex;
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
-		$('#join' + Client.gameList[i].gameId).prop('gameId', Client.gameList[i].gameId);
+		if (Client.currentUser.gameId == Client.gameList[i].gameId)	
+			Client.currentUser.gameIndex = i;
 		$('#join' + Client.gameList[i].gameId)
 			.button()
 			.click(function()
 			{
-				Client.currGameState.id = $(this).prop('gameId');
+				var gameId = Client.gameList[i].gameId;
+				Client.currentUser.newGameId = gameId;
 				sendQuery('{"action": "joinGame", "sid": ' + Client.currentUser.sid +
-					', "gameId": ' + $(this).prop('gameId') + '}', joinGameResponse);
+					', "gameId": ' + gameId + '}', joinGameResponse);
 			});
 		$('#leave' + Client.gameList[i].gameId)
 			.button()
@@ -36,13 +39,11 @@ Interface.fillGameList = function()
 					leaveGameResponse);
 			});
 		$('#setReadinesStatus' + Client.gameList[i].gameId).prop('isReady', 0);
-		$('#setReadinesStatus' + Client.gameList[i].gameId).prop('gameId', 
-			Client.gameList[i].gameId);
 		$('#setReadinesStatus' + Client.gameList[i].gameId)
 			.button()
 			.click(function()
 			{
-				gameId = $(this).prop('gameId');
+				var gameId = Client.gameList[i].gameId;
 				sendQuery('{"action": "setReadinessStatus", "sid": ' + Client.currentUser.sid +
 					', "isReady": ' + (1 - $(this).prop('isReady')) + '}', setReadinessStatusResponse);
 			});		
@@ -60,7 +61,7 @@ Interface.fillGameList = function()
 		}
 		else
 		{
-			if (Client.currGameState.state === 1)
+			if (Client.gameList[Client.currentUser.gameIndex].state === 1)
 			{
 				$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
 					Client.currentUser.isReady);
@@ -91,12 +92,9 @@ Interface.changeOnRegistration = function()
 Interface.changeOnLogin = function() 
 {
 	$('#userInfo').text('Hi, ' + Client.currentUser.username + '!');
-	$('#login').hide();
-	$('#logout').show();
-	$('#register').hide();
-	$('#createGame').show();
+	$('#login, #register').hide();
+	$('#logout, #createGame, #sendMessage').show();
 	$('#registerLoginForm').dialog('close');
-	$('#sendMessage').show();
 	Client.currentUser.isReady = undefined;
 	Client.currentUser.gameId = undefined;
 	if (Client.gameList)
@@ -109,7 +107,6 @@ Interface.changeOnLogin = function()
 				{
 					Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
 					Client.currentUser.gameId = Client.gameList[i].gameId;
-					setGame(Client.currentUser.gameId);
 					break;
 				}
 			if (Client.currentUser.gameId)
@@ -126,41 +123,31 @@ Interface.changeOnLogout = function()
 {
 	updateGameList();
 	$('#userInfo').text("You're not logged in, please login or register");
-	$('#username').val('');
-	$('#password').val('');
-	$('#login').show();
-	$('#logout').hide();
-	$('[id=register]').show();
-	$('[id*=join]').hide();
-	$('[id*=leave]').hide();
-	$('#createGame').hide();
-	$('#sendMessage').hide();
+	$('#username, #password').val('');
+	$('#login, [id=register]').show();
+	$('#logout, [id*=join], [id*=leave], #createGame, #sendMessage').hide();
 }
 
 Interface.changeOnJoin = function() 
 {
 	updateGameList();
-	$('[id*=join]').hide();
-	$('#leave' + Client.currentUser.gameId).show();
-	$('#setReadinesStatus' + Client.currentUser.gameId).show();
-	$('#createGame').hide();
+	$('[id*=join], #createGame').hide();
+	var gameId = Client.currentUser.gameId;
+	$('#leave' + gameId + ', #setReadinesStatus' + gameId).show();
 }
 
 Interface.changeOnLeave = function() 
 {
 	updateGameList();
-	$('[id*=join]').show();
-	$('[id*=leave]').hide();
-	$('#setReadinesStatus' + Client.currentUser.gameId).hide();
-	$('#createGame').show();
+	$('[id*=join], #createGame').show();
+	$('[id*=leave], #setReadinesStatus' + Client.currentUser.gameId).hide();
 }
 
 Interface.changeOnCreateGame = function(game)
 {
 	updateGameList();
-	$('[id*=join]').hide();
+	$('[id*=join], #createGame').hide();
 	$('#leave' + Client.currentUser.gameId).show();
-	$('#createGame').hide();
 }
 
 Interface.changeOnSetReadinessStatus = function()
@@ -169,8 +156,7 @@ Interface.changeOnSetReadinessStatus = function()
 	Client.currentUser.isReady = 1 - $('#setReadinesStatus' + 
 		Client.currentUser.gameId).prop('isReady');
 	$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
-		Client.currentUser.isReady);
-	$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
-		'I am not ready' : 'I am ready');
+		Client.currentUser.isReady).html(Client.currentUser.isReady ? 'I am not ready' : 
+		'I am ready');
 }
 

@@ -85,24 +85,10 @@ function getMapListResponse(data, beforeCreateGame)
 		return;
 	}
 	Client.mapList = data['maps'];
+	$('#mapList').empty();
 	$('#mapChooseTemplate').tmpl(Client.mapList).appendTo('#mapList');
 	if (beforeCreateGame)
 		$('#createGameForm').dialog('open');
-}
-
-function setGame(gameId)
-{
-	fields = ['gameId', 'gameName', 'mapId', 'activePlayerId', 'state', 'turn', 'turnsNum', 
-		'maxPlayersNum']
-	for (var i = 0; i < Client.gameList.length; ++i)
-	{
-		if (Client.gameList[i].gameId == gameId)
-		{
-			
-			for (var j = 0; j < fields.length; ++j)
-				Client.currGameState[fields[j]] = Client.gameList[i][fields[j]]
-		}
-	}
 }
 
 function joinGameResponse(data)
@@ -128,8 +114,7 @@ function joinGameResponse(data)
 			alert('There is no free space on map');
 			break;
 		case 'ok':
-			Client.currentUser.gameId = Client.currGameState.id;
-			setGame(Client.currentUser.gameId)
+			Client.currentUser.gameId = Client.currentUser.newGameId;
 			Interface.changeOnJoin();
 			break;
 		default:
@@ -152,6 +137,7 @@ function leaveGameResponse(data)
 			break;
 		case 'ok':
 			delete Client.currentUser.gameId;
+			delete Client.currentUser.gameIndex;
 			Interface.changeOnLeave();
 			break;
 		default:
@@ -184,7 +170,6 @@ function createGameResponse(data)
 			break;
 		case 'ok':
 			Client.currentUser.gameId = data.gameId;
-			setGame(Client.currentUser.gameId);
 			Interface.changeOnCreateGame(data);
 			$('#createGameForm').dialog('close');
 			break;
