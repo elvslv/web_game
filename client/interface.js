@@ -90,7 +90,7 @@ Interface.fillGameList = function()
 			.click(function()
 			{
 				var gameId = Client.gameList[i].gameId;
-				Client.currentUser.newGameId = gameId;
+				Client.newGameId = gameId;
 				sendQuery(makeQuery(['action', 'sid', 'gameId'], ['joinGame', Client.currentUser.sid, gameId]), 
 					joinGameResponse);
 			});

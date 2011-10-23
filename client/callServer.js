@@ -3,7 +3,7 @@ function sendQuery(query, callback)
 	$.ajax({
 		type: "POST",
 		url: "http://localhost/small_worlds/",
-		data: query,
+		data: $.toJSON(query),
 		success: function(result)
 		{
 			data = $.parseJSON(result);
@@ -13,26 +13,6 @@ function sendQuery(query, callback)
 				return;
 			}
 			callback(data);
-		},
-		beforeSend: function()
-		{
-			$.blockUI(
-			{
-				message: '<img src="styles/images/busy.gif" />',
-				css: 
-				{
-					width: '15px',  
-					top:  ($(window).height() - 15) /2 + 'px', 
-                	left: ($(window).width() - 15) /2 + 'px',
-                	transparent: 0,
-                	border: 'none',
-                	backgroundColor: '#666666'
-                }
-		    });
-		},
-		complete: function()
-		{
-			$.unblockUI();
 		}
 		
 	});

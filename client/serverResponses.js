@@ -117,7 +117,8 @@ function joinGameResponse(data)
 			alert('There is no free space on map');
 			break;
 		case 'ok':
-			Client.currentUser.gameId = Client.currentUser.newGameId;
+			Client.currentUser.gameId = Client.newGameId;
+			delete Client.newGameId;
 			Interface.changeOnJoin();
 			break;
 		default:
