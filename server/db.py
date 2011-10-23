@@ -336,15 +336,15 @@ class User(Base):
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 
 			x.state == misc.GAME_CONQUER and x.userId == self.id, self.game.history)
-		return len(filter(lambda x: x.warHistory.conqRegion.tokensNum > 0,  conqHist))
-
+		return len(filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist))
 
 class Region(Base):
 	__tablename__ = 'regions'
 	__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = Column(Integer, primary_key=True, autoincrement=False)
-	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', 
+		ondelete='CASCADE'), primary_key=True)
 	defTokensNum = Column(Integer, default = 0)
 
 	border = Column(Boolean, default=False)
@@ -383,8 +383,9 @@ class Region(Base):
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
 
-	id = pkey()
-	gameId = fkey('games.id')
+	id = Column(Integer, primary_key=True, autoincrement=False)
+	gameId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', 
+		ondelete='CASCADE'), primary_key=True)
 	tokenBadgeId = fkey('tokenBadges.id') 
 	ownerId = fkey('users.id')
 	regionId = Column(Integer, default = 0)
