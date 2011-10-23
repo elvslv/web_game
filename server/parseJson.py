@@ -12,7 +12,9 @@ def parseJsonObj(obj):
 		if not('action' in obj):
 			raise BadFieldException('badJson')
 		else:
+			dbi.session = dbi.Session()
 			ans = actions.doAction(obj)
+			dbi.Session.remove()
 	except BadFieldException, e:
 		return {'result': e.value}
 	return ans

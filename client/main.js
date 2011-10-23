@@ -10,7 +10,7 @@ $(function() {
 			'Ok': Interface.dialogs[i].ok, 
 			'Cancel': function(){$(this).dialog('close')
 		}});
-	}
+			}
 	$('#register')
 		.button()
 		.click(function() {

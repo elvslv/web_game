@@ -42,8 +42,7 @@ function loginResponse(data)
 			sid = data['sid'];
 			userId = data['userId'];
 			username = $('#username').val();
-			Client.currentUser = Client.newUser(username, userId);
-			Client.currentUser.sid = sid;
+			Client.currentUser = Client.newUser(username, userId, sid);
 			Interface.changeOnLogin();
 			break;
 		default:

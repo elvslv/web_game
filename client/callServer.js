@@ -3,7 +3,7 @@ function sendQuery(query, callback)
 	$.ajax({
 		type: "POST",
 		url: "http://localhost/small_worlds/",
-		data: $.toJSON(query),
+		data: query,
 		success: function(result)
 		{
 			data = $.parseJSON(result);
