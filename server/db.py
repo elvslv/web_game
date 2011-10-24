@@ -30,7 +30,8 @@ fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelet
 requiredInteger = lambda: Column(Integer, nullable=False)
 
 class _Database:
-	engine = create_engine(DB_STRING, echo=False)
+	engine = create_engine(DB_STRING, echo=False, convert_unicode=True, 
+		encoding="utf-8")
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
