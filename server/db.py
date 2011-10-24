@@ -394,13 +394,14 @@ class Region(Base):
 
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
-
+	__table_args__ = {'mysql_engine':'InnoDB'}
+	
 	id = pkey()
 	gameId = fkey('games.id')
 	tokenBadgeId = fkey('tokenBadges.id') 
 	ownerId = fkey('users.id')
 	regionId = Column(Integer, default = 0)
-	mapId  = Column(Integer, default = 0)# Would get rid of this but don't know how
+	mapId  = Column(Integer, default = 0)		# Would get rid of this but don't know how
 	tokensNum = Column(Integer, default = 0)
 	holeInTheGround = Column(Boolean, default = False)
 	encampment = Column(Integer, default = 0)
