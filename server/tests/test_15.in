@@ -100,7 +100,6 @@
 			"sid": 1,
 			"regions": [{"regionId": 3, "tokensNum": 7}]
 		},
-
 		{
 			"action": "finishTurn",
 			"sid" : 1

@@ -30,7 +30,7 @@ fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelet
 requiredInteger = lambda: Column(Integer, nullable=False)
 
 class _Database:
-	engine = create_engine(DB_STRING, echo=True)
+	engine = create_engine(DB_STRING, echo=False)
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
@@ -159,6 +159,9 @@ class Map(Base):
 	pictureSrc = Column(Text)
 	
 	def __init__(self, name, playersNum, turnsNum, thumbSrc, pictureSrc): 
+		if misc.TEST_MODE:
+			if dbi.query(Map).filter(Map.name == name).first():
+				raise BadFieldException('mapNameTaken')
 		self.name = name
 		self.playersNum = playersNum
 		self.turnsNum = turnsNum
@@ -177,7 +180,7 @@ class Map(Base):
 class Game(Base):
 	__tablename__ = 'games'
 	__table_args__ = {'mysql_engine':'InnoDB'}
-	
+
 	id = pkey()
 	name = uniqString(MAX_GAMENAME_LEN)
 	descr = string(MAX_GAMEDESCR_LEN)
@@ -190,6 +193,10 @@ class Game(Base):
 	
 	
 	def __init__(self, name, descr, map): 
+		if misc.TEST_MODE:
+			if dbi.query(Game).filter(Game.name == name).filter(Game.state 
+				!= misc.GAME_ENDED).first():
+				raise BadFieldException('gameNameTaken')
 		self.name = name
 		self.descr = descr
 		self.state = misc.GAME_WAITING
@@ -316,6 +323,10 @@ class User(Base):
 			primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
 	def __init__(self, username, password):
+		if misc.TEST_MODE:
+			if dbi.query(User).filter(User.name == username).first():
+				raise BadFieldException('usernameTaken')
+				
 		self.name = username
 		self.password = password
 
@@ -383,13 +394,12 @@ class Region(Base):
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
 
-	id = Column(Integer, primary_key=True, autoincrement=False)
-	gameId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', 
-		ondelete='CASCADE'), primary_key=True)
+	id = pkey()
+	gameId = fkey('games.id')
 	tokenBadgeId = fkey('tokenBadges.id') 
 	ownerId = fkey('users.id')
 	regionId = Column(Integer, default = 0)
-	mapId  = Column(Integer, default = 0)		# Would get rid of this but don't know how
+	mapId  = Column(Integer, default = 0)# Would get rid of this but don't know how
 	tokensNum = Column(Integer, default = 0)
 	holeInTheGround = Column(Boolean, default = False)
 	encampment = Column(Integer, default = 0)
@@ -497,7 +507,8 @@ class WarHistoryEntry(Base):
 	mainHistEntryId = fkey('history.id')
 	agressorBadgeId = fkey('tokenBadges.id')
 	victimBadgeId = fkey('tokenBadges.id')
-	conqRegionId = fkey('currentRegionStates.id')
+	conqRegionId = Column(Integer, ForeignKey('currentRegionStates.id', 
+		onupdate='CASCADE', ondelete='CASCADE'))
 	victimTokensNum = Column(Integer, default = 0)
 	diceRes = Column(Integer)
 	attackType = Column(Integer) 
@@ -506,7 +517,7 @@ class WarHistoryEntry(Base):
 													uselist=False))
 	agressorBadge = relationship(TokenBadge, primaryjoin=agressorBadgeId==TokenBadge.id)
 	victimBadge = relationship(TokenBadge, primaryjoin=victimBadgeId==TokenBadge.id)
-	conqRegion = relationship(RegionState, uselist=False)
+	conqRegion = relationship(RegionState, primaryjoin=conqRegionId==RegionState.id)
 
 	def __init__(self, mainHistEntryId, agressorBadgeId, conqRegionId, victimBadgeId, victimTokensNum, diceRes, attackType): 
 		self.mainHistEntryId = mainHistEntryId
