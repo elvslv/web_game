@@ -27,10 +27,9 @@ string = lambda len: Column(String(len))
 uniqString = lambda len: Column(String(len), unique=True, nullable=False)
 pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
-requiredInteger = lambda: Column(Integer, nullable=False)
 
 class _Database:
-	engine = create_engine(DB_STRING, echo=False, convert_unicode=True, 
+	engine = create_engine(DB_STRING, echo=None, convert_unicode=True, 
 		encoding="utf-8")
 
 	def __init__(self):
@@ -45,15 +44,12 @@ class _Database:
 
 	def add(self, obj):
 		self.session.add(obj)
-		self.commit()
 
 	def addAll(self, objs):
 		self.session.add_all(objs)
-		self.commit()
 
 	def delete(self, *args, **kwargs):
 		self.session.delete(*args, **kwargs)
-		self.commit()
 
 	def query(self, *args, **kwargs):
 		return self.session.query(*args, **kwargs)
@@ -62,7 +58,6 @@ class _Database:
 		meta = MetaData()
 		meta.reflect(bind=self.engine)
 		for table in reversed(meta.sorted_tables):
-		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
 		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
 			self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
@@ -81,6 +76,7 @@ class _Database:
 	def addUnique(self, obj, name):
 		try:
 			self.add(obj)
+			self.commit()
 		except IntegrityError:
 			raise BadFieldException("""%sTaken""" % name)
     
@@ -98,12 +94,6 @@ class _Database:
 		self.add(reg)
 		
 
-	def addNeighbors(self, reg, nodes):
-		for node in nodes:
-			node.mapId = reg.mapId
-			self.add(node)
-
-  
 	def getUserByNameAndPwd(self, username, password):
 		try:
 			return self.session.query(User).\
@@ -124,7 +114,7 @@ class _Database:
 
 	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
 		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
-
+	
 	def updateGameHistory(self, game, data):
 		if 'sid' in data:
 			user = self.getXbyY('User', 'sid', data['sid'])
@@ -136,6 +126,7 @@ class _Database:
 		defense, attackType):
 		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
 		self.add(hist)
+		self.commit()
 		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
 			defense, dice, attackType))
 
@@ -174,9 +165,6 @@ class Map(Base):
 		if not region: 
 			raise BadFieldException('badRegionId')
 		return region[0]
-
-	def getRegions(self):
-		return self.regions
 
 class Game(Base):
 	__tablename__ = 'games'
@@ -443,11 +431,11 @@ class Adjacency(Base):
 	mapId = Column(Integer, ForeignKey('regions.mapId'), primary_key=True)
 
 
-	def __init__(self, n1, n2):
+	def __init__(self, n1, n2, mapId):
 		self.regId = n1
 		self.neighborId = n2
-
-
+		self.mapId = mapId
+		
 class Message(Base):
     __tablename__ = 'chat'
     __table_args__ = {'mysql_engine':'InnoDB'}

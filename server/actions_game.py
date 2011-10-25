@@ -32,7 +32,6 @@ def act_setReadinessStatus(data):
 		else:
 			for i in range(misc.VISIBLE_RACES):
 				showNextRace(game, misc.VISIBLE_RACES - 1)
-			
 	dbi.updateHistory(user, GAME_START, None)
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
@@ -45,7 +44,7 @@ def act_selectRace(data):
 	game.checkStage(GAME_SELECT_RACE, user)
 	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
-	price = dbi.query(TokenBadge).filter(TokenBadge.pos >position).count()
+	price = dbi.query(TokenBadge).filter(TokenBadge.pos > position).count()
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId

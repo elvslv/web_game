@@ -75,9 +75,9 @@ def act_uploadMap(data):
 				raise BadFieldException('badRegion')
 			curId += 1
 		i = 0
-		for reg in newMap.regions:			#This is quite bad but I didn't manage to find the other way
+		for reg in newMap.regions:			
 			regInfo = data['regions'][i]			
-			dbi.addNeighbors(reg, map(lambda x: Adjacency(reg.id, x), regInfo['adjacent']))
+			dbi.addAll(map(lambda x: Adjacency(reg.id, x, mapId), regInfo['adjacent']))
 			i += 1
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
@@ -223,6 +223,7 @@ def act_getVisibleTokenBadges(data):
 
 def doAction(data, check = True):
 	try:
+		dbi.session = dbi.Session()
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
@@ -233,3 +234,6 @@ def doAction(data, check = True):
 	except Exception, e:			##Temporary
 		dbi.rollback()
 		raise e
+	finally:
+		dbi.Session.remove()
+		
