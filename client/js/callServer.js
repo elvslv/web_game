@@ -2,7 +2,7 @@ function sendQuery(query, callback)
 {
 	$.ajax({
 		type: "POST",
-		url: "http://localhost/small_worlds/",
+		url: "/ajax",
 		data: $.toJSON(query),
 		success: function(result)
 		{
@@ -13,6 +13,10 @@ function sendQuery(query, callback)
 				return;
 			}
 			callback(data);
+		},
+		error: function(jqXHR, textStatus, errorThrown)
+		{
+			alert(e);
 		}
 		
 	});
@@ -35,6 +39,12 @@ updateMapList = function(beforeCreateGame)
 	{
 		getMapListResponse(data, beforeCreateGame)
 	});
+}
+
+updateGameState = function()
+{
+	sendQuery(makeQuery(['action', 'gameId'], ['getGameState', Client.currentUser.gameId], 
+		getGameStateResponse))
 }
 
 makeQuery = function(fields, values)

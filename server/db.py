@@ -5,21 +5,12 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, join, scoped_ses
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
+from utils.path import join
 
 import misc
 import checkFields
 import sys
 import json
-
-DATABASE_HOST = "localhost"
-DATABASE_USER = "admin"
-DATABASE_NAME = "testdb"
-DATABASE_PASSWD = "12345"
-DATABASE_PORT = 3306
-
-DB_STRING =  """mysql+mysqldb://%s:%s@%s:%d/%s""" % \
-	(DATABASE_USER, DATABASE_PASSWD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME)
-
 
 Base = declarative_base()
 
@@ -29,14 +20,21 @@ pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 requiredInteger = lambda: Column(Integer, nullable=False)
 
-class _Database:
-	engine = create_engine(DB_STRING, echo=False, convert_unicode=True, 
-		encoding="utf-8")
+def get_db_string():
+    if misc.TEST_MODE:
+        return 'sqlite:///:memory:'
+    else:
+        return 'sqlite:///' + (join('game.db') or ':memory:')
+
+class Database:
+	instance = None
+	engine = create_engine(get_db_string(), echo=False)
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
-		self.Session = scoped_session(sessionmaker(bind=self.engine))
-
+		Session = sessionmaker(bind=self.engine)
+		self.session = Session()
+        
 	def commit(self):
 		self.session.commit()
 
@@ -140,17 +138,16 @@ class _Database:
 			defense, dice, attackType))
 
 
-_database = _Database()
+def db_instance():
+	if Database.instance is None:
+		Database.instance = Database()
+	return Database.instance
 
-
-def Database():
-    return _database
-
-dbi = Database()
+dbi = db_instance()
 
 class Map(Base):
 	__tablename__ = 'maps'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = pkey()
 	name = uniqString(MAX_MAPNAME_LEN)
@@ -180,10 +177,10 @@ class Map(Base):
 
 class Game(Base):
 	__tablename__ = 'games'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = pkey()
-	name = uniqString(MAX_GAMENAME_LEN)
+	name = string(MAX_GAMENAME_LEN)
 	descr = string(MAX_GAMEDESCR_LEN)
 	state = Column(Integer)
 	turn = Column(Integer, default=0)
@@ -274,7 +271,7 @@ class Game(Base):
 
 class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	gameId = fkey('games.id')
@@ -301,7 +298,7 @@ class TokenBadge(Base):
         
 class User(Base):
 	__tablename__ = 'users'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = pkey()
 	name = uniqString(MAX_USERNAME_LEN)
@@ -352,7 +349,7 @@ class User(Base):
 
 class Region(Base):
 	__tablename__ = 'regions'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = Column(Integer, primary_key=True, autoincrement=False)
 	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', 
@@ -394,14 +391,14 @@ class Region(Base):
 
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	gameId = fkey('games.id')
 	tokenBadgeId = fkey('tokenBadges.id') 
 	ownerId = fkey('users.id')
-	regionId = Column(Integer, default = 0)
-	mapId  = Column(Integer, default = 0)		# Would get rid of this but don't know how
+	regionId = fkey('regions.id')
+	mapId  = fkey('maps.id')		# Would get rid of this but don't know how
 	tokensNum = Column(Integer, default = 0)
 	holeInTheGround = Column(Boolean, default = False)
 	encampment = Column(Integer, default = 0)
@@ -414,9 +411,6 @@ class RegionState(Base):
 	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
 	owner = relationship(User, backref=backref('regions', cascade = "all,delete"))
 	region = relationship(Region, backref=backref('states', cascade="all,delete"))
-
-	__table_args__ = (ForeignKeyConstraint([regionId, mapId], [Region.id, Region.mapId]), 
-		{'mysql_engine':'InnoDB'})
 
 	def __init__(self, region, game):
 		self.region = region
@@ -436,7 +430,7 @@ class RegionState(Base):
 
 class Adjacency(Base):
 	__tablename__ = 'adjacentRegions'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	regId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	neighborId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
@@ -450,7 +444,7 @@ class Adjacency(Base):
 
 class Message(Base):
     __tablename__ = 'chat'
-    __table_args__ = {'mysql_engine':'InnoDB'}
+    #__table_args__ = {'mysql_engine':'InnoDB'}
 
     id = pkey()
     sender = fkey('users.id')
@@ -464,7 +458,7 @@ class Message(Base):
 
 class HistoryEntry(Base):
 	__tablename__ = 'history'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	userId = fkey('users.id')
@@ -489,7 +483,7 @@ class HistoryEntry(Base):
 
 class GameHistoryEntry(Base):
 	__tablename__ = 'gameHistory'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	gameId = fkey('games.id')
@@ -503,7 +497,7 @@ class GameHistoryEntry(Base):
 
 class WarHistoryEntry(Base):
 	__tablename__ = 'warHistory'
-	__table_args__ = {'mysql_engine':'InnoDB'}
+	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	mainHistEntryId = fkey('history.id')

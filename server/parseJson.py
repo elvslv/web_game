@@ -5,16 +5,14 @@ import misc
 import random
 import sys
 import httplib
-from db import _database as dbi
+from db import dbi
 
 def parseJsonObj(obj):
 	try:
 		if not('action' in obj):
-			raise BadFieldException('badJson')
+			raise BadFieldException(obj)
 		else:
-			dbi.session = dbi.Session()
 			ans = actions.doAction(obj)
-			dbi.Session.remove()
 	except BadFieldException, e:
 		return {'result': e.value}
 	return ans

@@ -76,8 +76,7 @@ function getGameListResponse(data)
 		alert("Unknown server response: " + data.toString());
 		return;
 	}
-	Client.gameList = data['games'];
-	Interface.fillGameList();
+	Interface.fillGameList(data['games']);
 }
 
 function getMapListResponse(data, beforeCreateGame)
@@ -264,6 +263,25 @@ function uploadMapResponse(data)
 			break;
 		case 'ok':
 			updateMapList(false);
+			break;
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
+
+function getGameStateResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badGameId':
+			alert('Invalid game id'); 
+			break;
+		case 'ok':
+			Client.currGameState = data['gameState'];
+			Interface.updateGameTab();
 			break;
 		default:
 			alert('Unknown server response' + data);

@@ -1,6 +1,5 @@
 $(function() {
-	updateGameList();
-	updateChat();
+	Interface.updatePage();
 	$('#tabs').tabs();
 	$('#tabs').tabs('add', '#ui-tabs-0', 'About', 0);
 	$('#ui-tabs-0').append("<div style = \"background: url(styles/images/bg.jpg) no-repeat; background-position: 40% center;\">"+

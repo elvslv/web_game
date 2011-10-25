@@ -1,5 +1,7 @@
 var Interface = {};
 
+Interface.needToCreateGameTab = false;
+
 Interface.defaultDialogOptions = {
 	'autoOpen': false,
 	'height': 300,
@@ -62,8 +64,23 @@ Interface.dialogs = [
 		}
 	}];
 
-Interface.fillGameList = function() 
+Interface.updatePage = function()
 {
+	if (Client.currentUser.gameId)
+		updateGameState();
+	else
+		updateGameList();
+	updateChat();
+	//window.setTimeout("Interface.updatePage()", 3000);
+}
+
+Interface.fillGameList = function(games) 
+{
+	showingGames = [];
+	for (var i = 0; i < Client.gameList.length; ++i)
+		if (!$('#gameList:nth-child(' + (i + 1) + ')').prop('hidden'))
+			showingGames.push(Client.gameList[i].gameId);
+	showingGames = showingGames.sort();
 	$('#gameList').empty();
 	if(Client.gameList.length)
 	{
@@ -81,8 +98,16 @@ Interface.fillGameList = function()
 	initGameList();
 	if (Client.currentUser.gameIndex)
 		delete Client.currentUser.gameIndex;
+	var lastSortIndex = 0;
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
+		while ((lastSortIndex < showingGames.length) && 
+			(showingGames[lastSortIndex] < Client.gameList[i].gameId))
+			++lastSortIndex;
+		if ((lastSortIndex < showingGames.length) && 
+			(showingGames[lastSortIndex] === Client.gameList[i].gameId))
+			$('#gameList:nth-child(' + (i + 1) + ')').show();
+		
 		if (Client.currentUser.gameId == Client.gameList[i].gameId)	
 			Client.currentUser.gameIndex = i;
 		$('#join' + Client.gameList[i].gameId)
@@ -106,7 +131,6 @@ Interface.fillGameList = function()
 			.button()
 			.click(function()
 			{
-				var gameId = Client.gameList[i].gameId;
 				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
 					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
 			});		
@@ -133,6 +157,11 @@ Interface.fillGameList = function()
 				$('#setReadinesStatus' + Client.currentUser.gameId).show();
 			}
 			$('#leave' + Client.currentUser.gameId).show();
+			if (Interface.needToCreateGameTab)
+			{
+				Interface.needToCreateGameTab = false;
+				Interface.createGameTab();
+			}
 		}
 	}
 }
@@ -175,51 +204,94 @@ Interface.changeOnLogin = function()
 			if (Client.currentUser.gameId)
 			{
 				$('#createGame').hide();
+				$('#gameList').hide();
 				break;
 			}
 		}
 	}
-	updateGameList();
+	Interface.needToCreateGameTab = true;
+	//updateGameList(true);
 }
 		
-Interface.changeOnLogout = function() 
+Interface.createGameTab = function()
 {
-	updateGameList();
-	$('#userInfo').text("You're not logged in, please login or register");
-	$('#username, #password').val('');
-	$('#login, [id=register]').show();
-	$('#logout, [id*=join], [id*=leave], #createGame, #sendMessage').hide();
+	$('#tabs').tabs('add', '#ui-tabs-1', Client.gameList[Client.currentUser.gameIndex].gameName, 1);
+	$('#ui-tabs-1').append('<div id = "currentGame"></div>');
+	$('#currentGame').append('<button id = "leaveGame" style = "display: none">leave</button>');
+	$('#currentGame').append('<button id = "setRadinessStatusInGame" style = "display: none"></button>');
+	$('#setRadinessStatusInGame').prop('isReady', 
+					Client.currentUser.isReady);
+	$('#setRadinessStatusInGame').html(Client.currentUser.isReady ? 'I am not ready' : 
+		'I am ready');
+	$('#leaveGame')
+		.button()
+		.click(function(){
+			sendQuery(makeQuery(['action', 'sid'], ['leaveGame', Client.currentUser.sid]), 
+				leaveGameResponse);
+		});
+	$('#setRadinessStatusInGame')
+		.button()
+		.click(function(){
+			sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
+				Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
+			;
+		});
+	$('#setRadinessStatusInGame').show();
+	$('#leaveGame').show();
+	
+}
+
+Interface.removeGameTab = function()
+{
+	$('#tabs').tabs('remove', 1);
 }
 
 Interface.changeOnJoin = function() 
 {
-	updateGameList();
+	Interface.needToCreateGameTab = true;
+	//updateGameList();
 	$('[id*=join], #createGame').hide();
 	var gameId = Client.currentUser.gameId;
 	$('#leave' + gameId + ', #setReadinesStatus' + gameId).show();
 }
 
+Interface.changeOnLogout = function() 
+{
+	//updateGameList();
+	$('#userInfo').text("You're not logged in, please login or register");
+	$('#username, #password').val('');
+	$('#login, [id=register]').show();
+	$('#logout, [id*=join], [id*=leave], #createGame, #sendMessage').hide();
+	Interface.removeGameTab();
+}
+
 Interface.changeOnLeave = function() 
 {
-	updateGameList();
+	//updateGameList();
 	$('[id*=join], #createGame').show();
 	$('[id*=leave], #setReadinesStatus' + Client.currentUser.gameId).hide();
+	Interface.removeGameTab();
 }
 
 Interface.changeOnCreateGame = function(game)
 {
-	updateGameList();
+	Interface.needToCreateGameTab = true;
+	//updateGameList();
 	$('[id*=join], #createGame').hide();
 	$('#leave' + Client.currentUser.gameId).show();
+	Interface.createGameTab();
 }
 
 Interface.changeOnSetReadinessStatus = function()
 {
-	updateGameList();
+	//updateGameList();
 	Client.currentUser.isReady = 1 - $('#setReadinesStatus' + 
 		Client.currentUser.gameId).prop('isReady');
+	title = Client.currentUser.isReady ? 'I am not ready' : 
+		'I am ready';
 	$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
-		Client.currentUser.isReady).html(Client.currentUser.isReady ? 'I am not ready' : 
-		'I am ready');
+		Client.currentUser.isReady).html(title);
+	if ($('#setRadinessStatusInGame'))
+		$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady).html(title);
 }
 

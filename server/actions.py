@@ -2,7 +2,6 @@ from db import Database, User, Message, Game, Map, Adjacency, RegionState
 import re
 import time
 import math
-import MySQLdb
 import sys
 import random
 import json
