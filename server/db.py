@@ -5,12 +5,21 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, join, scoped_ses
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
-from utils.path import join
 
 import misc
 import checkFields
 import sys
 import json
+
+DATABASE_HOST = "localhost"
+DATABASE_USER = "admin"
+DATABASE_NAME = "testdb"
+DATABASE_PASSWD = "12345"
+DATABASE_PORT = 3306
+
+DB_STRING =  """mysql+mysqldb://%s:%s@%s:%d/%s""" % \
+	(DATABASE_USER, DATABASE_PASSWD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME)
+
 
 Base = declarative_base()
 
@@ -18,7 +27,6 @@ string = lambda len: Column(String(len))
 uniqString = lambda len: Column(String(len), unique=True, nullable=False)
 pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
-requiredInteger = lambda: Column(Integer, nullable=False)
 
 def get_db_string():
     if misc.TEST_MODE:
@@ -34,7 +42,7 @@ class Database:
 		Base.metadata.create_all(self.engine)
 		Session = sessionmaker(bind=self.engine)
 		self.session = Session()
-        
+
 	def commit(self):
 		self.session.commit()
 
@@ -43,15 +51,12 @@ class Database:
 
 	def add(self, obj):
 		self.session.add(obj)
-		self.commit()
 
 	def addAll(self, objs):
 		self.session.add_all(objs)
-		self.commit()
 
 	def delete(self, *args, **kwargs):
 		self.session.delete(*args, **kwargs)
-		self.commit()
 
 	def query(self, *args, **kwargs):
 		return self.session.query(*args, **kwargs)
@@ -60,7 +65,6 @@ class Database:
 		meta = MetaData()
 		meta.reflect(bind=self.engine)
 		for table in reversed(meta.sorted_tables):
-		#	self.engine.execute("ALTER TABLE %s AUTO_INCREMENT=0" % table.name)
 		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
 			self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
@@ -96,12 +100,6 @@ class Database:
 		self.add(reg)
 		
 
-	def addNeighbors(self, reg, nodes):
-		for node in nodes:
-			node.mapId = reg.mapId
-			self.add(node)
-
-  
 	def getUserByNameAndPwd(self, username, password):
 		try:
 			return self.session.query(User).\
@@ -122,7 +120,7 @@ class Database:
 
 	def updateHistory(self, user, state, tokenBadgeId, dice = None, friend=None): 
 		self.add(HistoryEntry(user, state, tokenBadgeId, dice, friend))
-
+	
 	def updateGameHistory(self, game, data):
 		if 'sid' in data:
 			user = self.getXbyY('User', 'sid', data['sid'])
@@ -147,7 +145,6 @@ dbi = db_instance()
 
 class Map(Base):
 	__tablename__ = 'maps'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = pkey()
 	name = uniqString(MAX_MAPNAME_LEN)
@@ -177,7 +174,6 @@ class Map(Base):
 
 class Game(Base):
 	__tablename__ = 'games'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = pkey()
 	name = string(MAX_GAMENAME_LEN)
@@ -271,7 +267,6 @@ class Game(Base):
 
 class TokenBadge(Base):
 	__tablename__ = 'tokenBadges'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	gameId = fkey('games.id')
@@ -298,7 +293,6 @@ class TokenBadge(Base):
         
 class User(Base):
 	__tablename__ = 'users'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = pkey()
 	name = uniqString(MAX_USERNAME_LEN)
@@ -349,7 +343,6 @@ class User(Base):
 
 class Region(Base):
 	__tablename__ = 'regions'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 
 	id = Column(Integer, primary_key=True, autoincrement=False)
 	mapId =  Column(Integer, ForeignKey('maps.id', onupdate='CASCADE', 
@@ -391,7 +384,6 @@ class Region(Base):
 
 class RegionState(Base):
 	__tablename__ = 'currentRegionStates'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	gameId = fkey('games.id')
@@ -430,21 +422,19 @@ class RegionState(Base):
 
 class Adjacency(Base):
 	__tablename__ = 'adjacentRegions'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	regId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	neighborId = Column(Integer, ForeignKey('regions.id'), primary_key=True)
 	mapId = Column(Integer, ForeignKey('regions.mapId'), primary_key=True)
 
 
-	def __init__(self, n1, n2):
+	def __init__(self, n1, n2, mapId):
 		self.regId = n1
 		self.neighborId = n2
-
-
+		self.mapId = mapId
+		
 class Message(Base):
     __tablename__ = 'chat'
-    #__table_args__ = {'mysql_engine':'InnoDB'}
 
     id = pkey()
     sender = fkey('users.id')
@@ -458,7 +448,6 @@ class Message(Base):
 
 class HistoryEntry(Base):
 	__tablename__ = 'history'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	userId = fkey('users.id')
@@ -483,7 +472,6 @@ class HistoryEntry(Base):
 
 class GameHistoryEntry(Base):
 	__tablename__ = 'gameHistory'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	gameId = fkey('games.id')
@@ -497,7 +485,6 @@ class GameHistoryEntry(Base):
 
 class WarHistoryEntry(Base):
 	__tablename__ = 'warHistory'
-	#__table_args__ = {'mysql_engine':'InnoDB'}
 	
 	id = pkey()
 	mainHistEntryId = fkey('history.id')

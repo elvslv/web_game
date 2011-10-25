@@ -54,6 +54,7 @@ def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	tokenBadgesInStack = filter(lambda x: not x.owner and not x.inDecline and x.pos < lastIndex, game.tokenBadges) 
 	for tokenBadge in tokenBadgesInStack: tokenBadge.pos += 1
 	dbi.add(TokenBadge(raceId, specPowerId, game.id))
+	dbi.commit()
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):

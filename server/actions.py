@@ -2,6 +2,7 @@ from db import Database, User, Message, Game, Map, Adjacency, RegionState
 import re
 import time
 import math
+import MySQLdb
 import sys
 import random
 import json
@@ -74,9 +75,9 @@ def act_uploadMap(data):
 				raise BadFieldException('badRegion')
 			curId += 1
 		i = 0
-		for reg in newMap.regions:			#This is quite bad but I didn't manage to find the other way
+		for reg in newMap.regions:			
 			regInfo = data['regions'][i]			
-			dbi.addNeighbors(reg, map(lambda x: Adjacency(reg.id, x), regInfo['adjacent']))
+			dbi.addAll(map(lambda x: Adjacency(reg.id, x, mapId), regInfo['adjacent']))
 			i += 1
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
 	
@@ -231,4 +232,3 @@ def doAction(data, check = True):
 		return res
 	except BadFieldException, e:			##Temporary
 		dbi.rollback()
-		raise e.value
