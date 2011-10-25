@@ -4,9 +4,8 @@ function sendQuery(query, callback)
 		type: "POST",
 		url: "/ajax",
 		data: $.toJSON(query),
-		success: function(result)
+		success: function(data)
 		{
-			data = $.parseJSON(result);
 			if (!data['result'])
 			{
 				alert("Unknown server response: " + data);

@@ -66,12 +66,12 @@ Interface.dialogs = [
 
 Interface.updatePage = function()
 {
-	if (Client.currentUser.gameId)
+	if (Client.currentUser && Client.currentUser.gameId)
 		updateGameState();
 	else
 		updateGameList();
 	updateChat();
-	//window.setTimeout("Interface.updatePage()", 3000);
+	window.setTimeout("Interface.updatePage()", 3000);
 }
 
 Interface.fillGameList = function(games) 

@@ -229,6 +229,6 @@ def doAction(data, check = True):
 		res = globals()[func](data)
 		dbi.commit()
 		return res
-	except Exception, e:			##Temporary
+	except BadFieldException, e:			##Temporary
 		dbi.rollback()
-		raise e
+		raise e.value
