@@ -215,7 +215,7 @@ def act_getGameList(data):
 	return result
 
 def act_getGameState(data):
-	return {'result': ok, 'gameState': getGameState(dbi.getXbyY('Game', 'id', 
+	return {'result': 'ok', 'gameState': getGameState(dbi.getXbyY('Game', 'id', 
 		data['gameId']))}
 
 def act_getVisibleTokenBadges(data):
@@ -232,3 +232,4 @@ def doAction(data, check = True):
 		return res
 	except BadFieldException, e:			##Temporary
 		dbi.rollback()
+		return {'result': e.value}

@@ -10,7 +10,7 @@ from db import dbi
 def parseJsonObj(obj):
 	try:
 		if not('action' in obj):
-			raise BadFieldException(obj)
+			raise BadFieldException('badJson')
 		else:
 			ans = actions.doAction(obj)
 	except BadFieldException, e:

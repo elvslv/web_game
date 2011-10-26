@@ -99,7 +99,7 @@ def getGameState(game):
 		'currentTurn', 'activePlayerId']
 
 	result = dict()
-	for i in range(len(gameResFields)):
+	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 		
 	result['map'] = getMapState(game.map.id)

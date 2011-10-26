@@ -71,16 +71,17 @@ Interface.updatePage = function()
 	else
 		updateGameList();
 	updateChat();
-	window.setTimeout("Interface.updatePage()", 3000);
+	window.setTimeout("Interface.updatePage()", 5000);
 }
 
 Interface.fillGameList = function(games) 
 {
 	showingGames = [];
 	for (var i = 0; i < Client.gameList.length; ++i)
-		if (!$('#gameList:nth-child(' + (i + 1) + ')').prop('hidden'))
+		if ($('#gameList:nth-child(' + (i + 1) + ') ul').is(':visible'))
 			showingGames.push(Client.gameList[i].gameId);
 	showingGames = showingGames.sort();
+	Client.gameList = games;
 	$('#gameList').empty();
 	if(Client.gameList.length)
 	{
@@ -106,7 +107,7 @@ Interface.fillGameList = function(games)
 			++lastSortIndex;
 		if ((lastSortIndex < showingGames.length) && 
 			(showingGames[lastSortIndex] === Client.gameList[i].gameId))
-			$('#gameList:nth-child(' + (i + 1) + ')').show();
+			$('#gameList:nth-child(' + (i + 1) + ') ul').show();
 		
 		if (Client.currentUser.gameId == Client.gameList[i].gameId)	
 			Client.currentUser.gameIndex = i;

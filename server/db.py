@@ -5,21 +5,12 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, join, scoped_ses
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
+from utils.path import join
 
 import misc
 import checkFields
 import sys
 import json
-
-DATABASE_HOST = "localhost"
-DATABASE_USER = "admin"
-DATABASE_NAME = "testdb"
-DATABASE_PASSWD = "12345"
-DATABASE_PORT = 3306
-
-DB_STRING =  """mysql+mysqldb://%s:%s@%s:%d/%s""" % \
-	(DATABASE_USER, DATABASE_PASSWD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME)
-
 
 Base = declarative_base()
 
@@ -36,7 +27,8 @@ def get_db_string():
 
 class Database:
 	instance = None
-	engine = create_engine(get_db_string(), echo=False)
+	engine = create_engine(get_db_string(), echo=None, convert_unicode=True, 
+		encoding="utf-8")
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
@@ -83,6 +75,7 @@ class Database:
 	def addUnique(self, obj, name):
 		try:
 			self.add(obj)
+			self.commit()
 		except IntegrityError:
 			raise BadFieldException("""%sTaken""" % name)
     
@@ -134,7 +127,6 @@ class Database:
 		self.add(hist)
 		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
 			defense, dice, attackType))
-
 
 def db_instance():
 	if Database.instance is None:
