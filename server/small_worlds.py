@@ -9,7 +9,7 @@ import traceback
 import optparse
 
 STATIC_FILES_ROOT = join("./client/")
-PORT = 3030
+PORT = 30
 
 @route('/')
 def serve_main():

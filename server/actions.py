@@ -219,7 +219,7 @@ def act_getGameState(data):
 		data['gameId']))}
 
 def act_getVisibleTokenBadges(data):
-	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokensBadges(data['gameId'])}
+	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokenBadges(data['gameId'])}
 
 def doAction(data, check = True):
 	try:

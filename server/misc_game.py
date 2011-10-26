@@ -133,7 +133,7 @@ def getGameState(game):
 			
 		resPlayers.append(curPlayer)
 	result['players'] = resPlayers
-	result['visibleTokenBadges'] = getVisibleTokenBadges(gameId)
+	result['visibleTokenBadges'] = getVisibleTokenBadges(game.id)
 	return result
 
 def endOfGame(game, coins = None): 
@@ -196,9 +196,9 @@ def leave(user):
 			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
 					endOfGame(user.game)
 
-def getVisibleTokensBadges(gameId):
+def getVisibleTokenBadges(gameId):
 	game = dbi.getXbyY('Game', 'id', gameId)
-	rows = game.tokenBadges()
+	rows = game.tokenBadges
 	result = list()
 	for tokenBadge in filter(lambda x: x.position > 0, rows):
 		result.append({
