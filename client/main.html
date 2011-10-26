@@ -60,7 +60,6 @@
 		<p>${username}{{if $item.data.userId == $item.activePlayer}} -- active player{{/if}}</p>
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
-		
 	</div>
 </script>
 <script id="chatTemplate" type="text/x-jquery-tmpl"> 
@@ -90,6 +89,55 @@
 </script>
 <script id="mapChooseTemplate" type="text/x-jquery-tmpl"> 
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
+</script>
+<script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
+	<div class = "user">
+		<p>${name}{{if $item.data.id == $item.activePlayer}} -- active player {{/if}}</p>
+		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
+		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
+		{{if $item.currentTokenBadge}}
+			<p style="margin: 10px;">Current race: $item.data.currentTokenBadge.raceName</p>
+			<p style="margin: 10px;">Current special power: $item.data.currentTokenBadge.specialPowerName</p>
+			<p style="margin: 10px;">Total number of tokens: $item.data.currentTokenBadge.totalTokensNum</p>
+		{{/if}}
+		{{if $item.declinedTokenBadge}}
+			<p style="margin: 10px;">Current race: $item.data.declinedTokenBadge.raceName</p>
+			<p style="margin: 10px;">Current special power: $item.data.declinedTokenBadge.specialPowerName</p>
+			<p style="margin: 10px;">Total number of tokens: $item.data.declinedTokenBadge.totalTokensNum</p>
+		{{/if}}
+	</div>
+</script>
+<script id="visibleTokenBadgesTemplate" type="text/x-jquery-tmpl"> 
+	<div>
+		<p style="margin: 10px;">Current race: ${raceName}</p>
+		<p style="margin: 10px;">Current special power: ${specialPowerName}</p>
+		<p style="margin: 10px;">Position: ${position}</p>
+		<p style="margin: 10px;">Bonus money: ${bonusMoney}</p>
+	</div>
+</script>
+<script id="currentGameTemplate" type="text/x-jquery-tmpl"> 
+	<table>
+		<tr>
+			<td>
+				<button id = "leaveGame">leave</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button id = "setRadinessStatusInGame"></button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}
+			</td>
+		</tr>
+		<tr>
+			<td>
+				{{tmpl(visibleTokenBadges) "#visibleTokenBadgesTemplate"}}
+			</td>
+		</tr>
+	</table>
 </script>
 	<div id = 'tabs'>
 		<ul>

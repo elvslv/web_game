@@ -54,7 +54,6 @@ def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	tokenBadgesInStack = filter(lambda x: not x.owner and not x.inDecline and x.pos < lastIndex, game.tokenBadges) 
 	for tokenBadge in tokenBadgesInStack: tokenBadge.pos += 1
 	dbi.add(TokenBadge(raceId, specPowerId, game.id))
-	dbi.commit()
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
@@ -195,16 +194,17 @@ def leave(user):
 				makeDecline(user)
 			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
 					endOfGame(user.game)
+	dbi.commit()
 
 def getVisibleTokenBadges(gameId):
 	game = dbi.getXbyY('Game', 'id', gameId)
 	rows = game.tokenBadges
 	result = list()
-	for tokenBadge in filter(lambda x: x.position > 0, rows):
+	for tokenBadge in filter(lambda x: x.pos > 0, rows):
 		result.append({
 			'raceName': races.racesList[tokenBadge.raceId].name, 
 			'specialPowerName': races.specialPowerList[tokenBadge.specPowerId].name,
-			'position': tokenBadge.position,
+			'position': tokenBadge.pos,
 			'bonusMoney': tokenBadge.bonusMoney})
 	return result
 

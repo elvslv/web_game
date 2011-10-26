@@ -1,6 +1,6 @@
 from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN
 from gameExceptions import BadFieldException
-from sqlalchemy import create_engine, and_, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text, ForeignKeyConstraint
+from sqlalchemy import create_engine, and_, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text, func
 from sqlalchemy.orm import sessionmaker, relationship, backref, join, scoped_session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
@@ -27,8 +27,8 @@ def get_db_string():
 
 class Database:
 	instance = None
-	engine = create_engine(get_db_string(), echo=None, convert_unicode=True, 
-		encoding="utf-8")
+	engine = create_engine(get_db_string(), echo=True, convert_unicode=True, 
+		encoding="utf-8", pool_recycle=True)
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
@@ -43,13 +43,15 @@ class Database:
 
 	def add(self, obj):
 		self.session.add(obj)
+		self.commit()
 
 	def addAll(self, objs):
 		self.session.add_all(objs)
+		self.commit()
 
 	def delete(self, *args, **kwargs):
 		self.session.delete(*args, **kwargs)
-
+		
 	def query(self, *args, **kwargs):
 		return self.session.query(*args, **kwargs)
 
@@ -75,7 +77,7 @@ class Database:
 	def addUnique(self, obj, name):
 		try:
 			self.add(obj)
-			self.commit()
+			#self.commit()
 		except IntegrityError:
 			raise BadFieldException("""%sTaken""" % name)
     
@@ -276,7 +278,7 @@ class TokenBadge(Base):
 		self.raceId = raceId
 		self.specPowId = specPowId
 		self.gameId = gameId
-
+			
 	def isNeighbor(self, region):
 		for reg in self.regions:
 			if region.adjacent(reg.region):

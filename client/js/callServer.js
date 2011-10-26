@@ -42,8 +42,8 @@ updateMapList = function(beforeCreateGame)
 
 updateGameState = function()
 {
-	sendQuery(makeQuery(['action', 'gameId'], ['getGameState', Client.currentUser.gameId], 
-		getGameStateResponse))
+	sendQuery(makeQuery(['action', 'gameId'], ['getGameState', Client.currentUser.gameId]), 
+		getGameStateResponse)
 }
 
 makeQuery = function(fields, values)

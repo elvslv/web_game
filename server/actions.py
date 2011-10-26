@@ -134,7 +134,7 @@ def createDefaultMaps():
 def act_resetServer(data):
 	misc.LAST_SID = 0
 	misc.LAST_TIME = 0
-	misc.TEST_MODE = True
+	#misc.TEST_MODE = True
 	if 'randseed' in data:
 		misc.TEST_RANDSEED = data['randseed']
 	else:

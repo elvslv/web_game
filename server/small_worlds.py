@@ -21,11 +21,14 @@ def serve_dirs(root,filename):
 
 @route('/ajax', method='POST')
 def serve_ajax():
-    try:
-        return parseJson.parseJsonObj(json.load(request.body))
-    except Exception, e:
-        traceback.print_exc()
-        return e
+	while(1):
+	    try:
+	        return parseJson.parseJsonObj(json.load(request.body))
+	    except OperationError, e:
+	        continue
+	    except Exception, e:
+	        traceback.print_exc()
+	        return e
 
 def main():
 	run(reloader=True, host='localhost', port=PORT)
