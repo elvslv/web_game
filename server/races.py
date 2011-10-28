@@ -1,12 +1,10 @@
 import misc_game
-from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry, dbi
 from gameExceptions import BadFieldException
 from checkFields import  checkObjectsListCorrection
 from misc_game import *
 from misc import *
 from checkFields import *
-
-dbi = Database()
 
 class BaseRace:
 	def __init__(self, name, initialNum, maxNum):

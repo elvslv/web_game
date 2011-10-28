@@ -1,5 +1,7 @@
 from utils.path import join
-from bottle import route, run, static_file, request, app
+from bottle import route, run, static_file, request
+from sqlalchemy.exc import DatabaseError, DBAPIError, OperationalError
+
 import bottle
 import parseJson
 import misc
@@ -9,7 +11,10 @@ import traceback
 import optparse
 
 STATIC_FILES_ROOT = join("./client/")
-PORT = 30
+PORT = 3030
+
+app = bottle.app()
+app.catchall = False
 
 @route('/')
 def serve_main():
@@ -17,18 +22,15 @@ def serve_main():
 
 @route('/:root#css.*|images.*|js.*#/:filename')
 def serve_dirs(root,filename):
-    return static_file(filename, join(STATIC_FILES_ROOT, root))
+	return static_file(filename, join(STATIC_FILES_ROOT, root))
 
 @route('/ajax', method='POST')
 def serve_ajax():
-	while(1):
-	    try:
-	        return parseJson.parseJsonObj(json.load(request.body))
-	    except OperationError, e:
-	        continue
-	    except Exception, e:
-	        traceback.print_exc()
-	        return e
+	try:
+		return parseJson.parseJsonObj(json.load(request.body))
+	except Exception, e:
+		traceback.print_exc()
+		return e
 
 def main():
 	run(reloader=True, host='localhost', port=PORT)

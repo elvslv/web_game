@@ -261,6 +261,7 @@ Interface.changeOnJoinGame = function()
 {
 	$('#createGame').hide();
 	$('#gameList').hide();
+	Client.currentUser.isReady = false;
 	Interface.createGameTab();
 }
 

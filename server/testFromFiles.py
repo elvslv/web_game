@@ -8,7 +8,7 @@ import misc
 import actions
 import db
 
-dbi = db.Database()
+from db import dbi
 
 class TestFromFile(unittest.TestCase):
 	def __init__(self, inFile, ansFile):

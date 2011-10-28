@@ -20,20 +20,19 @@ pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 
 def get_db_string():
-    if misc.TEST_MODE:
-        return 'sqlite:///:memory:'
-    else:
-        return 'sqlite:///' + (join('game.db') or ':memory:')
+    #if misc.TEST_MODE:
+    #    return 'sqlite:///:memory:'
+    #else:
+	return 'sqlite:///' + (join('game.db') or ':memory:')
 
 class Database:
 	instance = None
-	engine = create_engine(get_db_string(), echo=True, convert_unicode=True, 
-		encoding="utf-8", pool_recycle=True)
+	engine = create_engine(get_db_string(), convert_unicode=True, 
+		encoding="utf-8")
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
-		Session = sessionmaker(bind=self.engine)
-		self.session = Session()
+		self.Session = scoped_session(sessionmaker(bind=self.engine))
 
 	def commit(self):
 		self.session.commit()
@@ -43,11 +42,9 @@ class Database:
 
 	def add(self, obj):
 		self.session.add(obj)
-		self.commit()
 
 	def addAll(self, objs):
 		self.session.add_all(objs)
-		self.commit()
 
 	def delete(self, *args, **kwargs):
 		self.session.delete(*args, **kwargs)
@@ -77,7 +74,7 @@ class Database:
 	def addUnique(self, obj, name):
 		try:
 			self.add(obj)
-			#self.commit()
+			self.commit()
 		except IntegrityError:
 			raise BadFieldException("""%sTaken""" % name)
     
@@ -127,6 +124,7 @@ class Database:
 		defense, attackType):
 		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
 		self.add(hist)
+		self.commit()
 		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
 			defense, dice, attackType))
 

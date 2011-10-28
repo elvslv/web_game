@@ -1,4 +1,5 @@
-from db import Database, User, Message, Game, Map, Adjacency, RegionState
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, dbi
+from sqlalchemy.exc import DatabaseError, DBAPIError, OperationalError
 import re
 import time
 import math
@@ -13,9 +14,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
 from actions_game import *
 from misc import *
-
-dbi = Database()
-
 	
 def act_register(data):
 	username = data['username']
@@ -134,7 +132,7 @@ def createDefaultMaps():
 def act_resetServer(data):
 	misc.LAST_SID = 0
 	misc.LAST_TIME = 0
-	#misc.TEST_MODE = True
+	misc.TEST_MODE = True
 	if 'randseed' in data:
 		misc.TEST_RANDSEED = data['randseed']
 	else:
@@ -223,6 +221,7 @@ def act_getVisibleTokenBadges(data):
 
 def doAction(data, check = True):
 	try:
+		dbi.session = dbi.Session()
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
@@ -230,6 +229,15 @@ def doAction(data, check = True):
 		res = globals()[func](data)
 		dbi.commit()
 		return res
-	except BadFieldException, e:			##Temporary
+	except BadFieldException, e: 
 		dbi.rollback()
 		return {'result': e.value}
+	except (DatabaseError, DBAPIError, OperationalError), e:
+		dbi.rollback()
+		return {'result': 'databaseError', 'statement': str(e.statement) if ('statement' in e) else None, 
+			'params': str(e.params) if ('params' in e) else None, 'orig': str(e.orig) if ('orig' in e) else None}
+	except Exception, e:
+		dbi.rollback()
+		raise e
+	finally:
+		dbi.Session.remove()

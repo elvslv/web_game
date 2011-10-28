@@ -1,10 +1,8 @@
-from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry
+from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry, dbi
 from checkFields import *
 from misc_game import *
 from gameExceptions import BadFieldException
 from misc import *
-
-dbi = Database()
 
 def act_setReadinessStatus(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
@@ -16,12 +14,14 @@ def act_setReadinessStatus(data):
 		raise BadFieldException('badGameState')
 
 	user.isReady = data['isReady']
+	dbi.commit()
 	maxPlayersNum = game.map.playersNum
 	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
 	if maxPlayersNum == readyPlayersNum:
 		# Starting
 		game.activePlayerId = min(game.players, key=lambda x: x.priority).id
 		game.state = GAME_START
+		dbi.commit()
 		#generate first 6 races
 		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
 			vRaces = data['visibleRaces']
@@ -57,6 +57,7 @@ def act_selectRace(data):
 	chosenBadge.bonusMoney = 0
 	chosenBadge.totalTokensNum = tokensNum
 	chosenBadge.specPowNum = races.specialPowerList[specialPowerId].bonusNum
+	dbi.commit()
 	updateRacesOnDesk(game, position)
 	dbi.updateHistory(user, GAME_SELECT_RACE, chosenBadge.id)
 	dbi.updateGameHistory(game, data)
