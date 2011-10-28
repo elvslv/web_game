@@ -269,7 +269,7 @@ class BaseSpecialPower:
 	def setEncampments(self, tokenBadge, encampments):
 		raise BadFieldException('badSpecialPower')
 
-	def setFortifield(self, tokenBadge, fortifield):
+	def setFortified(self, tokenBadge, fortified):
 		raise BadFieldException('badSpecialPower')
 
 	def selectFriend(self, user, data):
@@ -405,31 +405,31 @@ class SpecialPowerForest(BaseSpecialPower):
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortifield', 3, 6)
+		BaseSpecialPower.__init__(self, 'Fortified', 3, 6)
 		self.maxNum = 6
 
 	def clearRegion(self, tokenBadge, region):
 		if region.fortress:
 			tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 
-	def setFortifield(self, tokenBadge, fortifield):
-		if not('regionId' in fortifield and isinstance(fortifield['regionId'], int)):
+	def setFortified(self, tokenBadge, fortified):
+		if not('regionId' in fortified and isinstance(fortified['regionId'], int)):
 			raise BadFieldException('badRegionId')
 		user = tokenBadge.owner
-		regionId = fortifield['regionId']
+		regionId = fortified['regionId']
 		regState = user.game.map.getRegion(regionId).getState(user.game.id)
 
 		if regState.ownerId != tokenBadge.owner.id:
 			raise BadFieldException('badRegion')
 
 		if regState.fortress:
-			raise BadFieldException('tooManyFortifieldsInRegion')
+			raise BadFieldException('tooManyFortifiedsInRegion')
 
-		fortifieldsOnMap = len(filter(lambda x: x.fortress == True, tokenBadge.regions))
-		if fortifieldsOnMap >= self.maxNum:
-			raise BadFieldException('tooManyFortifieldsOnMap')
-		if fortifieldsOnMap == tokenBadge.specPowNum:
-			raise BadFieldException('tooManyFortifields')
+		fortifiedsOnMap = len(filter(lambda x: x.fortress == True, tokenBadge.regions))
+		if fortifiedsOnMap >= self.maxNum:
+			raise BadFieldException('tooManyFortifiedsOnMap')
+		if fortifiedsOnMap == tokenBadge.specPowNum:
+			raise BadFieldException('tooManyFortifieds')
 		regState.fortress = True
 
 	def incomeBonus(self, tokenBadge):

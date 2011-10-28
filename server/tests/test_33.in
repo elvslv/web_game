@@ -48,7 +48,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Fortifield", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Fortified", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -77,7 +77,7 @@
 			"regions": [{"regionId": 1, "tokensNum": 0},
 				{"regionId": 2, "tokensNum": 0},
 				{"regionId": 3, "tokensNum": 11}],
-			"fortifield": {"regionId": 3}
+			"fortified": {"regionId": 3}
 		},
 		{
 			"action": "finishTurn",
@@ -111,7 +111,7 @@
 			"action": "redeploy",
 			"sid": 1,
 			"regions": [{"regionId": 3, "tokensNum": 0}, {"regionId": 4, "tokensNum": 11}],
-			"fortifield": {"regionId": 4}
+			"fortified": {"regionId": 4}
 		},
 		{
 			"action": "finishTurn",
@@ -152,7 +152,7 @@
 			"regionId" : 3
 		}
 	],
-	"description": "special power Fortifield"
+	"description": "special power Fortified"
 }
 
 

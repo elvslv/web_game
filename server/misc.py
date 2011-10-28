@@ -245,7 +245,7 @@ False}
 		{'name': 'raceId', 'type': int, 'mandatory': False},
 		{'name': 'regions', 'type': list, 'mandatory': True},
 		{'name': 'encampments', 'type': list, 'mandatory': False},
-		{'name': 'fortifield', 'type': dict, 'mandatory': False},
+		{'name': 'fortified', 'type': dict, 'mandatory': False},
 		{'name': 'heroes', 'type': list, 'mandatory': False}
 	],
 	'defend': [

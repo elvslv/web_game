@@ -108,11 +108,19 @@
 	</div>
 </script>
 <script id="visibleTokenBadgesTemplate" type="text/x-jquery-tmpl"> 
-	<div>
-		<p style="margin: 10px;">Current race: ${raceName}</p>
-		<p style="margin: 10px;">Current special power: ${specialPowerName}</p>
-		<p style="margin: 10px;">Position: ${position}</p>
-		<p style="margin: 10px;">Bonus money: ${bonusMoney}</p>
+	<div>  
+		<table>
+			<tr>
+				<td rowspan = "2" class = {{html ''.concat($item.data.raceName)}}></td>
+				<td rowspan = "2" class =  {{html ''.concat($item.data.specialPowerName)}}></td>
+				<td class = "Money"><span>${bonusMoney}</span></td>
+			</tr>
+			<tr>
+				<td>
+					<button id={{html 'select'.concat($item.data.position)}} pos={{html $item.data.position}}></button>
+				</td>
+			</tr>
+		</table>
 	</div>
 </script>
 <script id="currentGameTemplate" type="text/x-jquery-tmpl"> 

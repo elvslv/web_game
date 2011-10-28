@@ -83,12 +83,21 @@ Interface.updateGameTab = function()
 	}
 	$('#ui-tabs-1').empty();
 	$('#currentGameTemplate').tmpl(Client.currGameState,
+	{
+		opts: 
 		{
-			opts: 
+			activePlayer: Client.currGameState.activePlayer,
+			showRaces: function()
 			{
-				activePlayer: Client.currGameState.activePlayer
+				for (var i = 0; i < Client.currGameState.players.length; ++i)
+				{
+					if (Client.currGameState.players[i].id == Client.currentUser.userId)
+						Client.currentUser.userIndex = i;
+				}
+				return (!Client.currGameState.players[Client.currentUser.userIndex].currentTokenBadge)
 			}
-		}).appendTo('#ui-tabs-1');
+		}
+	}).appendTo('#ui-tabs-1');
 	$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
 	$('#setRadinessStatusInGame').html(Client.currentUser.isReady ? 'I am not ready' : 
 		'I am ready');
@@ -103,9 +112,19 @@ Interface.updateGameTab = function()
 		.click(function(){
 			sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
 				Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
-			;
 		});
 	$('#setRadinessStatusInGame, #leaveGame').show();
+	for (var i = 0; i < Client.currGameState.visibleTokenBadges.length; ++i)
+	{
+		$('#select' + i)
+			.button({icons: { primary: "ui-icon-check" }})
+			.click(function(j){
+				return function(){
+					sendQuery(makeQuery(['action', 'sid', 'position'], ['selectRace', 
+						Client.currentUser.sid, j]), selectRaceResponse);					
+				}
+		}(i));		
+	}
 }
 
 
@@ -122,7 +141,7 @@ Interface.fillGameList = function(games)
 	$('#gameList, #gameListInfo').empty();
 	if(Client.gameList.length)
 	{
-		$('#gameListInfo').html('Games:')
+		$('#gameListInfo').html('Games:');
 		$('#gameListTemplate').tmpl(Client.gameList, 
 		{
 			join: function(gameId)
@@ -156,26 +175,10 @@ Interface.fillGameList = function(games)
 				{
 					var gameId = Client.gameList[j].gameId;
 					Client.newGameId = gameId;
-					sendQuery(makeQuery(['action', 'sid', 'gameId'], ['joinGame', Client.currentUser.sid, gameId]), 
-						joinGameResponse);
+					sendQuery(makeQuery(['action', 'sid', 'gameId'], ['joinGame', 
+						Client.currentUser.sid, gameId]), joinGameResponse);
 				}
 			}(i));
-		$('#leave' + Client.gameList[i].gameId)
-			.button()
-			.click(function()
-			{
-				sendQuery(makeQuery(['action', 'sid'], ['leaveGame', Client.currentUser.sid]), 
-					leaveGameResponse);
-			});
-		$('#setReadinesStatus' + Client.gameList[i].gameId).prop('isReady', 0);
-		$('#setReadinesStatus' + Client.gameList[i].gameId)
-			.button()
-			.click(function()
-			{
-				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
-					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
-			});		
-
 	}
 	if (Client.currentUser && Client.currentUser.sid)
 	{
@@ -249,6 +252,7 @@ Interface.changeOnLogin = function()
 		
 Interface.createGameTab = function(gameName)
 {
+	$('#gameListInfo').html('');
 	Interface.needToCreateGameTab = true;
 }
 
@@ -261,7 +265,6 @@ Interface.changeOnJoinGame = function()
 {
 	$('#createGame').hide();
 	$('#gameList').hide();
-	Client.currentUser.isReady = false;
 	Interface.createGameTab();
 }
 
@@ -282,7 +285,6 @@ Interface.changeOnLogout = function()
 Interface.changeOnLeave = function() 
 {
 	$('[id*=join], #createGame').show();
-	$('[id*=leave], #setReadinesStatus' + Client.currentUser.gameId).hide();
 	Interface.removeGameTab();
 }
 
@@ -294,12 +296,10 @@ Interface.changeOnCreateGame = function()
 
 Interface.changeOnSetReadinessStatus = function()
 {
-	Client.currentUser.isReady = 1 - $('#setReadinesStatus' + 
+	Client.currentUser.isReady = 1 - $('#setRadinessStatusInGame' + 
 		Client.currentUser.gameId).prop('isReady');
 	title = Client.currentUser.isReady ? 'I am not ready' : 
 		'I am ready';
-	$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
-		Client.currentUser.isReady).html(title);
 	if ($('#setRadinessStatusInGame'))
 		$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady).html(title);
 }

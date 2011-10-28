@@ -57,6 +57,7 @@ def act_selectRace(data):
 	chosenBadge.bonusMoney = 0
 	chosenBadge.totalTokensNum = tokensNum
 	chosenBadge.specPowNum = races.specialPowerList[specialPowerId].bonusNum
+	chosenBadge.pos = None
 	dbi.commit()
 	updateRacesOnDesk(game, position)
 	dbi.updateHistory(user, GAME_SELECT_RACE, chosenBadge.id)
@@ -154,7 +155,7 @@ def act_redeploy(data):
 
 	specAbilities = [
 	{'name': 'encampments', 'cmd': 'setEncampments'},
-	{'name': 'fortifield', 'cmd': 'setFortifield'},
+	{'name': 'fortified', 'cmd': 'setFortified'},
 	{'name': 'heroes', 'cmd': 'setHero'}]
 
 	for specAbility in specAbilities:

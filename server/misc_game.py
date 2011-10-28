@@ -5,6 +5,8 @@ from gameExceptions import BadFieldException
 import random
 import sys
 import db
+from sqlalchemy import and_
+from sqlalchemy.sql.expression import asc
 
 def clearFromRace(reg):
 	ans = 0
@@ -195,10 +197,9 @@ def leave(user):
 					endOfGame(user.game)
 
 def getVisibleTokenBadges(gameId):
-	game = dbi.getXbyY('Game', 'id', gameId)
-	rows = game.tokenBadges
+	rows = dbi.query(TokenBadge).filter(and_(TokenBadge.gameId == gameId, TokenBadge.pos >= 0)).order_by(asc(TokenBadge.pos))
 	result = list()
-	for tokenBadge in filter(lambda x: x.pos > 0, rows):
+	for tokenBadge in rows:
 		result.append({
 			'raceName': races.racesList[tokenBadge.raceId].name, 
 			'specialPowerName': races.specialPowerList[tokenBadge.specPowId].name,

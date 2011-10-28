@@ -287,3 +287,30 @@ function getGameStateResponse(data)
 			alert('Unknown server response' + data);
  	}
 }
+
+function selectRaceResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badPosition': 
+			alert('Invalid position');
+			break;
+		case 'badMoneyAmount':
+			alert('Not enough coins for race selecting'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'ok':
+			Client.tokenBadgeId = data['tokenBadgeId'];
+			break;
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}

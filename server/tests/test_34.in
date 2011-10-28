@@ -47,7 +47,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Fortifield", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Fortified", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -114,7 +114,7 @@
 			"action": "redeploy",
 			"sid": 1,
 			"regions": [{"regionId": 3, "tokensNum": 0}, {"regionId": 4, "tokensNum": 11}],
-			"fortifield": {"regionId": 4}
+			"fortified": {"regionId": 4}
 		},
 		{
 			"action": "finishTurn",
@@ -151,7 +151,7 @@
 		}
 
 	],
-	"description": "special power Fortifield - defence effect and 1 bonus coin are over after decline"
+	"description": "special power Fortified - defence effect and 1 bonus coin are over after decline"
 }
 
 

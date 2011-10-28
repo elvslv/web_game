@@ -16,3 +16,58 @@ BODY{
 	color: #fff;
 }
 .gallery-a:hover { color: #fff; }
+
+.Amazons, .Dwarves, .Elves, .Giants, .Halflings, .Humans, .Orcs, .Ratmen, .Skeletons, .Sorcerers,
+.Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .Flying,
+.Forest, .Fortified, .Heroic, .Hill, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp, .Wealthy {
+	width: 100px;
+	height:100px;
+}
+.Amazons { background: url("images/races/Amazons.jpg") no-repeat; }
+.Dwarves { background: url("images/races/Dwarves.jpg") no-repeat; }
+.Elves { background: url("images/races/Elves.jpg") no-repeat; }
+.Giants { background: url("images/races/Giants.jpg") no-repeat; }
+.Halflings { background: url("images/races/Halflings.jpg") no-repeat; }
+.Humans { background: url("images/races/Humans.jpg") no-repeat; }
+.Orcs { background: url("images/races/Orcs.jpg") no-repeat; }
+.Ratmen { background: url("images/races/Ratmen.jpg") no-repeat; }
+.Skeletons { background: url("images/races/Skeletons.jpg") no-repeat; }
+.Sorcerers { background: url("images/races/Sorcerers.jpg") no-repeat; }
+.Tritons { background: url("images/races/Tritons.jpg") no-repeat; }
+.Trolls { background: url("images/races/Trolls.jpg") no-repeat; }
+.Wizards { background: url("images/races/Wizards.jpg") no-repeat; }
+.Alchemist { background: url("images/specialPowers/Alchemist.jpg") no-repeat; }
+.Berserk { background: url("images/specialPowers/Berserk.jpg") no-repeat; }
+.Bivouacking { background: url("images/specialPowers/Bivouacking.jpg") no-repeat; }
+.Commando { background: url("images/specialPowers/Commando.jpg") no-repeat; }
+.Diplomat { background: url("images/specialPowers/Diplomat.jpg") no-repeat; }
+.Flying { background: url("images/specialPowers/Flying.jpg") no-repeat; }
+.Forest { background: url("images/specialPowers/Forest.jpg") no-repeat; }
+.Fortified { background: url("images/specialPowers/Fortified.jpg") no-repeat; }
+.Heroic { background: url("images/specialPowers/Heroic.jpg") no-repeat; }
+.Hill { background: url("images/specialPowers/Hill.jpg") no-repeat; }
+.Mounted { background: url("images/specialPowers/Mounted.jpg") no-repeat; }
+.Pillaging { background: url("images/specialPowers/Pillaging.jpg") no-repeat; }
+.Seafaring { background: url("images/specialPowers/Seafaring.jpg") no-repeat; }
+.Stout { background: url("images/specialPowers/Stout.jpg") no-repeat; }
+.Swamp { background: url("images/specialPowers/Swamp.jpg") no-repeat; }
+.Wealthy { background: url("images/specialPowers/Wealthy.jpg") no-repeat; }
+.Money {
+	background: url("images/Coins.jpg") no-repeat;
+	width: 50px;
+	height: 50px;
+	vertical-align:top;
+}
+
+.Money span{
+	font-family: fantasy;
+	font-weight: 600;
+	color:#FFFFFF;
+	text-align:right;
+	text-shadow:#000000;
+	float:right;
+	padding-right:7px;
+	width:100%;
+	height:100%;
+	font-size:26px;
+}
