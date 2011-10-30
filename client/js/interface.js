@@ -81,7 +81,7 @@ Interface.disableButtons = function()
 	if (Client.currGameState.state != GAME_WAITING)
 		$('#setRadinessStatusInGame').hide();
 	if (!isActivePlayer())
-		$('[id*=select]').hide();
+		$('[id*=select], #decline').hide();
 }
 
 Interface.updateGameTab = function()
@@ -105,6 +105,10 @@ Interface.updateGameTab = function()
 			showVisibleTokenBadges: function()
 			{
 				return Client.currentUser.currentTokenBadge == undefined;
+			},
+			currentUser: function()
+			{
+				return Client.currentUser.id
 			}
 		}
 	}).appendTo('#ui-tabs-1');
@@ -123,7 +127,13 @@ Interface.updateGameTab = function()
 			sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
 				Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
 		});
-	$('#setRadinessStatusInGame, #leaveGame').show();
+	$('#decline')
+		.button()
+		.click(function(){
+			sendQuery(makeQuery(['action', 'sid'], ['decline', 
+				Client.currentUser.sid]), declineResponse);
+		});
+	$('#setRadinessStatusInGame, #leaveGame, #decline').show();
 	for (var i = 0; i < Client.currGameState.tokenBadges.length; ++i)
 	{
 		$('#select' + i)

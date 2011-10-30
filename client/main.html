@@ -107,6 +107,11 @@
 				<td class = {{html ''.concat($item.data.currentTokenBadge.raceName)}}></td>
 				<td class =  {{html ''.concat($item.data.currentTokenBadge.specPowName)}}></td>
 				<td>{{html $item.data.currentTokenBadge.totalTokensNum}}</td>
+				{{if $item.data.id == $item.currentUser()}}
+					<td>
+						<button id = "decline" style = "display: none">Decline</button>
+					</td>
+				{{/if}}
 			<tr>
 			{{/if}}
 			{{if $item.data.declinedTokenBadge != undefined}}

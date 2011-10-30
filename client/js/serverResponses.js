@@ -314,3 +314,23 @@ function selectRaceResponse(data)
 			alert('Unknown server response' + data);
  	}
 }
+
+function declineResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'ok':
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
