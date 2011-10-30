@@ -99,7 +99,7 @@ Interface.updateGameTab = function()
 		{
 			activePlayer: function()
 			{
-				return Client.currGameState.activePlayerIndex ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
+				return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
 					undefined;
 			},
 			showVisibleTokenBadges: function()
@@ -137,7 +137,6 @@ Interface.updateGameTab = function()
 	}
 	Interface.disableButtons();
 }
-
 Interface.fillGameList = function(games) 
 {
 	if (Client.currentUser && Client.currentUser.gameId)

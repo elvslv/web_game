@@ -120,14 +120,18 @@ def getGameState(game):
 		
 		if player.currentTokenBadge:
 			curTokenBadge = dict()
-			curTokenBadge['race'] =  races.racesList[player.currentTokenBadge.raceId].name
-			curTokenBadge['specialPower'] =  races.specialPowerList[player.currentTokenBadge.specPowId].name
+			curTokenBadge['raceName'] =  races.racesList[player.currentTokenBadge.raceId].name
+			curTokenBadge['specialPowerName'] =  races.specialPowerList[player.currentTokenBadge.specPowId].name
+			curTokenBadge['tokenBadgeId'] = player.currentTokenBadge.id
+			curTokenBadge['totalTokensNum'] = player.currentTokenBadge.totalTokensNum
 			curPlayer['currentTokenBadge'] = curTokenBadge
 			
 		if player.declinedTokenBadge:
 			declinedTokenBadge = dict()
-			declinedTokenBadge['race'] =  races.racesList[player.declinedTokenBadge.raceId].name
-			declinedTokenBadge['specialPower'] =  races.specialPowerList[player.declinedTokenBadge.specPowId].name
+			declinedTokenBadge['raceName'] =  races.racesList[player.declinedTokenBadge.raceId].name
+			declinedTokenBadge['specialPowerName'] =  races.specialPowerList[player.declinedTokenBadge.specPowId].name
+			declinedTokenBadge['tokenBadgeId'] = player.declinedTokenBadge.id
+			declinedTokenBadge['totalTokensNum'] = player.declinedTokenBadge.totalTokensNum
 			curPlayer['declinedTokenBadge'] = declinedTokenBadge
 			
 		resPlayers.append(curPlayer)

@@ -98,16 +98,40 @@
 		<p>${username}{{if $item.data.id == $item.activePlayer()}} -- active player {{/if}}</p>
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
-		{{if $item.currentTokenBadge}}
-			<p style="margin: 10px;">Current race: $item.data.currentTokenBadge.raceName</p>
-			<p style="margin: 10px;">Current special power: $item.data.currentTokenBadge.specialPowerName</p>
-			<p style="margin: 10px;">Total number of tokens: $item.data.currentTokenBadge.totalTokensNum</p>
-		{{/if}}
-		{{if $item.declinedTokenBadge}}
-			<p style="margin: 10px;">Current race: $item.data.declinedTokenBadge.raceName</p>
-			<p style="margin: 10px;">Current special power: $item.data.declinedTokenBadge.specialPowerName</p>
-			<p style="margin: 10px;">Total number of tokens: $item.data.declinedTokenBadge.totalTokensNum</p>
-		{{/if}}
+		<table>
+			{{if $item.data.currentTokenBadge != undefined}}
+			<tr>
+				<td colspan = "3">Current token badge:</td>
+			</tr>
+			<tr>
+				<td class = {{html ''.concat($item.data.currentTokenBadge.raceName)}}></td>
+				<td class =  {{html ''.concat($item.data.currentTokenBadge.specPowName)}}></td>
+				<td>{{html $item.data.currentTokenBadge.totalTokensNum}}</td>
+			<tr>
+			{{/if}}
+			{{if $item.data.declinedTokenBadge != undefined}}
+			<tr>
+				<td colspan = "3">Declined token badge:</td>
+			</tr>
+			<tr>
+				<td class = {{html ''.concat($item.data.declinedTokenBadge.raceName)}}></td>
+				<td class =  {{html ''.concat($item.data.declinedTokenBadge.specPowName)}}></td>
+				<td>{{html $item.data.declinedTokenBadge.totalTokensNum}}</td>
+			<tr>
+			{{/if}}
+		</table>
+	</div>
+</script>
+<script id="tokenBadgeTemplate" type="text/x-jquery-tmpl"> 
+	<div>  
+		<table>
+			<tr>
+				
+			</tr>
+			<tr>
+
+			</tr>
+		</table>
 	</div>
 </script>
 <script id="visibleTokenBadgesTemplate" type="text/x-jquery-tmpl"> 

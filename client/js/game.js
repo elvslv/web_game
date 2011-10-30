@@ -152,7 +152,7 @@ TokenBadge = $.inherit({
 			this.pos = pos;
 			this.bonusMoney = bonusMoney;
 			this.inDecline = inDecline;
-			this.totakTokensNum = totalTokensNum;
+			this.totalTokensNum = totalTokensNum;
 			this.specPowNum = specPowNum;
 		}		
 			
