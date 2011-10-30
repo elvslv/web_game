@@ -1,15 +1,8 @@
 var Client = {};
 
-Client.currentUser = {};
+Client.currentUser = Object();
 
 Client.gameList = [];
-Client.newUser = function(name, id, sid) {
-	return {
-		"username" : name,
-		"userId" : id,
-		"sid" : sid,
-	};
-};
 
 Client.states = [
 	'start',

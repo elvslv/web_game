@@ -42,7 +42,7 @@ function loginResponse(data)
 			sid = data['sid'];
 			userId = data['userId'];
 			username = $('#username').val();
-			Client.currentUser = Client.newUser(username, userId, sid);
+			Client.currentUser = new User(userId, username, sid);
 			Interface.changeOnLogin();
 			break;
 		default:
@@ -280,7 +280,7 @@ function getGameStateResponse(data)
 			alert('Invalid game id'); 
 			break;
 		case 'ok':
-			Client.currGameState = data['gameState'];
+			Client.currGameState = createGameByState(data['gameState']);
 			Interface.updateGameTab();
 			break;
 		default:
@@ -308,7 +308,7 @@ function selectRaceResponse(data)
 			alert('Bad stage'); 
 			break;
 		case 'ok':
-			Client.tokenBadgeId = data['tokenBadgeId'];
+			Client.currentTokenBadge = data['tokenBadgeId'];
 			break;
 		default:
 			alert('Unknown server response' + data);

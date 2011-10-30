@@ -79,23 +79,15 @@ Interface.updateGameTab = function()
 	if (Interface.needToCreateGameTab)
 	{
 		Interface.needToCreateGameTab = false;
-		$('#tabs').tabs('add', '#ui-tabs-1', Client.currGameState.gameName, 1);
+		$('#tabs').tabs('add', '#ui-tabs-1', Client.currGameState.name, 1);
+		
 	}
 	$('#ui-tabs-1').empty();
 	$('#currentGameTemplate').tmpl(Client.currGameState,
 	{
 		opts: 
 		{
-			activePlayer: Client.currGameState.activePlayer,
-			showRaces: function()
-			{
-				for (var i = 0; i < Client.currGameState.players.length; ++i)
-				{
-					if (Client.currGameState.players[i].id == Client.currentUser.userId)
-						Client.currentUser.userIndex = i;
-				}
-				return (!Client.currGameState.players[Client.currentUser.userIndex].currentTokenBadge)
-			}
+			activePlayer: Client.currGameState.players[Client.currGameState.activePlayerIndex].id
 		}
 	}).appendTo('#ui-tabs-1');
 	$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
@@ -125,6 +117,14 @@ Interface.updateGameTab = function()
 				}
 		}(i));		
 	}
+	var showVisibleTokenBadges = false;
+	showVisibleTokenBadges = Client.currentUser.currentTokenBadge != undefined;
+	for (var i = 0; i < Client.currGameState.players.length; ++i)
+	{
+		if (Client.currGameState.players[i].id == Client.currentUser.id)
+			Client.currentUser.userIndex = i;
+	}
+	return (!Client.currGameState.players[Client.currentUser.userIndex].currentTokenBadge)
 }
 
 
@@ -186,21 +186,9 @@ Interface.fillGameList = function(games)
 		{
 			for (var i = 0; i < Client.gameList.length; ++i)
 			{
-				if (Client.gameList[i].state === 1)
+				if (Client.gameList[i].state === GAME_WAITING)
 					$('#join' + Client.gameList[i].gameId).show();
 			}
-		}
-		else
-		{
-			if (Client.gameList[Client.currentUser.gameIndex].state === 1)
-			{
-				$('#setReadinesStatus' + Client.currentUser.gameId).prop('isReady', 
-					Client.currentUser.isReady);
-				$('#setReadinesStatus' + Client.currentUser.gameId).html(Client.currentUser.isReady ? 
-					'I am not ready' : 'I am ready');
-				$('#setReadinesStatus' + Client.currentUser.gameId).show();
-			}
-			$('#leave' + Client.currentUser.gameId).show();
 		}
 	}
 }
@@ -233,7 +221,7 @@ Interface.changeOnLogin = function()
 		{
 			for (var j = 0; j < Client.gameList[i].players.length; ++j)
 				if (Client.gameList[i].players[j].userId === 
-						Client.currentUser.userId)
+						Client.currentUser.id)
 				{
 					Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
 					Client.currentUser.gameId = Client.gameList[i].gameId;
@@ -296,8 +284,7 @@ Interface.changeOnCreateGame = function()
 
 Interface.changeOnSetReadinessStatus = function()
 {
-	Client.currentUser.isReady = 1 - $('#setRadinessStatusInGame' + 
-		Client.currentUser.gameId).prop('isReady');
+	Client.currentUser.isReady = 1 - Client.currentUser.isReady;
 	title = Client.currentUser.isReady ? 'I am not ready' : 
 		'I am ready';
 	if ($('#setRadinessStatusInGame'))

@@ -15,7 +15,7 @@ function sendQuery(query, callback)
 		},
 		error: function(jqXHR, textStatus, errorThrown)
 		{
-			alert(e);
+			alert(errorThrown);
 		}
 		
 	});

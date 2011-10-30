@@ -127,6 +127,7 @@ class Database:
 		self.commit()
 		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
 			defense, dice, attackType))
+		self.commit()
 
 def db_instance():
 	if Database.instance is None:
@@ -174,7 +175,6 @@ class Game(Base):
 	turn = Column(Integer, default=0)
 	activePlayerId = Column(Integer)
 	mapId = fkey('maps.id')
-
 	map = relationship(Map)
 	
 	
