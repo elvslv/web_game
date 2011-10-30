@@ -115,12 +115,12 @@
 		<table>
 			<tr>
 				<td rowspan = "2" class = {{html ''.concat($item.data.raceName)}}></td>
-				<td rowspan = "2" class =  {{html ''.concat($item.data.specialPowerName)}}></td>
+				<td rowspan = "2" class =  {{html ''.concat($item.data.specPowName)}}></td>
 				<td class = "Money"><span>${bonusMoney}</span></td>
 			</tr>
 			<tr>
 				<td>
-					<button id={{html 'select'.concat($item.data.position)}} pos={{html $item.data.position}}></button>
+					<button id={{html 'select'.concat($item.data.pos)}} pos={{html $item.data.pos}}></button>
 				</td>
 			</tr>
 		</table>
@@ -143,6 +143,13 @@
 				{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}
 			</td>
 		</tr>
+		{{if $item.opts.showVisibleTokenBadges()}}
+			<tr>
+				<td>
+					{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
+				</td>
+			</tr>
+		{{/if}}
 	</table>
 </script>
 	<div id = 'tabs'>

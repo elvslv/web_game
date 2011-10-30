@@ -91,6 +91,10 @@ Interface.updateGameTab = function()
 			{
 				return Client.currGameState.activePlayerIndex ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
 					undefined;
+			},
+			showVisibleTokenBadges: function()
+			{
+				return Client.currentUser.currentTokenBadge == undefined;
 			}
 		}
 	}).appendTo('#ui-tabs-1');
@@ -121,14 +125,6 @@ Interface.updateGameTab = function()
 				}
 		}(i));		
 	}
-	var showVisibleTokenBadges = false;
-	showVisibleTokenBadges = Client.currentUser.currentTokenBadge != undefined;
-	for (var i = 0; i < Client.currGameState.players.length; ++i)
-	{
-		if (Client.currGameState.players[i].id == Client.currentUser.id)
-			Client.currentUser.userIndex = i;
-	}
-	return (!Client.currGameState.players[Client.currentUser.userIndex].currentTokenBadge)
 }
 
 

@@ -19,7 +19,7 @@ BODY{
 
 .Amazons, .Dwarves, .Elves, .Giants, .Halflings, .Humans, .Orcs, .Ratmen, .Skeletons, .Sorcerers,
 .Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .Flying,
-.Forest, .Fortified, .Heroic, .Hill, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp, .Wealthy {
+.Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp, .Wealthy {
 	width: 100px;
 	height:100px;
 }
@@ -46,6 +46,7 @@ BODY{
 .Fortified { background: url("images/specialPowers/Fortified.jpg") no-repeat; }
 .Heroic { background: url("images/specialPowers/Heroic.jpg") no-repeat; }
 .Hill { background: url("images/specialPowers/Hill.jpg") no-repeat; }
+.Merchant { background: url("images/specialPowers/Merchant.jpg") no-repeat; }
 .Mounted { background: url("images/specialPowers/Mounted.jpg") no-repeat; }
 .Pillaging { background: url("images/specialPowers/Pillaging.jpg") no-repeat; }
 .Seafaring { background: url("images/specialPowers/Seafaring.jpg") no-repeat; }

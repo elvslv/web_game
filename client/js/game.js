@@ -213,7 +213,10 @@ createGameByState = function(gameState)
 		tokenBadges = [];
 		visibleBadges = gameState.visibleTokenBadges;
 		for (var i = 0; i < visibleBadges.length; ++i)
-			tokenBadges.push(new TokenBadge(0, visibleBadges.raceName, visibleBadges.specialPowerName, i, visibleBadges.bonusMoney));
+		{
+			tokenBadge = new TokenBadge(0, visibleBadges[i].raceName, visibleBadges[i].specialPowerName, i, visibleBadges[i].bonusMoney)
+			tokenBadges.push(tokenBadge);
+		}
 		players = [];
 		activePlayerIndex = undefined;
 		userFields = ['isReady', 'coins', 'tokensInHand', 'priority', 'inGame'];
@@ -262,7 +265,10 @@ createGameByState = function(gameState)
 	tokenBadges = [];
 	visibleBadges = gameState.visibleTokenBadges;
 	for (var i = 0; i < visibleBadges.length; ++i)
-		tokenBadges.push(new TokenBadge(0, visibleBadges.raceName, visibleBadges.specialPowerName, i, visibleBadges.bonusMoney));
+	{
+		tokenBadge = new TokenBadge(0, visibleBadges[i].raceName, visibleBadges[i].specialPowerName, i, visibleBadges[i].bonusMoney)
+		tokenBadges.push(tokenBadge);
+	}	
 	Client.currGameState.tokenBadges = tokenBadges.copy();
 	players = [];
 	activePlayerIndex = undefined;
