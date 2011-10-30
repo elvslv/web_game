@@ -74,6 +74,16 @@ Interface.updatePage = function()
 	window.setTimeout("Interface.updatePage()", 5000);
 }
 
+
+
+Interface.disableButtons = function()
+{
+	if (Client.currGameState.state != GAME_WAITING)
+		$('#setRadinessStatusInGame').hide();
+	if (!isActivePlayer())
+		$('[id*=select]').hide();
+}
+
 Interface.updateGameTab = function()
 {
 	if (Interface.needToCreateGameTab)
@@ -125,8 +135,8 @@ Interface.updateGameTab = function()
 				}
 		}(i));		
 	}
+	Interface.disableButtons();
 }
-
 
 Interface.fillGameList = function(games) 
 {
@@ -191,6 +201,7 @@ Interface.fillGameList = function(games)
 			}
 		}
 	}
+	
 }
 
 
