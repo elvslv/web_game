@@ -191,8 +191,9 @@ User = $.inherit({
 
 createTokenBadge = function(tokenBadge)
 {
-	return new TokenBadge(tokenBadge.tokenBadgeId, tokenBadge.raceName, tokenBadge.specialPowerName,
-		tokenBadge.position, tokenBadge.bonusMoney, undefined, tokenBadge.totalTokensNum)
+	result = new TokenBadge(tokenBadge.tokenBadgeId, tokenBadge.raceName, tokenBadge.specialPowerName,
+		tokenBadge.position, tokenBadge.bonusMoney, undefined, tokenBadge.totalTokensNum);
+	return result;
 }
 
 createGameByState = function(gameState)
@@ -234,14 +235,16 @@ createGameByState = function(gameState)
 				player[userFields[j]] = gameState.players[i][userFields[j]];
 			if (player.id == Client.currentUser.id)
 			{
-				if (Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
+				if (!Client.currentUser.currentTokenBadge &&  gameState.players[i].currentTokenBadge || 
+					Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
 					gameState.players[i].currentTokenBadge.tokenBadgeId)
 				{
 					Client.currentUser.currentTokenBadge = createTokenBadge(
 						gameState.players[i].currentTokenBadge);
 					Client.currentUser.currentTokenBadge.inDecline = false;
 				}
-				if (Client.currentUser.declinedTokenBadge && Client.currentUser.declinedTokenBadge.id != 
+				if (!Client.currentUser.declinedTokenBadge && gameState.players[i].declinedTokenBadge||
+					Client.currentUser.declinedTokenBadge && Client.currentUser.declinedTokenBadge.id != 
 					gameState.players[i].declinedTokenBadge.tokenBadgeId)
 				{
 					Client.currentUser.declinedTokenBadge = createTokenBadge(
@@ -283,14 +286,16 @@ createGameByState = function(gameState)
 			player[userFields[j]] = gameState.players[i][userFields[j]];
 		if (player.id == Client.currentUser.id)
 		{
-			if (Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
+			if (!Client.currentUser.currentTokenBadge &&  gameState.players[i].currentTokenBadge || 
+				Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
 				gameState.players[i].currentTokenBadge.tokenBadgeId)
 			{
 				Client.currentUser.currentTokenBadge = createTokenBadge(
 					gameState.players[i].currentTokenBadge);
 				Client.currentUser.currentTokenBadge.inDecline = false;
 			}
-			if (Client.currentUser.declinedTokenBadge && Client.currentUser.declinedTokenBadge.id != 
+			if (!Client.currentUser.declinedTokenBadge && gameState.players[i].declinedTokenBadge||
+				Client.currentUser.declinedTokenBadge && Client.currentUser.declinedTokenBadge.id != 
 				gameState.players[i].declinedTokenBadge.tokenBadgeId)
 			{
 				Client.currentUser.declinedTokenBadge = createTokenBadge(

@@ -58,7 +58,6 @@ def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
-	game.getTokenBadge(position).pos = None
 	for tokenBadge in filter(lambda x: x.pos > position, game.tokenBadges):
 		tokenBadge.bonusMoney += 1
 	return showNextRace(game, position)
