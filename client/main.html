@@ -95,7 +95,7 @@
 </script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
-		<p>${name}{{if $item.data.id == $item.activePlayer}} -- active player {{/if}}</p>
+		<p>${username}{{if $item.data.id == $item.activePlayer()}} -- active player {{/if}}</p>
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
 		{{if $item.currentTokenBadge}}

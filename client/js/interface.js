@@ -87,7 +87,11 @@ Interface.updateGameTab = function()
 	{
 		opts: 
 		{
-			activePlayer: Client.currGameState.players[Client.currGameState.activePlayerIndex].id
+			activePlayer: function()
+			{
+				return Client.currGameState.activePlayerIndex ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
+					undefined;
+			}
 		}
 	}).appendTo('#ui-tabs-1');
 	$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
@@ -106,7 +110,7 @@ Interface.updateGameTab = function()
 				Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
 		});
 	$('#setRadinessStatusInGame, #leaveGame').show();
-	for (var i = 0; i < Client.currGameState.visibleTokenBadges.length; ++i)
+	for (var i = 0; i < Client.currGameState.tokenBadges.length; ++i)
 	{
 		$('#select' + i)
 			.button({icons: { primary: "ui-icon-check" }})

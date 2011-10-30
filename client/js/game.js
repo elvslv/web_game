@@ -226,9 +226,9 @@ createGameByState = function(gameState)
 				player = Client.currentUser;
 			}
 			else
-				player = new User(gameState.players[i].id, gameState.players[i].username, undefined, gameState.gameId);
+				player = new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
 			for (var j = 0; j < userFields.length; ++j)
-				player[userFields[i]] = gameState.players[i][userFields[i]];
+				player[userFields[j]] = gameState.players[i][userFields[j]];
 			if (player.id == Client.currentUser.id)
 			{
 				if (Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
@@ -249,8 +249,9 @@ createGameByState = function(gameState)
 			players.push(player);
 				
 		}
-		return new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, gameDescription.state,
-			gameDescription.currentTurn, activePlayerIndex, tokenBadges, players)
+		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, gameState.state,
+			gameState.currentTurn, activePlayerIndex, tokenBadges, players);
+		return result;
 	}
 	mapState = gameState['map'];
 	regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
@@ -271,9 +272,9 @@ createGameByState = function(gameState)
 		if (gameState.players[i].id == gameState.activePlayerId)
 			activePlayerIndex = i;
 		player = (gameState.players[i].id == Client.currentUser.id) ? player = Client.currentUser : 
-			new User(gameState.players[i].id, gameState.players[i].username, undefined, gameState.gameId);
+			new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
 		for (var j = 0; j < userFields.length; ++j)
-			player[userFields[i]] = gameState.players[i][userFields[i]];
+			player[userFields[j]] = gameState.players[i][userFields[j]];
 		if (player.id == Client.currentUser.id)
 		{
 			if (Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
@@ -295,4 +296,5 @@ createGameByState = function(gameState)
 	}
 	Client.currGameState.players = players.copy();
 	Client.currGameState.activePlayerIndex = activePlayerIndex;
+	return Client.currGameState;
 }
