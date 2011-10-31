@@ -23,7 +23,7 @@ def act_setReadinessStatus(data):
 		game.state = GAME_START
 		dbi.commit()
 		#generate first 6 races
-		if TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
+		if misc.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
 			vRaces = data['visibleRaces']
 			vSpecialPowers = data['visibleSpecialPowers']
 			for i in range(misc.VISIBLE_RACES):
@@ -115,6 +115,7 @@ def act_conquer(data):
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
 	dbi.updateGameHistory(game, data)
+	print user.currentTokenBadge.raceId
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
 
 def act_decline(data):
@@ -276,7 +277,7 @@ def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadgeId : raise BadFieldException('badStage')
 	user.game.checkStage(GAME_THROW_DICE, user)
-	if TEST_MODE: 
+	if misc.TEST_MODE: 
 		dice = data['dice'] if 'dice' in data else 0
 	else:
 		specialPowerId = user.currentTokenBadge.specPowId

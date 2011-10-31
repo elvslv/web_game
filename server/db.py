@@ -1,6 +1,6 @@
 from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN
 from gameExceptions import BadFieldException
-from sqlalchemy import create_engine, and_, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text, func
+from sqlalchemy import create_engine, and_, ForeignKeyConstraint, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text, func
 from sqlalchemy.orm import sessionmaker, relationship, backref, join, scoped_session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
@@ -357,6 +357,7 @@ class Region(Base):
 	neighbors = relationship('Adjacency' , cascade="all,delete", 
 		primaryjoin='and_(Region.id==Adjacency.regId,\
 		Region.mapId==Adjacency.mapId)')
+		
 
 	def __init__(self, id, defTokensNum, map_): 
 		self.id = id
@@ -381,8 +382,8 @@ class RegionState(Base):
 	gameId = fkey('games.id')
 	tokenBadgeId = fkey('tokenBadges.id') 
 	ownerId = fkey('users.id')
-	regionId = fkey('regions.id')
-	mapId  = fkey('maps.id')		# Would get rid of this but don't know how
+	regionId = Column(Integer, default = 0)			## To be fixed someday
+	mapId  = Column(Integer, default = 0) 			## This too
 	tokensNum = Column(Integer, default = 0)
 	holeInTheGround = Column(Boolean, default = False)
 	encampment = Column(Integer, default = 0)
@@ -395,6 +396,8 @@ class RegionState(Base):
 	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename
 	owner = relationship(User, backref=backref('regions', cascade = "all,delete"))
 	region = relationship(Region, backref=backref('states', cascade="all,delete"))
+
+	__table_args__ = (ForeignKeyConstraint([regionId, mapId], [Region.id, Region.mapId]), {})
 
 	def __init__(self, region, game):
 		self.region = region
