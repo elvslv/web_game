@@ -325,10 +325,14 @@ BaseSpecialPower = $.inherit({
 	{
 		return 0;
 	},
-	decline: function(user)
+	canDecline: function(user)
 	{
 		if (Client.currGameState.state != GAME_FINISH_TURN)
 			return false;
+	},
+	decline: function(user)
+	{
+		return;
 	},
 	updateBonusStateAtTheEndOfTurn: function(tokenBadgeId)
 	{
@@ -665,9 +669,9 @@ SpecialPowerStout = $.inherit(BaseSpecialPower, {
 	{
 		this.__base('Stout', 4);
 	},
-	decline: function(user)
+	canDecline: function(user)
 	{
-		return; 
+		return true; 
 	}
 });
 
@@ -756,3 +760,10 @@ specialPowerList = [
 ];
 for (var i = 0; i < specialPowerList.length; ++i)
 	specialPowerList[i].setId(i);
+
+getSpecPowId = function(name)
+{
+	for (var i = 0; i < specialPowerList.length; ++i)
+		if (specialPowerList[i].name == name)
+			return i;
+}

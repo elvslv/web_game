@@ -82,6 +82,9 @@ Interface.disableButtons = function()
 		$('#setRadinessStatusInGame').hide();
 	if (!isActivePlayer())
 		$('[id*=select], #decline').hide();
+	if (!specialPowerList[getSpecPowId(
+		Client.currentUser.currentTokenBadge.specPowName)].canDecline(Client.currentUser))
+		$('#decline').hide();
 }
 
 Interface.updateGameTab = function()

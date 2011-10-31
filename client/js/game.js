@@ -336,5 +336,5 @@ createGameByState = function(gameState)
 isActivePlayer = function()
 {
 	if (Client.currGameState.activePlayerIndex != undefined && 
-		Client.currGameState[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
+		Client.currGameState.players[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
 }
