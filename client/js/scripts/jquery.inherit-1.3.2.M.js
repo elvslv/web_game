@@ -6,7 +6,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.gnu.org/licenses/gpl.html
  *
- * @version 1.3.2
+ * @version 1.3.2.M
  */
 
 (function($) {
@@ -66,8 +66,9 @@ function override(base, result, add) {
 
 $.inherit = function() {
 
-	var hasBase = $.isFunction(arguments[0]),
-		base = hasBase? arguments[0] : emptyBase,
+	var withMixins = $.isArray(arguments[0]),
+		hasBase = withMixins || $.isFunction(arguments[0]),
+		base = hasBase? withMixins? arguments[0][0] : arguments[0] : emptyBase,
 		props = arguments[hasBase? 1 : 0] || {},
 		staticProps = arguments[hasBase? 2 : 1],
 		result = props.__constructor || (hasBase && base.prototype.__constructor)?
@@ -92,6 +93,29 @@ $.inherit = function() {
 
 	override(basePtp, resultPtp, props);
 	staticProps && override(base, result, staticProps);
+
+	if(withMixins) {
+		var i = 1, mixins = arguments[0], mixin, __constructors = [];
+		while(mixin = mixins[i++]) {
+			$.each(mixin.prototype, function(propName) {
+				if(propName == '__constructor') {
+					__constructors.push(this);
+				}
+				else if(propName != '__self') {
+					resultPtp[propName] = this;
+				}
+			});
+		}
+		if(__constructors.length > 0) {
+			resultPtp.__constructor && __constructors.push(resultPtp.__constructor);
+			resultPtp.__constructor = function() {
+				var i = 0, __constructor;
+				while(__constructor = __constructors[i++]) {
+					__constructor.apply(this, arguments);
+				}
+			};
+		}
+	}
 
 	return result;
 

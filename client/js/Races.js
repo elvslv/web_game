@@ -283,20 +283,20 @@ RaceSorcerers = $.inherit(BaseRace, {
 });
 
 racesList = [
-	RaceAmazons(),
-	RaceDwarves(),
-	RaceElves(),
+	new RaceAmazons(),
+	new RaceDwarves(),
+	new RaceElves(),
 //	RaceGhouls(),
-	RaceGiants(),
-	RaceHalflings(),
-	RaceHumans(),
-	RaceOrcs(),
-	RaceRatmen(),
-	RaceSkeletons(),
-	RaceSorcerers(),
-	RaceTritons(),
-	RaceTrolls(),
-	RaceWizards(),
+	new RaceGiants(),
+	new RaceHalflings(),
+	new RaceHumans(),
+	new RaceOrcs(),
+	new RaceRatmen(),
+	new RaceSkeletons(),
+	new RaceSorcerers(),
+	new RaceTritons(),
+	new RaceTrolls(),
+	new RaceWizards(),
 ];
 
 for (var i = 0; i < racesList.length; ++i)
@@ -638,6 +638,17 @@ SpecialPowerMerchant = $.inherit(BaseSpecialPower, {
 	}
 });
 
+SpecialPowerPillaging = $.inherit(BaseSpecialPower, {
+	__constructor: function()
+	{
+		this.__base('Pillaging', 5);
+	},
+	incomeBonus: function(tokenBadge)
+	{
+		return 0; 
+	}
+});
+
 SpecialPowerSeafaring = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
@@ -722,27 +733,26 @@ SpecialPowerWealthy = $.inherit(BaseSpecialPower, {
 });
 
 specialPowerList = [
-	SpecialPowerAlchemist(),
-	SpecialPowerBerserk(),
-	SpecialPowerBivouacking(),
-	SpecialPowerCommando(),
-	SpecialPowerDiplomat(),
-	SpecialPowerDragonMaster(),
-	SpecialPowerFlying(),
-	SpecialPowerForest(),
-	SpecialPowerFortified(),
-	SpecialPowerHeroic(),
-	SpecialPowerHill(),
-	SpecialPowerMerchant(),
-	SpecialPowerMounted(),
-	SpecialPowerPillaging(),
-	SpecialPowerSeafaring(), 
+	new SpecialPowerAlchemist(),
+	new SpecialPowerBerserk(),
+	new SpecialPowerBivouacking(),
+	new SpecialPowerCommando(),
+	new SpecialPowerDiplomat(),
+	new SpecialPowerDragonMaster(),
+	new SpecialPowerFlying(),
+	new SpecialPowerForest(),
+	new SpecialPowerFortified(),
+	new SpecialPowerHeroic(),
+	new SpecialPowerHill(),
+	new SpecialPowerMerchant(),
+	new SpecialPowerMounted(),
+	new SpecialPowerPillaging(),
+	new SpecialPowerSeafaring(), 
 //	SpecialPowerSpirit(),
-	SpecialPowerStout(),
-	SpecialPowerSwamp(),
-	SpecialPowerUnderworld(),
-	SpecialPowerWealthy()
+	new SpecialPowerStout(),
+	new SpecialPowerSwamp(),
+	new SpecialPowerUnderworld(),
+	new SpecialPowerWealthy()
 ];
 for (var i = 0; i < specialPowerList.length; ++i)
 	specialPowerList[i].setId(i);
-
