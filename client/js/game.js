@@ -154,7 +154,22 @@ TokenBadge = $.inherit({
 			this.inDecline = inDecline;
 			this.totalTokensNum = totalTokensNum;
 			this.specPowNum = specPowNum;
-		}		
+		},
+		regions: function()
+		{	
+			result = [];
+			for (var i = 0; i < Client.currGameState.map.regions; ++i)
+				if (Client.currGameState.map.regions[i].tokenBadgeId == this.id)
+					result.push(Client.currGameState.map.regions[i]);
+			return result;	
+		},
+		isNeighbor: function(region)
+		{
+			for (var i = 0; i < Client.currGameState.map.regions; ++i)
+				if (Client.currGameState.map.regions[i].id == region.id)
+					return true; 
+			return false;
+		}
 			
 });
 
@@ -186,7 +201,15 @@ User = $.inherit({
 				Client.currGameState.map.regions[i].inDecline = false;
 			}
 		}
-	}
+	},
+	regions: function()
+	{	
+		result = [];
+		for (var i = 0; i < Client.currGameState.map.regions; ++i)
+			if (Client.currGameState.map.regions[i].ownerId == this.id)
+				result.push(Client.currGameState.map.regions[i]);
+		return result;	
+	},
 });
 
 createTokenBadge = function(tokenBadge)

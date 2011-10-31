@@ -479,8 +479,8 @@ class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
 
-	def incomeBonus(self, user):
-		return len(user.regions)
+	def incomeBonus(self, tokenBadge):
+		return len(tokenBadge.owner.regions)
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
@@ -500,9 +500,6 @@ class SpecialPowerPillaging(BaseSpecialPower):
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
-
-	def incomeBonus(self, tokenBadge): 
-		return len(filter(lambda x: x.region.swamp, tokenBadge.regions))
 	
 	def canConquer(self, region, tokenBadge):
 		return (tokenBadge.isNeighbor(region) and tokenBadge.regions) or not\
