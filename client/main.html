@@ -99,6 +99,7 @@
 		<p>${username}{{if $item.data.id == $item.activePlayer()}} -- active player {{/if}}</p>
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
+		<p style="margin: 10px;">Coins: ${coins}</p>
 		<table>
 			{{if $item.data.currentTokenBadge != undefined}}
 			<tr>
