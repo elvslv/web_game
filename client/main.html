@@ -128,18 +128,6 @@
 		</table>
 	</div>
 </script>
-<script id="tokenBadgeTemplate" type="text/x-jquery-tmpl"> 
-	<div>  
-		<table>
-			<tr>
-				
-			</tr>
-			<tr>
-
-			</tr>
-		</table>
-	</div>
-</script>
 <script id="visibleTokenBadgesTemplate" type="text/x-jquery-tmpl"> 
 	<div>  
 		<table>
@@ -150,7 +138,7 @@
 			</tr>
 			<tr>
 				<td>
-					<button id={{html 'select'.concat($item.data.pos)}} pos={{html $item.data.pos}}></button>
+					<button id={{html 'select'.concat($item.data.pos)}} pos={{html $item.data.pos}} style = "display: none"></button>
 				</td>
 			</tr>
 		</table>
@@ -170,16 +158,29 @@
 		</tr>
 		<tr>
 			<td>
+				Players:
+			</td>
+		</tr>
+		<tr>
+			<td>
 				{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}
 			</td>
 		</tr>
-		{{if $item.opts.showVisibleTokenBadges()}}
-			<tr>
-				<td>
-					{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
-				</td>
-			</tr>
-		{{/if}}
+		<tr>
+			<td>
+				Visible token badges:
+			</td>
+		</tr>
+		<tr>
+			<td>
+				{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
+			</td>
+		</tr>
+		<tr>
+			<td>
+				
+			</td>
+		</tr>
 	</table>
 </script>
 	<div id = 'tabs'>

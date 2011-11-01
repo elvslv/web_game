@@ -76,15 +76,11 @@ Interface.updatePage = function()
 
 
 
-Interface.disableButtons = function()
+Interface.prepareForActions = function()
 {
-	if (Client.currGameState.state != GAME_WAITING)
-		$('#setRadinessStatusInGame').hide();
-	if (!isActivePlayer())
-		$('[id*=select], #decline').hide();
-	if (!specialPowerList[getSpecPowId(
-		Client.currentUser.currentTokenBadge.specPowName)].canDecline(Client.currentUser))
-		$('#decline').hide();
+	Interface.prepareForSetReadinessStatus();
+	Interface.prepareForRaceSelect();
+	Interface.prepareForDecline();
 }
 
 Interface.updateGameTab = function()
@@ -136,7 +132,7 @@ Interface.updateGameTab = function()
 			sendQuery(makeQuery(['action', 'sid'], ['decline', 
 				Client.currentUser.sid]), declineResponse);
 		});
-	$('#setRadinessStatusInGame, #leaveGame, #decline').show();
+	$('#leaveGame').show();
 	for (var i = 0; i < Client.currGameState.tokenBadges.length; ++i)
 	{
 		$('#select' + i)
@@ -148,8 +144,28 @@ Interface.updateGameTab = function()
 				}
 		}(i));		
 	}
-	Interface.disableButtons();
+	Interface.prepareForActions();
 }
+
+Interface.prepareForSetReadinessStatus = function()
+{
+	if (Client.currGameState.state == GAME_WAITING)
+		$('#setRadinessStatusInGame').show();
+}
+
+Interface.prepareForRaceSelect = function()
+{
+	if (canSelectRace())
+		$('[id*=select]').show();	
+}
+
+Interface.prepareForDecline = function()
+{
+	if (canDecline())
+		$('#decline').show();
+}
+
+
 Interface.fillGameList = function(games) 
 {
 	if (Client.currentUser && Client.currentUser.gameId)

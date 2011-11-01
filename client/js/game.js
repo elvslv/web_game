@@ -338,3 +338,16 @@ isActivePlayer = function()
 	if (Client.currGameState.activePlayerIndex != undefined && 
 		Client.currGameState.players[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
 }
+
+canSelectRace = function()
+{
+	return isActivePlayer() && 
+		Client.currentUser.currentTokenBadge == undefined && 
+		(Client.currGameState.state in possiblePrevCmd[GAME_SELECT_RACE]);
+}
+
+canDecline = function()
+{
+	return (isActivePlayer() && specialPowerList[getSpecPowId(
+		Client.currentUser.currentTokenBadge.specPowName)].canDecline(Client.currentUser))
+}
