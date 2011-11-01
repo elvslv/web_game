@@ -228,7 +228,7 @@ Interface.prepareForSelectFriend = function()
 		}
 	if (cnt)
 	{
-		$('#conquer')
+		$('#selectFriend')
 			.button()
 			.click(function(){
 				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
