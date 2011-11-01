@@ -54,7 +54,7 @@ Region = $.inherit({
 	},
 	adjacent: function(region)
 	{
-		return region.id in this.adjacent; 
+		return includes(region.id, this.adjacent); 
 	},
 	isImmune: function(enchanting)
 	{
@@ -126,7 +126,7 @@ Game = $.inherit({
 	{
 		if (this.activePlayer != Client.currentUser.id)
 			return (this.defendingPlayer == Client.currentUser.id || state == GAME_DEFEND);
-		result = !(this.state in possiblePrevSmd[state]);
+		result = !(includes(this.state, possiblePrevSmd[state]));
 		//add checking of attacking type
 		
 	},
@@ -335,7 +335,7 @@ createGameByState = function(gameState)
 
 checkStage = function(newState)
 {
-	var result = Client.currGameState.state in possiblePrevCmd[newState];
+	var result = includes(Client.currGameState.state, possiblePrevCmd[newState]);
 	if (result)
 	{
 		switch(newState)
@@ -416,4 +416,11 @@ selectFriend = function(user)
 {
 	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
 	return specialPower.selectFriend(user);
+}
+
+canThrowDice = function()
+{
+	result = isActivePlayer() && checkStage(GAME_THROW_DICE) && user().currentTokenBadge;
+	result = result && getSpecPowByName(user().currentTokenBadge.specPowName).throwDice();
+	return result;
 }

@@ -446,7 +446,7 @@ SpecialPowerDiplomat = $.inherit(BaseSpecialPower, {
 	},
 	selectFriend: function(friend)
 	{
-		if (friend.id == user().id || !(friend in Client.currGameState.players))
+		if (friend.id == user().id || !(includes(friend,  Client.currGameState.players)))
 			return false;
 		return true;
 		//should we remember info about previous conquers?

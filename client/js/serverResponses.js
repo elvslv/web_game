@@ -416,3 +416,24 @@ function selectFriendResponse(data)
  	}
 }
 
+function throwDiceResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'ok':
+			alert('Dice: ' + data['dice']);
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
+

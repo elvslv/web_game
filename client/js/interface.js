@@ -83,6 +83,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForDecline();
 	Interface.prepareForFinishTurn();
 	Interface.prepareForConquer();
+	Interface.prepareForSelectFriend();
 }
 
 Interface.updateGameTab = function()
@@ -237,6 +238,20 @@ Interface.prepareForSelectFriend = function()
 			});
 		$('#possibleFriends').show();
 		$('#selectFriend').show();
+	}
+}
+
+Interface.prepareForThrowDice = function()
+{
+	if (canThrowDice())
+	{
+		$('#throwDice')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['throwDice', user().sid]), 
+					throwDiceResponse);
+			});
+		$('#throwDice').show();
 	}
 }
 
