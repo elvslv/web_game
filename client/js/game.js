@@ -356,10 +356,15 @@ isActivePlayer = function()
 		Client.currGameState.players[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
 }
 
-canSelectRace = function()
+canSelectRaces = function()
 {
 	return isActivePlayer() && user().currentTokenBadge == undefined && 
 		checkStage(GAME_SELECT_RACE);
+}
+
+canSelectRace = function(i)
+{
+	return user().coins >= 5 - i;
 }
 
 canDecline = function()

@@ -162,8 +162,11 @@ Interface.prepareForSetReadinessStatus = function()
 
 Interface.prepareForRaceSelect = function()
 {
-	if (canSelectRace())
-		$('[id*=select]').show();	
+	if (canSelectRaces())
+		for (var i = 0; i < game().tokenBadges.length; ++i)
+			if (canSelectRace(i))
+				$('#select' + i).show();	
+	
 }
 
 Interface.prepareForDecline = function()
