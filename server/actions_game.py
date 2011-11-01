@@ -115,7 +115,6 @@ def act_conquer(data):
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
 	dbi.updateGameHistory(game, data)
-	print user.currentTokenBadge.raceId
 	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
 
 def act_decline(data):

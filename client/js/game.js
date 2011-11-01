@@ -345,6 +345,9 @@ checkStage = function(newState)
 				result = !(tokenBadge && getRaceByName(tokenBadge.raceName).needRedeployment() && 
 					game().state != GAME_REDEPLOY && game().state != GAME_CHOOSE_FRIEND);
 				break;
+			case GAME_CONQUER:
+				//check for dice!!!
+				break;
 		}
 	}
 	return result;
@@ -352,7 +355,7 @@ checkStage = function(newState)
 
 isActivePlayer = function()
 {
-	if (Client.currGameState.activePlayerIndex != undefined && 
+	return (Client.currGameState.activePlayerIndex != undefined && 
 		Client.currGameState.players[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
 }
 
@@ -376,4 +379,21 @@ canDecline = function()
 canFinishTurn = function()
 {
 	return isActivePlayer() && checkStage(GAME_FINISH_TURN);
+}
+
+canBeginConquer = function()
+{
+	return (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER));
+}
+
+canConquer = function(region)
+{
+	if (region.ownerId == user().id && !region.inDecline)
+		return false;
+	//check for friend!
+	f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge);
+	f2 = getRaceByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
+	if (!(f1 && f2))
+		return false;
+	return !region.isImmune(false);
 }

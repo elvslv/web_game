@@ -82,6 +82,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForRaceSelect();
 	Interface.prepareForDecline();
 	Interface.prepareForFinishTurn();
+	Interface.prepareForConquer();
 }
 
 Interface.updateGameTab = function()
@@ -112,52 +113,32 @@ Interface.updateGameTab = function()
 			}
 		}
 	}).appendTo('#ui-tabs-1');
-	$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
-	$('#setRadinessStatusInGame').html(Client.currentUser.isReady ? 'I am not ready' : 
-		'I am ready');
 	$('#leaveGame')
 		.button()
 		.click(function(){
 			sendQuery(makeQuery(['action', 'sid'], ['leaveGame', Client.currentUser.sid]), 
 				leaveGameResponse);
 		});
-	$('#setRadinessStatusInGame')
-		.button()
-		.click(function(){
-			sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
-				Client.currentUser.sid, (1 - $(this).prop('isReady'))]), setReadinessStatusResponse);
-		});
-	$('#decline')
-		.button()
-		.click(function(){
-			sendQuery(makeQuery(['action', 'sid'], ['decline', 
-				Client.currentUser.sid]), declineResponse);
-		});
-	$('#finishTurn')
-		.button()
-		.click(function(){
-			sendQuery(makeQuery(['action', 'sid'], ['finishTurn', 
-				user().sid]), finishTurnResponse);
-		});
 	$('#leaveGame').show();
-	for (var i = 0; i < Client.currGameState.tokenBadges.length; ++i)
-	{
-		$('#select' + i)
-			.button({icons: { primary: "ui-icon-check" }})
-			.click(function(j){
-				return function(){
-					sendQuery(makeQuery(['action', 'sid', 'position'], ['selectRace', 
-						Client.currentUser.sid, j]), selectRaceResponse);					
-				}
-		}(i));		
-	}
 	Interface.prepareForActions();
 }
 
 Interface.prepareForSetReadinessStatus = function()
 {
 	if (Client.currGameState.state == GAME_WAITING)
+	{
+		$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
+		$('#setRadinessStatusInGame').html(Client.currentUser.isReady ? 'I am not ready' : 
+			'I am ready');
+		$('#setRadinessStatusInGame')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
+					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), 
+					setReadinessStatusResponse);
+			});
 		$('#setRadinessStatusInGame').show();
+	}
 }
 
 Interface.prepareForRaceSelect = function()
@@ -165,21 +146,73 @@ Interface.prepareForRaceSelect = function()
 	if (canSelectRaces())
 		for (var i = 0; i < game().tokenBadges.length; ++i)
 			if (canSelectRace(i))
+			{
+				$('#select' + i)
+					.button({icons: { primary: "ui-icon-check" }})
+					.click(function(j){
+						return function(){
+							sendQuery(makeQuery(['action', 'sid', 'position'], 
+								['selectRace', Client.currentUser.sid, j]), selectRaceResponse);					
+						}
+				}(i));
 				$('#select' + i).show();	
-	
+			}
 }
 
 Interface.prepareForDecline = function()
 {
 	if (canDecline())
+	{
+		$('#decline')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['decline', Client.currentUser.sid]),
+					declineResponse);
+			});
 		$('#decline').show();
+	}
 }
 
 
 Interface.prepareForFinishTurn = function()
 {
 	if (canFinishTurn())
+	{
+		$('#finishTurn')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['finishTurn', user().sid]), 
+					finishTurnResponse);
+			});
 		$('#finishTurn').show();
+	}
+}
+
+Interface.prepareForConquer = function()
+{
+	if (!canBeginConquer())
+		return;
+	var cnt = 0;
+	for (var i = 0; i < game().map.regions; ++i)
+		if (canConquer(game().map.regions[i]))
+		{
+			$('#possibleRegions').append('<option value = ' + i + '>' + game().map.regions[i].id + 
+				'</option>');
+			++cnt;
+		}
+	if (cnt)
+	{
+		$('#conquer')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+					['conquer', user().sid, $('#possibleRegions option:selected').val()]), 
+					conquerResponse);				
+			});
+		$('#possibleRegions').show();
+		$('#conquer').show();
+	}
+	
 }
 
 Interface.fillGameList = function(games) 

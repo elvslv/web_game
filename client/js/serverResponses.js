@@ -354,3 +354,37 @@ function finishTurnResponse(data)
 			alert('Unknown server response' + data);
  	}
 }
+
+function conquerResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badRegionId':
+			alert('Invalid region id'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'badRegion':
+			alert('Bad region'); 
+			break;
+		case 'regionIsImmune':
+			alert('Region is immune'); 
+			break;
+		case 'badTokensNum':
+			alert('Not enough tokens, dice: ' + data['dice']); 
+			break;
+		case 'ok':
+			if (data['dice'] != undefined)
+				alert('dice: ' + data['dice']);
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
