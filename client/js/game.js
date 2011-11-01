@@ -1,17 +1,17 @@
-GAME_START = 0;
-GAME_WAITING = 1;
-GAME_PROCESSING = 2;
-GAME_ENDED = 3;
-GAME_FINISH_TURN = 4;
-GAME_SELECT_RACE = 5;
-GAME_CONQUER = 6;
-GAME_DECLINE = 7;
-GAME_REDEPLOY = 8;
-GAME_THROW_DICE = 9;
-GAME_DEFEND = 12;
-GAME_CHOOSE_FRIEND = 13;
-GAME_UNSUCCESSFULL_CONQUER = 14;
-possiblePrevCmd = [];
+var GAME_START = 0,
+	GAME_WAITING = 1,
+	GAME_PROCESSING = 2,
+	GAME_ENDED = 3,
+	GAME_FINISH_TURN = 4,
+	GAME_SELECT_RACE = 5,
+	GAME_CONQUER = 6,
+	GAME_DECLINE = 7,
+	GAME_REDEPLOY = 8,
+	GAME_THROW_DICE = 9,
+	GAME_DEFEND = 12,
+	GAME_CHOOSE_FRIEND = 13,
+	GAME_UNSUCCESSFULL_CONQUER = 14;
+var possiblePrevCmd = [];
 possiblePrevCmd[GAME_FINISH_TURN] = [GAME_DECLINE, GAME_REDEPLOY, GAME_CHOOSE_FRIEND];
 possiblePrevCmd[GAME_SELECT_RACE] = [GAME_START, GAME_FINISH_TURN];
 possiblePrevCmd[GAME_CONQUER] = [GAME_CONQUER, GAME_SELECT_RACE, GAME_FINISH_TURN,
@@ -333,6 +333,23 @@ createGameByState = function(gameState)
 	return Client.currGameState;
 }
 
+checkStage = function(newState)
+{
+	var result = Client.currGameState.state in possiblePrevCmd[newState];
+	if (result)
+	{
+		switch(newState)
+		{
+			case GAME_FINISH_TURN:
+				tokenBadge = user().currentTokenBadge;
+				result = !(tokenBadge && getRaceByName(tokenBadge.raceName).needRedeployment() && 
+					game().state != GAME_REDEPLOY && game().state != GAME_CHOOSE_FRIEND);
+				break;
+		}
+	}
+	return result;
+}
+
 isActivePlayer = function()
 {
 	if (Client.currGameState.activePlayerIndex != undefined && 
@@ -341,13 +358,17 @@ isActivePlayer = function()
 
 canSelectRace = function()
 {
-	return isActivePlayer() && 
-		Client.currentUser.currentTokenBadge == undefined && 
-		(Client.currGameState.state in possiblePrevCmd[GAME_SELECT_RACE]);
+	return isActivePlayer() && user().currentTokenBadge == undefined && 
+		checkStage(GAME_SELECT_RACE);
 }
 
 canDecline = function()
 {
-	return (isActivePlayer() && specialPowerList[getSpecPowId(
-		Client.currentUser.currentTokenBadge.specPowName)].canDecline(Client.currentUser))
+	return isActivePlayer() && 
+		getSpecPowByName(user().currentTokenBadge.specPowName).canDecline(user());
+}
+
+canFinishTurn = function()
+{
+	return isActivePlayer() && checkStage(GAME_FINISH_TURN);
 }

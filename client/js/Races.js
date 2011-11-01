@@ -282,7 +282,7 @@ RaceSorcerers = $.inherit(BaseRace, {
 	}
 });
 
-racesList = [
+var racesList = [
 	new RaceAmazons(),
 	new RaceDwarves(),
 	new RaceElves(),
@@ -736,7 +736,7 @@ SpecialPowerWealthy = $.inherit(BaseSpecialPower, {
 	}
 });
 
-specialPowerList = [
+var specialPowerList = [
 	new SpecialPowerAlchemist(),
 	new SpecialPowerBerserk(),
 	new SpecialPowerBivouacking(),
@@ -766,4 +766,31 @@ getSpecPowId = function(name)
 	for (var i = 0; i < specialPowerList.length; ++i)
 		if (specialPowerList[i].name == name)
 			return i;
+}
+
+getSpecialPower = function(id)
+{
+	return specialPowerList[id];
+}
+
+getSpecPowByName = function(name)
+{
+	return specialPowerList[getSpecPowId(name)];
+}
+
+getRaceId = function(name)
+{
+	for (var i = 0; i < racesList.length; ++i)
+		if (racesList[i].name == name)
+			return i;
+}
+
+getRace = function(id)
+{
+	return racesList[id];
+}
+
+getRaceByName = function(name)
+{
+	return racesList[getRaceId(name)];
 }

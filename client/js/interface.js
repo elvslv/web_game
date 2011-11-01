@@ -81,6 +81,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForSetReadinessStatus();
 	Interface.prepareForRaceSelect();
 	Interface.prepareForDecline();
+	Interface.prepareForFinishTurn();
 }
 
 Interface.updateGameTab = function()
@@ -132,6 +133,12 @@ Interface.updateGameTab = function()
 			sendQuery(makeQuery(['action', 'sid'], ['decline', 
 				Client.currentUser.sid]), declineResponse);
 		});
+	$('#finishTurn')
+		.button()
+		.click(function(){
+			sendQuery(makeQuery(['action', 'sid'], ['finishTurn', 
+				user().sid]), finishTurnResponse);
+		});
 	$('#leaveGame').show();
 	for (var i = 0; i < Client.currGameState.tokenBadges.length; ++i)
 	{
@@ -165,6 +172,12 @@ Interface.prepareForDecline = function()
 		$('#decline').show();
 }
 
+
+Interface.prepareForFinishTurn = function()
+{
+	if (canFinishTurn())
+		$('#finishTurn').show();
+}
 
 Interface.fillGameList = function(games) 
 {
