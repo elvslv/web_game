@@ -388,3 +388,31 @@ function conquerResponse(data)
 			alert('Unknown server response' + data);
  	}
 }
+
+
+function selectFriendResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badFriendId':
+			alert('Invalid friend id'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'badFriend':
+			alert('Bad friend'); 
+			break;
+		case 'ok':
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
+

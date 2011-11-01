@@ -369,6 +369,10 @@ BaseSpecialPower = $.inherit({
 	setHero: function(tokenBadgeId, heroes)
 	{
 		return false;
+	},
+	canChooseFriend: function()
+	{
+		return false;
 	}
 });
 
@@ -440,13 +444,16 @@ SpecialPowerDiplomat = $.inherit(BaseSpecialPower, {
 	{
 		this.__base('Diplomat', 5, 1);
 	},
-	selectFriend: function(user, data)
+	selectFriend: function(friend)
 	{
-		friend = data['friendId'];
-		if (friend == user.id || !(friend in Client.currGameState.players))
+		if (friend.id == user().id || !(friend in Client.currGameState.players))
 			return false;
 		return true;
 		//should we remember info about previous conquers?
+	},
+	canChooseFriend: function()
+	{
+		return true;
 	}
 });
 

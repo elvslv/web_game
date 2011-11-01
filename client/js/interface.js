@@ -193,7 +193,7 @@ Interface.prepareForConquer = function()
 	if (!canBeginConquer())
 		return;
 	var cnt = 0;
-	for (var i = 0; i < game().map.regions; ++i)
+	for (var i = 0; i < game().map.regions.length; ++i)
 		if (canConquer(game().map.regions[i]))
 		{
 			$('#possibleRegions').append('<option value = ' + i + '>' + game().map.regions[i].id + 
@@ -212,7 +212,32 @@ Interface.prepareForConquer = function()
 		$('#possibleRegions').show();
 		$('#conquer').show();
 	}
-	
+}
+
+Interface.prepareForSelectFriend = function()
+{
+	if (!canChooseFriend())
+		return;
+	var cnt = 0;
+	for (var i = 0; i < game().players.length; ++i)
+		if (selectFriend(game().players[i]))
+		{
+			$('#possibleFriends').append('<option value = ' + i + '>' + game().players[i].name + 
+				'</option>');
+			++cnt;
+		}
+	if (cnt)
+	{
+		$('#conquer')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
+					['selectFriend', user().sid, $('#possibleFriends option:selected').val()]), 
+					selectFriendResponse);				
+			});
+		$('#possibleFriends').show();
+		$('#selectFriend').show();
+	}
 }
 
 Interface.fillGameList = function(games) 

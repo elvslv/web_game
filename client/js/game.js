@@ -348,6 +348,9 @@ checkStage = function(newState)
 			case GAME_CONQUER:
 				//check for dice!!!
 				break;
+			case GAME_CHOOSE_FRIEND:
+				//check if can select friend 
+				break;
 		}
 	}
 	return result;
@@ -396,4 +399,21 @@ canConquer = function(region)
 	if (!(f1 && f2))
 		return false;
 	return !region.isImmune(false);
+}
+
+canChooseFriend = function()
+{
+	result = user().currentTokenBadge != undefined && checkStage(GAME_CHOOSE_FRIEND);
+	if (result)
+	{
+		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+		result = specialPower.canChooseFriend();
+	}
+	return result;
+}
+
+selectFriend = function(user)
+{
+	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+	return specialPower.selectFriend(user);
 }
