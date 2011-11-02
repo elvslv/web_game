@@ -84,6 +84,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForFinishTurn();
 	Interface.prepareForConquer();
 	Interface.prepareForSelectFriend();
+	Interface.prepareForEnchant();
 }
 
 Interface.updateGameTab = function()
@@ -280,6 +281,33 @@ Interface.prepareForEnchant = function()
 		$('#enchant').show();
 	}
 }
+
+Interface.prepareForDragonAttack = function()
+{
+	if (!canBeginDragonAttack())
+		return;
+	var cnt = 0;
+	for (var i = 0; i < game().map.regions.length; ++i)
+		if (canDragonAttack(game().map.regions[i]))
+		{
+			$('#possibleRegionsForDragonAttack').append('<option value = ' + i + '>' + game().map.regions[i].id + 
+				'</option>');
+			++cnt;
+		}
+	if (cnt)
+	{
+		$('#dragonAttack')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+					['dragonAttack', user().sid, $('#possibleRegionsForDragonAttack option:selected').val()]), 
+					dragonAttackResponse);				
+			});
+		$('#possibleRegionsForDragonAttack').show();
+		$('#dragonAttack').show();
+	}
+}
+
 Interface.fillGameList = function(games) 
 {
 	if (Client.currentUser && Client.currentUser.gameId)

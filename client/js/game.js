@@ -360,6 +360,13 @@ createGameByState = function(gameState)
 
 alreadyAttacked = function(attackType)
 {
+	switch(attackType)
+	{
+		case ATTACK_DRAGON:
+			break;
+		case ATTACK_ENCHANT:
+			break;
+	}
 	return false;
 }
 
@@ -457,24 +464,6 @@ canThrowDice = function()
 	return result;
 }
 
-/*def act_enchant(data):
-	user = dbi.getXbyY('User', 'sid', data['sid'])
-	if not user.currentTokenBadge: 
-		raise BadFieldException('badStage')
-	user.game.checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
-	
-	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
-	victimBadgeId = reg.tokenBadge.id
-	reg.checkIfImmune(True)
-	clearFromRace(reg)
-	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge,
-		reg)
-	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
-			reg.region.id, 1, ATTACK_ENCHANT)
-	dbi.updateGameHistory(user.game, data)
-	return {'result': 'ok'}	
-*/
-
 canBeginEnchant = function()
 {
 	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_ENCHANT)) ;
@@ -483,6 +472,7 @@ canBeginEnchant = function()
 		race = getRaceByName(user().currentTokenBadge.raceName);
 		result = race.canEnchant();
 	}
+	return result;
 }
 
 canEnchant = function(region)
@@ -490,3 +480,22 @@ canEnchant = function(region)
 	return getRaceByName(user().currentTokenBadge.raceName).enchant(region);
 	
 }
+
+canBeginDragonAttack = function()
+{
+	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON)) ;
+	if (result)
+	{
+		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+		result = specialPower.canBeginDragonAttack();
+	}
+	return result;
+}
+
+canDragonAttack = function(region)
+{
+	return getSpecPowByName(user().currentTokenBadge.specPowName).dragonAttack(region);
+	
+}
+
+

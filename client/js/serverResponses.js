@@ -475,3 +475,30 @@ function enchantResponse(data)
  	}
 }
 
+function dragonAttackResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'badRegionId':
+			alert('Invalid region id'); 
+			break;
+		case 'badRegion':
+			alert('Bad region');
+			break;
+		case 'ok':
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
+
+

@@ -381,6 +381,10 @@ BaseSpecialPower = $.inherit({
 	canChooseFriend: function()
 	{
 		return false;
+	},
+	canBeginDragonAttack: function()
+	{
+		return false;
 	}
 });
 
@@ -470,8 +474,9 @@ SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 	{
 		this.__base('Dragon master', 5, 1);
 	},
-	dragonAttack: function(tokenBadge, region)
+	dragonAttack: function(region)
 	{
+		tokenBadge = user().currentTokenBadge;
 		if (region.isImmune())
 			return false;
 		if (!(racesList[tokenBadge.raceId].canConquer(region, tokenBadge) 
@@ -492,6 +497,10 @@ SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 		regions = user.regions();
 		for (var i = 0; i < regions.length; ++i)
 			region.dragon = false;
+	},
+	canBeginDragonAttack: function()
+	{
+		return true;
 	}
 });
 
