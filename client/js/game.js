@@ -10,7 +10,11 @@ var GAME_START = 0,
 	GAME_THROW_DICE = 9,
 	GAME_DEFEND = 12,
 	GAME_CHOOSE_FRIEND = 13,
-	GAME_UNSUCCESSFULL_CONQUER = 14;
+	GAME_UNSUCCESSFULL_CONQUER = 14,
+	ATTACK_CONQUER = 0,
+	ATTACK_DRAGON = 1,
+	ATTACK_ENCHANT = 2;
+	
 var possiblePrevCmd = [];
 possiblePrevCmd[GAME_FINISH_TURN] = [GAME_DECLINE, GAME_REDEPLOY, GAME_CHOOSE_FRIEND];
 possiblePrevCmd[GAME_SELECT_RACE] = [GAME_START, GAME_FINISH_TURN];
@@ -333,7 +337,33 @@ createGameByState = function(gameState)
 	return Client.currGameState;
 }
 
-checkStage = function(newState)
+/*def checkStage(self, state, user, attackType = None):
+		lastEvent = self.history[-1]
+		badStage = not (lastEvent.state in misc.possiblePrevCmd[state]) 
+		if attackType:
+			curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
+				x.userId == user.id and x.state == misc.GAME_CONQUER, 
+				user.game.history)
+			if curTurnHistory:
+				if filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory):
+					badStage = True
+		if lastEvent.state == misc.GAME_CONQUER:
+			battle = lastEvent.warHistory
+			victim = battle.victimBadge
+			canDefend = victim != None  and\
+				not victim.inDecline and\
+				battle.attackType != misc.ATTACK_ENCHANT and\
+				battle.victimTokensNum > 1
+			badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
+		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
+			raise BadFieldException('badStage')*/
+
+alreadyAttacked = function(attackType)
+{
+	return false;
+}
+
+checkStage = function(newState, attackType)
 {
 	var result = includes(Client.currGameState.state, possiblePrevCmd[newState]);
 	if (result)
@@ -347,6 +377,8 @@ checkStage = function(newState)
 				break;
 			case GAME_CONQUER:
 				//check for dice!!!
+				if (alreadyAttacked(attackType))
+					result = false;
 				break;
 			case GAME_CHOOSE_FRIEND:
 				//check if can select friend 
@@ -423,4 +455,38 @@ canThrowDice = function()
 	result = isActivePlayer() && checkStage(GAME_THROW_DICE) && user().currentTokenBadge;
 	result = result && getSpecPowByName(user().currentTokenBadge.specPowName).throwDice();
 	return result;
+}
+
+/*def act_enchant(data):
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not user.currentTokenBadge: 
+		raise BadFieldException('badStage')
+	user.game.checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
+	
+	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
+	victimBadgeId = reg.tokenBadge.id
+	reg.checkIfImmune(True)
+	clearFromRace(reg)
+	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge,
+		reg)
+	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
+			reg.region.id, 1, ATTACK_ENCHANT)
+	dbi.updateGameHistory(user.game, data)
+	return {'result': 'ok'}	
+*/
+
+canBeginEnchant = function()
+{
+	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_ENCHANT)) ;
+	if (result)
+	{
+		race = getRaceByName(user().currentTokenBadge.raceName);
+		result = race.canEnchant();
+	}
+}
+
+canEnchant = function(region)
+{
+	return getRaceByName(user().currentTokenBadge.raceName).enchant(region);
+	
 }

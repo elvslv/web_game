@@ -64,6 +64,10 @@ BaseRace = $.inherit({
 	{
 		return false;
 	},
+	canEnchant: function()
+	{
+		return false;
+	},
 	clearRegion: function(tokenBadge, region)
 	{
 		region.encampent = 0;
@@ -279,6 +283,10 @@ RaceSorcerers = $.inherit(BaseRace, {
 			region.tokensNum > 1 ||
 			region.inDecline ||
 			tokenBadge.totalTokensNum == this.maxNum));
+	},
+	canEnchant: function()
+	{
+		return true;
 	}
 });
 

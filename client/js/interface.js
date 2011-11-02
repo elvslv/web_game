@@ -255,6 +255,31 @@ Interface.prepareForThrowDice = function()
 	}
 }
 
+Interface.prepareForEnchant = function()
+{
+	if (!canBeginEnchant())
+		return;
+	var cnt = 0;
+	for (var i = 0; i < game().map.regions.length; ++i)
+		if (canEnchant(game().map.regions[i]))
+		{
+			$('#possibleRegionsForEnchant').append('<option value = ' + i + '>' + game().map.regions[i].id + 
+				'</option>');
+			++cnt;
+		}
+	if (cnt)
+	{
+		$('#enchant')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+					['enchant', user().sid, $('#possibleRegionsForEnchant option:selected').val()]), 
+					enchantResponse);				
+			});
+		$('#possibleRegionsForEnchant').show();
+		$('#enchant').show();
+	}
+}
 Interface.fillGameList = function(games) 
 {
 	if (Client.currentUser && Client.currentUser.gameId)

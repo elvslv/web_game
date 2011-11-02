@@ -437,3 +437,41 @@ function throwDiceResponse(data)
  	}
 }
 
+function enchantResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'badRegionId':
+			alert('Invalid region id'); 
+			break;
+		case 'badRegion':
+			alert('Bad region');
+			break;
+		case 'badAttackedRace':
+			alert('You cannot attack yourself');
+			break;
+		case 'nothingToEnchant': case 'cannotEnchantMoreThanOneToken':
+			alert('You can enhcant only one token');
+			break;
+		case 'cannotEnchantDeclinedRace':
+			alert('You can enhcant only active race');
+			break;
+		case 'noMoreTokensInStorageTray':
+			alert("There aren't free tokens in storage tray");
+			break;
+		case 'ok':
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
+
