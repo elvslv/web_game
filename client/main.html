@@ -167,16 +167,18 @@
 				{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}
 			</td>
 		</tr>
-		<tr>
-			<td>
-				Visible token badges:
-			</td>
-		</tr>
-		<tr>
-			<td>
-				{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
-			</td>
-		</tr>
+		{{if tokenBadges.length}}
+			<tr>
+				<td>
+					Visible token badges:
+				</td>
+			</tr>
+			<tr>
+				<td>
+					{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
+				</td>
+			</tr>
+		{{/if}}
 		<tr>
 			<td>
 				<button id = "finishTurn" style = "display: none">Finish turn</button>

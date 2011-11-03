@@ -101,7 +101,7 @@ def getGameState(game):
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 		
-	result['map'] = getMapState(game.map.id)
+	result['map'] = getMapState(game.map.id, game.id)
 
 	playerAttrs = ['id', 'name', 'isReady', 'inGame', 'coins', 'tokensInHand']
 	playerAttrNames = ['userId', 'username', 'isReady', 'inGame' 'coins', 
@@ -166,23 +166,25 @@ def getMapState(mapId, gameId = None):
 	map_ = dbi.getXbyY('Map', 'id', mapId)
 	result = getShortMapState(map_)
 	result['regions'] = list()
-	constRegionAttrs = ['id', 'defTokensNum', 'border', 'coast', 'mountain', 
+	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
-	constRegionAttrNames = ['regionId', 'defaultTokensNum', 'border', 'coast', 
-		'mountain', 'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 
-		'swamp', 'cavern']
 	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
 		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
 
 	for region in map_.regions:
 		curReg = dict()
+		curReg['constRegionState'] = list()
+		
 		for i in range(len(constRegionAttrs)):
-			curReg[constRegionAttrNames[i]] = getattr(region, constRegionAttrs[i])
+			if getattr(region, constRegionAttrs[i]):
+				curReg['constRegionState'].append(constRegionAttrs[i])
+				
 		curReg['adjacentRegions'] = region.getNeighbors()
 		if gameId:
-			curRegState = region.getState()
+			curRegState = region.getState(gameId)
+			curReg['currentRegionState'] = dict()
 			for i in range(len(curRegionAttrs)):
-				curReg[curRegionAttrs[i]] = getattr(curRegState, curRegionAttrs[i])
+				curReg['currentRegionState'][curRegionAttrs[i]] = getattr(curRegState, curRegionAttrs[i])
 		result['regions'].append(curReg)
 	return result
 

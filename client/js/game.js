@@ -232,7 +232,7 @@ createGameByState = function(gameState)
 		for (var i = 0; i < mapState.regions.length; ++i)
 		{
 			curReg = mapState.regions[i].currentRegionState;
-			region.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].constRegionState, 
+			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].constRegionState, 
 				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
 				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline));
 		}
