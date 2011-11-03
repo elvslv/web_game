@@ -79,8 +79,8 @@ Map = $.inherit(
 		this.id = id;
 		this.playersNum = playersNum;
 		this.turnsNum = turnsNum;
-		this.thmbSrc = thmbSrc;
-		this.pictureSrc = pictureSrc;
+		this.thumbnail = thmbSrc;
+		this.picture = pictureSrc;
 		this.regions = regions.copy();
     },
     getRegion: function(id)
@@ -236,7 +236,7 @@ createGameByState = function(gameState)
 				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
 				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline));
 		}
-		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thmbSrc, mapState.pictureSrc, 
+		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
 		tokenBadges = [];
 		visibleBadges = gameState.visibleTokenBadges;

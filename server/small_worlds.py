@@ -20,7 +20,7 @@ app.catchall = False
 def serve_main():
     return static_file('main.html', STATIC_FILES_ROOT)
 
-@route('/:root#css.*|images.*|js.*#/:filename')
+@route('/:root#css.*|images.*|js.*|maps.*#/:filename')
 def serve_dirs(root,filename):
 	return static_file(filename, join(STATIC_FILES_ROOT, root))
 

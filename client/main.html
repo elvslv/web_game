@@ -148,22 +148,22 @@
 <script id="currentGameTemplate" type="text/x-jquery-tmpl"> 
 	<table>
 		<tr>
-			<td>
+			<td colspan = "2">
 				<button id = "leaveGame">leave</button>
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td colspan = "2">
 				<button id = "setRadinessStatusInGame" style = "display: none"></button>
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td colspan = "2">
 				Players:
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td colspan = "2">
 				{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}
 			</td>
 		</tr>
@@ -180,7 +180,7 @@
 			</tr>
 		{{/if}}
 		<tr>
-			<td>
+			<td colspan = "2">
 				<button id = "finishTurn" style = "display: none">Finish turn</button>
 			</td>
 		</tr>
@@ -203,7 +203,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td>
+			<td colspan = "2">
 				<button id = "throwDice" style = "display: none">Throw dice</button>
 			</td>
 		</tr>
