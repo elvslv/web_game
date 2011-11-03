@@ -28,7 +28,7 @@ def get_db_string():
 class Database:
 	instance = None
 	engine = create_engine(get_db_string(), convert_unicode=True, 
-		encoding="utf-8")
+		encoding="utf-8", echo = True)
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
@@ -79,12 +79,17 @@ class Database:
 			raise BadFieldException("""%sTaken""" % name)
     
 	def addRegion(self, id, map_, regInfo):
+		print 0
 		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
 		if not 'population' in regInfo:
 			regInfo['population'] = 0
 
-		reg = Region(id, regInfo['population'], map_)
+		reg = Region(id, regInfo['population'], map_, 
+			regInfo['x_race'] if 'x_race' in regInfo else None, 
+			regInfo['y_race'] if 'y_race' in regInfo else None, 
+			regInfo['x_power'] if 'x_power' in regInfo else None, 
+			regInfo['y_power'] if 'y_power' in regInfo else None)
 		for descr in regInfo['landDescription']:
 			if not descr in misc.possibleLandDescription[:11]:
 				raise BadFieldException('unknownLandDescription')
@@ -352,17 +357,25 @@ class Region(Base):
 	hill = Column(Boolean, default=False) 
 	swamp = Column(Boolean, default=False) 
 	cavern = Column(Boolean, default=False)
-
+	x_race = Column(Integer)
+	y_race = Column(Integer)
+	x_power = Column(Integer)
+	y_power = Column(Integer)
+	
 	map = relationship(Map, backref=backref('regions', order_by=id))
 	neighbors = relationship('Adjacency' , cascade="all,delete", 
 		primaryjoin='and_(Region.id==Adjacency.regId,\
 		Region.mapId==Adjacency.mapId)')
 		
 
-	def __init__(self, id, defTokensNum, map_): 
+	def __init__(self, id, defTokensNum, map_, x_race, y_race, x_power, y_power): 
 		self.id = id
 		self.defTokensNum = defTokensNum
 		self.map = map_
+		self.x_race = x_race
+		self.y_race = y_race
+		self.x_power = x_power
+		self.y_power = y_power
 
 	def getState(self, gameId):
 		state = filter(lambda x : x.gameId == gameId, self.states)

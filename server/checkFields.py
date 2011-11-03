@@ -76,6 +76,7 @@ def checkFiles(thumbSrc, pictSrc):
 	sys.path.append(path)
 	os.chdir(path)
 	path1 = os.pardir
+	path1 += '\\client'
 	os.chdir(path1)
 	if not(os.path.exists(thumbSrc) and os.path.exists(pictSrc)):
 		raise BadFieldException("Thumbnail or picture files aren't found")

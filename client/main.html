@@ -94,6 +94,9 @@
 <script id="mapChooseTemplate" type="text/x-jquery-tmpl"> 
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
 </script>
+<script id="regionsTemplate" type="text/x-jquery-tmpl"> 
+	<area shape = "circle" coords = {{html $item.coords($item.data.id)}} alt = "{{html $item.data.id}}"/>
+</script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
 		<p>${username}{{if $item.data.id == $item.activePlayer()}} -- active player {{/if}}</p>
@@ -148,8 +151,14 @@
 <script id="currentGameTemplate" type="text/x-jquery-tmpl"> 
 	<table>
 		<tr>
-			<td colspan = "2">
+			<td>
 				<button id = "leaveGame">leave</button>
+			</td>
+			<td rowspan = "11" align = "center">
+				<img src = {{html $item.data.map.picture}} usemap = "#map" style = "margin-left: 50px;">
+				<map name = "map" id = "map">
+					{{tmpl(map.regions, $item.opts) "#regionsTemplate"}}
+				</map>
 			</td>
 		</tr>
 		<tr>

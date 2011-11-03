@@ -112,6 +112,10 @@ Interface.updateGameTab = function()
 			currentUser: function()
 			{
 				return Client.currentUser.id
+			},
+			coords: function(regionId)
+			{
+				return '"' + game().map.regions[regionId - 1].x_race + ', ' + game().map.regions[regionId - 1].y_race + ', ' + '50"';
 			}
 		}
 	}).appendTo('#ui-tabs-1');

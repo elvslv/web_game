@@ -173,6 +173,10 @@ def getMapState(mapId, gameId = None):
 
 	for region in map_.regions:
 		curReg = dict()
+		curReg['x_race'] = region.x_race
+		curReg['y_race'] = region.y_race
+		curReg['x_power'] = region.x_power
+		curReg['y_power'] = region.y_power
 		curReg['constRegionState'] = list()
 		
 		for i in range(len(constRegionAttrs)):

@@ -29,8 +29,8 @@ possiblePrevCmd[GAME_DEFEND] = [GAME_CONQUER];
 possiblePrevCmd[GAME_CHOOSE_FRIEND] = [GAME_REDEPLOY];
 
 Region = $.inherit({
-	__constructor: function(id, adjacent, props, ownerId, tokenBadgeId, tokensNum, 
-		holeInTheGround, encampment, dragon, fortress, hero, inDecline)
+	__constructor: function(id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
+		encampment, dragon, fortress, hero, inDecline, x_race, y_race, x_power, y_power)
 	{
 		this.id = id;
 		this.adjacent = adjacent.copy();
@@ -44,6 +44,10 @@ Region = $.inherit({
 		this.fortress = fortress; 
 		this.hero = hero;
 		this.inDecline = inDecline;
+		this.x_race = x_race;
+		this.y_race = y_race;
+		this.x_power = x_power;
+		this.y_power = y_power;
 	},
 	hasProperty: function(prop)
 	{
@@ -234,7 +238,8 @@ createGameByState = function(gameState)
 			curReg = mapState.regions[i].currentRegionState;
 			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].constRegionState, 
 				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
-				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline));
+				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, curReg.x_race,
+				curReg.y_race, curReg.x_power, curReg.y_power));
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
@@ -288,7 +293,7 @@ createGameByState = function(gameState)
 	}
 	mapState = gameState['map'];
 	regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
-			'dragon', 'fortress', 'hero', 'inDecline']
+			'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']
 	for (var i = 0; i < mapState.regions.length; ++i)
 		for (var j = 0; j < regionFields.length; ++j)
 			Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i][regionFields[j]];
@@ -336,27 +341,6 @@ createGameByState = function(gameState)
 	Client.currGameState.activePlayerIndex = activePlayerIndex;
 	return Client.currGameState;
 }
-
-/*def checkStage(self, state, user, attackType = None):
-		lastEvent = self.history[-1]
-		badStage = not (lastEvent.state in misc.possiblePrevCmd[state]) 
-		if attackType:
-			curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
-				x.userId == user.id and x.state == misc.GAME_CONQUER, 
-				user.game.history)
-			if curTurnHistory:
-				if filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory):
-					badStage = True
-		if lastEvent.state == misc.GAME_CONQUER:
-			battle = lastEvent.warHistory
-			victim = battle.victimBadge
-			canDefend = victim != None  and\
-				not victim.inDecline and\
-				battle.attackType != misc.ATTACK_ENCHANT and\
-				battle.victimTokensNum > 1
-			badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
-		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
-			raise BadFieldException('badStage')*/
 
 alreadyAttacked = function(attackType)
 {
