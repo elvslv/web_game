@@ -287,10 +287,14 @@ createGameByState = function(gameState)
 			players.push(player);
 				
 		}
-		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, gameState.state,
+		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
+			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
 			gameState.currentTurn, activePlayerIndex, tokenBadges, players);
 		return result;
 	}
+
+	Client.currGameState.state = (gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'];
+	
 	mapState = gameState['map'];
 	regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
 			'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']
@@ -398,7 +402,7 @@ canSelectRace = function(i)
 
 canDecline = function()
 {
-	return isActivePlayer() && 
+	return isActivePlayer() && user().currentTokenBadge && 
 		getSpecPowByName(user().currentTokenBadge.specPowName).canDecline(user());
 }
 
@@ -418,7 +422,7 @@ canConquer = function(region)
 		return false;
 	//check for friend!
 	f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge);
-	f2 = getRaceByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
+	f2 = getSpecPowByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
 	if (!(f1 && f2))
 		return false;
 	return !region.isImmune(false);

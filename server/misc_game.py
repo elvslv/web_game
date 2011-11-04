@@ -98,6 +98,8 @@ def getGameState(game):
 		'currentTurn', 'activePlayerId']
 
 	result = dict()
+	result['lastEvent'] = game.getLastState()
+	
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 		

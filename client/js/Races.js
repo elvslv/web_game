@@ -323,7 +323,7 @@ BaseSpecialPower = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return (tokenBadge.isNeighbor(region) || !tokenBadge.regions())&& !region.hasProperty('sea');
+		return (tokenBadge.isNeighbor(region) || !tokenBadge.regions().length)&& !region.hasProperty('sea');
 	},
 	attackBonus: function(regionId, tokenBadgeId)
 	{

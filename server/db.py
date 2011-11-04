@@ -28,7 +28,7 @@ def get_db_string():
 class Database:
 	instance = None
 	engine = create_engine(get_db_string(), convert_unicode=True, 
-		encoding="utf-8", echo = True)
+		encoding="utf-8")
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)

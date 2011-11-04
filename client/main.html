@@ -154,9 +154,11 @@
 			<td>
 				<button id = "leaveGame">leave</button>
 			</td>
-			<td rowspan = "11" align = "center">
-				<img src = {{html $item.data.map.picture}} usemap = "#map" style = "margin-left: 50px;">
-				<map name = "map" id = "map">
+			<td rowspan = "12" valign = "top">
+				<img src = {{html $item.data.map.picture}} usemap = "#map" style = "margin-left: 250px;">
+			</td>
+			<td rowspan = "12">
+				<map name = "map" id = "map" valign = "top">
 					{{tmpl(map.regions, $item.opts) "#regionsTemplate"}}
 				</map>
 			</td>
@@ -178,12 +180,12 @@
 		</tr>
 		{{if tokenBadges.length}}
 			<tr>
-				<td>
+				<td colspan = "2">
 					Visible token badges:
 				</td>
 			</tr>
 			<tr>
-				<td>
+				<td colspan = "2">
 					{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
 				</td>
 			</tr>
