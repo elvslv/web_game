@@ -10,6 +10,7 @@
 		<script type="text/javascript" src="js/scripts/jquery.form.js"></script>
 		<script type="text/javascript" src="js/scripts/jquery.json-2.3.min.js"></script>
 		<script type="text/javascript" src="js/scripts/jquery.inherit-1.3.2.M.js"></script>
+		<script type="text/javascript" src="js/scripts/jquery.maphilight.min.js"></script>
 		<script type="text/javascript" src="js/utils.js"></script> 
 		<script type="text/javascript" src="js/data.js"></script> 
 		<script type="text/javascript" src="js/game.js"></script> 
@@ -95,7 +96,7 @@
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
 </script>
 <script id="regionsTemplate" type="text/x-jquery-tmpl"> 
-	<area shape = "circle" coords = {{html $item.coords($item.data.id)}} alt = "{{html $item.data.id}}"/>
+	<area shape = "circle" coords = {{html $item.coords($item.data.id)}} id = "{{html 'region'.concat($item.data.id)}}"/>
 </script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
@@ -155,12 +156,12 @@
 				<button id = "leaveGame">leave</button>
 			</td>
 			<td rowspan = "12" valign = "top">
-				<img src = {{html $item.data.map.picture}} usemap = "#map" style = "margin-left: 250px;">
-			</td>
-			<td rowspan = "12">
-				<map name = "map" id = "map" valign = "top">
-					{{tmpl(map.regions, $item.opts) "#regionsTemplate"}}
-				</map>
+				<div style = "margin-left: 250px;">
+					<img id = "imgmap" src = {{html $item.data.map.picture}} usemap = "#map">
+					<map name = "map" id = "map" valign = "top">
+						{{tmpl(map.regions, $item.opts) "#regionsTemplate"}}
+					</map>
+				</div>
 			</td>
 		</tr>
 		<tr>

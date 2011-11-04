@@ -126,6 +126,15 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
+	$('#imgmap').maphilight();
+	for (var i = 0; i < game().map.regions.length; ++i)
+	{
+		$('#region' + (i + 1)).click(function(j){
+			return function(){
+				alert(j);					
+			}
+		}(i + 1));
+	}
 	Interface.prepareForActions();
 }
 
