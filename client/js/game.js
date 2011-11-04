@@ -49,6 +49,29 @@ Region = $.inherit({
 		this.x_power = x_power;
 		this.y_power = y_power;
 	},
+	htmlRegionInfo: function()
+	{
+		result = 'Properties:';
+		for (var i = 0; i < this.props.length; ++i)
+			result += '<p>' + this.props[i] + '</p>';
+		if (this.ownerId)
+			result += '<p>Owner: ' + this.ownerId + '</p>';
+		if (this.tokensNum)
+			result += '<p>Number of tokens: ' + this.tokensNum + '</p>';
+		if (this.holeInTheGround)
+			result += '<p>Hole in the ground</p>';
+		if (this.encampment)
+			result += '<p>Encampment</p>';
+		if (this.dragon)
+			result += '<p>Dragon</p>';
+		if (this.fortress)
+			result += '<p>Fortress</p>';
+		if (this.hero)
+			result += '<p>Hero</p>';
+		if (this.inDecline)
+			result += '<p>Declined</p>';
+		return result;
+	},
 	hasProperty: function(prop)
 	{
 		for (var i = 0; i < this.props.length; ++i)
@@ -294,7 +317,6 @@ createGameByState = function(gameState)
 	}
 
 	Client.currGameState.state = (gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'];
-	
 	mapState = gameState['map'];
 	regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
 			'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']

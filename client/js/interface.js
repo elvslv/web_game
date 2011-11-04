@@ -131,7 +131,22 @@ Interface.updateGameTab = function()
 	{
 		$('#region' + (i + 1)).click(function(j){
 			return function(){
-				alert(j);					
+				$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
+				$('#confirm').dialog({
+					resizable: false,
+					height:140,
+					modal: true,
+					buttons: {
+						"Conquer": function() {
+							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+								['conquer', user().sid, j]), conquerResponse);	
+							$(this).dialog('close');
+						},
+						Cancel: function() {
+							$(this).dialog('close');
+						}
+					}});
+				$('#confirm').dialog('open');
 			}
 		}(i + 1));
 	}
