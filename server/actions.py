@@ -58,20 +58,15 @@ def act_uploadMap(data):
 	name = data['mapName']
 	playersNum = int(data['playersNum'])
 	result = list()
-	print 8
 	checkFiles(data['thumbnail'], data['picture'])
 	newMap = Map(name, playersNum, data['turnsNum'], data['thumbnail'], 
 		data['picture'])
-	print 9
 	dbi.addUnique(newMap, 'mapName')
-	print 3
 	mapId = newMap.id
 	if 'regions' in data:
-		print 4
 		regions = data['regions']
 		curId = 1
 		for regInfo in regions:
-			print 5
 			try:	
 				dbi.addRegion(curId, newMap, regInfo)
 			except KeyError:
@@ -133,7 +128,6 @@ def act_doSmth(data):
 
 def createDefaultMaps():
 	for map_ in misc.defaultMaps:
-		print 1
 		act_uploadMap(map_)
 
 def act_resetServer(data):
@@ -152,8 +146,7 @@ def act_resetServer(data):
 def act_saveGame(data):
 	result = list()
 	game = dbi.getXbyY('Game', 'id', data['gameId'])
-	row = filter(lambda x: x.gameId == game.id, game.gameHistory)
-	for action in row:
+	for action in game.gameHistory:
 		result.append(json.loads(action.action))
 	return {'result': 'ok', 'actions': result}
 

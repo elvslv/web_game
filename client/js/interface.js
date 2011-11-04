@@ -119,6 +119,7 @@ Interface.updateGameTab = function()
 			}
 		}
 	}).appendTo('#ui-tabs-1');
+	drawMap(Client.currGameState.map);
 	$('#leaveGame')
 		.button()
 		.click(function(){
@@ -126,7 +127,7 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
-	$('#imgmap').maphilight();
+/*	$('#imgmap').maphilight();
 	for (var i = 0; i < game().map.regions.length; ++i)
 	{
 		$('#region' + (i + 1)).click(function(j){
@@ -149,7 +150,7 @@ Interface.updateGameTab = function()
 				$('#confirm').dialog('open');
 			}
 		}(i + 1));
-	}
+	}*/
 	Interface.prepareForActions();
 }
 

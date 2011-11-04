@@ -29,12 +29,14 @@ possiblePrevCmd[GAME_DEFEND] = [GAME_CONQUER];
 possiblePrevCmd[GAME_CHOOSE_FRIEND] = [GAME_REDEPLOY];
 
 Region = $.inherit({
-	__constructor: function(id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
-		encampment, dragon, fortress, hero, inDecline, x_race, y_race, x_power, y_power)
+	__constructor: function(id, adjacent, landscape, bonus, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
+		encampment, dragon, fortress, hero, inDecline, raceCoords, powerCoords, bonusCoords, coordinates)
 	{
-		this.id = id;
+		this.id = id;							
 		this.adjacent = adjacent.copy();
+		this.landscape = landscape;
 		this.props = props.copy();
+		this.bonus = bonus;
 		this.ownerId = ownerId;
 		this.tokenBadgeId = tokenBadgeId;
 		this.tokensNum = tokensNum;
@@ -44,10 +46,10 @@ Region = $.inherit({
 		this.fortress = fortress; 
 		this.hero = hero;
 		this.inDecline = inDecline;
-		this.x_race = x_race;
-		this.y_race = y_race;
-		this.x_power = x_power;
-		this.y_power = y_power;
+		this.raceCoords = parseArray(raceCoords);
+		this.bonusCoords = parseArray(bonusCoords);
+		this.powerCoords = parseArray(powerCoords);
+		this.coordinates = parseArray(coordinates);
 	},
 	htmlRegionInfo: function()
 	{
@@ -259,10 +261,12 @@ createGameByState = function(gameState)
 		for (var i = 0; i < mapState.regions.length; ++i)
 		{
 			curReg = mapState.regions[i].currentRegionState;
-			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].constRegionState, 
+			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].landscape,
+				mapState.regions[i].bonus, mapState.regions[i].constRegionState, 
 				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
-				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, curReg.x_race,
-				curReg.y_race, curReg.x_power, curReg.y_power));
+				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, 
+				mapState.regions[i].raceCoords, mapState.regions[i].bonusCoords, 
+				mapState.regions[i].powerCoords, mapState.regions[i].coordinates));
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
@@ -319,7 +323,7 @@ createGameByState = function(gameState)
 	Client.currGameState.state = (gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'];
 	mapState = gameState['map'];
 	regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
-			'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']
+			'dragon', 'fortress', 'hero', 'inDecline']
 	for (var i = 0; i < mapState.regions.length; ++i)
 		for (var j = 0; j < regionFields.length; ++j)
 			Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i][regionFields[j]];

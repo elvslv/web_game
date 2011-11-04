@@ -12,6 +12,7 @@
 		<script type="text/javascript" src="js/scripts/jquery.inherit-1.3.2.M.js"></script>
 		<script type="text/javascript" src="js/scripts/jquery.maphilight.min.js"></script>
 		<script type="text/javascript" src="js/utils.js"></script> 
+		<script type="text/javascript" src="js/graphics.js"></script> 
 		<script type="text/javascript" src="js/data.js"></script> 
 		<script type="text/javascript" src="js/game.js"></script> 
 		<script type="text/javascript" src="js/races.js"></script> 
@@ -106,7 +107,7 @@
 		<p style="margin: 10px;">Coins: ${coins}</p>
 		<p style="margin: 10px;">Tokens in hand: ${tokensInHand}</p>
 		<table>
-			{{if $item.data.currentTokenBadge != undefined}}
+			{{if $item.data.currentTokenBadge}}
 			<tr>
 				<td colspan = "3">Current token badge:</td>
 			</tr>
@@ -114,7 +115,7 @@
 				<td class = {{html ''.concat($item.data.currentTokenBadge.raceName)}}></td>
 				<td class =  {{html ''.concat($item.data.currentTokenBadge.specPowName)}}></td>
 				<td>{{html $item.data.currentTokenBadge.totalTokensNum}}</td>
-				{{if $item.data.id == $item.currentUser()}}
+				{{if $item.data.id === $item.currentUser()}}
 					<td>
 						<button id = "decline" style = "display: none">Decline</button>
 					</td>
@@ -158,10 +159,7 @@
 			</td>
 			<td rowspan = "12" valign = "top">
 				<div style = "margin-left: 250px;">
-					<img id = "imgmap" src = {{html $item.data.map.picture}} usemap = "#map">
-					<map name = "map" id = "map" valign = "top">
-						{{tmpl(map.regions, $item.opts) "#regionsTemplate"}}
-					</map>
+					<canvas id="map" width="630" height="515"></canvas>
 				</div>
 			</td>
 		</tr>

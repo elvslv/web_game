@@ -504,177 +504,177 @@ defaultMaps = [
 		'turnsNum': 10,
 	 	'regions' : 
 	 	[
-	 		{
-				'population': 1,
-	 			'landDescription' : ['border', 'coast', 'forest', 'magic'],  #1
+			{	
+				'landDescription' : ['border', 'coast', 'magic', 'forest'],  		#1
+				'coordinates' : [[0, 0], [0, 128], [46, 145], [125, 140], [103, 0]],
 	 			'adjacent' : [2, 6],
-				'x_race': 15,
-				'y_race': 15,
-				'x_power': 15,
-				'y_power': 80
+				'bonusCoords' : [74, 30],
+				'raceCoords': [31, 36],
+				'powerCoords' : [26, 96]
 	 		},
-			{
-	 			'landDescription' : ['border', 'sea'],  #2
+			{	
+	 			'landDescription' : ['border', 'coast', 'magic', 'sea'], 			#2
+				'coordinates' : [[103, 0], [125, 140], [202, 103], [258, 101], [275, 77], [264, 0]],
 	 			'adjacent' : [1, 3, 6, 7],
-				'x_race': 130,
-				'y_race': 8,
-				'x_power': 130,
-				'y_power': 64
-	 		},{
-	 			'landDescription' : ['border', 'coast', 'farmland', 'magic'],  #3
-	 			'adjacent' : [2, 4, 7, 8],
-				'x_race': 285,
-				'y_race': 8,
-				'x_power': 317,
-				'y_power': 65 
+				'raceCoords': [184, 73],
+				'powerCoords' : [234, 53]
+	 		},			
+			
+			{	
+	 			'landDescription' : ['coast', 'magic', 'farmland'],					#3  
+				'coordinates' : [[264, 0], [275, 77], [258, 101], [273, 137], [295, 142], [391, 109], [409, 94], [393, 42], [403, 0]],
+	 			'adjacent' : [2, 7, 6, 8],
+				'bonusCoords' : [307, 94],
+				'raceCoords': [330, 32],
+				'powerCoords' : [364, 83]
 	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['border', 'coast', 'forest', 'mine'],  #4
+		
+			{		
+	 			'landDescription' : ['border', 'coast', 'mine', 'forest'],			#4 
 	 			'adjacent' : [3, 5, 8, 9, 10],
-				'x_race': 8,
-				'y_race': 412,
-				'x_power': 419,
-				'y_power': 65
+				'coordinates' : [[403, 0], [392, 42], [409, 94], [391, 109], [422, 176], [508, 158], [535, 104], [502, 78], [555, 0]],
+				'raceCoords': [8, 412],
+				'powerCoords' : [444, 39],
+				'bonusCoords' : [459, 75]
 	 		},
-			{
-	 			'landDescription' : ['border', 'swamp', 'cavern'],  #5
+
+			{	
+	 			'landDescription' : ['border', 'swamp', 'cavern'], 					#5
+				'coordinates' : [[555, 0],  [502, 78], [535, 104], [630, 120], [630, 0]],
 	 			'adjacent' : [4, 10],
-				'x_race': 560,
-				'y_race': 4,
-				'x_power': 570,
-				'y_power': 55
+				'raceCoords': [560, 4],
+				'powerCoords' : [570, 55],
+				'bonusCoords' : [548, 68]
 	 		},
-			{
-	 			'landDescription' : ['border', 'coast', 'hill'],  #6
+			
+			{	
+	 			'landDescription' : ['border', 'coast', 'hill'],					#6
+				'coordinates' : [[0, 128], [46, 145], [125, 140], [130, 253], [89, 235], [0, 279]],		
 	 			'adjacent' : [1, 2, 7, 11],
-				'x_race': 63,
-				'y_race': 165,
-				'x_power': 6,
-				'y_power': 195
+				'raceCoords': [63, 145],
+				'powerCoords' : [6, 195]
 	 		},
-			{
-	 			'landDescription' : ['mountain', 'coast', 'mountain', 'mine', 'cavern']
-,  #7
+
+			{																		#7
+	 			'landDescription' : ['mountain', 'coast', 'mine', 'mountain'],  
 	 			'adjacent' : [2, 3, 6, 8, 11, 12],
-				'x_race': 150,
-				'y_race': 190,
-				'x_power': 167,
-				'y_power': 35
+				'coordinates' : [[125, 140], [130, 253], [160, 251], [268, 218], [303, 172], [295, 142], [273, 137], [258, 101], [202, 103]],
+				'bonusCoords': [263, 166],
+				'raceCoords': [150, 190],
+				'powerCoords' : [167, 35],
 	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['mountain', 'coast', 'hill'],  #8
+
+			{	
+	 			'landDescription' : [ 'coast', 'hill'], 							#8
 	 			'adjacent' : [3, 4, 7, 9, 12, 13],
-				'x_race': 300,
-				'y_race': 191,
-				'x_power': 333,
-				'y_power': 137 
+				'coordinates' : [[268, 218], [303, 172], [295, 142], [391, 109], [422, 176], [446, 232], [393, 273], [348, 248], [309, 251]],
+				'raceCoords': [300, 191],
+				'powerCoords' : [333, 137],
 	 		},
-			{
-	 			'landDescription' : ['sea'],  #9
+
+			{																		#9
+	 			'landDescription' : ['sea'],  
+				'coordinates' : [[393, 273], [446, 232], [422, 176], [508, 158], [547, 238], [565, 271], [508, 314]],
 	 			'adjacent' : [4, 8, 10, 13, 14],
-				'x_race': 448,
-				'y_race': 240,
-				'x_power': 453,
-				'y_power': 180 
-	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['border', 'coast', 'mountain'],  #10
+				'raceCoords': [448, 240],
+				'powerCoords' : [453, 180]
+ 			},
+
+			{																		#10
+	 			'landDescription' : ['border', 'coast', 'mountain'],
 	 			'adjacent' : [4, 5, 9, 14],
-				'x_race': 546,
-				'y_race': 180,
-				'x_power': 536,
-				'y_power': 123
+				'coordinates' : [[508, 158],  [535, 104], [630, 120], [630, 240], [547, 238]],
+				'raceCoords': [546, 180],
+				'powerCoords' : [536, 123]
 	 		},
-			{
-	 			'landDescription' : ['border', 'sea'],  #11
+
+			{																		#11
+	 			'landDescription' : ['border', 'sea'],  
 	 			'adjacent' : [6, 7, 12, 15],
-				'x_race': 7,
-				'y_race': 305,
-				'x_power': 65,
-				'y_power': 253 
+				'coordinates' : [[0, 279],[89, 235],[130, 253], [160, 251], [155, 340], [113, 343], [0, 375]],
+				'raceCoords': [7, 305],
+				'powerCoords' : [65, 253]
 	 		},
-			{
-	 			'landDescription' : ['coast', 'farmland'],  #12
+
+			{																		#12
+	 			'landDescription' : ['coast', 'farmland'], 
+				'coordinates' : [[160, 251], [155, 340], [216, 339], [278, 329], [310, 287], [309, 251], [268, 218]],
 	 			'adjacent' : [7, 8, 11, 13, 15, 17],
-				'x_race': 214,
-				'y_race': 253,
-				'x_power': 163,
-				'y_power': 287 
+				'raceCoords': [214, 253],
+				'powerCoords' : [163, 287]
 	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['coast', 'forest'],  #13
+
+			{																		#13
+	 			'landDescription' : ['coast', 'forest'],  
+				'coordinates' : [[278, 329], [310, 287], [309, 251], [348, 248], [393, 273],  [508, 314], [512, 371], [405, 410]],
 	 			'adjacent' : [8, 9, 12, 14, 17, 18, 19],
-				'x_race': 380,
-				'y_race': 313,
-				'x_power': 318,
-				'y_power': 295
+				'raceCoords': [380, 313],
+				'powerCoords' : [318, 215]
 	 		},
-			{
-	 			'landDescription' : ['border', 'coast', 'farmland', 'magic'],  #14
+
+			{	
+	 			'landDescription' : ['border', 'coast', 'magic', 'farmland'],		#14
+				'coordinates' : [[508, 314], [512, 371], [556, 415], [630, 416], [630, 240], [547, 238], [565, 271]], 
 	 			'adjacent' : [9, 10, 13, 19, 20],
-				'x_race': 546,
-				'y_race': 348,
-				'x_power': 565,
-				'y_power': 287
+				'bonusCoords' : [599, 275],
+				'raceCoords': [546, 348],
+				'powerCoords' : [565, 287]
+		
 	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['border', 'coast', 'swamp', 'magic'],  #15
+
+			{																		#15
+	 			'landDescription' : ['border', 'coast', 'magic', 'swamp'], 
 	 			'adjacent' : [11, 12, 16, 17],
-				'x_race': 87,
-				'y_race': 375,
-				'x_power': 28,
-				'y_power': 376
+				'coordinates' : [[0, 375], [113, 343], [155, 340],[216, 339],[245, 385], [184, 465], [0, 421]],
+				'bonusCoords' : [192, 379],
+				'raceCoords': [87, 375],
+				'powerCoords' : [28, 376] 
+			},
+
+			{	
+	 			'landDescription' : ['border', 'hill', 'cavern'],					#16
+				'coordinates' : [[0, 421], [184, 465], [186, 515], [0, 515]],
+				'bonusCoords' : [129, 483],
+				'raceCoords': [62, 458],
+				'powerCoords' : [6, 458],
+	 			'adjacent' : [15, 17]
 	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['border', 'hill', 'cavern'],  #16
-	 			'adjacent' : [15, 17],
-				'x_race': 62,
-				'y_race': 458,
-				'x_power': 6,
-				'y_power': 458
-	 		},
-			{
-	 			'landDescription' : ['border', 'mountain', 'mine'],  #17
+
+			{																		#17
+	 			'landDescription' : ['border', 'mountain', 'mine'],  
 	 			'adjacent' : [12, 13, 15, 16, 18],
-				'x_race': 202,
-				'y_race': 460,
-				'x_power': 244,
-				'y_power': 398
+				'coordinates' : [[216, 339], [278, 329], [335, 365], [289, 515], [186, 515], [184, 465], [245, 385]],
+				'bonusCoords' : [273, 360],
+				'raceCoords': [202, 460],
+				'powerCoords' : [244, 398]
 	 		},
-			{
-	 			'landDescription' : ['border', 'hill', 'cavern'],  #18
+
+			{																		#18
+	 			'landDescription' : ['border', 'cavern', 'hill'],  
+				'coordinates' : [[289, 515], [335, 365], [405, 410], [408, 515]],
+				'bonusCoords' : [378, 486],
 	 			'adjacent' : [13, 17, 19],
-				'x_race': 324,
-				'y_race': 411,
-				'x_power':308,
-				'y_power': 464
+				'raceCoords': [324, 411],
+				'powerCoords' : [308, 464]
 	 		},
-			{
-				'population': 1,
-	 			'landDescription' : ['border', 'swamp', 'mine'],  #19
+
+			{																		#19
+	 			'landDescription' : ['border', 'mine', 'swamp'],
+				'coordinates' : [[408, 515], [405, 410], [512, 371], [556, 415], [518, 468], [523, 515]],
 	 			'adjacent' : [13, 14, 18, 20],
-				'x_race': 419,
-				'y_race': 411,
-				'x_power': 437,
-				'y_power': 466
+				'bonusCoords' : [514, 418],
+				'raceCoords': [419, 411],
+				'powerCoords' : [437, 466]
 	 		},
-			{
-	 			'landDescription' : ['border', 'mountain'],  #20
-	 			'adjacent' : [14, 19],
-				'x_race': 529,
-				'y_race': 466,
-				'x_power': 582,
-				'y_power': 422
-	 		}
-	 	], 
+
+			{																		#20
+	 			'landDescription' : ['border', 'mountain'], 
+				'coordinates' : [[523, 515], [518, 468], [556, 415], [630, 416], [630, 515]],
+				'adjacent' : [14, 19],
+				'raceCoords': [529, 466],
+				'powerCoords' : [582, 422]
+			}
+		],
 		'thumbnail': 'maps/map1Thumb.jpg', 'picture': 'maps/map1.jpg'
 	}
-			
-]
-
+];

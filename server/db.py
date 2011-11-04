@@ -79,17 +79,15 @@ class Database:
 			raise BadFieldException("""%sTaken""" % name)
     
 	def addRegion(self, id, map_, regInfo):
-		print 0
 		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
 		if not 'population' in regInfo:
 			regInfo['population'] = 0
-
 		reg = Region(id, regInfo['population'], map_, 
-			regInfo['x_race'] if 'x_race' in regInfo else None, 
-			regInfo['y_race'] if 'y_race' in regInfo else None, 
-			regInfo['x_power'] if 'x_power' in regInfo else None, 
-			regInfo['y_power'] if 'y_power' in regInfo else None)
+			regInfo['raceCoords'] if 'raceCoords' in regInfo else None, 
+			regInfo['powerCoords'] if 'powerCoords' in regInfo else None,
+			regInfo['bonusCoords'] if 'bonusCoords' in regInfo else None,
+			regInfo['coordinates'] if 'coordinates' in regInfo else None)
 		for descr in regInfo['landDescription']:
 			if not descr in misc.possibleLandDescription[:11]:
 				raise BadFieldException('unknownLandDescription')
@@ -357,10 +355,10 @@ class Region(Base):
 	hill = Column(Boolean, default=False) 
 	swamp = Column(Boolean, default=False) 
 	cavern = Column(Boolean, default=False)
-	x_race = Column(Integer)
-	y_race = Column(Integer)
-	x_power = Column(Integer)
-	y_power = Column(Integer)
+	raceCoords = Column(String)
+	powerCoords = Column(String)
+	bonusCoords = Column(String)
+	coordinates = Column(String)
 	
 	map = relationship(Map, backref=backref('regions', order_by=id))
 	neighbors = relationship('Adjacency' , cascade="all,delete", 
@@ -368,14 +366,14 @@ class Region(Base):
 		Region.mapId==Adjacency.mapId)')
 		
 
-	def __init__(self, id, defTokensNum, map_, x_race, y_race, x_power, y_power): 
+	def __init__(self, id, defTokensNum, map_, raceCoords, powerCoords, bonusCoords, coordinates): 
 		self.id = id
 		self.defTokensNum = defTokensNum
 		self.map = map_
-		self.x_race = x_race
-		self.y_race = y_race
-		self.x_power = x_power
-		self.y_power = y_power
+		self.raceCoords = str(raceCoords)
+		self.powerCoords = str(powerCoords)
+		self.bonusCoords = str(bonusCoords)
+		self.coordinates = str(coordinates)
 
 	def getState(self, gameId):
 		state = filter(lambda x : x.gameId == gameId, self.states)
