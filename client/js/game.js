@@ -102,6 +102,10 @@ Region = $.inherit({
 			if (this.encampment || !this.tokensNum || this.tokensNum > 1 || this.inDecline)
 				return true;
 		return false;
+	},
+	drawTokenBadge: function()
+	{
+		
 	}
 
 });
@@ -128,7 +132,8 @@ Map = $.inherit(
 });
 
 Game = $.inherit({
-	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players)
+	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
+		tokenBadgesInGame)
 	{
 		this.id = id;
 		this.name = name;
@@ -139,6 +144,7 @@ Game = $.inherit({
 		this.activePlayerIndex = activePlayerIndex;
 		this.tokenBadges = tokenBadges.copy();
 		this.players = players.copy();
+		this.tokenBadgesInGame = tokenBadgesInGame.copy();
 	},
 	setState: function(state)
 	{
@@ -259,78 +265,32 @@ createTokenBadge = function(tokenBadge)
 
 createGameByState = function(gameState)
 {
-	if (!Client.currGameState) //we must create map, regions, tokenBadges
+	mapState = gameState['map'];
+	if (!Client.currGameState)
 	{
-		mapState = gameState['map'];
 		regions = [];
 		for (var i = 0; i < mapState.regions.length; ++i)
 		{
 			curReg = mapState.regions[i].currentRegionState;
-			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].constRegionState, 
-				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
-				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, mapState.regions[i].x_race,
-				mapState.regions[i].y_race, mapState.regions[i].x_power, mapState.regions[i].y_power,
-				mapState.regions[i].x_min, mapState.regions[i].x_max, mapState.regions[i].y_min, mapState.regions[i].y_max));
+			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, 
+				mapState.regions[i].constRegionState, curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, 
+				curReg.holeInTheGround, curReg.encampment, curReg.dragon, curReg.fortress, curReg.hero, 
+				curReg.inDecline, mapState.regions[i].x_race, mapState.regions[i].y_race, 
+				mapState.regions[i].x_power, mapState.regions[i].y_power, mapState.regions[i].x_min, 
+				mapState.regions[i].x_max, mapState.regions[i].y_min, mapState.regions[i].y_max));
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
-		tokenBadges = [];
-		visibleBadges = gameState.visibleTokenBadges;
-		for (var i = 0; i < visibleBadges.length; ++i)
-		{
-			tokenBadge = new TokenBadge(0, visibleBadges[i].raceName, visibleBadges[i].specialPowerName, i, visibleBadges[i].bonusMoney)
-			tokenBadges.push(tokenBadge);
-		}
-		players = [];
-		activePlayerIndex = undefined;
-		userFields = ['isReady', 'coins', 'tokensInHand', 'priority', 'inGame'];
-		for (var i = 0; i < gameState.players.length; ++i)
-		{
-			if (gameState.players[i].id == gameState.activePlayerId)
-				activePlayerIndex = i;
-			if (gameState.players[i].id == Client.currentUser.id)
-			{
-				player = Client.currentUser;
-			}
-			else
-				player = new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
-			for (var j = 0; j < userFields.length; ++j)
-				player[userFields[j]] = gameState.players[i][userFields[j]];
-			if (player.id == Client.currentUser.id)
-			{
-				if (!Client.currentUser.currentTokenBadge &&  gameState.players[i].currentTokenBadge || 
-					Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
-					gameState.players[i].currentTokenBadge.tokenBadgeId)
-				{
-					Client.currentUser.currentTokenBadge = createTokenBadge(
-						gameState.players[i].currentTokenBadge);
-					Client.currentUser.currentTokenBadge.inDecline = false;
-				}
-				if (!Client.currentUser.declinedTokenBadge && gameState.players[i].declinedTokenBadge||
-					Client.currentUser.declinedTokenBadge && Client.currentUser.declinedTokenBadge.id != 
-					gameState.players[i].declinedTokenBadge.tokenBadgeId)
-				{
-					Client.currentUser.declinedTokenBadge = createTokenBadge(
-						gameState.players[i].declinedTokenBadge);
-					Client.currentUser.declinedTokenBadge.inDecline = true;
-				}
-			}
-			players.push(player);
-				
-		}
-		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
-			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
-			gameState.currentTurn, activePlayerIndex, tokenBadges, players);
-		return result;
 	}
-
-	Client.currGameState.state = (gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'];
-	mapState = gameState['map'];
-	regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
-			'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']
-	for (var i = 0; i < mapState.regions.length; ++i)
-		for (var j = 0; j < regionFields.length; ++j)
-			Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i][regionFields[j]];
+	else
+	{
+		regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
+		'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']
+		for (var i = 0; i < mapState.regions.length; ++i)
+			for (var j = 0; j < regionFields.length; ++j)
+				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i][regionFields[j]];
+	}
+	
 	tokenBadges = [];
 	visibleBadges = gameState.visibleTokenBadges;
 	for (var i = 0; i < visibleBadges.length; ++i)
@@ -338,7 +298,8 @@ createGameByState = function(gameState)
 		tokenBadge = new TokenBadge(0, visibleBadges[i].raceName, visibleBadges[i].specialPowerName, i, visibleBadges[i].bonusMoney)
 		tokenBadges.push(tokenBadge);
 	}	
-	Client.currGameState.tokenBadges = tokenBadges.copy();
+
+	tokenBadgesInGame = [];
 	players = [];
 	activePlayerIndex = undefined;
 	userFields = ['isReady', 'coins', 'tokensInHand', 'priority', 'inGame'];
@@ -350,30 +311,38 @@ createGameByState = function(gameState)
 			new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
 		for (var j = 0; j < userFields.length; ++j)
 			player[userFields[j]] = gameState.players[i][userFields[j]];
-		if (player.id == Client.currentUser.id)
+		if (gameState.players[i].currentTokenBadge)
 		{
-			if (!Client.currentUser.currentTokenBadge &&  gameState.players[i].currentTokenBadge || 
-				Client.currentUser.currentTokenBadge && Client.currentUser.currentTokenBadge.id != 
-				gameState.players[i].currentTokenBadge.tokenBadgeId)
-			{
-				Client.currentUser.currentTokenBadge = createTokenBadge(
-					gameState.players[i].currentTokenBadge);
-				Client.currentUser.currentTokenBadge.inDecline = false;
-			}
-			if (!Client.currentUser.declinedTokenBadge && gameState.players[i].declinedTokenBadge||
-				Client.currentUser.declinedTokenBadge && Client.currentUser.declinedTokenBadge.id != 
-				gameState.players[i].declinedTokenBadge.tokenBadgeId)
-			{
-				Client.currentUser.declinedTokenBadge = createTokenBadge(
-					gameState.players[i].declinedTokenBadge);
-				Client.currentUser.declinedTokenBadge.inDecline = true;
-			}
+			player.currentTokenBadge = createTokenBadge(
+				gameState.players[i].currentTokenBadge);
+			player.currentTokenBadge.inDecline = false;
+			tokenBadgesInGame[player.currentTokenBadge.id] = player.currentTokenBadge;
+		}
+		if (gameState.players[i].declinedTokenBadge)
+		{
+			player.declinedTokenBadge = createTokenBadge(
+				gameState.players[i].declinedTokenBadge);
+			player.declinedTokenBadge.inDecline = true;
+			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		}
 		players.push(player);
 	}
-	Client.currGameState.players = players.copy();
-	Client.currGameState.activePlayerIndex = activePlayerIndex;
-	return Client.currGameState;
+	
+	if (!Client.currGameState)
+	{
+		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
+			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
+			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame);
+	}
+	else
+	{
+		Client.currGameState.tokenBadges = tokenBadges.copy();
+		Client.currGameState.tokenBadgesInGame = tokenBadgesInGame.copy();
+		Client.currGameState.players = players.copy();
+		Client.currGameState.activePlayerIndex = activePlayerIndex;
+		result = Client.currGameState;
+	}
+	return result;
 }
 
 alreadyAttacked = function(attackType)
