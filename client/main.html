@@ -104,7 +104,7 @@
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
 		<p style="margin: 10px;">Coins: ${coins}</p>
-		<p style="margin: 10px;">Tokens in hand: ${tokensInHand}</p>
+		<p id = "freeTokens" style="margin: 10px;">Tokens in hand: ${tokensInHand}</p>
 		<table>
 			{{if $item.data.currentTokenBadge != undefined}}
 			<tr>

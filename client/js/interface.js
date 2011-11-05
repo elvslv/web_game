@@ -126,6 +126,7 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
+	$('#freeTokens').draggable();
 	$('#imgmap').maphilight();
 	for (var i = 0; i < game().map.regions.length; ++i)
 	{
@@ -182,6 +183,11 @@ Interface.updateGameTab = function()
 					$('#btnDragonAttack').hide();				
 			}
 		}(i + 1));
+		$('#region' + (i + 1)).droppable({
+			drop: function( event, ui ) {
+				alert( "Dropped!" );
+			}
+		});
 		game().map.regions[i].drawTokenBadge();
 	}
 	Interface.prepareForActions();
