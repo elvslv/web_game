@@ -82,9 +82,9 @@ Interface.prepareForActions = function()
 	Interface.prepareForRaceSelect();
 	Interface.prepareForDecline();
 	Interface.prepareForFinishTurn();
-	Interface.prepareForConquer();
+	//Interface.prepareForConquer();
 	Interface.prepareForSelectFriend();
-	Interface.prepareForEnchant();
+	//Interface.prepareForEnchant();
 }
 
 Interface.updateGameTab = function()
@@ -131,22 +131,55 @@ Interface.updateGameTab = function()
 	{
 		$('#region' + (i + 1)).click(function(j){
 			return function(){
+				$('#confirmInfo').empty();
 				$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
 				$('#confirm').dialog({
-					resizable: false,
-					height:140,
+					height:250,
+					title: 'region ' + j,
 					modal: true,
-					buttons: {
-						"Conquer": function() {
+					buttons: [
+					{
+						id: 'btnConquer',
+						text: 'Conquer',
+						click: function() {
 							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
 								['conquer', user().sid, j]), conquerResponse);	
 							$(this).dialog('close');
-						},
-						Cancel: function() {
+						}
+					},
+					{
+						id: 'btnEnchant',
+						text: 'Enchant',
+						click: function() {
+							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+								['enchant', user().sid, j]), enchantResponse);
 							$(this).dialog('close');
 						}
-					}});
+					},
+					{
+						id: 'btnDragonAttack',
+						text: 'Dragon attack',
+						click: function() {
+							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+								['dragonAttack', user().sid, j]), dragonAttackResponse);
+							$(this).dialog('close');
+						}
+					},
+					{
+						id: 'btnCancel',
+						text: 'Cancel',
+						click: function() {
+							$(this).dialog('close');
+						}
+					}
+					]});
 				$('#confirm').dialog('open');
+				if (!(canBeginConquer() && canConquer(game().map.regions[j - 1])))
+					$('#btnConquer').hide();
+				if (!(canBeginEnchant() && canEnchant(game().map.regions[j - 1])))
+					$('#btnEnchant').hide();
+				if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
+					$('#btnDragonAttack').hide();				
 			}
 		}(i + 1));
 	}

@@ -30,7 +30,8 @@ possiblePrevCmd[GAME_CHOOSE_FRIEND] = [GAME_REDEPLOY];
 
 Region = $.inherit({
 	__constructor: function(id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
-		encampment, dragon, fortress, hero, inDecline, x_race, y_race, x_power, y_power)
+		encampment, dragon, fortress, hero, inDecline, x_race, y_race, x_power, y_power,
+		x_min, x_max, y_min, y_max)
 	{
 		this.id = id;
 		this.adjacent = adjacent.copy();
@@ -48,6 +49,12 @@ Region = $.inherit({
 		this.y_race = y_race;
 		this.x_power = x_power;
 		this.y_power = y_power;
+		this.x_min = x_min;
+		this.x_max = x_max;
+		this.y_min = y_min;
+		this.y_max = y_max;
+		this.coordsStr = '"' + x_min + ', ' + y_min + ', ' + x_max + ', ' + y_min + ', ' + x_max +
+			', ' + y_max + ', ' + x_min + ', ' + y_max + '"';
 	},
 	htmlRegionInfo: function()
 	{
@@ -261,8 +268,9 @@ createGameByState = function(gameState)
 			curReg = mapState.regions[i].currentRegionState;
 			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, mapState.regions[i].constRegionState, 
 				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
-				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, curReg.x_race,
-				curReg.y_race, curReg.x_power, curReg.y_power));
+				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, mapState.regions[i].x_race,
+				mapState.regions[i].y_race, mapState.regions[i].x_power, mapState.regions[i].y_power,
+				mapState.regions[i].x_min, mapState.regions[i].x_max, mapState.regions[i].y_min, mapState.regions[i].y_max));
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);

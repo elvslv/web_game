@@ -96,7 +96,7 @@
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
 </script>
 <script id="regionsTemplate" type="text/x-jquery-tmpl"> 
-	<area shape = "circle" coords = {{html $item.coords($item.data.id)}} id = "{{html 'region'.concat($item.data.id)}}"/>
+	<area shape = "poly" coords = {{html $item.data.coordsStr}} id = "{{html 'region'.concat($item.data.id)}}"/>
 </script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
@@ -196,16 +196,7 @@
 			<td colspan = "2">
 				<button id = "finishTurn" style = "display: none">Finish turn</button>
 			</td>
-		</tr>
-		<tr>
-			<td>
-				<select id = "possibleRegions" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "conquer" style = "display: none">Conquer</button>
-			</td>
-		</tr>		
+		</tr>	
 		<tr>
 			<td>
 				<select id = "possibleFriends" style = "display: none">
@@ -218,24 +209,6 @@
 		<tr>
 			<td colspan = "2">
 				<button id = "throwDice" style = "display: none">Throw dice</button>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<select id = "possibleRegionsForEnchant" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "enchant" style = "display: none">Enchant</button>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<select id = "possibleRegionsForDragonAttack" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "dragonAttack" style = "display: none">Dragon attack</button>
 			</td>
 		</tr>
 	</table>
