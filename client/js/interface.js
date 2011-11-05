@@ -119,7 +119,7 @@ Interface.updateGameTab = function()
 			}
 		}
 	}).appendTo('#ui-tabs-1');
-	drawMap(Client.currGameState.map);
+	Graphics.drawMap(Client.currGameState.map);
 	$('#leaveGame')
 		.button()
 		.click(function(){

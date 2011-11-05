@@ -49,7 +49,7 @@ Region = $.inherit({
 		this.raceCoords = parseArray(raceCoords);
 		this.bonusCoords = parseArray(bonusCoords);
 		this.powerCoords = parseArray(powerCoords);
-		this.coordinates = parseArray(coordinates);
+		this.coordinates = toPolygon(parseArray(coordinates));
 	},
 	htmlRegionInfo: function()
 	{

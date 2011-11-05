@@ -2,6 +2,8 @@ var Client = {};
 
 Client.currentUser = Object();
 
+Client.currGameState = undefined;
+	
 Client.gameList = [];
 
 Client.states = [
