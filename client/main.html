@@ -157,7 +157,7 @@
 				<button id = "leaveGame">leave</button>
 			</td>
 			<td rowspan = "12" valign = "top">
-				<div style = "margin-left: 250px;">
+				<div id = "imgdiv" style = "margin-left: 250px;">
 					<img id = "imgmap" src = {{html $item.data.map.picture}} usemap = "#map">
 					<map name = "map" id = "map" valign = "top">
 						{{tmpl(map.regions, $item.opts) "#regionsTemplate"}}

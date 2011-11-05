@@ -105,7 +105,20 @@ Region = $.inherit({
 	},
 	drawTokenBadge: function()
 	{
-		
+		offset = $('#imgdiv').offset();
+		if (this.tokenBadgeId)
+		{
+			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
+			$('#imgdiv').append('<div class = "' + tokenBadge.raceName + ('Token' + 
+				tokenBadge.inDecline ? 'Decline' : '') + '" style = "top: ' + (this.y_race + 
+					offset.top) + '; left: ' + (this.x_race + offset.left) + 
+					'"></div>');
+		}
+		else if (this.tokensNum)
+		{
+			$('#imgdiv').append('<div class = "Declined" style = "top: ' + (this.y_race + 
+					offset.top) + '; left: ' + (this.x_race + offset.left) + '"></div>');
+		}
 	}
 
 });
@@ -285,10 +298,10 @@ createGameByState = function(gameState)
 	else
 	{
 		regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
-		'dragon', 'fortress', 'hero', 'inDecline', 'x_race', 'y_race', 'x_power', 'y_power']
+		'dragon', 'fortress', 'hero', 'inDecline']
 		for (var i = 0; i < mapState.regions.length; ++i)
 			for (var j = 0; j < regionFields.length; ++j)
-				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i][regionFields[j]];
+				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
 	}
 	
 	tokenBadges = [];

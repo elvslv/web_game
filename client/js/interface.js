@@ -182,6 +182,7 @@ Interface.updateGameTab = function()
 					$('#btnDragonAttack').hide();				
 			}
 		}(i + 1));
+		game().map.regions[i].drawTokenBadge();
 	}
 	Interface.prepareForActions();
 }
