@@ -111,12 +111,12 @@ Region = $.inherit({
 			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
 			$('#imgdiv').append('<div class = "' + tokenBadge.raceName + ('Token' + 
 				tokenBadge.inDecline ? 'Decline' : '') + '" style = "top: ' + this.y_race + '; left: ' 
-				+ this.x_race + '"></div>');
+				+ this.x_race + '">' + this.tokensNum + '</div>');
 		}
 		else if (this.tokensNum)
 		{
 			$('#imgdiv').append('<div class = "Declined" style = "top: ' + this.y_race + '; left: ' + 
-				this.x_race + '"></div>');
+				this.x_race + '">' + this.tokensNum + '</div>');
 		}
 	}
 

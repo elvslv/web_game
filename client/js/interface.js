@@ -126,7 +126,7 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
-	$('#freeTokens').draggable();
+	$('#freeTokens').draggable({revert: 'invalid'});
 	$('#imgmap').maphilight();
 	for (var i = 0; i < game().map.regions.length; ++i)
 	{
