@@ -199,7 +199,7 @@ TokenBadge = $.inherit({
 		isNeighbor: function(region)
 		{
 			for (var i = 0; i < Client.currGameState.map.regions; ++i)
-				if (Client.currGameState.map.regions[i].id == region.id)
+				if (Client.currGameState.map.regions[i].adjacent(region))
 					return true; 
 			return false;
 		}

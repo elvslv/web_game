@@ -1,6 +1,8 @@
-Array.prototype.copy = function() {
+Array.prototype.copy = function() 
+{
 		return [].concat(this);
-	};
+};
+		
 includes = function(data, array)
 {
 	for (var i = 0; i < array.length; ++i)
@@ -12,7 +14,7 @@ includes = function(data, array)
 parseArray = function(array){
 	if (!array || array == 'None') return false;
 	return JSON.parse('{ "name" : ' + array + '}').name;
-}
+};
 
 toPolygon = function(array){
 	var i, poly = [], curr = {};

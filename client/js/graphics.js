@@ -15,14 +15,12 @@ Graphics = {};
 
 		
 Graphics.drawMap = function(map) {
-	Graphics.paper = Raphael("map", 630, 515);
+	Graphics.paper = Raphael("map", 630, 620);
 	var paper = Graphics.paper;
-	console.log(paper);
 	var drawRegion = function(region){
 		var path = paths[region.landscape];
-		var stroke = region === Client.selectedRegion ? "#ccc" : "black";
 		var r = paper.path(getSvgPath(region.coordinates))
-				.attr({fill: "url(" + path + ")", "stroke" : stroke, "stroke-width": 3, "stroke-linecap": "round"});
+				.attr({fill: "url(" + path + ")", "stroke-width": 3, "stroke-linecap": "round"});
 		if (region.bonus) {
 			var bonusPath = paths[region.bonus];
 			r.bonus = paper.circle(region.bonusCoords[0], region.bonusCoords[1], 12)
@@ -34,93 +32,56 @@ Graphics.drawMap = function(map) {
 						.attr({fill : "url(" + racePath + ")"});
 		}
 		region.ui = r;
-		r.click(function() {
-		if (Client.selectedRegion)
-			Client.selectedRegion.ui.animate({stroke: "black"}, 300);
-			r.animate({stroke: "#ccc"}, 300);
-			r.toFront();
+		r.model = region;
+		r.mouseover(function() {
+			r.animate({stroke: "#ccc"}, 300).toFront();
 			if (r.bonus) r.bonus.toFront();
 			if (r.race) r.race.toFront();
-			Client.selectedRegion = region;
 		});
+		r.mouseout(function() {
+			r.animate({stroke: "black"}, 300).toFront();
+			if (r.bonus) r.bonus.toFront();
+			if (r.race) r.race.toFront();
+		});
+		var box = r.getBBox();
+		var bounds = paper.rect(box.x, box.y, box.width, box.height)
+			.attr({stroke: "fff"});
+		bounds.parent = r;
+		bounds.onDragOver(function(){
+			console.log('dragging over');
+		});
+		bounds.toFront();
 		return r;
 		};
-    for (var i = 0; i < map.regions.length; ++i)
+	for (var i = 0; i < map.regions.length; ++i)
 		drawRegion(map.regions[i]);
+	var frame = paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
+	var t = paper.text(315, 540, "Units");
+	t.attr({"font": '100 16px "Helvetica Neue", Helvetica', fill: "navy", "text-anchor": "middle"});
+	var race = paper.circle(30, 580, 12).attr({fill : "black"});
+	race.drag(
+		function(dx, dy){
+		this.attr({cx: this.ox + dx, cy: this.oy + dy}); 
 		
-};
-	/*	
-
-Graphics.drawRegion = function(region, ctx){
-	var drawPolygon = function(data) {
-		var i = 0; 
-		ctx.beginPath(); 
-		ctx.moveTo(data.coordinates[0].x, data.coordinates[0].y);
-		for (i = 0; i < data.coordinates.length; ++i) 
-			ctx.lineTo(data.coordinates[i].x, data.coordinates[i].y);
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fill();
-		if (data === Client.currRegion) {
-	 		ctx.fillStyle = 'rgba(255, 0, 255, 0.2)';
-			ctx.fill();
+	},
+	function(){
+		this.ox = this.attr("cx");
+		this.oy = this.attr("cy");
+		this.toFront();
+	},
+	function(){
+		var bounds = paper.getElementByPoint(this.attr("cx"), this.attr("cy"));
+		var reg;
+		if (bounds){
+			console.log(bounds);
+			reg = bounds.parent.model;
+			console.log('here');
+			reg.ui.race = paper.circle(reg.raceCoords[0], reg.raceCoords[1], 12);
 		}
-	};
-	if (region.fillStyle){
-		ctx.fillStyle = region.fillStyle;
-		drawPolygon(region);
-		ctx.fill();
-		if (region.raceImg)
-			ctx.drawImage(region.raceImg, region.raceCoords[0], 
-				region.raceCoords[1], 30, 30);
-		if (region.bonus)
-			ctx.drawImage(region.bonusImg, region.bonusCoords[0], 
-				region.bonusCoords[1], 30, 30);
-		return;
-	}
+		this.attr({cx: this.ox, cy: this.oy}); 
+	});
+	var t2 = paper.text(290, 585, Client.currentUser.tokensInHand); 
+	t2.attr({"font": '100 12px "Helvetica Neue", Helvetica', fill: "navy", "text-anchor": "start"});
 	
-	var landImg = new Image();
-	landImg.onload = function() {
-		region.fillStyle = ctx.createPattern(landImg, 'repeat');
-		ctx.fillStyle = region.fillStyle;
-		drawPolygon(region);
-	};
-	landImg.src = paths[region.landscape];
-	if (region.population) {
-		region.raceImg = new Image();
-		region.raceImg.onload = function(){
-			ctx.drawImage(region.raceImg, region.raceCoords[0], region.raceCoords[1], 30, 30);
-		};
-		region.raceImg.src = paths['natives'];
-	}
-	if (region.bonus) {
-		region.bonusImg = new Image();
-		region.bonusImg.onload = function(){
-			ctx.drawImage(region.bonusImg, region.bonusCoords[0], region.bonusCoords[1], 30, 30);
-		};
-		region.bonusImg.src = paths[region.bonus];
-	};
 };
-
-
-
-
-function drawMap(map){
-	var kin = new Kinetic("map");
-	var ctx = kin.getContext();
-	var canvas = kin.getCanvas();
-	ctx.lineWidth = 7;
-	var i = 0;
-	for (i = 0; i < map.regions.length; ++i)
-		Graphics.drawRegion(map.regions[i], ctx);
-	canvas.addEventListener("mousedown", function(){
-			console.log(window.evt);
-            var mousePos = kin.getMousePos();
-			console.log(mousePos);
-			var region = getRegion(mousePos);
-			if (region){
-				Client.currRegion = region;
-				Graphics.drawRegion(region);	
-			}
-        });
-};*/
+	
