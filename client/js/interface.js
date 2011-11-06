@@ -10,11 +10,13 @@ Interface.gameTab = function()
 				'<button id = "leaveGame">leave</button>' +
 			'</td>' +
 			'<td rowspan = "12" valign = "top">' +
-				'<div id = "imgdiv" style = "margin-left: 250px; position: relative">' +
+				'<div style = "margin-left: 250px; position: relative">' +
+					'<div id = "imgdiv" style = "position: absolute;">' +
+					'</div>' +
 					'<img id = "imgmap" src = "' + game().map.picture + '" usemap = "#map">' +
 					'<map name = "map" id = "map" valign = "top">' +
 					'</map>' +
-				'</div>' +
+				'<div>' +
 			'</td>' +
 		'</tr>' +
 		'<tr>' +
@@ -136,7 +138,7 @@ Interface.updatePage = function()
 		updateGameState();
 	else
 		updateGameList();
-	updateChat();
+	//updateChat();
 	window.setTimeout("Interface.updatePage()", 5000);
 }
 
@@ -168,6 +170,63 @@ Interface.updateGameTab = function()
 				}
 			}
 		}).appendTo('#map');
+		$('#imgmap').maphilight();
+		for (var i = 0; i < game().map.regions.length; ++i)
+		{
+			$('#region' + (i + 1)).click(function(j){
+				return function(){
+					$('#confirmInfo').empty();
+					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
+					$('#confirm').dialog({
+						height:250,
+						title: 'region ' + j,
+						modal: true,
+						buttons: [
+						{
+							id: 'btnConquer',
+							text: 'Conquer',
+							click: function() {
+								sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+									['conquer', user().sid, j]), conquerResponse);	
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnEnchant',
+							text: 'Enchant',
+							click: function() {
+								sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+									['enchant', user().sid, j]), enchantResponse);
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnDragonAttack',
+							text: 'Dragon attack',
+							click: function() {
+								sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+									['dragonAttack', user().sid, j]), dragonAttackResponse);
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnCancel',
+							text: 'Cancel',
+							click: function() {
+								$(this).dialog('close');
+							}
+						}
+						]});
+					$('#confirm').dialog('open');
+					if (!(canBeginConquer() && canConquer(game().map.regions[j - 1])))
+						$('#btnConquer').hide();
+					if (!(canBeginEnchant() && canEnchant(game().map.regions[j - 1])))
+						$('#btnEnchant').hide();
+					if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
+						$('#btnDragonAttack').hide();				
+				}
+			}(i + 1));
+		}
 	}
 	
 	$('#usersInCurGame').empty();
@@ -195,70 +254,9 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
-	$('#freeTokens').draggable({revert: 'invalid'});
-	$('#imgmap').maphilight();
+	$('#imgdiv').empty();
 	for (var i = 0; i < game().map.regions.length; ++i)
-	{
-		$('#region' + (i + 1)).click(function(j){
-			return function(){
-				$('#confirmInfo').empty();
-				$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
-				$('#confirm').dialog({
-					height:250,
-					title: 'region ' + j,
-					modal: true,
-					buttons: [
-					{
-						id: 'btnConquer',
-						text: 'Conquer',
-						click: function() {
-							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-								['conquer', user().sid, j]), conquerResponse);	
-							$(this).dialog('close');
-						}
-					},
-					{
-						id: 'btnEnchant',
-						text: 'Enchant',
-						click: function() {
-							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-								['enchant', user().sid, j]), enchantResponse);
-							$(this).dialog('close');
-						}
-					},
-					{
-						id: 'btnDragonAttack',
-						text: 'Dragon attack',
-						click: function() {
-							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-								['dragonAttack', user().sid, j]), dragonAttackResponse);
-							$(this).dialog('close');
-						}
-					},
-					{
-						id: 'btnCancel',
-						text: 'Cancel',
-						click: function() {
-							$(this).dialog('close');
-						}
-					}
-					]});
-				$('#confirm').dialog('open');
-				if (!(canBeginConquer() && canConquer(game().map.regions[j - 1])))
-					$('#btnConquer').hide();
-				if (!(canBeginEnchant() && canEnchant(game().map.regions[j - 1])))
-					$('#btnEnchant').hide();
-				if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
-					$('#btnDragonAttack').hide();				
-			}
-		}(i + 1));
-		$('#region' + (i + 1)).droppable({
-			drop: function( event, ui ) {
-				alert( "Dropped!" );
-			}
-		});
 		game().map.regions[i].drawTokenBadge();
-	}
 	Interface.prepareForActions();
 }
 
