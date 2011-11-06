@@ -535,8 +535,8 @@ defaultMaps = [
 				'population': 1,
 	 			'landDescription' : ['border', 'coast', 'forest', 'mine'],  
 	 			'adjacent' : [3, 5, 8, 9, 10],
-				'x_race': 8,
-				'y_race': 412,
+				'x_race': 412,
+				'y_race': 8,
 				'x_power': 419,
 				'y_power': 65,
 				'coords': '404, 0, 393, 45, 409, 95, 422, 179, 508, 160, 536, 106, 503, 82, 551, 36, 552, 0'

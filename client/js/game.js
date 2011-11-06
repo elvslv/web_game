@@ -209,16 +209,18 @@ TokenBadge = $.inherit({
 		regions: function()
 		{	
 			result = [];
-			for (var i = 0; i < Client.currGameState.map.regions; ++i)
+			for (var i = 0; i < Client.currGameState.map.regions.length; ++i)
 				if (Client.currGameState.map.regions[i].tokenBadgeId == this.id)
 					result.push(Client.currGameState.map.regions[i]);
 			return result;	
 		},
 		isNeighbor: function(region)
 		{
-			for (var i = 0; i < Client.currGameState.map.regions; ++i)
-				if (Client.currGameState.map.regions[i].id == region.id)
-					return true; 
+			regions = this.regions();
+			for (var i = 0; i < regions.length; ++i)
+				for (var j = 0; j < regions[i].adjacent.length; ++j)
+					if (regions[i].adjacent[j] == region.id)
+						return true; 
 			return false;
 		}
 			
@@ -428,8 +430,8 @@ canConquer = function(region)
 	if (region.ownerId == user().id && !region.inDecline)
 		return false;
 	//check for friend!
-	f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge);
-	f2 = getSpecPowByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
+	var f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge), 
+		f2 = getSpecPowByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
 	if (!(f1 && f2))
 		return false;
 	return !region.isImmune(false);
