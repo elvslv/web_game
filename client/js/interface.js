@@ -82,9 +82,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForRaceSelect();
 	Interface.prepareForDecline();
 	Interface.prepareForFinishTurn();
-	//Interface.prepareForConquer();
 	Interface.prepareForSelectFriend();
-	//Interface.prepareForEnchant();
 }
 
 Interface.updateGameTab = function()

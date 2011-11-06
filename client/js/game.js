@@ -346,6 +346,8 @@ createGameByState = function(gameState)
 		Client.currGameState.tokenBadgesInGame = tokenBadgesInGame.copy();
 		Client.currGameState.players = players.copy();
 		Client.currGameState.activePlayerIndex = activePlayerIndex;
+		Client.currGameState.state = (gameState['state'] == GAME_START) ? 
+			gameState['lastEvent'] : gameState['state'];
 		result = Client.currGameState;
 	}
 	return result;
