@@ -2,6 +2,72 @@ var Interface = {};
 
 Interface.needToCreateGameTab = false;
 
+Interface.gameTab = function()
+{
+	return '<table>' +
+		'<tr>' +
+			'<td>' +
+				'<button id = "leaveGame">leave</button>' +
+			'</td>' +
+			'<td rowspan = "12" valign = "top">' +
+				'<div id = "imgdiv" style = "margin-left: 250px; position: relative">' +
+					'<img id = "imgmap" src = "' + game().map.picture + '" usemap = "#map">' +
+					'<map name = "map" id = "map" valign = "top">' +
+					'</map>' +
+				'</div>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2">' +
+				'<button id = "setRadinessStatusInGame" style = "display: none"></button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2">' +
+				'Players:' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2" id = "usersInCurGame">' +
+				//'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
+			'</td>' +
+		'</tr>' +
+		(tokenBadges.length 
+		?
+			'<tr>' +
+				'<td colspan = "2">' +
+					'Visible token badges:' +
+				'</td>' +
+			'</tr>' +
+			'<tr>' +
+				'<td colspan = "2" id = "visibleTokenBadges">' +
+					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
+				'</td>' +
+			'</tr>' 
+		: 
+			'') +
+		'<tr>' +
+			'<td colspan = "2">' +
+				'<button id = "finishTurn" style = "display: none">Finish turn</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td>' +
+				'<select id = "possibleFriends" style = "display: none">' +
+				'</select>' +
+			'</td>' +
+			'<td>' +
+				'<button id = "selectFriend" style = "display: none">Select friend</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2">'  +
+				'<button id = "throwDice" style = "display: none">Throw dice</button>' +
+			'</td>' +
+		'</tr>' +
+	'</table>';
+}
+
 Interface.defaultDialogOptions = {
 	'autoOpen': false,
 	'height': 300,
@@ -91,32 +157,37 @@ Interface.updateGameTab = function()
 	{
 		Interface.needToCreateGameTab = false;
 		$('#tabs').tabs('add', '#ui-tabs-1', Client.currGameState.name, 1);
-		
-	}
-	$('#ui-tabs-1').empty();
-	$('#currentGameTemplate').tmpl(Client.currGameState,
-	{
-		opts: 
+		$('#ui-tabs-1').append(Interface.gameTab());
+		$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
 		{
-			activePlayer: function()
+			opts: 
 			{
-				return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
-					undefined;
-			},
-			showVisibleTokenBadges: function()
-			{
-				return Client.currentUser.currentTokenBadge == undefined;
-			},
-			currentUser: function()
-			{
-				return Client.currentUser.id
-			},
-			coords: function(regionId)
-			{
-				return '"' + game().map.regions[regionId - 1].x_race + ', ' + game().map.regions[regionId - 1].y_race + ', ' + '50"';
+				coords: function(regionId)
+				{
+					return '"' + game().map.regions[regionId - 1].x_race + ', ' + game().map.regions[regionId - 1].y_race + ', ' + '50"';
+				}
 			}
+		}).appendTo('#map');
+	}
+	
+	$('#usersInCurGame').empty();
+	$('#usersInCurGameTemplate').tmpl(Client.currGameState.players,
+	{
+		
+		activePlayer: function()
+		{
+			return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
+				undefined;
+		},
+		currentUser: function()
+		{
+			return Client.currentUser.id
 		}
-	}).appendTo('#ui-tabs-1');
+	}).appendTo('#usersInCurGame');	
+	
+	$('#visibleTokenBadges').empty();
+	$('#visibleTokenBadgesTemplate').tmpl(Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
+
 	$('#leaveGame')
 		.button()
 		.click(function(){
