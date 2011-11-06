@@ -89,10 +89,7 @@ class Database:
 			regInfo['y_race'] if 'y_race' in regInfo else None, 
 			regInfo['x_power'] if 'x_power' in regInfo else None, 
 			regInfo['y_power'] if 'y_power' in regInfo else None,
-			regInfo['x_min'] if 'x_min' in regInfo else None, 
-			regInfo['x_max'] if 'x_max' in regInfo else None, 
-			regInfo['y_min'] if 'y_min' in regInfo else None, 
-			regInfo['y_max'] if 'y_max' in regInfo else None)
+			regInfo['coords'] if 'coords' in regInfo else None)
 		for descr in regInfo['landDescription']:
 			if not descr in misc.possibleLandDescription[:11]:
 				raise BadFieldException('unknownLandDescription')
@@ -367,10 +364,7 @@ class Region(Base):
 	y_race = Column(Integer)
 	x_power = Column(Integer)
 	y_power = Column(Integer)
-	x_min = Column(Integer)
-	x_max = Column(Integer)
-	y_min = Column(Integer)
-	y_max = Column(Integer)
+	coords = Column(Text)
 	
 	map = relationship(Map, backref=backref('regions', order_by=id))
 	neighbors = relationship('Adjacency' , cascade="all,delete", 
@@ -379,7 +373,7 @@ class Region(Base):
 		
 
 	def __init__(self, id, defTokensNum, map_, x_race, y_race, x_power, y_power, 
-		x_min, x_max, y_min, y_max): 
+		coords): 
 		self.id = id
 		self.defTokensNum = defTokensNum
 		self.map = map_
@@ -387,10 +381,7 @@ class Region(Base):
 		self.y_race = y_race
 		self.x_power = x_power
 		self.y_power = y_power
-		self.x_min = x_min
-		self.x_max = x_max
-		self.y_min = y_min
-		self.y_max = y_max
+		self.coords = coords
 
 	def getState(self, gameId):
 		state = filter(lambda x : x.gameId == gameId, self.states)

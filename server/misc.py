@@ -512,10 +512,7 @@ defaultMaps = [
 				'y_race': 15,
 				'x_power': 15,
 				'y_power': 80,
-				'x_min': 0,
-				'x_max': 104,
-				'y_min': 0,
-				'y_max': 145
+				'coords': '0, 0, 0, 158, 46, 146, 126, 151, 104, 0'
 	 		},
 			{
 	 			'landDescription' : ['border', 'sea'],  
@@ -524,10 +521,7 @@ defaultMaps = [
 				'y_race': 8,
 				'x_power': 130,
 				'y_power': 64,
-				'x_min': 113,
-				'x_max': 261,
-				'y_min': 0,
-				'y_max': 101
+				'coords': '104, 0, 126, 151, 154, 135, 202, 107, 258, 104, 277, 77, 264, 0'
 	 		},{
 	 			'landDescription' : ['border', 'coast', 'farmland', 'magic'],  
 	 			'adjacent' : [2, 4, 7, 8],
@@ -535,10 +529,7 @@ defaultMaps = [
 				'y_race': 8,
 				'x_power': 317,
 				'y_power': 65,
-				'x_min': 267,
-				'x_max': 391,
-				'y_min': 0,
-				'y_max': 114
+				'coords': '264, 0, 277, 77, 258, 104, 273, 142, 297, 143, 392, 113, 409, 95, 393, 45, 404, 0'
 	 		},
 			{
 				'population': 1,
@@ -548,10 +539,7 @@ defaultMaps = [
 				'y_race': 412,
 				'x_power': 419,
 				'y_power': 65,
-				'x_min': 407,
-				'x_max': 515,
-				'y_min': 0,
-				'y_max': 155
+				'coords': '404, 0, 393, 45, 409, 95, 422, 179, 508, 160, 536, 106, 503, 82, 551, 36, 552, 0'
 	 		},
 			{
 	 			'landDescription' : ['border', 'swamp', 'cavern'],  
@@ -560,10 +548,7 @@ defaultMaps = [
 				'y_race': 4,
 				'x_power': 570,
 				'y_power': 55,
-				'x_min': 553,
-				'x_max': 634,
-				'y_min': 0,
-				'y_max': 112
+				'coords': '552, 0, 551, 36, 503, 82, 536, 106, 634, 123, 634, 0'
 	 		},
 			{
 	 			'landDescription' : ['border', 'coast', 'hill'],  
@@ -572,10 +557,7 @@ defaultMaps = [
 				'y_race': 165,
 				'x_power': 6,
 				'y_power': 195,
-				'x_min': 0,
-				'x_max': 144,
-				'y_min': 153,
-				'y_max': 231
+				'coords': '0, 158, 46, 146, 126, 151, 154, 135, 132, 256, 92, 233, 0, 282'
 	 		},
 			{
 	 			'landDescription' : ['mountain', 'coast', 'mountain', 'mine', 'cavern'],  
@@ -584,10 +566,7 @@ defaultMaps = [
 				'y_race': 190,
 				'x_power': 167,
 				'y_power': 35,
-				'x_min': 149,
-				'x_max': 278,
-				'y_min': 126,
-				'y_max': 229
+				'coords': '154, 135, 202, 107, 258, 104, 273, 142, 297, 143, 305, 172, 268, 222, 191, 247, 132, 256'
 	 		},
 			{
 				'population': 1,
@@ -597,22 +576,16 @@ defaultMaps = [
 				'y_race': 191,
 				'x_power': 333,
 				'y_power': 137,
-				'x_min': 303,
-				'x_max': 426,
-				'y_min': 144,
-				'y_max': 254
+				'coords': '297, 143, 392, 113, 444, 235, 388, 277, 350, 247, 308, 254, 268, 222, 305, 172'
 	 		},
 			{
-	 			'landDescription' : ['sea'],  
+	 			'landDescription' : ['sea'], 
 	 			'adjacent' : [4, 8, 10, 13, 14],
 				'x_race': 448,
 				'y_race': 240,
 				'x_power': 453,
 				'y_power': 180,
-				'x_min': 426,
-				'x_max': 529,
-				'y_min': 181,
-				'y_max': 304
+				'coords': '422, 179, 508, 160, 548, 238, 565, 276, 508, 317, 388, 277, 444, 235'
 	 		},
 			{
 				'population': 1,
@@ -622,10 +595,7 @@ defaultMaps = [
 				'y_race': 180,
 				'x_power': 536,
 				'y_power': 123,
-				'x_min': 537,
-				'x_max': 634,
-				'y_min': 108,
-				'y_max': 240
+				'coords':  '508, 160, 536, 106, 634, 123, 634, 242, 548, 238'
 	 		},
 			{
 	 			'landDescription' : ['border', 'sea'],  
@@ -634,22 +604,16 @@ defaultMaps = [
 				'y_race': 305,
 				'x_power': 65,
 				'y_power': 253,
-				'x_min': 0,
-				'x_max': 158,
-				'y_min': 255,
-				'y_max': 350
+				'coords': '0, 377, 114, 343, 155, 342, 160, 255, 132, 256, 92, 233, 0, 282'
 	 		},
 			{
-	 			'landDescription' : ['coast', 'farmland'],  
+	 			'landDescription' : ['coast', 'farmland'], 
 	 			'adjacent' : [7, 8, 11, 13, 15, 17],
 				'x_race': 214,
 				'y_race': 253,
 				'x_power': 163,
 				'y_power': 287,
-				'x_min': 159,
-				'x_max': 309,
-				'y_min': 249,
-				'y_max': 327
+				'coords': '217, 339, 281, 331, 312, 290, 308, 254, 268, 222, 191, 247, 160, 255, 155, 342'
 	 		},
 			{
 				'population': 1,
@@ -659,10 +623,7 @@ defaultMaps = [
 				'y_race': 313,
 				'x_power': 318,
 				'y_power': 295,
-				'x_min': 313,
-				'x_max': 510,
-				'y_min': 282,
-				'y_max': 378
+				'coords': '308, 254, 350, 247, 388, 277, 508, 317, 511, 374, 404, 411, 281, 331, 312, 290'
 	 		},
 			{
 	 			'landDescription' : ['border', 'coast', 'farmland', 'magic'],  
@@ -671,36 +632,27 @@ defaultMaps = [
 				'y_race': 348,
 				'x_power': 565,
 				'y_power': 287,
-				'x_min': 531,
-				'x_max': 242,
-				'y_min': 634,
-				'y_max': 407
+				'coords': '508, 317, 565, 276, 548, 238, 634, 242, 634, 418, 553, 416, 511, 374'
 	 		},
 			{
 				'population': 1,
-	 			'landDescription' : ['border', 'coast', 'swamp', 'magic'],  
+	 			'landDescription' : ['border', 'coast', 'swamp', 'magic'], 
 	 			'adjacent' : [11, 12, 16, 17],
 				'x_race': 87,
 				'y_race': 375,
 				'x_power': 28,
 				'y_power': 376,
-				'x_min': 50,
-				'x_max': 214,
-				'y_min': 342,
-				'y_max': 435
+				'coords': '0, 377, 114, 343, 155, 342, 217, 339, 247, 387, 185, 465, 0, 426'
 	 		},
 			{
 				'population': 1,
-	 			'landDescription' : ['border', 'hill', 'cavern'],  
+	 			'landDescription' : ['border', 'hill', 'cavern'], 
 	 			'adjacent' : [15, 17],
 				'x_race': 62,
 				'y_race': 458,
 				'x_power': 6,
 				'y_power': 458,
-				'x_min': 0,
-				'x_max': 184,
-				'y_min': 453,
-				'y_max': 515
+				'coords': '0, 426, 185, 465, 186, 515, 0, 515'
 	 		},
 			{
 	 			'landDescription' : ['border', 'mountain', 'mine'],  
@@ -709,22 +661,16 @@ defaultMaps = [
 				'y_race': 460,
 				'x_power': 244,
 				'y_power': 398,
-				'x_min': 223,
-				'x_max': 314,
-				'y_min': 346,
-				'y_max': 515
+				'coords': '186, 515, 288, 515, 336, 369, 281, 331, 217, 339, 247, 387, 185, 465'
 	 		},
 			{
-	 			'landDescription' : ['border', 'hill', 'cavern'],  
+	 			'landDescription' : ['border', 'hill', 'cavern'], 
 	 			'adjacent' : [13, 17, 19],
 				'x_race': 324,
 				'y_race': 411,
 				'x_power':308,
 				'y_power': 464,
-				'x_min': 313,
-				'x_max': 407,
-				'y_min': 398,
-				'y_max': 515
+				'coords': '288, 515, 336, 369, 404, 411, 408, 513'
 	 		},
 			{
 				'population': 1,
@@ -734,10 +680,7 @@ defaultMaps = [
 				'y_race': 411,
 				'x_power': 437,
 				'y_power': 466,
-				'x_min': 407,
-				'x_max': 528,
-				'y_min': 391,
-				'y_max': 515
+				'coords': '404, 411, 511, 374, 553, 416, 519, 471, 520, 515, 408, 513'
 	 		},
 			{
 	 			'landDescription' : ['border', 'mountain'],  
@@ -746,12 +689,9 @@ defaultMaps = [
 				'y_race': 466,
 				'x_power': 582,
 				'y_power': 422,
-				'x_min': 529,
-				'x_max': 634,
-				'y_min': 423,
-				'y_max': 515
+				'coords': '553, 416, 634, 418, 634, 515, 520, 515, 519, 471'
 	 		}
-	 	],
+	 	], 
 		'thumbnail': 'maps/map1Thumb.jpg', 'picture': 'maps/map1.jpg'
 	}
 			
