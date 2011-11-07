@@ -43,14 +43,6 @@ Graphics.drawMap = function(map) {
 			if (r.bonus) r.bonus.toFront();
 			if (r.race) r.race.toFront();
 		});
-		var box = r.getBBox();
-		var bounds = paper.rect(box.x, box.y, box.width, box.height)
-			.attr({stroke: "fff"});
-		bounds.parent = r;
-		bounds.onDragOver(function(){
-			console.log('dragging over');
-		});
-		bounds.toFront();
 		return r;
 		};
 	for (var i = 0; i < map.regions.length; ++i)
@@ -61,6 +53,7 @@ Graphics.drawMap = function(map) {
 	var race = paper.circle(30, 580, 12).attr({fill : "black"});
 	race.drag(
 		function(dx, dy){
+	//	There should be some code checking are there really enough units	
 		this.attr({cx: this.ox + dx, cy: this.oy + dy}); 
 		
 	},
@@ -70,13 +63,14 @@ Graphics.drawMap = function(map) {
 		this.toFront();
 	},
 	function(){
-		var bounds = paper.getElementByPoint(this.attr("cx"), this.attr("cy"));
-		var reg;
-		if (bounds){
-			console.log(bounds);
-			reg = bounds.parent.model;
-			console.log('here');
-			reg.ui.race = paper.circle(reg.raceCoords[0], reg.raceCoords[1], 12);
+		console.log(paper);
+		var posX = this.getBBox().x + paper.canvas.offsetLeft - $(document).scrollLeft();
+		var posY = this.getBBox().y + paper.canvas.offsetTop - $(document).scrollTop();
+		var region = paper.getElementByPoint(posX, posY);
+		if (region && region.model){
+			reg = region.model;
+			reg.ui.race = paper.circle(reg.raceCoords[0], reg.raceCoords[1], 12)
+				.attr({fill : "black"});
 		}
 		this.attr({cx: this.ox, cy: this.oy}); 
 	});

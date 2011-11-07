@@ -513,7 +513,7 @@ defaultMaps = [
 				'powerCoords' : [26, 96]
 	 		},
 			{	
-	 			'landDescription' : ['border', 'coast', 'magic', 'sea'], 			#2
+	 			'landDescription' : ['border', 'coast', 'sea'], 			#2
 				'coordinates' : [[103, 0], [125, 140], [202, 103], [258, 101], [275, 77], [264, 0]],
 	 			'adjacent' : [1, 3, 6, 7],
 				'raceCoords': [184, 73],
@@ -533,7 +533,7 @@ defaultMaps = [
 	 			'landDescription' : ['border', 'coast', 'mine', 'forest'],			#4 
 	 			'adjacent' : [3, 5, 8, 9, 10],
 				'coordinates' : [[403, 0], [392, 42], [409, 94], [391, 109], [422, 176], [508, 158], [535, 104], [502, 78], [555, 0]],
-				'raceCoords': [8, 412],
+				'raceCoords': [412, 13],
 				'powerCoords' : [444, 39],
 				'bonusCoords' : [459, 75]
 	 		},
@@ -542,7 +542,7 @@ defaultMaps = [
 	 			'landDescription' : ['border', 'swamp', 'cavern'], 					#5
 				'coordinates' : [[555, 0],  [502, 78], [535, 104], [630, 120], [630, 0]],
 	 			'adjacent' : [4, 10],
-				'raceCoords': [560, 4],
+				'raceCoords': [560, 20],
 				'powerCoords' : [570, 55],
 				'bonusCoords' : [548, 68]
 	 		},
@@ -560,8 +560,8 @@ defaultMaps = [
 	 			'adjacent' : [2, 3, 6, 8, 11, 12],
 				'coordinates' : [[125, 140], [130, 253], [160, 251], [268, 218], [303, 172], [295, 142], [273, 137], [258, 101], [202, 103]],
 				'bonusCoords': [263, 166],
-				'raceCoords': [150, 190],
-				'powerCoords' : [167, 35],
+				'raceCoords': [251, 178],
+				'powerCoords' : [175, 202],
 	 		},
 
 			{	
