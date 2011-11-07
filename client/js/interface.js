@@ -151,6 +151,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForDecline();
 	Interface.prepareForFinishTurn();
 	Interface.prepareForSelectFriend();
+	Interface.prepareForThrowDice();
 }
 
 Interface.updateGameTab = function()
@@ -160,6 +161,32 @@ Interface.updateGameTab = function()
 		Interface.needToCreateGameTab = false;
 		$('#tabs').tabs('add', '#ui-tabs-1', Client.currGameState.name, 1);
 		$('#ui-tabs-1').append(Interface.gameTab());
+		$('#setRadinessStatusInGame')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
+					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), 
+					setReadinessStatusResponse);
+			});
+		$('#finishTurn')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['finishTurn', user().sid]), 
+					finishTurnResponse);
+			});
+		$('#selectFriend')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
+					['selectFriend', user().sid, $('#possibleFriends option:selected').val()]), 
+					selectFriendResponse);				
+			});
+		$('#throwDice')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['throwDice', user().sid]), 
+					throwDiceResponse);
+			});
 		$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
 		{
 			opts: 
@@ -267,13 +294,6 @@ Interface.prepareForSetReadinessStatus = function()
 		$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
 		$('#setRadinessStatusInGame').html(Client.currentUser.isReady ? 'I am not ready' : 
 			'I am ready');
-		$('#setRadinessStatusInGame')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
-					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), 
-					setReadinessStatusResponse);
-			});
 		$('#setRadinessStatusInGame').show();
 	}
 }
@@ -315,39 +335,7 @@ Interface.prepareForFinishTurn = function()
 {
 	if (canFinishTurn())
 	{
-		$('#finishTurn')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid'], ['finishTurn', user().sid]), 
-					finishTurnResponse);
-			});
 		$('#finishTurn').show();
-	}
-}
-
-Interface.prepareForConquer = function()
-{
-	if (!canBeginConquer())
-		return;
-	var cnt = 0;
-	for (var i = 0; i < game().map.regions.length; ++i)
-		if (canConquer(game().map.regions[i]))
-		{
-			$('#possibleRegions').append('<option value = ' + i + '>' + game().map.regions[i].id + 
-				'</option>');
-			++cnt;
-		}
-	if (cnt)
-	{
-		$('#conquer')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-					['conquer', user().sid, $('#possibleRegions option:selected').val()]), 
-					conquerResponse);				
-			});
-		$('#possibleRegions').show();
-		$('#conquer').show();
 	}
 }
 
@@ -365,13 +353,6 @@ Interface.prepareForSelectFriend = function()
 		}
 	if (cnt)
 	{
-		$('#selectFriend')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
-					['selectFriend', user().sid, $('#possibleFriends option:selected').val()]), 
-					selectFriendResponse);				
-			});
 		$('#possibleFriends').show();
 		$('#selectFriend').show();
 	}
@@ -381,65 +362,7 @@ Interface.prepareForThrowDice = function()
 {
 	if (canThrowDice())
 	{
-		$('#throwDice')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid'], ['throwDice', user().sid]), 
-					throwDiceResponse);
-			});
 		$('#throwDice').show();
-	}
-}
-
-Interface.prepareForEnchant = function()
-{
-	if (!canBeginEnchant())
-		return;
-	var cnt = 0;
-	for (var i = 0; i < game().map.regions.length; ++i)
-		if (canEnchant(game().map.regions[i]))
-		{
-			$('#possibleRegionsForEnchant').append('<option value = ' + i + '>' + game().map.regions[i].id + 
-				'</option>');
-			++cnt;
-		}
-	if (cnt)
-	{
-		$('#enchant')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-					['enchant', user().sid, $('#possibleRegionsForEnchant option:selected').val()]), 
-					enchantResponse);				
-			});
-		$('#possibleRegionsForEnchant').show();
-		$('#enchant').show();
-	}
-}
-
-Interface.prepareForDragonAttack = function()
-{
-	if (!canBeginDragonAttack())
-		return;
-	var cnt = 0;
-	for (var i = 0; i < game().map.regions.length; ++i)
-		if (canDragonAttack(game().map.regions[i]))
-		{
-			$('#possibleRegionsForDragonAttack').append('<option value = ' + i + '>' + game().map.regions[i].id + 
-				'</option>');
-			++cnt;
-		}
-	if (cnt)
-	{
-		$('#dragonAttack')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-					['dragonAttack', user().sid, $('#possibleRegionsForDragonAttack option:selected').val()]), 
-					dragonAttackResponse);				
-			});
-		$('#possibleRegionsForDragonAttack').show();
-		$('#dragonAttack').show();
 	}
 }
 
