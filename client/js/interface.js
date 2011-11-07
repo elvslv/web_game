@@ -67,6 +67,23 @@ Interface.gameTab = function()
 				'<button id = "throwDice" style = "display: none">Throw dice</button>' +
 			'</td>' +
 		'</tr>' +
+		'<tr>' +
+			'<td>' +
+				'<button id = "changeRedeployStatus" style = "display: none">Start redeploy</button>' +
+			'</td>' +
+			'<td>' +
+				'<button id = "redeploy" style = "display: none">redeploy</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td>' +
+				'<select id = "possibleRegionsForDefend" style = "display: none">' +
+				'</select>' +
+			'</td>' +
+			'<td>' +
+				'<button id = "defend" style = "display: none">Defend</button>' +
+			'</td>' +
+		'</tr>' +
 	'</table>';
 }
 
@@ -152,6 +169,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForFinishTurn();
 	Interface.prepareForSelectFriend();
 	Interface.prepareForThrowDice();
+	Interface.prepareForRedeploy();
 }
 
 Interface.updateGameTab = function()
@@ -187,13 +205,37 @@ Interface.updateGameTab = function()
 				sendQuery(makeQuery(['action', 'sid'], ['throwDice', user().sid]), 
 					throwDiceResponse);
 			});
+		$('#changeRedeployStatus')
+			.button()
+			.click(function(){
+				if (Client.currGameState.redeployStarted)
+				{
+					Client.currGameState.redeployStarted = false;
+					$('#changeRedeployStatus').html('Start redeploy');
+					$('#redeploy').hide();
+					return;
+				}
+				Client.currGameState.redeployStarted = true;
+				Client.currGameState.regions = [];
+				user().startRedeploy();
+				$('#changeRedeployStatus').html('Cancel redeploy');
+				$('#redeploy').show();
+			});
+		$('#redeploy')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regions'], 
+					['redeploy', user().sid, game().redeployRegions]), 
+					redeployResponse);
+			});
 		$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
 		{
 			opts: 
 			{
 				coords: function(regionId)
 				{
-					return '"' + game().map.regions[regionId - 1].x_race + ', ' + game().map.regions[regionId - 1].y_race + ', ' + '50"';
+					return '"' + game().map.regions[regionId - 1].x_race + ', ' +
+						game().map.regions[regionId - 1].y_race + ', ' + '50"';
 				}
 			}
 		}).appendTo('#map');
@@ -204,6 +246,12 @@ Interface.updateGameTab = function()
 				return function(){
 					$('#confirmInfo').empty();
 					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
+					$('#confirmInfo').append('<select id = "possibleTokensNumForRedeploy"' +
+						' style = "display: none"></select>');
+					$('#confirmInfo').append('<select id = "possibleTokensNumForDefend"' +
+						' style = "display: none"></select>');
+					$('#confirmInfo').append('<select id = "possibleEncampmentsNum"' +
+						' style = "display: none"></select>');
 					$('#confirm').dialog({
 						height:250,
 						title: 'region ' + j,
@@ -242,6 +290,20 @@ Interface.updateGameTab = function()
 							click: function() {
 								$(this).dialog('close');
 							}
+						},
+						{
+							id: 'btnSetHero',
+							text: 'Set hero',
+							click: function() {
+								Client.currGameState.heroRegions.push(j);
+							}
+						},
+						{
+							id: 'btnSetFortress',
+							text: 'Set fortress',
+							click: function() {
+								Client.currGameState.fortressRegions.push(j);
+							}
 						}
 						]});
 					$('#confirm').dialog('open');
@@ -250,7 +312,32 @@ Interface.updateGameTab = function()
 					if (!(canBeginEnchant() && canEnchant(game().map.regions[j - 1])))
 						$('#btnEnchant').hide();
 					if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
-						$('#btnDragonAttack').hide();				
+						$('#btnDragonAttack').hide();
+					if (game().redeployStarted && canRedeploy(game().map.regions[j - 1]))
+					{
+						for (var k = 0; k < user().freeTokens + game().map.regions[j - 1].tokensNum; ++k)
+							$('#possibleTokensNumForRedeploy').append('<option' + 
+							((k + 1 == game().map.regions[j - 1].tokensNum) ? ' selected' : 
+							'') + '>' + (k + 1) + '</option>');
+						$('#possibleTokensNumForRedeploy').change(function(){
+							tokensNum = parseInt($('#possibleTokensNumForRedeploy option:selected').val());
+							user().freeTokens += game().map.regions[j - 1].tokensNum - tokensNum;
+							var l;
+							for ( l = 0; l < game().redeployRegions.length; ++l)
+							{
+								if (game().redeployRegions[l]['regionId'] == j)
+								{
+									game().redeployRegions[l]['tokensNum'] = tokensNum;
+									break;
+								}
+							}
+							if (l == game().redeployRegions.length)
+								game().redeployRegions.push({'regionId': j, 'tokensNum': tokensNum});
+						});
+						$('#possibleTokensNumForRedeploy').show();
+					}
+					$('#btnSetHero').hide();
+					$('#btnSetFortress').hide();
 				}
 			}(i + 1));
 		}
@@ -296,6 +383,8 @@ Interface.prepareForSetReadinessStatus = function()
 			'I am ready');
 		$('#setRadinessStatusInGame').show();
 	}
+	else
+		$('#setRadinessStatusInGame').hide();
 }
 
 Interface.prepareForRaceSelect = function()
@@ -334,9 +423,9 @@ Interface.prepareForDecline = function()
 Interface.prepareForFinishTurn = function()
 {
 	if (canFinishTurn())
-	{
 		$('#finishTurn').show();
-	}
+	else
+		$('#finishTurn').hide();
 }
 
 Interface.prepareForSelectFriend = function()
@@ -356,14 +445,31 @@ Interface.prepareForSelectFriend = function()
 		$('#possibleFriends').show();
 		$('#selectFriend').show();
 	}
+	else
+	{
+		$('#possibleFriends').hide();
+		$('#selectFriend').hide();
+	}
+}
+
+Interface.prepareForRedeploy = function()
+{
+	if (!canBeginRedeploy())
+	{
+		$('#changeRedeployStatus').hide();
+		$('#redeploy').hide();
+		Client.currGameState.redeployStarted = false;
+		return;
+	}
+	$('#changeRedeployStatus').show();
 }
 
 Interface.prepareForThrowDice = function()
 {
 	if (canThrowDice())
-	{
 		$('#throwDice').show();
-	}
+	else
+		$('#throwDice').hide();
 }
 
 Interface.fillGameList = function(games) 

@@ -501,4 +501,56 @@ function dragonAttackResponse(data)
  	}
 }
 
+function redeployResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'badJson': 
+			alert('Invalid data');
+			break;
+		case 'badUserSid':
+			alert('Invalid sid'); 
+			break;
+		case 'badStage':
+			alert('Bad stage'); 
+			break;
+		case 'badRegionId':
+			alert('Invalid region id'); 
+			break;
+		case 'badRegion':
+			alert('Bad region');
+		case 'noTokensForRedeployment':
+			alert('noTokensForRedeployment'); 
+			break;
+		case 'userHasNoRegions':
+			alert('userHasNoRegions'); 
+			break;
+		case 'badTokensNum':
+			alert('badTokensNum'); 
+			break;
+		case 'badEncampmentsNum':
+			alert('badEncampmentsNum');
+			break;
+		case 'tooManyFortifieldsInRegion':
+			alert('tooManyFortifieldsInRegion'); 
+			break;
+		case 'tooManyFortifieldsOnMap':
+			alert('tooManyFortifieldsOnMap'); 
+			break;
+		case 'tooManyFortifields':
+			alert('tooManyFortifields');
+			break;
+		case 'notEnoughEncampentsForRedeployment':
+			alert('notEnoughEncampentsForRedeployment');
+			break;
+		case 'badSetHeroCommand':
+			alert('badSetHeroCommand');
+			break;
+		case 'ok':
+			break; //state will be changed on the next getGameState()
+		default:
+			alert('Unknown server response' + data);
+ 	}
+}
+
 

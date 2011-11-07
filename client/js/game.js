@@ -152,6 +152,8 @@ Game = $.inherit({
 		this.tokenBadges = tokenBadges.copy();
 		this.players = players.copy();
 		this.tokenBadgesInGame = tokenBadgesInGame.copy();
+		this.redeployStarted = false;
+		this.redeployRegions = [];
 	},
 	setState: function(state)
 	{
@@ -263,6 +265,19 @@ User = $.inherit({
 				result.push(Client.currGameState.map.regions[i]);
 		return result;	
 	},
+	startRedeploy: function()
+	{
+		regions = this.currentTokenBadge.regions();
+		this.freeTokens = this.currentTokenBadge.totalTokensNum;
+		for (var i = 0; i < regions.length; ++i)
+		{
+			Client.currGameState.redeployRegions.push({'regionId': regions[i].id, 
+				'tokensNum': regions[i].tokensNum});
+			this.freeTokens -= regions[i].tokensNum;
+		}
+		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
+		this.freeTokens = Math.max(this.freeTokens, 0);
+	}
 });
 
 createTokenBadge = function(tokenBadge)
@@ -422,7 +437,8 @@ canFinishTurn = function()
 
 canBeginConquer = function()
 {
-	return (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER));
+	return (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER) && 
+		user().tokensInHand > 0);
 }
 
 canConquer = function(region)
@@ -494,5 +510,63 @@ canDragonAttack = function(region)
 	return getSpecPowByName(user().currentTokenBadge.specPowName).dragonAttack(region);
 	
 }
+/*def act_redeploy(data):
+	for region in tokenBadge.regions: region.tokensNum = 0
+	for rec in data['regions']:
+		if not ('regionId' in rec and 'tokensNum' in rec):
+			raise BadFieldException('badJson')							## Shouldn't it be in some sort of
+																	## ``check everything'' function?
+		if not isinstance(rec['regionId'], int):
+			raise BadFieldException('badRegionId')
+		if not isinstance(rec['tokensNum'], int):
+			raise BadFieldException('badTokensNum')
+		regState = user.game.map.getRegion(rec['regionId']).getState(user.game.id)
+		tokensNum = rec['tokensNum']
+		if  regState.tokenBadge != user.currentTokenBadge: raise BadFieldException('badRegion')
+		if tokensNum > unitsNum: raise BadFieldException('notEnoughTokensForRedeployment')
+		regState.tokensNum = tokensNum		
+		unitsNum -= tokensNum
 
+	specAbilities = [
+	{'name': 'encampments', 'cmd': 'setEncampments'},
+	{'name': 'fortified', 'cmd': 'setFortified'},
+	{'name': 'heroes', 'cmd': 'setHero'}]
 
+	for specAbility in specAbilities:
+		if specAbility['name'] in data:
+			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], tokenBadge, 
+				data[specAbility['name']])
+
+			
+	if unitsNum: 
+		if not regState:
+			raise BadFieldException('thereAreTokensInHand')
+		regState.tokensNum += unitsNum
+	emptyRegions = filter( lambda x: not x.tokensNum, tokenBadge.regions)
+	for region in emptyRegions:
+		clearFromRace(region)	
+		region.owner = None
+		region.tokenBadge = None
+
+	dbi.updateHistory(user, GAME_REDEPLOY, user.currentTokenBadge.id)
+	dbi.updateGameHistory(user.game, data)
+	return {'result': 'ok'}
+		*/
+
+canBeginRedeploy = function()
+{
+	if (!(user().currentTokenBadge != undefined && checkStage(GAME_REDEPLOY) && 
+		user().currentTokenBadge.regions().length))
+		return false;
+	return user().currentTokenBadge.totalTokensNum + 
+		getRaceByName(user().currentTokenBadge.raceName).turnEndReinforcements(user()) > 0;
+}
+
+canRedeploy = function(region)
+{
+	regions = user().currentTokenBadge.regions();
+	for (var i = 0; i < regions.length; ++i)
+		if (regions[i].id == region.id)
+			return true;
+	return false;
+}
