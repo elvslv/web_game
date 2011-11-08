@@ -94,11 +94,15 @@ def countCoins(user):
 
 def getDefendingInfo(game):
 	if not (len(game.history) and game.history[-1].warHistory and game.history[-1].warHistory.victimBadge):
-		print 1
 		return 
 	result = dict()
 	lastAttack = game.history[-1].warHistory
+	tokensNum = lastAttack.victimTokensNum + callRaceMethod(lastAttack.victimBadge.raceId, 
+		'sufferCasualties_', lastAttack.victimBadge)
+	if not tokensNum:
+		return
 	result['playerId'] = lastAttack.victimBadge.owner.id
+	result['tokensNum'] = tokensNum
 	result['regionId'] = lastAttack.conqRegion.id
 	return result
 	

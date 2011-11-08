@@ -85,7 +85,7 @@ Region = $.inherit({
 	{
 		return  this.adjacent; 
 	},
-	adjacent: function(region)
+	isAdjacent: function(region)
 	{
 		return includes(region.id, this.adjacent); 
 	},
@@ -140,7 +140,7 @@ Map = $.inherit(
 
 Game = $.inherit({
 	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
-		tokenBadgesInGame)
+		tokenBadgesInGame, defendingPlayerIndex, conqueredRegion, victimTokensNum)
 	{
 		this.id = id;
 		this.name = name;
@@ -154,6 +154,11 @@ Game = $.inherit({
 		this.tokenBadgesInGame = tokenBadgesInGame.copy();
 		this.redeployStarted = false;
 		this.redeployRegions = [];
+		this.defendingPlayerIndex = defendingPlayerIndex;
+		this.conqueredRegion = conqueredRegion;
+		this.victimTokensNum = victimTokensNum;
+		this.freeTokensForDefend = victimTokensNum;
+		this.defendRegions = [];
 	},
 	setState: function(state)
 	{
@@ -224,6 +229,19 @@ TokenBadge = $.inherit({
 					if (regions[i].adjacent[j] == region.id)
 						return true; 
 			return false;
+		},
+		hasNotAdjacentRegions: function(region)
+		{
+			regions = this.regions();
+			for (var i = 0; i < regions.length; ++i)
+			{
+				for (var j = 0; j < regions[i].adjacent.length; ++j)
+					if (regions[i].adjacent[j] == region.id)
+						break; 
+				if (j == regions[i].adjacent.length)
+					return true;
+			}
+			return false;
 		}
 			
 });
@@ -290,6 +308,9 @@ createTokenBadge = function(tokenBadge)
 createGameByState = function(gameState)
 {
 	mapState = gameState['map'];
+	conqueredRegion = undefined;
+	defendingPlayerIndex = undefined;
+	victimTokensNum = gameState['defendingInfo'] ? gameState['defendingInfo']['tokensNum'] : undefined;
 	if (!Client.currGameState)
 	{
 		regions = [];
@@ -301,6 +322,8 @@ createGameByState = function(gameState)
 				curReg.holeInTheGround, curReg.encampment, curReg.dragon, curReg.fortress, curReg.hero, 
 				curReg.inDecline, mapState.regions[i].x_race, mapState.regions[i].y_race, 
 				mapState.regions[i].x_power, mapState.regions[i].y_power, mapState.regions[i].coords));
+			if (gameState['defendingInfo'] && i + 1 == gameState['defendingInfo']['regionId'])
+				conqueredRegion = regions[i];
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
@@ -310,8 +333,12 @@ createGameByState = function(gameState)
 		regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
 		'dragon', 'fortress', 'hero', 'inDecline']
 		for (var i = 0; i < mapState.regions.length; ++i)
+		{
 			for (var j = 0; j < regionFields.length; ++j)
 				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
+			if (gameState['defendingInfo'] && game().map.regions[i].id == gameState['defendingInfo']['regionId'])
+				conqueredRegion = game().map.regions[i];
+		}
 	}
 	
 	tokenBadges = [];
@@ -349,13 +376,16 @@ createGameByState = function(gameState)
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		}
 		players.push(player);
+		if (gameState['defendingInfo'] && player.id == gameState['defendingInfo']['playerId'])
+			defendingPlayerIndex = i;
 	}
 	
 	if (!Client.currGameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
 			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
-			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame);
+			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
+			defendingPlayerIndex, conqueredRegion, victimTokensNum);
 	}
 	else
 	{
@@ -365,6 +395,13 @@ createGameByState = function(gameState)
 		Client.currGameState.activePlayerIndex = activePlayerIndex;
 		Client.currGameState.state = (gameState['state'] == GAME_START) ? 
 			gameState['lastEvent'] : gameState['state'];
+		if (!(defendingPlayerIndex != undefined))
+			Client.currGameState.defendRegions = [];
+		Client.currGameState.defendingPlayerIndex = defendingPlayerIndex;
+		Client.currGameState.conqueredRegion = conqueredRegion;
+		Client.currGameState.victimTokensNum = victimTokensNum;
+		if (!(Client.currGameState.freeTokensForDefend != undefined))
+			Client.currGameState.freeTokensForDefend = victimTokensNum;
 		result = Client.currGameState;
 	}
 	return result;
@@ -407,9 +444,16 @@ checkStage = function(newState, attackType)
 	return result;
 }
 
+isDefendingPlayer = function()
+{
+	return (Client.currGameState.defendingPlayerIndex != undefined && 
+		Client.currGameState.players[Client.currGameState.defendingPlayerIndex].id == Client.currentUser.id); 
+}
+
 isActivePlayer = function()
 {
-	return (Client.currGameState.activePlayerIndex != undefined && 
+	return (!(Client.currGameState.defendingPlayerIndex != undefined) && 
+		Client.currGameState.activePlayerIndex != undefined && 
 		Client.currGameState.players[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
 }
 
@@ -510,48 +554,6 @@ canDragonAttack = function(region)
 	return getSpecPowByName(user().currentTokenBadge.specPowName).dragonAttack(region);
 	
 }
-/*def act_redeploy(data):
-	for region in tokenBadge.regions: region.tokensNum = 0
-	for rec in data['regions']:
-		if not ('regionId' in rec and 'tokensNum' in rec):
-			raise BadFieldException('badJson')							## Shouldn't it be in some sort of
-																	## ``check everything'' function?
-		if not isinstance(rec['regionId'], int):
-			raise BadFieldException('badRegionId')
-		if not isinstance(rec['tokensNum'], int):
-			raise BadFieldException('badTokensNum')
-		regState = user.game.map.getRegion(rec['regionId']).getState(user.game.id)
-		tokensNum = rec['tokensNum']
-		if  regState.tokenBadge != user.currentTokenBadge: raise BadFieldException('badRegion')
-		if tokensNum > unitsNum: raise BadFieldException('notEnoughTokensForRedeployment')
-		regState.tokensNum = tokensNum		
-		unitsNum -= tokensNum
-
-	specAbilities = [
-	{'name': 'encampments', 'cmd': 'setEncampments'},
-	{'name': 'fortified', 'cmd': 'setFortified'},
-	{'name': 'heroes', 'cmd': 'setHero'}]
-
-	for specAbility in specAbilities:
-		if specAbility['name'] in data:
-			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], tokenBadge, 
-				data[specAbility['name']])
-
-			
-	if unitsNum: 
-		if not regState:
-			raise BadFieldException('thereAreTokensInHand')
-		regState.tokensNum += unitsNum
-	emptyRegions = filter( lambda x: not x.tokensNum, tokenBadge.regions)
-	for region in emptyRegions:
-		clearFromRace(region)	
-		region.owner = None
-		region.tokenBadge = None
-
-	dbi.updateHistory(user, GAME_REDEPLOY, user.currentTokenBadge.id)
-	dbi.updateGameHistory(user.game, data)
-	return {'result': 'ok'}
-		*/
 
 canBeginRedeploy = function()
 {
@@ -569,4 +571,15 @@ canRedeploy = function(region)
 		if (regions[i].id == region.id)
 			return true;
 	return false;
+}
+
+canBeginDefend = function()
+{
+	return (isDefendingPlayer() && user().currentTokenBadge && checkStage(GAME_DEFEND));
+}
+
+canDefend = function(region)
+{
+	return region.ownerId == user().id && !(game().conqueredRegion.isAdjacent(region) && 
+		user().currentTokenBadge.hasNotAdjacentRegions(region))
 }

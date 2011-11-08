@@ -77,10 +77,6 @@ Interface.gameTab = function()
 		'</tr>' +
 		'<tr>' +
 			'<td>' +
-				'<select id = "possibleRegionsForDefend" style = "display: none">' +
-				'</select>' +
-			'</td>' +
-			'<td>' +
 				'<button id = "defend" style = "display: none">Defend</button>' +
 			'</td>' +
 		'</tr>' +
@@ -170,6 +166,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForSelectFriend();
 	Interface.prepareForThrowDice();
 	Interface.prepareForRedeploy();
+	Interface.prepareForDefend();
 }
 
 Interface.updateGameTab = function()
@@ -228,6 +225,13 @@ Interface.updateGameTab = function()
 					['redeploy', user().sid, game().redeployRegions]), 
 					redeployResponse);
 			});
+		$('#defend')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regions'], 
+					['defend', user().sid, game().defendRegions]), 
+					defendResponse);
+			});
 		$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
 		{
 			opts: 
@@ -247,11 +251,11 @@ Interface.updateGameTab = function()
 					$('#confirmInfo').empty();
 					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
 					$('#confirmInfo').append('<select id = "possibleTokensNumForRedeploy"' +
-						' style = "display: none"></select>');
+						' style = "display: none">Redeploy</select>');
 					$('#confirmInfo').append('<select id = "possibleTokensNumForDefend"' +
-						' style = "display: none"></select>');
+						' style = "display: none">Defend</select>');
 					$('#confirmInfo').append('<select id = "possibleEncampmentsNum"' +
-						' style = "display: none"></select>');
+						' style = "display: none">Set encampments</select>');
 					$('#confirm').dialog({
 						height:250,
 						title: 'region ' + j,
@@ -315,10 +319,10 @@ Interface.updateGameTab = function()
 						$('#btnDragonAttack').hide();
 					if (game().redeployStarted && canRedeploy(game().map.regions[j - 1]))
 					{
-						for (var k = 0; k < user().freeTokens + game().map.regions[j - 1].tokensNum; ++k)
+						for (var k = 0; k <= user().freeTokens + game().map.regions[j - 1].tokensNum; ++k)
 							$('#possibleTokensNumForRedeploy').append('<option' + 
-							((k + 1 == game().map.regions[j - 1].tokensNum) ? ' selected' : 
-							'') + '>' + (k + 1) + '</option>');
+							((k == game().map.regions[j - 1].tokensNum) ? ' selected' : 
+							'') + '>' + k + '</option>');
 						$('#possibleTokensNumForRedeploy').change(function(){
 							tokensNum = parseInt($('#possibleTokensNumForRedeploy option:selected').val());
 							user().freeTokens += game().map.regions[j - 1].tokensNum - tokensNum;
@@ -336,6 +340,40 @@ Interface.updateGameTab = function()
 						});
 						$('#possibleTokensNumForRedeploy').show();
 					}
+					if (canBeginDefend() && canDefend(game().map.regions[j - 1]))
+					{
+						var curTokensNum = 0;
+						for (l = 0; l < game().defendRegions.length; ++l)
+							if (game().defendRegions[l]['regionId'] == j)
+							{
+								curTokensNum = game().defendRegions[l]['tokensNum'];
+								break;
+							}
+						for (var k = 0; k <= game().freeTokensForDefend + curTokensNum; ++k)
+							$('#possibleTokensNumForDefend').append('<option' + 
+							((k == game().map.regions[j - 1].tokensNum) ? ' selected' : 
+							'') + '>' + k + '</option>');
+						$('#possibleTokensNumForDefend').change(function(){
+							tokensNum = parseInt($('#possibleTokensNumForDefend option:selected').val());
+							var l;
+							for (l = 0; l < game().defendRegions.length; ++l)
+							{
+								if (game().defendRegions[l]['regionId'] == j)
+								{
+									game().freeTokensForDefend += game().defendRegions[l]['tokensNum'] - 
+										tokensNum;
+									game().defendRegions[l]['tokensNum'] = tokensNum;
+									break;
+								}
+							}
+							if (l == game().defendRegions.length)
+							{
+								game().freeTokensForDefend -= tokensNum;
+								game().defendRegions.push({'regionId': j, 'tokensNum': tokensNum});
+							}
+						});
+						$('#possibleTokensNumForDefend').show();
+					}
 					$('#btnSetHero').hide();
 					$('#btnSetFortress').hide();
 				}
@@ -352,9 +390,18 @@ Interface.updateGameTab = function()
 			return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
 				undefined;
 		},
+		defendingPlayer: function()
+		{
+			return Client.currGameState.defendingPlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.defendingPlayerIndex].id : 
+				undefined;
+		},
 		currentUser: function()
 		{
-			return Client.currentUser.id
+			return Client.currentUser.id;
+		},
+		freeTokensForDefend: function()
+		{
+			return Client.currGameState.freeTokensForDefend;
 		}
 	}).appendTo('#usersInCurGame');	
 	
@@ -419,13 +466,20 @@ Interface.prepareForDecline = function()
 	}
 }
 
-
 Interface.prepareForFinishTurn = function()
 {
 	if (canFinishTurn())
 		$('#finishTurn').show();
 	else
 		$('#finishTurn').hide();
+}
+
+Interface.prepareForDefend = function()
+{
+	if (canBeginDefend())
+		$('#defend').show();
+	else
+		$('#defend').hide();
 }
 
 Interface.prepareForSelectFriend = function()

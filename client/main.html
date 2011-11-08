@@ -100,11 +100,23 @@
 </script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
-		<p>${username}{{if $item.data.id == $item.activePlayer()}} -- active player {{/if}}</p>
+		<p>
+			{{if $item.data.id == $item.currentUser()}}<i><b>{{/if}}
+			${username}
+			{{if $item.data.id == $item.currentUser()}}</b></i>{{/if}}
+			{{if $item.data.id == $item.activePlayer()}} -- active player {{else}}
+			{{if $item.data.id == $item.defendingPlayer()}} -- defending player {{/if}}
+			{{/if}}
+		</p>
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
 		<p style="margin: 10px;">Coins: ${coins}</p>
-		<p id = "freeTokens" style="margin: 10px;">Tokens in hand: ${tokensInHand}</p>
+		<p id = "freeTokens" style="margin: 10px;">Tokens in hand: 
+		{{if $item.data.id == $item.defendingPlayer()}}
+			{{html  $item.freeTokensForDefend()}}
+		{{else}}
+			${tokensInHand}
+		{{/if}}</p>
 		<table>
 			{{if $item.data.currentTokenBadge != undefined}}
 			<tr>
