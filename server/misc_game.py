@@ -92,6 +92,16 @@ def countCoins(user):
 		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
 	return income
 
+def getDefendingInfo(game):
+	if not (len(game.history) and game.history[-1].warHistory and game.history[-1].warHistory.victimBadge):
+		print 1
+		return 
+	result = dict()
+	lastAttack = game.history[-1].warHistory
+	result['playerId'] = lastAttack.victimBadge.owner.id
+	result['regionId'] = lastAttack.conqRegion.id
+	return result
+	
 def getGameState(game):
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
 	gameNameAttrs = ['gameId', 'gameName', 'gameDescription', 'state', 
@@ -99,9 +109,14 @@ def getGameState(game):
 
 	result = dict()
 	result['lastEvent'] = game.getLastState()
+
 	
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
+
+	defendingInfo = getDefendingInfo(game)
+	if defendingInfo:
+		result['defendingInfo'] = defendingInfo
 		
 	result['map'] = getMapState(game.map.id, game.id)
 
