@@ -150,7 +150,7 @@ Map = $.inherit(
 
 Game = $.inherit({
 	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
-		tokenBadgesInGame, defendingPlayerIndex, conqueredRegion, victimTokensNum)
+		tokenBadgesInGame, defendingPlayerIndex, conqueredRegion, victimTokensNum, encampmentsRegions)
 	{
 		this.id = id;
 		this.name = name;
@@ -169,6 +169,10 @@ Game = $.inherit({
 		this.victimTokensNum = victimTokensNum;
 		this.freeTokensForDefend = victimTokensNum;
 		this.defendRegions = [];
+		this.encampmentsRegions = encampmentsRegions.copy();
+		this.freeEncampments = 5;
+		for (var i = 0; i < encampmentsRegions.length; ++i)
+			this.freeEncampments -= encampmentsRegions['encampmentsNum'];
 	},
 	setState: function(state)
 	{
@@ -320,6 +324,7 @@ createGameByState = function(gameState)
 	mapState = gameState['map'];
 	conqueredRegion = undefined;
 	defendingPlayerIndex = undefined;
+	encampmentsRegions = [];
 	victimTokensNum = gameState['defendingInfo'] ? gameState['defendingInfo']['tokensNum'] : undefined;
 	if (!Client.currGameState)
 	{
@@ -334,6 +339,8 @@ createGameByState = function(gameState)
 				mapState.regions[i].x_power, mapState.regions[i].y_power, mapState.regions[i].coords));
 			if (gameState['defendingInfo'] && i + 1 == gameState['defendingInfo']['regionId'])
 				conqueredRegion = regions[i];
+			if (curReg.encampment)
+				encampmentsRegions.push({'regionId': i + 1, 'encampmentsNum': curReg.encampment});
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
@@ -348,6 +355,9 @@ createGameByState = function(gameState)
 				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
 			if (gameState['defendingInfo'] && game().map.regions[i].id == gameState['defendingInfo']['regionId'])
 				conqueredRegion = game().map.regions[i];
+			if (mapState.regions[i].currentRegionState['encampment'])
+				encampmentsRegions.push({'regionId': i + 1, 
+				'encampmentsNum': mapState.regions[i].currentRegionState['encampment']});
 		}
 	}
 	
@@ -395,7 +405,7 @@ createGameByState = function(gameState)
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
 			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
 			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
-			defendingPlayerIndex, conqueredRegion, victimTokensNum);
+			defendingPlayerIndex, conqueredRegion, victimTokensNum, encampmentsRegions);
 	}
 	else
 	{
@@ -412,6 +422,10 @@ createGameByState = function(gameState)
 		Client.currGameState.victimTokensNum = victimTokensNum;
 		if (!(Client.currGameState.freeTokensForDefend != undefined))
 			Client.currGameState.freeTokensForDefend = victimTokensNum;
+		Client.currGameState.encampmentsRegions = encampmentsRegions.copy();
+		Client.currGameState.freeEncampments = 5;
+		for (var i = 0; i < encampmentsRegions.length; ++i)
+			Client.currGameState.freeEncampments -= encampmentsRegions['encampmentsNum'];
 		result = Client.currGameState;
 	}
 	return result;
@@ -592,4 +606,21 @@ canDefend = function(region)
 {
 	return region.ownerId == user().id && !(game().conqueredRegion.isAdjacent(region) && 
 		user().currentTokenBadge.hasNotAdjacentRegions(region))
+}
+
+canBeginSettingEncampments = function()
+{
+	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY)) ;
+	if (result)
+	{
+		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+		result = specialPower.canBeginSettingEncampments();
+	}
+	return result;
+}
+
+canSetEncampments = function(region)
+{
+	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+	return specialPower.setEncampments(region);
 }

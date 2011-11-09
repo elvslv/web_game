@@ -366,6 +366,10 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
+	canBeginSettingEncampments: function()
+	{
+		return false;
+	},
 	setFortified: function(tokenBadge, fortified)
 	{
 		return false;
@@ -422,21 +426,13 @@ SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 		for (var i = 0; i < regions.length; ++i)
 			regions[i].encampment = false;
 	},
-	setEncampments: function(tokenBadge, encampments) //should be rewritten for one encampent?
+	canBeginSettingEncampments: function()
 	{
-		freeEncampments = 5;
-		for (var i = 0; i < encampments.length; ++i)
-		{
-			region = Client.currGameState.map.getRegion(encampments[i].regionId);
-			encampmentsNum = encampments[i].encampmentsNum;
-			if (region.tokenBadgeId != tokenBadge.id)
-				return false;
-			if (encampmentsNum > freeEncampments)
-				return false;
-			region.encampent = encampmentsNum;
-			freeEncampments -= encampmentsNum
-		}
 		return true;
+	},
+	setEncampments: function(region) //should be rewritten for one encampent?
+	{
+		return (region.tokenBadgeId == tokenBadge.id)
 	}
 });
 

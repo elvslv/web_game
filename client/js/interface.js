@@ -214,8 +214,8 @@ Interface.updateGameTab = function()
 		$('#redeploy')
 			.button()
 			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regions'], 
-					['redeploy', user().sid, game().redeployRegions]), 
+				sendQuery(makeQuery(['action', 'sid', 'regions', 'encampments'], 
+					['redeploy', user().sid, game().redeployRegions, game().encampmentsRegions]), 
 					redeployResponse);
 			});
 		$('#defend')
@@ -243,12 +243,19 @@ Interface.updateGameTab = function()
 				return function(){
 					$('#confirmInfo').empty();
 					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
-					$('#confirmInfo').append('<select id = "possibleTokensNumForRedeploy"' +
-						' style = "display: none">Redeploy</select>');
-					$('#confirmInfo').append('<select id = "possibleTokensNumForDefend"' +
-						' style = "display: none">Defend</select>');
-					$('#confirmInfo').append('<select id = "possibleEncampmentsNum"' +
-						' style = "display: none">Set encampments</select>');
+					$('#confirmInfo').append(
+						'<laber id = "lblPossibleTokensNumForRedeploy" '+
+						'for="possibleTokensNumForRedeploy" style = "display: none">Redeploy</label>' +
+						'<select id = "possibleTokensNumForRedeploy" style = "display: none">' +
+						'</select><br>');
+					$('#confirmInfo').append(
+						'<laber id = "lblPossibleTokensNumForDefend" '+ 
+						'for="possibleTokensNumForDefend" style = "display: none">Defend</label>' +
+						'<select id = "possibleTokensNumForDefend" style = "display: none"></select><br>');
+					$('#confirmInfo').append(
+						'<laber id = "lblPossibleEncampmentsNum"' +
+						'for="possibleEncampmentsNum" style = "display: none">Set encampments</label>' +
+						'<select id = "possibleEncampmentsNum" style = "display: none"></select><br>');
 					$('#confirm').dialog({
 						height:250,
 						title: 'region ' + j,
@@ -332,6 +339,7 @@ Interface.updateGameTab = function()
 								game().redeployRegions.push({'regionId': j, 'tokensNum': tokensNum});
 						});
 						$('#possibleTokensNumForRedeploy').show();
+						$('#lblPossibleTokensNumForRedeploy').show();
 					}
 					if (canBeginDefend() && canDefend(game().map.regions[j - 1]))
 					{
@@ -366,6 +374,42 @@ Interface.updateGameTab = function()
 							}
 						});
 						$('#possibleTokensNumForDefend').show();
+						$('#lblPossibleTokensNumForDefend').show();
+					}
+					if (canBeginSettingEncampments() && canSetEncampments(game().map.regions[j - 1]))
+					{
+						var curEncampmentsNum = 0;
+						for (l = 0; l < game().encampmentsRegions.length; ++l)
+							if (game().encampmentsRegions[l]['regionId'] == j)
+							{
+								curEncampmentsNum = game().encampmentsRegions[l]['encampmentsNum'];
+								break;
+							}
+						for (var k = 0; k <= game().freeEncampments + curEncampmentsNum; ++k)
+							$('#possibleEncampmentsNum').append('<option' + 
+							((k == game().map.regions[j - 1].encampmentsNum) ? ' selected' : 
+							'') + '>' + k + '</option>');
+						$('#possibleEncampmentsNum').change(function(){
+							encampmentsNum = parseInt($('#possibleEncampmentsNum option:selected').val());
+							var l;
+							for (l = 0; l < game().encampmentsRegions.length; ++l)
+							{
+								if (game().encampmentsRegions[l]['regionId'] == j)
+								{
+									game().freeEncampments += game().encampmentsRegions[l]['encampmentsNum'] - 
+										encampmentsNum;
+									game().encampmentsRegions[l]['encampmentsNum'] = encampmentsNum;
+									break;
+								}
+							}
+							if (l == game().encampmentsRegions.length)
+							{
+								game().freeEncampments -= encampmentsNum;
+								game().encampmentsRegions.push({'regionId': j, 'encampmentsNum': encampmentsNum});
+							}
+						});
+						$('#possibleEncampmentsNum').show();
+						$('#lblPossibleEncampmentsNum').show();
 					}
 					$('#btnSetHero').hide();
 					$('#btnSetFortress').hide();
