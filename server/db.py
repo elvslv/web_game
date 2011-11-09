@@ -86,7 +86,6 @@ class Database:
 		reg = Region(id, regInfo['population'], map_, 
 			regInfo['raceCoords'] if 'raceCoords' in regInfo else None, 
 			regInfo['powerCoords'] if 'powerCoords' in regInfo else None,
-			regInfo['bonusCoords'] if 'bonusCoords' in regInfo else None,
 			regInfo['coordinates'] if 'coordinates' in regInfo else None)
 		for descr in regInfo['landDescription']:
 			if not descr in misc.possibleLandDescription[:11]:
@@ -237,8 +236,11 @@ class Game(Base):
 		
 
 	def getLastState(self):
-		return self.history[-1].state
-
+		if (len(self.history)):
+			return self.history[-1].state
+		else:
+			return self.state
+	
 	def getNextPlayer(self):
 		activePlayer = dbi.getXbyY('User', 'id', self.activePlayerId)
 		curPlayer = activePlayer
@@ -357,22 +359,19 @@ class Region(Base):
 	cavern = Column(Boolean, default=False)
 	raceCoords = Column(String)
 	powerCoords = Column(String)
-	bonusCoords = Column(String)
 	coordinates = Column(String)
-	
 	map = relationship(Map, backref=backref('regions', order_by=id))
 	neighbors = relationship('Adjacency' , cascade="all,delete", 
 		primaryjoin='and_(Region.id==Adjacency.regId,\
 		Region.mapId==Adjacency.mapId)')
 		
 
-	def __init__(self, id, defTokensNum, map_, raceCoords, powerCoords, bonusCoords, coordinates): 
+	def __init__(self, id, defTokensNum, map_, raceCoords, powerCoords, coordinates): 
 		self.id = id
 		self.defTokensNum = defTokensNum
 		self.map = map_
 		self.raceCoords = str(raceCoords)
 		self.powerCoords = str(powerCoords)
-		self.bonusCoords = str(bonusCoords)
 		self.coordinates = str(coordinates)
 
 	def getState(self, gameId):

@@ -81,7 +81,6 @@ def act_uploadMap(data):
 	
 
 def act_createGame(data):
-	print 'createGame'
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.gameId: raise BadFieldException('alreadyInGame')
 	map_ = dbi.getXbyY('Map', 'id', data['mapId'])

@@ -99,15 +99,27 @@
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
 </script>
 <script id="regionsTemplate" type="text/x-jquery-tmpl"> 
-	<area shape = "circle" coords = {{html $item.coords($item.data.id)}} id = "{{html 'region'.concat($item.data.id)}}"/>
+	<area shape = "poly" coords = {{html $item.data.coordsStr}} id = "{{html 'region'.concat($item.data.id)}}"/>
 </script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user">
-		<p>${username}{{if $item.data.id == $item.activePlayer()}} -- active player {{/if}}</p>
+		<p>
+			{{if $item.data.id == $item.currentUser()}}<i><b>{{/if}}
+			${username}
+			{{if $item.data.id == $item.currentUser()}}</b></i>{{/if}}
+			{{if $item.data.id == $item.activePlayer()}} -- active player {{else}}
+			{{if $item.data.id == $item.defendingPlayer()}} -- defending player {{/if}}
+			{{/if}}
+		</p>
 		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
 		<p style="margin: 10px;">Coins: ${coins}</p>
-		<p style="margin: 10px;">Tokens in hand: ${tokensInHand}</p>
+		<p id = "freeTokens" style="margin: 10px;">Tokens in hand: 
+		{{if $item.data.id == $item.defendingPlayer()}}
+			{{html  $item.freeTokensForDefend()}}
+		{{else}}
+			${tokensInHand}
+		{{/if}}</p>
 		<table>
 			{{if $item.data.currentTokenBadge}}
 			<tr>
@@ -153,92 +165,7 @@
 		</table>
 	</div>
 </script>
-<script id="currentGameTemplate" type="text/x-jquery-tmpl"> 
-	<table>
-		<tr>
-			<td>
-				<button id = "leaveGame">leave</button>
-			</td>
-			<td rowspan = "12" valign = "top">
-				<div style = "margin-left: 250px;" id="map">
-				</div>
-			</td>
-		</tr>
-		<tr>
-			<td colspan = "2">
-				<button id = "setRadinessStatusInGame" style = "display: none"></button>
-			</td>
-		</tr>
-		<tr>
-			<td colspan = "2">
-				Players:
-			</td>
-		</tr>
-		<tr>
-			<td colspan = "2">
-				{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}
-			</td>
-		</tr>
-		{{if tokenBadges.length}}
-			<tr>
-				<td colspan = "2">
-					Visible token badges:
-				</td>
-			</tr>
-			<tr>
-				<td colspan = "2">
-					{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}
-				</td>
-			</tr>
-		{{/if}}
-		<tr>
-			<td colspan = "2">
-				<button id = "finishTurn" style = "display: none">Finish turn</button>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<select id = "possibleRegions" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "conquer" style = "display: none">Conquer</button>
-			</td>
-		</tr>		
-		<tr>
-			<td>
-				<select id = "possibleFriends" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "selectFriend" style = "display: none">Select friend</button>
-			</td>
-		</tr>
-		<tr>
-			<td colspan = "2">
-				<button id = "throwDice" style = "display: none">Throw dice</button>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<select id = "possibleRegionsForEnchant" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "enchant" style = "display: none">Enchant</button>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<select id = "possibleRegionsForDragonAttack" style = "display: none">
-				</select>
-			</td>
-			<td>
-				<button id = "dragonAttack" style = "display: none">Dragon attack</button>
-			</td>
-		</tr>
-	</table>
-</script>
+
 	<div id = 'tabs'>
 		<ul>
 	    </ul>	

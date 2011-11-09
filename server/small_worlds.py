@@ -9,6 +9,7 @@ import sys
 import json
 import traceback
 import optparse
+import actions
 
 STATIC_FILES_ROOT = join("./client/")
 PORT = 3030
@@ -34,6 +35,7 @@ def serve_ajax():
 
 def main():
 	run(reloader=True, host='localhost', port=PORT)
+	actions.doAction({"action" : "resetServer"})
 	return 0
 
 if __name__ == '__main__':

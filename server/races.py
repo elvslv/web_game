@@ -65,6 +65,9 @@ class BaseRace:
 		region.hero = False
 		return -1
 
+	def sufferCasualties_(self, tokenBadge):
+		return -1
+		
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
 		return -1
@@ -162,6 +165,9 @@ class RaceElves(BaseRace):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
 	def sufferCasualties(self, tokenBadge):
+		return 0
+
+	def sufferCasualties_(self, tokenBadge):
 		return 0
 
 	def clearRegion(self, tokenBadge, region):

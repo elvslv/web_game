@@ -2,6 +2,87 @@ var Interface = {};
 
 Interface.needToCreateGameTab = false;
 
+Interface.gameTab = function()
+{
+	return '<table>' +
+		'<tr>' +
+			'<td>' +
+				'<button id = "leaveGame">leave</button>' +
+			'</td>' +
+			'<td rowspan = "12" valign = "top">' +
+				'<div id="map" style = "margin-left: 250px;">' +
+				//	'<div id = "imgdiv" style = "position: absolute;">' +
+				//	'</div>' +
+				//	'<img id = "imgmap" src = "' + game().map.picture + '" usemap = "#map">' +
+				//	'<map name = "map" id = "map" valign = "top">' +
+				//	'</map>' 
+				'</div>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2">' +
+				'<button id = "setRadinessStatusInGame" style = "display: none"></button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2">' +
+				'Players:' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2" id = "usersInCurGame">' +
+				//'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
+			'</td>' +
+		'</tr>' +
+		(tokenBadges.length 
+		?
+			'<tr>' +
+				'<td colspan = "2">' +
+					'Visible token badges:' +
+				'</td>' +
+			'</tr>' +
+			'<tr>' +
+				'<td colspan = "2" id = "visibleTokenBadges">' +
+					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
+				'</td>' +
+			'</tr>' 
+		: 
+			'') +
+		'<tr>' +
+			'<td colspan = "2">' +
+				'<button id = "finishTurn" style = "display: none">Finish turn</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td>' +
+				'<select id = "possibleFriends" style = "display: none">' +
+				'</select>' +
+			'</td>' +
+			'<td>' +
+				'<button id = "selectFriend" style = "display: none">Select friend</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td colspan = "2">'  +
+				'<button id = "throwDice" style = "display: none">Throw dice</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td>' +
+				'<button id = "changeRedeployStatus" style = "display: none">Start redeploy</button>' +
+			'</td>' +
+			'<td>' +
+				'<button id = "redeploy" style = "display: none">redeploy</button>' +
+			'</td>' +
+		'</tr>' +
+		'<tr>' +
+			'<td>' +
+				'<button id = "defend" style = "display: none">Defend</button>' +
+			'</td>' +
+		'</tr>' +
+	'</table>';
+};
+
 Interface.defaultDialogOptions = {
 	'autoOpen': false,
 	'height': 300,
@@ -70,9 +151,9 @@ Interface.updatePage = function()
 		updateGameState();
 	else
 		updateGameList();
-	updateChat();
+	//updateChat();
 	window.setTimeout("Interface.updatePage()", 5000);
-}
+};
 
 
 
@@ -82,44 +163,386 @@ Interface.prepareForActions = function()
 	Interface.prepareForRaceSelect();
 	Interface.prepareForDecline();
 	Interface.prepareForFinishTurn();
-	Interface.prepareForConquer();
 	Interface.prepareForSelectFriend();
-	Interface.prepareForEnchant();
-}
+	Interface.prepareForThrowDice();
+	Interface.prepareForRedeploy();
+	Interface.prepareForDefend();
+};
 
+Interface.getRegionInfo = function(reg){
+	return function(){
+		$('#confirmInfo').empty();
+		$('#confirmInfo').append(reg.htmlRegionInfo());
+		$('#confirmInfo').append('<select id = "possibleTokensNumForRedeploy"' +
+					' style = "display: none">Redeploy</select>');
+		$('#confirmInfo').append('<select id = "possibleTokensNumForDefend"' +
+				' style = "display: none">Defend</select>');
+		$('#confirmInfo').append('<select id = "possibleEncampmentsNum"' +
+				' style = "display: none">Set encampments</select>');
+		$('#confirm').dialog({
+			height:250,
+			title: 'region ' + reg.id,
+			modal: true,
+			buttons: [
+			{
+				id: 'btnConquer',
+				text: 'Conquer',
+				click: function() {
+					sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+							['conquer', user().sid, j]), conquerResponse);	
+						$(this).dialog('close');
+				}
+			},
+			{
+				id: 'btnEnchant',
+				text: 'Enchant',
+				click: function() {
+				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+							['enchant', user().sid, j]), enchantResponse);
+						$(this).dialog('close');
+				}
+			},
+			{
+				id: 'btnDragonAttack',
+				text: 'Dragon attack',
+				click: function() {
+					sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+								['dragonAttack', user().sid, j]), dragonAttackResponse);
+							$(this).dialog('close');
+				}
+			},
+			{
+				id: 'btnCancel',
+				text: 'Cancel',
+				click: function() {
+					$(this).dialog('close');
+				}
+			},
+			{
+				id: 'btnSetHero',
+				text: 'Set hero',
+				click: function() {
+					Client.currGameState.heroRegions.push(j);
+				}
+			},
+			{
+				id: 'btnSetFortress',
+				text: 'Set fortress',
+				click: function() {
+					Client.currGameState.fortressRegions.push(j);
+				}
+			}
+		]});
+		$('#confirm').dialog('open');
+		if (!(canBeginConquer() && canConquer(reg)))
+			$('#btnConquer').hide();
+		if (!(canBeginEnchant() && canEnchant(reg)))
+			$('#btnEnchant').hide();
+		if (!(canBeginDragonAttack() && canDragonAttack(reg)))
+			$('#btnDragonAttack').hide();
+		if (game().redeployStarted && canRedeploy(reg))
+		{
+			for (var k = 0; k <= user().freeTokens + reg.tokensNum; ++k)
+				$('#possibleTokensNumForRedeploy').append('<option' + 
+					((k === reg.tokensNum) ? ' selected' : 
+							'') + '>' + k + '</option>');
+				$('#possibleTokensNumForRedeploy').change(function(){
+					tokensNum = parseInt($('#possibleTokensNumForRedeploy option:selected').val());
+					user().freeTokens += reg.tokensNum - tokensNum;
+					var l;
+					for (l = 0; l < game().redeployRegions.length; ++l)
+					{
+						if (game().redeployRegions[l].regionId === reg.id)
+						{
+							game().redeployRegions[l].tokensNum = tokensNum;
+							break;
+						}
+					}
+					if (l === game().redeployRegions.length)
+						game().redeployRegions.push({'regionId': reg.id, 'tokensNum': tokensNum});
+				});
+				$('#possibleTokensNumForRedeploy').show();
+		}
+		if (canBeginDefend() && canDefend(reg))
+		{
+			var curTokensNum = 0;
+			for (l = 0; l < game().defendRegions.length; ++l)
+				if (game().defendRegions[l].regionId === reg.id)
+				{
+					curTokensNum = game().defendRegions[l]['tokensNum'];
+					break;
+				}
+			for (var k = 0; k <= game().freeTokensForDefend + curTokensNum; ++k)
+				$('#possibleTokensNumForDefend').append('<option' + 
+					((k == reg.tokensNum) ? ' selected' : 
+					'') + '>' + k + '</option>');
+			$('#possibleTokensNumForDefend').change(function(){
+			tokensNum = parseInt($('#possibleTokensNumForDefend option:selected').val());
+			var l;
+			for (l = 0; l < game().defendRegions.length; ++l)
+			{
+				if (game().defendRegions[l].regionId === reg.id)
+				{
+					game().freeTokensForDefend += game().defendRegions[l].tokensNum - 
+							tokensNum;
+					game().defendRegions[l].tokensNum = tokensNum;
+					break;
+				}
+			}
+			if (l === game().defendRegions.length)
+			{
+				game().freeTokensForDefend -= tokensNum;
+				game().defendRegions.push({'regionId': reg.id, 'tokensNum': tokensNum});
+			}
+			});
+			$('#possibleTokensNumForDefend').show();
+		}
+		$('#btnSetHero').hide();
+		$('#btnSetFortress').hide();
+	}
+};
+
+	
 Interface.updateGameTab = function()
 {
 	if (Interface.needToCreateGameTab)
 	{
 		Interface.needToCreateGameTab = false;
 		$('#tabs').tabs('add', '#ui-tabs-1', Client.currGameState.name, 1);
-		
-	}
-	$('#ui-tabs-1').empty();
-	$('#currentGameTemplate').tmpl(Client.currGameState,
-	{
-		opts: 
+		$('#ui-tabs-1').append(Interface.gameTab());
+		$('#setRadinessStatusInGame')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
+					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), 
+					setReadinessStatusResponse);
+			});
+		$('#finishTurn')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['finishTurn', user().sid]), 
+					finishTurnResponse);
+			});
+		$('#selectFriend')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
+					['selectFriend', user().sid, $('#possibleFriends option:selected').val()]), 
+					selectFriendResponse);				
+			});
+		$('#throwDice')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['throwDice', user().sid]), 
+					throwDiceResponse);
+			});
+		$('#changeRedeployStatus')
+			.button()
+			.click(function(){
+				if (Client.currGameState.redeployStarted)
+				{
+					Client.currGameState.redeployStarted = false;
+					$('#changeRedeployStatus').html('Start redeploy');
+					$('#redeploy').hide();
+					return;
+				}
+				Client.currGameState.redeployStarted = true;
+				Client.currGameState.regions = [];
+				user().startRedeploy();
+				$('#changeRedeployStatus').html('Cancel redeploy');
+				$('#redeploy').show();
+			});
+		$('#redeploy')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regions'], 
+					['redeploy', user().sid, game().redeployRegions]), 
+					redeployResponse);
+			});
+		$('#defend')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid', 'regions'], 
+					['defend', user().sid, game().defendRegions]), 
+					defendResponse);
+			});
+		Graphics.drawMap(Client.currGameState.map);
+	/*	$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
 		{
-			activePlayer: function()
+			opts: 
 			{
-				return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
-					undefined;
-			},
-			showVisibleTokenBadges: function()
-			{
-				return Client.currentUser.currentTokenBadge == undefined;
-			},
-			currentUser: function()
-			{
-				return Client.currentUser.id
-			},
-			coords: function(regionId)
-			{
-				return '"' + game().map.regions[regionId - 1].x_race + ', ' + game().map.regions[regionId - 1].y_race + ', ' + '50"';
+				coords: function(regionId)
+				{
+					return '"' + game().map.regions[regionId - 1].x_race + ', ' +
+						game().map.regions[regionId - 1].y_race + ', ' + '50"';
+				}
 			}
+		}).appendTo('#map');
+		$('#imgmap').maphilight();
+		for (var i = 0; i < game().map.regions.length; ++i)
+		{
+			$('#region' + (i + 1)).click(function(j){
+				return function(){
+					$('#confirmInfo').empty();
+					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
+					$('#confirmInfo').append('<select id = "possibleTokensNumForRedeploy"' +
+						' style = "display: none">Redeploy</select>');
+					$('#confirmInfo').append('<select id = "possibleTokensNumForDefend"' +
+						' style = "display: none">Defend</select>');
+					$('#confirmInfo').append('<select id = "possibleEncampmentsNum"' +
+						' style = "display: none">Set encampments</select>');
+					$('#confirm').dialog({
+						height:250,
+						title: 'region ' + j,
+						modal: true,
+						buttons: [
+						{
+							id: 'btnConquer',
+							text: 'Conquer',
+							click: function() {
+								sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+									['conquer', user().sid, j]), conquerResponse);	
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnEnchant',
+							text: 'Enchant',
+							click: function() {
+								sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+									['enchant', user().sid, j]), enchantResponse);
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnDragonAttack',
+							text: 'Dragon attack',
+							click: function() {
+								sendQuery(makeQuery(['action', 'sid', 'regionId'], 
+									['dragonAttack', user().sid, j]), dragonAttackResponse);
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnCancel',
+							text: 'Cancel',
+							click: function() {
+								$(this).dialog('close');
+							}
+						},
+						{
+							id: 'btnSetHero',
+							text: 'Set hero',
+							click: function() {
+								Client.currGameState.heroRegions.push(j);
+							}
+						},
+						{
+							id: 'btnSetFortress',
+							text: 'Set fortress',
+							click: function() {
+								Client.currGameState.fortressRegions.push(j);
+							}
+						}
+						]});
+					$('#confirm').dialog('open');
+					if (!(canBeginConquer() && canConquer(game().map.regions[j - 1])))
+						$('#btnConquer').hide();
+					if (!(canBeginEnchant() && canEnchant(game().map.regions[j - 1])))
+						$('#btnEnchant').hide();
+					if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
+						$('#btnDragonAttack').hide();
+					if (game().redeployStarted && canRedeploy(game().map.regions[j - 1]))
+					{
+						for (var k = 0; k <= user().freeTokens + game().map.regions[j - 1].tokensNum; ++k)
+							$('#possibleTokensNumForRedeploy').append('<option' + 
+							((k == game().map.regions[j - 1].tokensNum) ? ' selected' : 
+							'') + '>' + k + '</option>');
+						$('#possibleTokensNumForRedeploy').change(function(){
+							tokensNum = parseInt($('#possibleTokensNumForRedeploy option:selected').val());
+							user().freeTokens += game().map.regions[j - 1].tokensNum - tokensNum;
+							var l;
+							for ( l = 0; l < game().redeployRegions.length; ++l)
+							{
+								if (game().redeployRegions[l]['regionId'] == j)
+								{
+									game().redeployRegions[l]['tokensNum'] = tokensNum;
+									break;
+								}
+							}
+							if (l == game().redeployRegions.length)
+								game().redeployRegions.push({'regionId': j, 'tokensNum': tokensNum});
+						});
+						$('#possibleTokensNumForRedeploy').show();
+					}
+					if (canBeginDefend() && canDefend(game().map.regions[j - 1]))
+					{
+						var curTokensNum = 0;
+						for (l = 0; l < game().defendRegions.length; ++l)
+							if (game().defendRegions[l]['regionId'] == j)
+							{
+								curTokensNum = game().defendRegions[l]['tokensNum'];
+								break;
+							}
+						for (var k = 0; k <= game().freeTokensForDefend + curTokensNum; ++k)
+							$('#possibleTokensNumForDefend').append('<option' + 
+							((k == game().map.regions[j - 1].tokensNum) ? ' selected' : 
+							'') + '>' + k + '</option>');
+						$('#possibleTokensNumForDefend').change(function(){
+							tokensNum = parseInt($('#possibleTokensNumForDefend option:selected').val());
+							var l;
+							for (l = 0; l < game().defendRegions.length; ++l)
+							{
+								if (game().defendRegions[l]['regionId'] == j)
+								{
+									game().freeTokensForDefend += game().defendRegions[l]['tokensNum'] - 
+										tokensNum;
+									game().defendRegions[l]['tokensNum'] = tokensNum;
+									break;
+								}
+							}
+							if (l == game().defendRegions.length)
+							{
+								game().freeTokensForDefend -= tokensNum;
+								game().defendRegions.push({'regionId': j, 'tokensNum': tokensNum});
+							}
+						});
+						$('#possibleTokensNumForDefend').show();
+					}
+					$('#btnSetHero').hide();
+					$('#btnSetFortress').hide();
+				}
+			}(i + 1));
+		}*/
+	}
+	
+	$('#usersInCurGame').empty();
+	$('#usersInCurGameTemplate').tmpl(Client.currGameState.players,
+	{
+		
+		activePlayer: function()
+		{
+			return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
+				undefined;
+		},
+		defendingPlayer: function()
+		{
+			return Client.currGameState.defendingPlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.defendingPlayerIndex].id : 
+				undefined;
+		},
+		currentUser: function()
+		{
+			return Client.currentUser.id;
+		},
+		freeTokensForDefend: function()
+		{
+			return Client.currGameState.freeTokensForDefend;
 		}
-	}).appendTo('#ui-tabs-1');
-	Graphics.drawMap(Client.currGameState.map);
+	}).appendTo('#usersInCurGame');	
+	
+	$('#visibleTokenBadges').empty();
+	$('#visibleTokenBadgesTemplate').tmpl(Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
+
 	$('#leaveGame')
 		.button()
 		.click(function(){
@@ -127,30 +550,9 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
-/*	$('#imgmap').maphilight();
+//	$('#imgdiv').empty();
 	for (var i = 0; i < game().map.regions.length; ++i)
-	{
-		$('#region' + (i + 1)).click(function(j){
-			return function(){
-				$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
-				$('#confirm').dialog({
-					resizable: false,
-					height:140,
-					modal: true,
-					buttons: {
-						"Conquer": function() {
-							sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-								['conquer', user().sid, j]), conquerResponse);	
-							$(this).dialog('close');
-						},
-						Cancel: function() {
-							$(this).dialog('close');
-						}
-					}});
-				$('#confirm').dialog('open');
-			}
-		}(i + 1));
-	}*/
+		game().map.regions[i].drawTokenBadge();
 	Interface.prepareForActions();
 }
 
@@ -161,15 +563,10 @@ Interface.prepareForSetReadinessStatus = function()
 		$('#setRadinessStatusInGame').prop('isReady', Client.currentUser.isReady);
 		$('#setRadinessStatusInGame').html(Client.currentUser.isReady ? 'I am not ready' : 
 			'I am ready');
-		$('#setRadinessStatusInGame')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'isReady'], ['setReadinessStatus', 
-					Client.currentUser.sid, (1 - $(this).prop('isReady'))]), 
-					setReadinessStatusResponse);
-			});
 		$('#setRadinessStatusInGame').show();
 	}
+	else
+		$('#setRadinessStatusInGame').hide();
 }
 
 Interface.prepareForRaceSelect = function()
@@ -204,45 +601,20 @@ Interface.prepareForDecline = function()
 	}
 }
 
-
 Interface.prepareForFinishTurn = function()
 {
 	if (canFinishTurn())
-	{
-		$('#finishTurn')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid'], ['finishTurn', user().sid]), 
-					finishTurnResponse);
-			});
 		$('#finishTurn').show();
-	}
+	else
+		$('#finishTurn').hide();
 }
 
-Interface.prepareForConquer = function()
+Interface.prepareForDefend = function()
 {
-	if (!canBeginConquer())
-		return;
-	var cnt = 0;
-	for (var i = 0; i < game().map.regions.length; ++i)
-		if (canConquer(game().map.regions[i]))
-		{
-			$('#possibleRegions').append('<option value = ' + i + '>' + game().map.regions[i].id + 
-				'</option>');
-			++cnt;
-		}
-	if (cnt)
-	{
-		$('#conquer')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-					['conquer', user().sid, $('#possibleRegions option:selected').val()]), 
-					conquerResponse);				
-			});
-		$('#possibleRegions').show();
-		$('#conquer').show();
-	}
+	if (canBeginDefend())
+		$('#defend').show();
+	else
+		$('#defend').hide();
 }
 
 Interface.prepareForSelectFriend = function()
@@ -259,82 +631,34 @@ Interface.prepareForSelectFriend = function()
 		}
 	if (cnt)
 	{
-		$('#selectFriend')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
-					['selectFriend', user().sid, $('#possibleFriends option:selected').val()]), 
-					selectFriendResponse);				
-			});
 		$('#possibleFriends').show();
 		$('#selectFriend').show();
 	}
+	else
+	{
+		$('#possibleFriends').hide();
+		$('#selectFriend').hide();
+	}
+}
+
+Interface.prepareForRedeploy = function()
+{
+	if (!canBeginRedeploy())
+	{
+		$('#changeRedeployStatus').hide();
+		$('#redeploy').hide();
+		Client.currGameState.redeployStarted = false;
+		return;
+	}
+	$('#changeRedeployStatus').show();
 }
 
 Interface.prepareForThrowDice = function()
 {
 	if (canThrowDice())
-	{
-		$('#throwDice')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid'], ['throwDice', user().sid]), 
-					throwDiceResponse);
-			});
 		$('#throwDice').show();
-	}
-}
-
-Interface.prepareForEnchant = function()
-{
-	if (!canBeginEnchant())
-		return;
-	var cnt = 0;
-	for (var i = 0; i < game().map.regions.length; ++i)
-		if (canEnchant(game().map.regions[i]))
-		{
-			$('#possibleRegionsForEnchant').append('<option value = ' + i + '>' + game().map.regions[i].id + 
-				'</option>');
-			++cnt;
-		}
-	if (cnt)
-	{
-		$('#enchant')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-					['enchant', user().sid, $('#possibleRegionsForEnchant option:selected').val()]), 
-					enchantResponse);				
-			});
-		$('#possibleRegionsForEnchant').show();
-		$('#enchant').show();
-	}
-}
-
-Interface.prepareForDragonAttack = function()
-{
-	if (!canBeginDragonAttack())
-		return;
-	var cnt = 0;
-	for (var i = 0; i < game().map.regions.length; ++i)
-		if (canDragonAttack(game().map.regions[i]))
-		{
-			$('#possibleRegionsForDragonAttack').append('<option value = ' + i + '>' + game().map.regions[i].id + 
-				'</option>');
-			++cnt;
-		}
-	if (cnt)
-	{
-		$('#dragonAttack')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-					['dragonAttack', user().sid, $('#possibleRegionsForDragonAttack option:selected').val()]), 
-					dragonAttackResponse);				
-			});
-		$('#possibleRegionsForDragonAttack').show();
-		$('#dragonAttack').show();
-	}
+	else
+		$('#throwDice').hide();
 }
 
 Interface.fillGameList = function(games) 
