@@ -12,10 +12,10 @@ function registerResponse(data)
 			$('#dialogInfo').text('Invalid data');
 			break;
 		case 'usernameTaken':
-			$('#dialogInfo').text('User with the same name have already registered');
+			$('#dialogInfo').text('User with the same name has already registered');
 			break;
 		case 'ok':
-			alert("You're were registered, congratulations!");
+			alert("You were registered, congratulations!");
 			Interface.changeOnRegistration();
 			break;
 		default:
@@ -196,7 +196,7 @@ function setReadinessStatusResponse(data)
 			alert("You're not playing");
 			break;
 		case 'badGameState': 
-			alert('You can not join game that have been already started or finished');
+			alert('You cannot do it while playing');
 			break;
 		case 'ok':
 			Interface.changeOnSetReadinessStatus();

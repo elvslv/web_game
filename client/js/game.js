@@ -95,9 +95,17 @@ Region = $.inherit({
 				return true;
 		return false;
 	},
-	drawTokenBadge: function()
+	getTokenBadge : function()
 	{
-/*		offset = $('#imgdiv').offset();
+		return game().tokenBadgesInGame[this.tokenBadgeId];
+	},
+	getOwner : function()
+	{
+		return game().players[this.ownerId];
+	}
+		
+/*		
+	offset = $('#imgdiv').offset();
 		if (this.tokenBadgeId)
 		{
 			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
@@ -110,8 +118,6 @@ Region = $.inherit({
 			$('#imgdiv').append('<div class = "Declined" style = "top: ' + this.y_race + '; left: ' + 
 				this.x_race + '">' + this.tokensNum + '</div>');
 		}*/
-	}
-
 });
 
 Map = $.inherit(
@@ -238,6 +244,11 @@ TokenBadge = $.inherit({
 				if (j == regions[i].adjacent.length)
 					return true;
 			}
+		},
+		getPic : function()
+		{
+			var race = getRaceByName(this.raceName);
+			return this.inDecline ? race.getPicture(true) : race.getPicture(false);
 		}
 			
 });
@@ -296,17 +307,16 @@ User = $.inherit({
 
 createTokenBadge = function(tokenBadge)
 {
-	result = new TokenBadge(tokenBadge.tokenBadgeId, tokenBadge.raceName, tokenBadge.specialPowerName,
+	return new TokenBadge(tokenBadge.tokenBadgeId, tokenBadge.raceName, tokenBadge.specialPowerName,
 		tokenBadge.position, tokenBadge.bonusMoney, undefined, tokenBadge.totalTokensNum);
-	return result;
 }
 
 createGameByState = function(gameState)
 {
-	mapState = gameState['map'];
+	mapState = gameState.map;
 	conqueredRegion = undefined;
 	defendingPlayerIndex = undefined;
-	victimTokensNum = gameState['defendingInfo'] ? gameState['defendingInfo']['tokensNum'] : undefined;
+	victimTokensNum = gameState.defendingInfo;
 	if (!Client.currGameState)
 	{
 		regions = [];
@@ -320,7 +330,7 @@ createGameByState = function(gameState)
 				mapState.regions[i].raceCoords, mapState.regions[i].powerCoords, 
 				mapState.regions[i].coordinates));
 
-			if (gameState['defendingInfo'] && i + 1 == gameState['defendingInfo']['regionId'])
+			if (gameState.defendingInfo && i + 1 == gameState.defendingInfo.regionId)
 				conqueredRegion = regions[i];
 		}
 		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
@@ -334,7 +344,8 @@ createGameByState = function(gameState)
 		{
 			for (var j = 0; j < regionFields.length; ++j)
 				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
-			if (gameState['defendingInfo'] && game().map.regions[i].id == gameState['defendingInfo']['regionId'])
+			if (gameState.defendingInfo && 
+				game().map.regions[i].id === gameState.defendingInfo.regionId)
 				conqueredRegion = game().map.regions[i];
 		}
 	}
@@ -373,14 +384,14 @@ createGameByState = function(gameState)
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		}
 		players.push(player);
-		if (gameState['defendingInfo'] && player.id == gameState['defendingInfo']['playerId'])
+		if (gameState.defendingInfo && player.id == gameState.defendingInfo.playerId)
 			defendingPlayerIndex = i;
 	}
 	
 	if (!Client.currGameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
-			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
+			(gameState.state == GAME_START) ? gameState.lastEvent : gameState.state,
 			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
 			defendingPlayerIndex, conqueredRegion, victimTokensNum);
 	}
@@ -390,8 +401,8 @@ createGameByState = function(gameState)
 		Client.currGameState.tokenBadgesInGame = tokenBadgesInGame.copy();
 		Client.currGameState.players = players.copy();
 		Client.currGameState.activePlayerIndex = activePlayerIndex;
-		Client.currGameState.state = (gameState['state'] == GAME_START) ? 
-			gameState['lastEvent'] : gameState['state'];
+		Client.currGameState.state = gameState.state === GAME_START ? 
+			gameState.lastEvent : gameState.state;
 		if (!(defendingPlayerIndex != undefined))
 			Client.currGameState.defendRegions = [];
 		Client.currGameState.defendingPlayerIndex = defendingPlayerIndex;

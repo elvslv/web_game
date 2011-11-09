@@ -81,7 +81,15 @@ BaseRace = $.inherit({
 	{
 		tokenBadge.totalTokensNum -= 1;
 		return -1;
+	},
+	getPic : function(declined)
+	{
+		n = this.name ? this.name + ' ' : ''; 
+		return "css/images/races/" + n + "small " + 
+			(declined ? "decline.jpg" : ".jpg"); 
 	}
+	
+
 });
 	
 RaceHalflings = $.inherit(BaseRace, {
@@ -305,6 +313,7 @@ var racesList = [
 	new RaceTritons(),
 	new RaceTrolls(),
 	new RaceWizards(),
+	new BaseRace()
 ];
 
 for (var i = 0; i < racesList.length; ++i)
@@ -819,4 +828,9 @@ getRace = function(id)
 getRaceByName = function(name)
 {
 	return racesList[getRaceId(name)];
+}
+
+getBaseRace = function() 
+{
+	return getRaceByName();
 }

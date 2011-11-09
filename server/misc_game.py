@@ -202,8 +202,7 @@ def getMapState(mapId, gameId = None):
 				curReg['landscape'] = constRegionAttrs[i]
 			elif constRegionAttrs[i] in ('mine', 'cavern', 'magic'):
 				curReg['bonus'] = constRegionAttrs[i]
-			else:
-				curReg['constRegionState'].append(constRegionAttrs[i])
+			curReg['constRegionState'].append(constRegionAttrs[i])
 			 
 				
 		curReg['adjacentRegions'] = region.getNeighbors()

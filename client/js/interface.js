@@ -550,9 +550,6 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
-//	$('#imgdiv').empty();
-	for (var i = 0; i < game().map.regions.length; ++i)
-		game().map.regions[i].drawTokenBadge();
 	Interface.prepareForActions();
 }
 
