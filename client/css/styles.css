@@ -74,7 +74,7 @@ BODY{
 }
 
 .AmazonsToken, .DwarvesToken, .ElvesToken, .GiantsToken, .HalflingsToken, .HumansToken, .OrcsToken, .RatmenToken, .SkeletonsToken, .SorcerersToken, .TritonsToken, .TrollsToken, .WizardsToken,
-.AmazonsTokenDecline, .DwarvesTokenDecline, .ElvesTokenDecline, .GiantsTokenDecline, .HalflingsTokenDecline, .HumansTokenDecline, .OrcsTokenDecline, .RatmenTokenDecline, .SkeletonsTokenDecline, .SorcerersTokenDecline, .TritonsTokenDecline, .TrollsTokenDecline, .WizardsTokenDecline, .Declined{
+.AmazonsTokenDecline, .DwarvesTokenDecline, .ElvesTokenDecline, .GiantsTokenDecline, .HalflingsTokenDecline, .HumansTokenDecline, .OrcsTokenDecline, .RatmenTokenDecline, .SkeletonsTokenDecline, .SorcerersTokenDecline, .TritonsTokenDecline, .TrollsTokenDecline, .WizardsTokenDecline, .Declined, .Encampment, .Dragon, .Fortress, .Hero{
 	width: 50px;
 	height:50px;
 	position:absolute;
@@ -109,3 +109,7 @@ BODY{
 .WizardsTokenDecline { background: url("images/races/Wizards small decline.jpg") no-repeat; }
 
 .Declined { background: url("images/races/decline.jpg") no-repeat; }
+.Fortress { background: url("images/races/fortress.jpg") no-repeat; }
+.Encampment { background: url("images/races/encampment.jpg") no-repeat; }
+.Dragon { background: url("images/races/dragon.jpg") no-repeat; }
+.Hero { background: url("images/races/hero.jpg") no-repeat; }

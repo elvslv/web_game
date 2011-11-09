@@ -109,10 +109,20 @@ Region = $.inherit({
 				+ this.x_race + '">' + this.tokensNum + '</div>');
 		}
 		else if (this.tokensNum)
-		{
 			$('#imgdiv').append('<div class = "Declined" style = "top: ' + this.y_race + '; left: ' + 
 				this.x_race + '">' + this.tokensNum + '</div>');
-		}
+		if (this.encampment)
+			$('#imgdiv').append('<div class = "Encampment" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '">' + this.encampment + '</div>');
+		if (this.dragon)
+			$('#imgdiv').append('<div class = "Dragon" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '"></div>');
+		if (this.fortress)
+			$('#imgdiv').append('<div class = "Fortress" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '"></div>');
+		if (this.hero)
+			$('#imgdiv').append('<div class = "Hero" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '"></div>');
 	}
 
 });
@@ -510,7 +520,7 @@ canChooseFriend = function()
 
 selectFriend = function(user)
 {
-	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+	specialPower = getSpecPowByName(Client.currentUser.currentTokenBadge.specPowName);
 	return specialPower.selectFriend(user);
 }
 

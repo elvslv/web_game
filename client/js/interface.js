@@ -189,13 +189,6 @@ Interface.updateGameTab = function()
 				sendQuery(makeQuery(['action', 'sid'], ['finishTurn', user().sid]), 
 					finishTurnResponse);
 			});
-		$('#selectFriend')
-			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'friendId'], 
-					['selectFriend', user().sid, $('#possibleFriends option:selected').val()]), 
-					selectFriendResponse);				
-			});
 		$('#throwDice')
 			.button()
 			.click(function(){
@@ -490,20 +483,16 @@ Interface.prepareForSelectFriend = function()
 	for (var i = 0; i < game().players.length; ++i)
 		if (selectFriend(game().players[i]))
 		{
-			$('#possibleFriends').append('<option value = ' + i + '>' + game().players[i].name + 
-				'</option>');
-			++cnt;
+			$('#selectFriend' + game().players[i].id)
+				.button()
+				.click(function(j){
+					return function(){
+						sendQuery(makeQuery(['action', 'sid', 'friendId'], 
+							['selectFriend', user().sid, j]), selectFriendResponse);
+					}
+				}(game().players[i].id));	
+			$('#selectFriend' + game().players[i].id).show();
 		}
-	if (cnt)
-	{
-		$('#possibleFriends').show();
-		$('#selectFriend').show();
-	}
-	else
-	{
-		$('#possibleFriends').hide();
-		$('#selectFriend').hide();
-	}
 }
 
 Interface.prepareForRedeploy = function()
