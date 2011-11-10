@@ -382,6 +382,10 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
+	canBeginSetHero: function()
+	{
+		return false;
+	},
 	canChooseFriend: function()
 	{
 		return false;
@@ -584,19 +588,19 @@ SpecialPowerHeroic = $.inherit(BaseSpecialPower, {
 	{
 		this.__base('Heroic', 5, 2);
 	},
-	setHero: function(tokenBadge, heroes)
+	setHero: function(region)
 	{
-		regions = tokenBadge.regions();
-		for (var i = 0; i < regions.length; ++i)
-			regions[i].hero = false;
-		user = tokenBadge.ownerId
-		for (var i = 0; i < regions.length; ++i)
-		{
-			region = Client.currGameState.map.getRegion(heroes[i].regionId);	
-			if (region.tokenBadge != tokenBadge)
-				return false;
-			region.hero = true;
-		}
+		var f1 = region.tokenBadgeId == user().currentTokenBadge.id,
+			f2 = game().heroesRegions.length < 2,
+			f3 = !(game().heroesRegions[0] && 
+				region.id == game().heroesRegions[0]['regionId'] || 
+				game().heroesRegions[1] &&
+				region.id == game().heroesRegions[1]['regionId'])
+		
+		return f1 && f2 && f3;
+	},
+	canBeginSetHero: function()
+	{
 		return true;
 	},
 	decline: function(user)

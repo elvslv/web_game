@@ -170,9 +170,6 @@ Game = $.inherit({
 		this.freeTokensForDefend = victimTokensNum;
 		this.defendRegions = [];
 		this.encampmentsRegions = encampmentsRegions.copy();
-		this.freeEncampments = 5;
-		for (var i = 0; i < encampmentsRegions.length; ++i)
-			this.freeEncampments -= encampmentsRegions['encampmentsNum'];
 	},
 	setState: function(state)
 	{
@@ -309,6 +306,11 @@ User = $.inherit({
 		}
 		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
 		this.freeTokens = Math.max(this.freeTokens, 0);
+		Client.currGameState.freeEncampments = 5;
+		for (var i = 0; i < Client.currGameState.encampmentsRegions.length; ++i)
+			Client.currGameState.freeEncampments -= Client.currGameState.encampmentsRegions['encampmentsNum'];
+		Client.currGameState.heroesRegions = [];
+		Client.currGameState.fortressRegion = undefined;
 	}
 });
 
@@ -426,9 +428,6 @@ createGameByState = function(gameState)
 		if (!(Client.currGameState.freeTokensForDefend != undefined))
 			Client.currGameState.freeTokensForDefend = victimTokensNum;
 		Client.currGameState.encampmentsRegions = encampmentsRegions.copy();
-		Client.currGameState.freeEncampments = 5;
-		for (var i = 0; i < encampmentsRegions.length; ++i)
-			Client.currGameState.freeEncampments -= encampmentsRegions['encampmentsNum'];
 		result = Client.currGameState;
 	}
 	return result;
@@ -584,7 +583,7 @@ canDragonAttack = function(region)
 
 canBeginRedeploy = function()
 {
-	if (!(user().currentTokenBadge != undefined && checkStage(GAME_REDEPLOY) && 
+	if (!(isActivePlayer() && user().currentTokenBadge != undefined && checkStage(GAME_REDEPLOY) && 
 		user().currentTokenBadge.regions().length))
 		return false;
 	return user().currentTokenBadge.totalTokensNum + 
@@ -613,7 +612,8 @@ canDefend = function(region)
 
 canBeginSettingEncampments = function()
 {
-	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY)) ;
+	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
+		game().redeployStarted ) ;
 	if (result)
 	{
 		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
@@ -626,4 +626,22 @@ canSetEncampments = function(region)
 {
 	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
 	return specialPower.setEncampments(region);
+}
+
+canBeginSetHero = function()
+{
+	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
+		game().redeployStarted) ;
+	if (result)
+	{
+		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+		result = specialPower.canBeginSetHero();
+	}
+	return result;
+}
+
+canSetHero = function(region)
+{
+	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+	return specialPower.setHero(region);
 }

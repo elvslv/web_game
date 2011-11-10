@@ -214,9 +214,19 @@ Interface.updateGameTab = function()
 		$('#redeploy')
 			.button()
 			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regions', 'encampments'], 
-					['redeploy', user().sid, game().redeployRegions, game().encampmentsRegions]), 
-					redeployResponse);
+				var cmds = ['action', 'sid', 'regions'];
+				var params = ['redeploy', user().sid, game().redeployRegions];
+				if (game().encampmentsRegions.length)
+				{
+					cmds.push('encampments');
+					params.push(game().encampmentsRegions);
+				}
+				if (game().heroesRegions.length)
+				{
+					cmds.push('heroes');
+					params.push(game().heroesRegions);
+				}
+				sendQuery(makeQuery(cmds,params), redeployResponse);
 			});
 		$('#defend')
 			.button()
@@ -239,7 +249,7 @@ Interface.updateGameTab = function()
 		$('#imgmap').maphilight();
 		for (var i = 0; i < game().map.regions.length; ++i)
 		{
-			$('#region' + (i + 1)).click(function(j){
+			$('#region' + (i + 1)).live('click', function(j){
 				return function(){
 					$('#confirmInfo').empty();
 					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
@@ -297,10 +307,27 @@ Interface.updateGameTab = function()
 						},
 						{
 							id: 'btnSetHero',
-							text: 'Set hero',
-							click: function() {
-								Client.currGameState.heroRegions.push(j);
+							click: function()
+							{
+								if ($('#btnSetHero').html() == 'Set hero')
+								{
+									game().heroesRegions.push({'regionId': j});
+									$('#btnSetHero').html('Remove hero');
+								}
+								else
+								{
+									if (game().heroesRegions[0] && 
+										game().heroesRegions[0]['regionId'] == j)
+										if (game().heroesRegions[1])
+											game().heroesRegions[0] = game().heroesRegions[1];
+										else 
+											game().heroesRegions = [];
+									else
+										delete game().heroesRegions[1];
+									$('#btnSetHero').html('Set hero');
+								}
 							}
+									
 						},
 						{
 							id: 'btnSetFortress',
@@ -319,13 +346,16 @@ Interface.updateGameTab = function()
 						$('#btnDragonAttack').hide();
 					if (game().redeployStarted && canRedeploy(game().map.regions[j - 1]))
 					{
-						for (var k = 0; k <= user().freeTokens + game().map.regions[j - 1].tokensNum; ++k)
-							$('#possibleTokensNumForRedeploy').append('<option' + 
-							((k == game().map.regions[j - 1].tokensNum) ? ' selected' : 
-							'') + '>' + k + '</option>');
+						curTokensNum = game().map.regions[j - 1].tokensNum;
+						for (var k = 0; k < game().redeployRegions.length; ++k)
+							if (game().redeployRegions[k]['regionId'] == j)
+								curTokensNum = game().redeployRegions[k]['tokensNum'];
+						for (var k = 0; k <= user().freeTokens + curTokensNum; ++k)
+							$('#possibleTokensNumForRedeploy').append('<option' + ((k == curTokensNum) 
+							? ' selected' : '') + '>' + k + '</option>');
 						$('#possibleTokensNumForRedeploy').change(function(){
 							tokensNum = parseInt($('#possibleTokensNumForRedeploy option:selected').val());
-							user().freeTokens += game().map.regions[j - 1].tokensNum - tokensNum;
+							user().freeTokens += curTokensNum - tokensNum;
 							var l;
 							for ( l = 0; l < game().redeployRegions.length; ++l)
 							{
@@ -411,7 +441,25 @@ Interface.updateGameTab = function()
 						$('#possibleEncampmentsNum').show();
 						$('#lblPossibleEncampmentsNum').show();
 					}
-					$('#btnSetHero').hide();
+					if (canBeginSetHero())
+					{
+						if (game().heroesRegions[0] && 
+							game().heroesRegions[0]['regionId'] == j || 
+							game().heroesRegions[1] && 
+							game().heroesRegions[1]['regionId'] == j)
+						{
+							$('#btnSetHero').html('Remove hero');
+						
+						}
+						else if (canSetHero(game().map.regions[j - 1]))
+						{
+							$('#btnSetHero').html('Set hero');
+						}
+						else
+							$('#btnSetHero').hide();
+					}
+					else
+						$('#btnSetHero').hide();
 					$('#btnSetFortress').hide();
 				}
 			}(i + 1));
