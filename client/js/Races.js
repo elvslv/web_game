@@ -362,7 +362,7 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
-	setEncampments: function(tokenBadge, encampments)
+	setEncampments: function(region)
 	{
 		return false;
 	},
@@ -370,7 +370,7 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
-	setFortified: function(tokenBadge, fortified)
+	setFortress: function(region)
 	{
 		return false;
 	},
@@ -378,11 +378,15 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
-	setHero: function(tokenBadgeId, heroes)
+	setHero: function(region)
 	{
 		return false;
 	},
 	canBeginSetHero: function()
+	{
+		return false;
+	},
+	canBeginSetFortress: function()
 	{
 		return false;
 	},
@@ -541,6 +545,10 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 		this.__base('Fortified', 3, 6);
 		this.maxNum = 6;
 	},
+	canBeginSetFortress: function()
+	{
+		return true;
+	},
 	incomeBonus: function(tokenBadge)
 	{
 		if (tokenBadge.inDecline)
@@ -557,27 +565,20 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 		if (region.fortress)
 			tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 	},
-	setFortified: function(tokenBadge, fortified)
+	setFortress: function(region)
 	{
-		user = tokenBadge.ownerId;
-		regionId = fortified['regionId'];
-		region = Client.currGameState.map.getRegion(regionId);
-		if (region.ownerId != user)
+		if (region.tokenBadgeId != user().currentTokenBadge.id 
+			|| region.fortress)
 			return false;
 
-		if (region.fortress)
-			return false;
-
-		regions = tokenBadge.regions();
+		regions = user().currentTokenBadge.regions();
 		cnt = 0;
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].fortress)
 				++cnt;
 		if (cnt >= this.maxNum)
 			return false;
-		if (cnt == tokenBadge.specPowNum)
-			return false;
-		region.fortress = true;
+
 		return true;
 	}
 	

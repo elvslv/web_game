@@ -226,6 +226,11 @@ Interface.updateGameTab = function()
 					cmds.push('heroes');
 					params.push(game().heroesRegions);
 				}
+				if (game().fortressRegion)
+				{
+					cmds.push('fortified');
+					params.push({'regionId': game().fortressRegion});
+				}
 				sendQuery(makeQuery(cmds,params), redeployResponse);
 			});
 		$('#defend')
@@ -333,7 +338,16 @@ Interface.updateGameTab = function()
 							id: 'btnSetFortress',
 							text: 'Set fortress',
 							click: function() {
-								Client.currGameState.fortressRegions.push(j);
+								if ($('#btnSetFortress').html() == 'Set fortress')
+								{
+									game().fortressRegion = j;
+									$('#btnSetFortress').html('Remove fortress');
+								}
+								else
+								{
+									game().fortressRegion = undefined;
+									$('#btnSetHero').html('Set fortress');
+								}
 							}
 						}
 						]});
@@ -447,20 +461,26 @@ Interface.updateGameTab = function()
 							game().heroesRegions[0]['regionId'] == j || 
 							game().heroesRegions[1] && 
 							game().heroesRegions[1]['regionId'] == j)
-						{
 							$('#btnSetHero').html('Remove hero');
-						
-						}
 						else if (canSetHero(game().map.regions[j - 1]))
-						{
 							$('#btnSetHero').html('Set hero');
-						}
 						else
 							$('#btnSetHero').hide();
 					}
 					else
 						$('#btnSetHero').hide();
-					$('#btnSetFortress').hide();
+					if (canBeginSetFortress())
+					{
+						if (game().fortressRegion == j)
+							$('#btnSetFortress').html('Remove fortress');
+						else if (!game().fortressRegion && 
+							canSetFortress(game().map.regions[j - 1]))
+							$('#btnSetFortress').html('Set fortress');
+						else
+							$('#btnSetFortress').hide();
+					}
+					else
+						$('#btnSetFortress').hide();
 				}
 			}(i + 1));
 		}

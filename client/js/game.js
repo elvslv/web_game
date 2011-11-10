@@ -100,7 +100,6 @@ Region = $.inherit({
 	},
 	drawTokenBadge: function()
 	{
-		offset = $('#imgdiv').offset();
 		if (this.tokenBadgeId)
 		{
 			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
@@ -630,18 +629,22 @@ canSetEncampments = function(region)
 
 canBeginSetHero = function()
 {
-	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
-		game().redeployStarted) ;
-	if (result)
-	{
-		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
-		result = specialPower.canBeginSetHero();
-	}
-	return result;
+	return game().redeployStarted && 
+		getSpecPowByName(user().currentTokenBadge.specPowName).canBeginSetHero();
 }
 
 canSetHero = function(region)
 {
-	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
-	return specialPower.setHero(region);
+	return getSpecPowByName(user().currentTokenBadge.specPowName).setHero(region);
+}
+
+canBeginSetFortress = function()
+{
+	return game().redeployStarted && 
+		getSpecPowByName(user().currentTokenBadge.specPowName).canBeginSetFortress();
+}
+
+canSetFortress = function(region)
+{
+	return getSpecPowByName(user().currentTokenBadge.specPowName).setFortress(region);
 }
