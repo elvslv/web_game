@@ -109,7 +109,7 @@ BODY{
 .WizardsTokenDecline { background: url("images/races/Wizards small decline.jpg") no-repeat; }
 
 .Declined { background: url("images/races/decline.jpg") no-repeat; }
-.Fortress { background: url("images/races/fortress.jpg") no-repeat; }
-.Encampment { background: url("images/races/encampment.jpg") no-repeat; }
-.Dragon { background: url("images/races/dragon.jpg") no-repeat; }
-.Hero { background: url("images/races/hero.jpg") no-repeat; }
+.Fortress { background: url("images/specialPowers/fortress.jpg") no-repeat; }
+.Encampment { background: url("images/specialPowers/encampment.jpg") no-repeat; }
+.Dragon { background: url("images/specialPowers/dragon.jpg") no-repeat; }
+.Hero { background: url("images/specialPowers/hero.jpg") no-repeat; }
