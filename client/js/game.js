@@ -395,6 +395,9 @@ createGameByState = function(gameState)
 			player.declinedTokenBadge.inDecline = true;
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		}
+		if (gameState['friendsInfo'] && gameState['friendsInfo']['slaveId'] == player.id)
+			player.friendId = gameState['friendsInfo']['masterId']
+			
 		players.push(player);
 		if (gameState['defendingInfo'] && player.id == gameState['defendingInfo']['playerId'])
 			defendingPlayerIndex = i;
@@ -511,7 +514,7 @@ canBeginConquer = function()
 
 canConquer = function(region)
 {
-	if (region.ownerId == user().id && !region.inDecline)
+	if (region.ownerId == user().id && !region.inDecline || region.ownerId == user().friendId)
 		return false;
 	//check for friend!
 	var f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge), 
