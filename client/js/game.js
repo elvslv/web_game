@@ -506,17 +506,23 @@ canFinishTurn = function()
 
 canBeginConquer = function()
 {
-	return (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER) && 
-		user().tokensInHand > 0);
+	var f1 = isActivePlayer(),
+		f2 = user().currentTokenBadge,
+		f3 = checkStage(GAME_CONQUER),
+		f4 = user().tokensInHand > 0
+	return (f1 && f2 && f3 && f4);
 }
 
 canConquer = function(region)
 {
-	if (region.ownerId == user().id && !region.inDecline || region.ownerId == user().friendId)
+	if (region.ownerId == user().id && !region.inDecline || 
+		user().friendId && region.ownerId == user().friendId)
 		return false;
 	//check for friend!
-	var f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge), 
-		f2 = getSpecPowByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
+	var f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, 
+			user().currentTokenBadge), 
+		f2 = getSpecPowByName(user().currentTokenBadge.specPowName).canConquer(region, 
+			user().currentTokenBadge);
 	if (!(f1 && f2))
 		return false;
 	return !region.isImmune(false);

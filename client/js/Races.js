@@ -11,8 +11,11 @@ BaseRace = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return (!tokenBadge.regions().length && (region.hasProperty('coast') || 
-			region.hasProperty('border'))) || tokenBadge.regions().length;
+		var f1 = !tokenBadge.regions().length,
+			f2 = region.hasProperty('coast'),
+			f3 = region.hasProperty('border'),
+			f4 = tokenBadge.regions().length;
+		return (f1 && (f2 || f3)) || f4;
 	},
 	attackBonus: function(region, tokenBadge)
 	{
@@ -323,7 +326,10 @@ BaseSpecialPower = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return (tokenBadge.isNeighbor(region) || !tokenBadge.regions().length)&& !region.hasProperty('sea');
+		var f1 = tokenBadge.isNeighbor(region),
+			f2 = !tokenBadge.regions().length,
+			f3 = !region.hasProperty('sea')
+		return (f1 || f2)&& f3;
 	},
 	attackBonus: function(regionId, tokenBadgeId)
 	{
