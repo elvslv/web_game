@@ -341,8 +341,7 @@ BaseSpecialPower = $.inherit({
 	},
 	canDecline: function(user)
 	{
-		if (Client.currGameState.state != GAME_FINISH_TURN)
-			return false;
+		return (Client.currGameState.state == GAME_FINISH_TURN);
 	},
 	decline: function(user)
 	{

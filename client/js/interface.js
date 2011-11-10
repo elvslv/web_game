@@ -328,7 +328,7 @@ Interface.updateGameTab = function()
 										else 
 											game().heroesRegions = [];
 									else
-										delete game().heroesRegions[1];
+										game().heroesRegions.pop();
 									$('#btnSetHero').html('Set hero');
 								}
 							}
@@ -346,7 +346,7 @@ Interface.updateGameTab = function()
 								else
 								{
 									game().fortressRegion = undefined;
-									$('#btnSetHero').html('Set fortress');
+									$('#btnSetFortress').html('Set fortress');
 								}
 							}
 						}

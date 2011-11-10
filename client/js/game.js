@@ -168,7 +168,6 @@ Game = $.inherit({
 		this.victimTokensNum = victimTokensNum;
 		this.freeTokensForDefend = victimTokensNum;
 		this.defendRegions = [];
-		this.encampmentsRegions = encampmentsRegions.copy();
 	},
 	setState: function(state)
 	{
@@ -305,11 +304,24 @@ User = $.inherit({
 		}
 		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
 		this.freeTokens = Math.max(this.freeTokens, 0);
-		Client.currGameState.freeEncampments = 5;
-		for (var i = 0; i < Client.currGameState.encampmentsRegions.length; ++i)
-			Client.currGameState.freeEncampments -= Client.currGameState.encampmentsRegions['encampmentsNum'];
+		Client.currGameState.encampmentsRegions = [];
 		Client.currGameState.heroesRegions = [];
 		Client.currGameState.fortressRegion = undefined;
+		Client.currGameState.freeEncampments = 5;
+		for (var i = 0; i < regions.length; ++i)
+		{
+			if (regions[i].encampment)
+			{
+				Client.currGameState.encampmentsRegions.push({
+					'regionId': regions[i].id, 'encampmentsNum': regions[i].encampment});
+				Client.currGameState.freeEncampments -= regions[i].encampment;
+			}
+			if (regions[i].hero)
+				Client.currGameState.heroesRegions.push({'regionId': regions[i].id});
+			if (regions[i].fortress)
+				Client.currGameState.fortressRegion = regions[i].id;
+		}
+		
 	}
 });
 
@@ -389,6 +401,8 @@ createGameByState = function(gameState)
 			player.currentTokenBadge.inDecline = false;
 			tokenBadgesInGame[player.currentTokenBadge.id] = player.currentTokenBadge;
 		}
+		else
+			player.currentTokenBadge = undefined;
 		if (gameState.players[i].declinedTokenBadge)
 		{
 			player.declinedTokenBadge = createTokenBadge(
@@ -396,6 +410,8 @@ createGameByState = function(gameState)
 			player.declinedTokenBadge.inDecline = true;
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		}
+			else
+				player.declinedTokenBadge = undefined;
 		if (gameState['friendsInfo'] && gameState['friendsInfo']['slaveId'] == player.id)
 			player.friendId = gameState['friendsInfo']['masterId']
 			
@@ -409,7 +425,7 @@ createGameByState = function(gameState)
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
 			(gameState['state'] == GAME_START) ? gameState['lastEvent'] : gameState['state'],
 			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
-			defendingPlayerIndex, conqueredRegion, victimTokensNum, encampmentsRegions);
+			defendingPlayerIndex, conqueredRegion, victimTokensNum);
 	}
 	else
 	{
@@ -426,7 +442,6 @@ createGameByState = function(gameState)
 		Client.currGameState.victimTokensNum = victimTokensNum;
 		if (!(Client.currGameState.freeTokensForDefend != undefined))
 			Client.currGameState.freeTokensForDefend = victimTokensNum;
-		Client.currGameState.encampmentsRegions = encampmentsRegions.copy();
 		result = Client.currGameState;
 	}
 	return result;
