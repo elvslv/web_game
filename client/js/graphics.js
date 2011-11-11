@@ -22,33 +22,49 @@ Graphics.drawTokenBadge = function(reg, num, pic){
 			"text-anchor": "start"}).toFront();
 	race.drag(
 		function(dx, dy){
-		this.attr({x: this.ox + dx, y: this.oy + dy}); 
-		this.num.attr({x: this.num.ox + dx, y: this.num.oy + dy}); 
+			Graphics.dragging = true;
+			this.attr({x: this.ox + dx, y: this.oy + dy}); 
+			this.num.attr({x: this.num.ox + dx, y: this.num.oy + dy}); 
 		
-	},
-	function(){
-		this.ox = this.attr("x");
-		this.oy = this.attr("y");
-		this.num.ox = this.num.attr("x");
-		this.num.oy = this.num.attr("y");
-		this.toFront();
-		this.num.toFront();
-	},
-	function(){
-		var posX = this.getBBox().x + Graphics.paper.canvas.offsetLeft - $(document).scrollLeft();
-		var posY = this.getBBox().y + Graphics.paper.canvas.offsetTop - $(document).scrollTop();
-		var newRegion = Graphics.paper.getElementByPoint(300, 300);
-		alert(newRegion);
-		var newRegion = Graphics.paper.getElementByPoint(posX, posY);
-		if (newRegion && newRegion.model && newRegion.model !== reg){
-			newRegion.race = Graphics.drawTokenBadge(newRegion.model, 1, pic);
-		}
-		this.attr({x: this.ox, y: this.oy}); 
-		this.num.attr({x: this.num.ox, y: this.num.oy});
-	});
+		},
+		function(){
+			this.ox = this.attr("x");
+			this.oy = this.attr("y");
+			this.num.ox = this.num.attr("x");
+			this.num.oy = this.num.attr("y");
+			this.toFront();
+			this.num.toFront();
+		},
+		function(){
+			var offset = Graphics.offset();
+			var posX = this.getBBox().x + offset.left;
+			var posY = this.getBBox().y + offset.top;
+			var newRegion = Graphics.paper.getElementByPoint(posX, posY);
+			if (newRegion && newRegion.model && newRegion.model !== reg){
+				newRegion.race = Graphics.drawTokenBadge(newRegion.model, 1, pic);
+			}
+			Graphics.dragging = false;
+			this.attr({x: this.ox, y: this.oy}); 
+			this.num.attr({x: this.num.ox, y: this.num.oy});
+		});
 	return race;
 };
 
+Graphics.offset = function(){
+	var br = $.browser;
+	var left, top;
+	if (br.opera || br.webkit) { 
+		left = Graphics.paper.canvas.offsetLeft;
+		top = Graphics.paper.canvas.offsetTop;
+	} else{
+		left = $(Graphics.paper.canvas).offset().left;
+		top = $(Graphics.paper.canvas).offset().top;
+	}
+	return {left : left - $(document).scrollLeft(), top : top - $(document).scrollTop()};
+};
+		
+		
+		
 		
 Graphics.drawMap = function(map) {
 	Graphics.paper = Raphael("map", 630, 620);
@@ -56,13 +72,15 @@ Graphics.drawMap = function(map) {
 	var selectRegion = function(reg, sel){
 			return function(){
 				reg.animate({stroke: sel ? "red" : "black"}, 300);
+				if (!Graphics.dragging)
+					reg.toFront();
 				if (reg.race) {
 					reg.race.toFront();
 					if (reg.race.num) {
 						reg.race.num.toFront();
-						console.log(reg);
 					}
 				}
+				
 			}
 	};
 	var drawRegion = function(region){
@@ -74,10 +92,8 @@ Graphics.drawMap = function(map) {
 			var racePath = tokenBadge ? tokenBadge.getPic() : getBaseRace().getPic(true);
 			r.race = Graphics.drawTokenBadge(region, region.tokensNum, racePath);
 		}
-		r.mouseover(selectRegion(r, true));
-		r.mouseout(selectRegion(r, false));
+		r.hover(selectRegion(r, true), selectRegion(r, false));
 		r.click(Interface.getRegionInfo(region));
-		r.onDragOver(function(){alert ("fuck firefox")});
 		region.ui = r;
 		r.model = region;
 		return r;
