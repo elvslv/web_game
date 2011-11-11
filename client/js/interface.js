@@ -31,7 +31,7 @@ Interface.gameTab = function()
 		'</tr>' +
 		'<tr>' +
 			'<td colspan = "2" id = "usersInCurGame">' +
-				//'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
+				'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
 			'</td>' +
 		'</tr>' +
 		(tokenBadges.length 
@@ -43,7 +43,7 @@ Interface.gameTab = function()
 			'</tr>' +
 			'<tr>' +
 				'<td colspan = "2" id = "visibleTokenBadges">' +
-					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
+					'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
 				'</td>' +
 			'</tr>' 
 		: 

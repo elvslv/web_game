@@ -13,11 +13,16 @@ var paths = {
 
 Graphics = {};
 
+Graphics.freeTokenBadgeCoords = {
+	'race' : [60, 550],
+	'power' : [120, 550]
+};
+
 Graphics.drawTokenBadge = function(reg, num, pic){
-	var coords = reg ? reg.raceCoords : [60, 550];
+	var coords = reg ? reg.raceCoords : Graphics.freeTokenBadgeCoords.race;
 	var race = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
-	race.num = Graphics.paper.text(coords[0] + 36, coords[1] + 7, num)
+	race.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"}).toFront();
 	race.drag(
@@ -41,7 +46,12 @@ Graphics.drawTokenBadge = function(reg, num, pic){
 			var posY = this.getBBox().y + offset.top;
 			var newRegion = Graphics.paper.getElementByPoint(posX, posY);
 			if (newRegion && newRegion.model && newRegion.model !== reg){
-				newRegion.race = Graphics.drawTokenBadge(newRegion.model, 1, pic);
+				if (!newRegion.race)
+					newRegion.race = Graphics.drawTokenBadge(newRegion.model, 1, pic);
+				else {
+					var previousNum = parseInt(newRegion.race.num.attr("text"));
+					newRegion.race.num.attr({"text" : previousNum + 1});
+				}
 			}
 			Graphics.dragging = false;
 			this.attr({x: this.ox, y: this.oy}); 
@@ -101,7 +111,10 @@ Graphics.drawMap = function(map) {
 	for (var i = 0; i < map.regions.length; ++i)
 		drawRegion(map.regions[i]);
 	var frame = paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
-//	if (Client.currentUser.tokenInHand)
-	//	Graphics.drawTokenBadge(null, user().tokensInHand, paths.natives);
+	if (user().tokensInHand){
+		console.log('here');
+		Graphics.drawTokenBadge(null, user().tokensInHand, user().currentTokenBadge.getPic());
+
+	}
 };
 	

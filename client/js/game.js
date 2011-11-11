@@ -104,20 +104,6 @@ Region = $.inherit({
 		return game().players[this.ownerId];
 	}
 		
-/*		
-	offset = $('#imgdiv').offset();
-		if (this.tokenBadgeId)
-		{
-			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
-			$('#imgdiv').append('<div class = "' + tokenBadge.raceName + ('Token' + 
-				(tokenBadge.inDecline ? 'Decline' : '')) + '" style = "top: ' + this.y_race + '; left: ' 
-				+ this.x_race + '">' + this.tokensNum + '</div>');
-		}
-		else if (this.tokensNum)
-		{
-			$('#imgdiv').append('<div class = "Declined" style = "top: ' + this.y_race + '; left: ' + 
-				this.x_race + '">' + this.tokensNum + '</div>');
-		}*/
 });
 
 Map = $.inherit(
@@ -248,7 +234,7 @@ TokenBadge = $.inherit({
 		getPic : function()
 		{
 			var race = getRaceByName(this.raceName);
-			return this.inDecline ? race.getPicture(true) : race.getPicture(false);
+			return this.inDecline ? race.getPic(true) : race.getPic(false);
 		}
 			
 });
@@ -565,7 +551,7 @@ canDragonAttack = function(region)
 
 canBeginRedeploy = function()
 {
-	if (!(user().currentTokenBadge != undefined && checkStage(GAME_REDEPLOY) && 
+	if (!(user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
 		user().currentTokenBadge.regions().length))
 		return false;
 	return user().currentTokenBadge.totalTokensNum + 

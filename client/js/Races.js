@@ -85,8 +85,8 @@ BaseRace = $.inherit({
 	getPic : function(declined)
 	{
 		n = this.name ? this.name + ' ' : ''; 
-		return "css/images/races/" + n + "small " + 
-			(declined ? "decline.jpg" : ".jpg"); 
+		return "css/images/races/" + n + "small" + 
+			(declined ? " decline.jpg" : ".jpg"); 
 	}
 	
 
