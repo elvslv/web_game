@@ -8,14 +8,46 @@ function sendQuery(query, callback)
 		{
 			if (!data['result'])
 			{
-				alert("Unknown server response: " + data);
+				console.error("Unknown server response: " + data);
 				return;
 			}
-			callback(data);
+			switch(data['result'])
+			{
+				case 'badJson': //may it be???
+				case 'badReadinessStatus':
+					console.error('Invalid data');
+					break;
+				case 'badUserSid':
+					gotBadUserSid();
+					break;
+				case 'badGameId': //may it be???
+					console.error('Invalid game id');
+					break;
+				case 'badMapId': 
+					console.error('Invalid map id');
+					break;
+				case 'badPosition': 
+					console.error('Invalid position');
+					break;
+				case 'badStage':
+					alert('Bad stage'); 
+					break;
+				case 'badRegion':
+					alert('Bad region'); 
+					break;
+				case 'badFriendId':
+					console.error('Invalid friend id'); 
+					break;
+				case 'badRegionId':
+					console.error('Invalid region id'); 
+					break;
+				default:
+					callback(data);
+			}
 		},
 		error: function(jqXHR, textStatus, errorThrown)
 		{
-			alert(errorThrown);
+			console.error(errorThrown);
 		}
 		
 	});

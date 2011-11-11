@@ -17,6 +17,19 @@ BODY{
 }
 .gallery-a:hover { color: #fff; }
 
+.dialogError{
+	display: none; 
+	min-height: 30px;
+	text-align: center;
+	margin-top: 10px;
+}
+
+.dialogError span{
+	vertical-align: middle;
+	padding-top: 30px;
+}
+
+
 .Amazons, .Dwarves, .Elves, .Giants, .Halflings, .Humans, .Orcs, .Ratmen, .Skeletons, .Sorcerers,
 .Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .Flying,
 .Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp, .Wealthy {

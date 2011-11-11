@@ -133,14 +133,13 @@ Interface.dialogs = [
 		'title': 'Create new map',
 		'ok':  function() 
 		{
-			$('#submitThmb').click();
 			var mapName = $('#mapName'),
 				playersNum = $('#playersNum'),
 				turnsNum = $('#turnsNum'),
 				regionList = $('#regionList');
 			query = makeQuery(['action', 'mapName', 'playersNum', 'turnsNum', 'regions', 'thumbnail', 
 				'picture'], ['uploadMap', mapName.val(), playersNum.val(), turnsNum.val(), regionList.val(),
-				filenames[0], filenames[1]]);
+				'maps/mapThumb.jpg', 'maps/map.jpg']);
 			sendQuery(query, uploadMapResponse);
 		}
 	}];
@@ -257,6 +256,8 @@ Interface.updateGameTab = function()
 			$('#region' + (i + 1)).live('click', function(j){
 				return function(){
 					$('#confirmInfo').empty();
+					$('#confirmOutput span').empty();
+					$('#confirmOutput').hide();
 					$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
 					$('#confirmInfo').append(
 						'<laber id = "lblPossibleTokensNumForRedeploy" '+

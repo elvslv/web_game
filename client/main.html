@@ -189,9 +189,10 @@
 				</td>
 			</tr>
 		</table>
+		<div id = "registerLoginOutput" class = "dialogError ui-state-error ui-corner-all"><span>11</span></div>
 	</div>
 	<div id = "createGameForm" style = "display: none">
-		<p id = "dialogInfo">Please enter unique username and valid password</p>
+		<p id = "dialogInfo">Please enter game info</p>
 		<table>
 			<tr>
 				<td>
@@ -219,6 +220,7 @@
 			</tr>
 		</table>
 		<button id = "browseMaps">Browse maps</button>
+		<div id = "createGameOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
 	</div>
 	<div id = "browseMapsForm" style = "display: none">
 		<p id = "dialogInfo">Maps:</p>
@@ -226,6 +228,7 @@
 	</div>
 	<div id = "confirm" style = "display: none">
 		<div id = "confirmInfo"></div>
+		<div id = "confirmOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
 	</div>
     <div id = "uploadMap" style = "display: none">
     		<table>
@@ -261,37 +264,8 @@
 					<textarea id="regionsList" value="" class="text ui-widget-content ui-corner-all" ></textarea>
 				</td>
 			</tr>
-			<tr>
-				<td colspan = "2">
-				<form id="uploadMapPictures" enctype="multipart/form-data" action="upload_maps.php" method="POST">
-					<table>
-						<tr>
-							<td>
-								<label for="thmbInput">Thumbnail</label>
-							</td>
-							<td>
-								<input name="thmb"  id="thmbInput"  type="file" accept="image/jpeg"/>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<label for="pictInput">Full picture</label>
-							</td>
-							<td>
-								<input name="pict"  id="pictInput"  type="file" accept="image/jpeg"/>
-							</td>
-						</tr>
-						<tr>
-							<td colspan = "2">
-								<input id = "submitMapPictures" type = "submit" style = "display: none"/>
-							</td>
-						</tr>
-						
-					</table>
-				</form>
-				</td>
-			</tr>
 		</table>
+		<div id = "uploadMapOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
     </div>
 </body>
 </html>
