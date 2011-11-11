@@ -1,4 +1,4 @@
-function sendQuery(query, callback)
+function sendQuery(query, callback, readonly)
 {
 	$.ajax({
 		type: "POST",
@@ -48,6 +48,30 @@ function sendQuery(query, callback)
 		error: function(jqXHR, textStatus, errorThrown)
 		{
 			console.error(errorThrown);
+		},
+		beforeSend: function()
+		{
+			if (!readonly)
+			{
+				$.blockUI(
+				{
+					message: '<img src="css/images/ajax-loader.gif" />',
+					css:
+					{
+						width: '24px',
+						top: '15px',
+						left: '15px',
+						transparent: 0,
+						border: 'none',
+						backgroundColor: '#666666'
+					}
+				});
+			}
+		},
+		complete: function()
+		{
+			if(!readonly)
+				$.unblockUI();
 		}
 		
 	});
@@ -55,12 +79,12 @@ function sendQuery(query, callback)
 
 updateGameList = function()
 {
-	sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse);
+	sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse, true);
 }
 
 updateChat = function()
 {
-	sendQuery(makeQuery(['action', 'since'], ['getMessages', Client.messages.length]), 
+	sendQuery(makeQuery(['action', 'since'], ['getMessages', Client.messages.length], true), 
 		getMessagesResponse);
 }
 
@@ -69,13 +93,13 @@ updateMapList = function(beforeCreateGame)
 	sendQuery(makeQuery(['action'], ['getMapList']), function(data) 
 	{
 		getMapListResponse(data, beforeCreateGame)
-	});
+	}, true);
 }
 
 updateGameState = function()
 {
 	sendQuery(makeQuery(['action', 'gameId'], ['getGameState', Client.currentUser.gameId]), 
-		getGameStateResponse)
+		getGameStateResponse, true)
 }
 
 makeQuery = function(fields, values)

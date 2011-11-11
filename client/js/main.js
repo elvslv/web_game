@@ -117,7 +117,7 @@ $(function() {
 	$('#getGameList')
 		.button()
 		.click(function() {
-			sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse);
+			sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse, true);
 		});
 	$('#getGameList').button(
 	{
