@@ -98,11 +98,8 @@
 <script id="mapChooseTemplate" type="text/x-jquery-tmpl"> 
 	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
 </script>
-<script id="regionsTemplate" type="text/x-jquery-tmpl"> 
-	<area shape = "poly" coords = {{html $item.data.coordsStr}} id = "{{html 'region'.concat($item.data.id)}}"/>
-</script>
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
-	<div class = "user">
+	<div class = "user" style=${$item.color($item.data.id)}>
 		<p>
 			{{if $item.data.id == $item.currentUser()}}<i><b>{{/if}}
 			${username}

@@ -88,12 +88,10 @@ Region = $.inherit({
 	},
 	isImmune: function(enchanting)
 	{
-		if (this.holeInTheGround || this.dragon || this.hero)
-			return true;
-		if (enchanting)
-			if (this.encampment || !this.tokensNum || this.tokensNum > 1 || this.inDecline)
-				return true;
-		return false;
+		return this.holeInTheGround || this.dragon || this.hero ||
+			(enchanting && 
+				(this.encampment || !this.tokensNum || 
+				this.tokensNum > 1 || this.inDecline));
 	},
 	getTokenBadge : function()
 	{
@@ -278,6 +276,7 @@ User = $.inherit({
 	},
 	startRedeploy: function()
 	{
+		Graphics.redeploying = true;
 		regions = this.currentTokenBadge.regions();
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
 		for (var i = 0; i < regions.length; ++i)

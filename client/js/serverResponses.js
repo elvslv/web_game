@@ -381,7 +381,7 @@ function conquerResponse(data)
 			alert('Not enough tokens, dice: ' + data['dice']); 
 			break;
 		case 'ok':
-			if (data['dice'] != undefined)
+			if (data['dice'])
 				alert('dice: ' + data['dice']);
 			break; //state will be changed on the next getGameState()
 		default:
