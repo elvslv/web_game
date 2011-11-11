@@ -63,7 +63,7 @@ BaseRace = $.inherit({
 	{
 		return;
 	},
-	enchant: function(tokenBadgeId, regionId)
+	enchant: function(region)
 	{
 		return false;
 	},
@@ -276,12 +276,14 @@ RaceSorcerers = $.inherit(BaseRace, {
 	{
 		this.__base('Sorcerers', 5, 18);
 	},
-	enchant: function(tokenBadge, region)
+	enchant: function(region)
 	{
+		tokenBadge = user().currentTokenBadge;
 		return (!(region.isImmune(true) || 
 			!(this.canConquer(region, tokenBadge) && 
-			specialPowerList[tokenBadge.specPowId].canConquer(region, tokenBadge)) ||
+			getSpecPowByName(tokenBadge.specPowName).canConquer(region, tokenBadge)) ||
 			region.tokenBadgeId == tokenBadge.id || 
+			!region.tokenBadgeId ||
 			!region.tokensNum ||
 			region.tokensNum > 1 ||
 			region.inDecline ||
@@ -355,7 +357,7 @@ BaseSpecialPower = $.inherit({
 	{
 		return;
 	},
-	dragonAttack: function(tokenBadgeId, regionId, tokensNum)
+	dragonAttack: function(region)
 	{
 		return false;
 	},
@@ -481,14 +483,14 @@ SpecialPowerDiplomat = $.inherit(BaseSpecialPower, {
 SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('Dragon master', 5, 1);
+		this.__base('DragonMaster', 5, 1);
 	},
 	dragonAttack: function(region)
 	{
 		tokenBadge = user().currentTokenBadge;
 		if (region.isImmune())
 			return false;
-		if (!(racesList[tokenBadge.raceId].canConquer(region, tokenBadge) 
+		if (!(getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge) 
 			&& this.canConquer(region, tokenBadge)))
 			return false;
 		if (region.tokenBadgeId && region.tokenBadgeId == tokenBadge.id)

@@ -355,7 +355,7 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 
 class SpecialPowerDragonMaster(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Dragon master', 5, 1)
+		BaseSpecialPower.__init__(self, 'DragonMaster', 5, 1)
 
 	def dragonAttack(self, tokenBadge, regState):
 		regState.checkIfImmune()

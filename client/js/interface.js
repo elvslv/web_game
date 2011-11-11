@@ -235,6 +235,7 @@ Interface.updateGameTab = function()
 		$('#defend')
 			.button()
 			.click(function(){
+				game().defendStarted = false;
 				sendQuery(makeQuery(['action', 'sid', 'regions'], 
 					['defend', user().sid, game().defendRegions]), 
 					defendResponse);
@@ -319,6 +320,8 @@ Interface.updateGameTab = function()
 								{
 									game().heroesRegions.push({'regionId': j});
 									$('#btnSetHero').html('Remove hero');
+									game().map.regions[j - 1].hero = true;
+									game().map.regions[j - 1].drawTokenBadge();
 								}
 								else
 								{
@@ -330,6 +333,8 @@ Interface.updateGameTab = function()
 											game().heroesRegions = [];
 									else
 										game().heroesRegions.pop();
+									game().map.regions[j - 1].hero = false;
+									game().map.regions[j - 1].drawTokenBadge();
 									$('#btnSetHero').html('Set hero');
 								}
 							}
@@ -343,11 +348,15 @@ Interface.updateGameTab = function()
 								{
 									game().fortressRegion = j;
 									$('#btnSetFortress').html('Remove fortress');
+									game().map.regions[j - 1].fortress = true;
+									game().map.regions[j - 1].drawTokenBadge();
 								}
 								else
 								{
 									game().fortressRegion = undefined;
 									$('#btnSetFortress').html('Set fortress');
+									game().map.regions[j - 1].fortress = false;
+									game().map.regions[j - 1].drawTokenBadge();
 								}
 							}
 						}
@@ -382,6 +391,8 @@ Interface.updateGameTab = function()
 							}
 							if (l == game().redeployRegions.length)
 								game().redeployRegions.push({'regionId': j, 'tokensNum': tokensNum});
+							game().map.regions[j - 1].tokensNum = tokensNum;
+							game().map.regions[j - 1].drawTokenBadge();
 						});
 						$('#possibleTokensNumForRedeploy').show();
 						$('#lblPossibleTokensNumForRedeploy').show();
@@ -397,7 +408,7 @@ Interface.updateGameTab = function()
 							}
 						for (var k = 0; k <= game().freeTokensForDefend + curTokensNum; ++k)
 							$('#possibleTokensNumForDefend').append('<option' + 
-							((k == game().map.regions[j - 1].tokensNum) ? ' selected' : 
+							((k == curTokensNum) ? ' selected' : 
 							'') + '>' + k + '</option>');
 						$('#possibleTokensNumForDefend').change(function(){
 							tokensNum = parseInt($('#possibleTokensNumForDefend option:selected').val());
@@ -417,6 +428,9 @@ Interface.updateGameTab = function()
 								game().freeTokensForDefend -= tokensNum;
 								game().defendRegions.push({'regionId': j, 'tokensNum': tokensNum});
 							}
+							game().defendStarted = true;
+							game().map.regions[j - 1].tokensNum += tokensNum - curTokensNum;
+							game().map.regions[j - 1].drawTokenBadge();
 						});
 						$('#possibleTokensNumForDefend').show();
 						$('#lblPossibleTokensNumForDefend').show();
@@ -452,6 +466,8 @@ Interface.updateGameTab = function()
 								game().freeEncampments -= encampmentsNum;
 								game().encampmentsRegions.push({'regionId': j, 'encampmentsNum': encampmentsNum});
 							}
+							game().map.regions[j - 1].encampment = encampmentsNum;
+							game().map.regions[j - 1].drawTokenBadge();
 						});
 						$('#possibleEncampmentsNum').show();
 						$('#lblPossibleEncampmentsNum').show();

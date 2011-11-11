@@ -168,6 +168,7 @@ Game = $.inherit({
 		this.victimTokensNum = victimTokensNum;
 		this.freeTokensForDefend = victimTokensNum;
 		this.defendRegions = [];
+		this.defendStarted = false;
 	},
 	setState: function(state)
 	{
@@ -360,17 +361,20 @@ createGameByState = function(gameState)
 	}
 	else
 	{
-		regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
-		'dragon', 'fortress', 'hero', 'inDecline']
-		for (var i = 0; i < mapState.regions.length; ++i)
+		if (!(game().redeployStarted || game().defendStarted))
 		{
-			for (var j = 0; j < regionFields.length; ++j)
-				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
-			if (gameState['defendingInfo'] && game().map.regions[i].id == gameState['defendingInfo']['regionId'])
-				conqueredRegion = game().map.regions[i];
-			if (mapState.regions[i].currentRegionState['encampment'])
-				encampmentsRegions.push({'regionId': i + 1, 
-				'encampmentsNum': mapState.regions[i].currentRegionState['encampment']});
+			regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
+			'dragon', 'fortress', 'hero', 'inDecline']
+			for (var i = 0; i < mapState.regions.length; ++i)
+			{
+				for (var j = 0; j < regionFields.length; ++j)
+					Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
+				if (gameState['defendingInfo'] && game().map.regions[i].id == gameState['defendingInfo']['regionId'])
+					conqueredRegion = game().map.regions[i];
+				if (mapState.regions[i].currentRegionState['encampment'])
+					encampmentsRegions.push({'regionId': i + 1, 
+					'encampmentsNum': mapState.regions[i].currentRegionState['encampment']});
+			}
 		}
 	}
 	
@@ -586,7 +590,8 @@ canEnchant = function(region)
 
 canBeginDragonAttack = function()
 {
-	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON)) ;
+	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON) &&
+		user().tokensInHand > 0) ;
 	if (result)
 	{
 		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
@@ -627,7 +632,7 @@ canBeginDefend = function()
 canDefend = function(region)
 {
 	return region.ownerId == user().id && !(game().conqueredRegion.isAdjacent(region) && 
-		user().currentTokenBadge.hasNotAdjacentRegions(region))
+		user().currentTokenBadge.hasNotAdjacentRegions(game().conqueredRegion))
 }
 
 canBeginSettingEncampments = function()

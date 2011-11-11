@@ -31,8 +31,8 @@ BODY{
 
 
 .Amazons, .Dwarves, .Elves, .Giants, .Halflings, .Humans, .Orcs, .Ratmen, .Skeletons, .Sorcerers,
-.Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .Flying,
-.Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp, .Wealthy {
+.Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .DragonMaster, .Flying, .Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp,
+.Underworld, .Wealthy {
 	width: 100px;
 	height:100px;
 }
@@ -54,6 +54,7 @@ BODY{
 .Bivouacking { background: url("images/specialPowers/Bivouacking.jpg") no-repeat; }
 .Commando { background: url("images/specialPowers/Commando.jpg") no-repeat; }
 .Diplomat { background: url("images/specialPowers/Diplomat.jpg") no-repeat; }
+.DragonMaster { background: url("images/specialPowers/DragonMaster.jpg") no-repeat; }
 .Flying { background: url("images/specialPowers/Flying.jpg") no-repeat; }
 .Forest { background: url("images/specialPowers/Forest.jpg") no-repeat; }
 .Fortified { background: url("images/specialPowers/Fortified.jpg") no-repeat; }
@@ -65,6 +66,7 @@ BODY{
 .Seafaring { background: url("images/specialPowers/Seafaring.jpg") no-repeat; }
 .Stout { background: url("images/specialPowers/Stout.jpg") no-repeat; }
 .Swamp { background: url("images/specialPowers/Swamp.jpg") no-repeat; }
+.Underworld { background: url("images/specialPowers/Underworld.jpg") no-repeat; }
 .Wealthy { background: url("images/specialPowers/Wealthy.jpg") no-repeat; }
 .Money {
 	background: url("images/Coins.jpg") no-repeat;
