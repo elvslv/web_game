@@ -14,7 +14,7 @@ var paths = {
 Graphics = {};
 
 Graphics.forbidUpdate = function(){
-	return Graphics.redeploying || Graphics.dragging;
+	return game().redeployStarted || Graphics.dragging;
 };
 
 Graphics.freeTokenBadgeCoords = {
@@ -25,29 +25,44 @@ Graphics.freeTokenBadgeCoords = {
 Graphics.REG_DOESNT_EXIST = -1;
 
 
-Graphics.drawTokenBadge = function(reg){	//no arg means we're drawing
+Graphics.drawTokenBadge = function(reg, drop){	
+												//no arg means we're drawing
 												//free tokens of user under the map pic
-	var num = reg.tokensNum || (!reg && user().tokensInHand);
+	var num = drop ? 1 : !reg ? user().tokensInHand : reg.tokensNum;
 	if (!num) return;
-	var tokenBadge = reg ? reg.getTokenBadge() : Graphics.REG_DOESNT_EXIST,
-		pic = !tokenBadge ? getBaseRace().getPic(true) : 
-				tokenBadge === Graphics.REG_DOESNT_EXIST ? 
+	var tokenBadge = drop ? user().currentTokenBadge : 
+			reg ? reg.getTokenBadge() : Graphics.REG_DOESNT_EXIST,	//obfuscation
+		pic = !tokenBadge ? getBaseRace().getPic(true) : 			//intented
+				tokenBadge === Graphics.REG_DOESNT_EXIST ? 			
 				user().currentTokenBadge.getPic() :  
-					tokenBadge.getPic()
+					tokenBadge.getPic(),
 		coords = reg ? reg.raceCoords : Graphics.freeTokenBadgeCoords.race,
 		race = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
 	race.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"}).toFront();
+	race.num.n = num;
+	race.canDrag = function(){
+		return (!reg || reg.ownerId === user().id) && isActivePlayer() &&
+			game().redeployStarted;
+	};			
 	race.drag(
 		function(dx, dy){
-			Graphics.dragging = true;
+			if (!this.canDrag()) return;
 			this.attr({x: this.ox + dx, y: this.oy + dy}); 
 			this.num.attr({x: this.num.ox + dx, y: this.num.oy + dy}); 
 		
 		},
 		function(){
+			if (!this.canDrag()) return;
+			Graphics.dragging = true;
+			if (this.num.n > 1) {
+				this.tempCopy = this.clone();
+				this.tempCopy.num = this.num.clone();
+				this.tempCopy.num.attr({"text" : this.num.n - 1});
+				this.num.attr({"text" : 1});
+			} 
 			this.ox = this.attr("x");
 			this.oy = this.attr("y");
 			this.num.ox = this.num.attr("x");
@@ -56,23 +71,58 @@ Graphics.drawTokenBadge = function(reg){	//no arg means we're drawing
 			this.num.toFront();
 		},
 		function(){
-			var offset = Graphics.offset();
-			var posX = this.getBBox().x + offset.left;
-			var posY = this.getBBox().y + offset.top;
-			var newRegion = Graphics.paper.getElementByPoint(posX, posY);
-			if (newRegion && newRegion.model && newRegion.model !== reg){
-				if (!newRegion.race)
-					newRegion.race = Graphics.drawTokenBadge(newRegion.model, 1, pic);
+			if (!this.canDrag()) return;
+			var offset = Graphics.offset(),
+				posX = this.getBBox().x + offset.left,
+				posY = this.getBBox().y + offset.top,
+				element = Graphics.paper.getElementByPoint(posX, posY),
+				newRegion, 
+				that = this,
+				last = function(){
+					return that.tempCopy === undefined;
+				},	
+				restore = function(){
+					that.num.attr({"text" : that.num.n});
+					that.attr({x: that.ox, y: that.oy}); 
+					that.num.attr({x: that.num.ox, y: that.num.oy});
+				};
+	//		console.log(element);
+			if (element) newRegion = element.r ? element.r : element; 
+			
+			if (newRegion && newRegion.model && 
+					newRegion.model.ownerId === user().id && 
+					newRegion.model.id !== reg.id){
+				if (!newRegion.race) 	
+					Graphics.drawTokenBadge(newRegion.model, true);
 				else {
-					var previousNum = parseInt(newRegion.race.num.attr("text"));
-					newRegion.race.num.attr({"text" : previousNum + 1});
+					console.log(newRegion.race);
+					newRegion.race.num.n++;
+					newRegion.race.num.attr({"text" : newRegion.race.num.n});
 				}
+				if (!last()) {
+					this.num.n--;
+					restore();
+				} else { 
+					delete this.r.race;
+					this.remove();
+				}
+				game().redeployRegions[newRegion.model.id]++;
+				game().redeployRegions[reg.id]--;
+					
+			} else restore(); 
+								
+								
+			if (!last()) {
+				this.tempCopy.remove();
+				delete this.tempCopy;
 			}
 			Graphics.dragging = false;
-			this.attr({x: this.ox, y: this.oy}); 
-			this.num.attr({x: this.num.ox, y: this.num.oy});
 		});
-	if (reg) reg.ui.race = race;
+	if (reg) {
+		reg.ui.race = race;
+		race.r = reg.ui;
+	}
+	return race;
 };
 
 Graphics.offset = function(){
@@ -91,7 +141,11 @@ Graphics.offset = function(){
 };
 
 Graphics.getRegColor = function(region){
-	return region.ownerId ? Graphics.colors[region.ownerId] : "white";
+	return region.ownerId ? Graphics.colors[region.ownerId] : "silver";
+};
+
+Graphics.getRegBoundsColor = function(region){
+	return canBeginConquer() && canConquer(region) ? "yellow" : "black";
 };
 
 Graphics.update = function(map){
@@ -99,7 +153,7 @@ Graphics.update = function(map){
 	if (Graphics.forbidUpdate()) return;
 	for (i = 0; i < map.regions.length; ++i){
 		cur = map.regions[i];
-		cur.ui.attr({fill : Graphics.getRegColor(cur)});
+		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
 		Graphics.drawTokenBadge(cur);
 	}
 };
@@ -116,7 +170,8 @@ Graphics.drawMap = function(map) {
 		
 	},  selectRegion = function(reg, sel){
 			return function(){
-				reg.animate({stroke: sel ? "red" : "black"}, 300);
+				reg.animate({stroke: sel ? "red" : 
+					Graphics.getRegBoundsColor(reg.model)}, 300);
 				if (!Graphics.dragging)
 					reg.toFront();
 				if (reg.race) {
@@ -128,10 +183,11 @@ Graphics.drawMap = function(map) {
 				
 			}
 	},  drawRegion = function(region){
-	//	var path = paths[region.landscape];
 		var fillStyle = Graphics.getRegColor(region),
+			strokeStyle = Graphics.getRegBoundsColor(region),
 			r = paper.path(getSvgPath(region.coords))
-				.attr({fill: fillStyle, "stroke-width": 3, "stroke-linecap": "round"});
+				.attr({fill: fillStyle, stroke : strokeStyle,
+				"stroke-width": 3, "stroke-linecap": "round"});
 		region.ui = r;
 		r.model = region;
 		Graphics.drawTokenBadge(region);
@@ -143,7 +199,8 @@ Graphics.drawMap = function(map) {
 	for (var i = 0; i < map.regions.length; ++i)
 		drawRegion(map.regions[i]);
 	var frame = paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
-	Graphics.drawTokenBadge(null);
-	
+	if (user().freeTokens)
+		Graphics.freeTokensBadge = Graphics.drawTokenBadge(null);
+
 };
 	

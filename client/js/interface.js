@@ -11,11 +11,7 @@ Interface.gameTab = function()
 			'</td>' +
 			'<td rowspan = "12" valign = "top">' +
 				'<div id="map" style = "margin-left: 250px;">' +
-				//	'<div id = "imgdiv" style = "position: absolute;">' +
-				//	'</div>' +
-				//	'<img id = "imgmap" src = "' + game().map.picture + '" usemap = "#map">' +
-				//	'<map name = "map" id = "map" valign = "top">' +
-				//	'</map>' 
+
 				'</div>' +
 			'</td>' +
 		'</tr>' +
@@ -34,7 +30,7 @@ Interface.gameTab = function()
 				'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
 			'</td>' +
 		'</tr>' +
-		(tokenBadges.length 
+		(game().tokenBadges.length 
 		?
 			'<tr>' +
 				'<td colspan = "2">' +
@@ -188,6 +184,7 @@ Interface.getRegionInfo = function(reg){
 				id: 'btnConquer',
 				text: 'Conquer',
 				click: function() {
+					reg.ui.glow();
 					sendQuery(makeQuery(['action', 'sid', 'regionId'], 
 							['conquer', user().sid, reg.id]), conquerResponse);	
 						$(this).dialog('close');
@@ -240,7 +237,7 @@ Interface.getRegionInfo = function(reg){
 			$('#btnEnchant').hide();
 		if (!(canBeginDragonAttack() && canDragonAttack(reg)))
 			$('#btnDragonAttack').hide();
-		if (game().redeployStarted && canRedeploy(reg))
+	/*	if (game().redeployStarted && canRedeploy(reg))
 		{
 			for (var k = 0; k <= user().freeTokens + reg.tokensNum; ++k)
 				$('#possibleTokensNumForRedeploy').append('<option' + 
@@ -262,7 +259,7 @@ Interface.getRegionInfo = function(reg){
 						game().redeployRegions.push({'regionId': reg.id, 'tokensNum': tokensNum});
 				});
 				$('#possibleTokensNumForRedeploy').show();
-		}
+		}*/
 		if (canBeginDefend() && canDefend(reg))
 		{
 			var curTokensNum = 0;
@@ -339,15 +336,14 @@ Interface.updateGameTab = function()
 		$('#changeRedeployStatus')
 			.button()
 			.click(function(){
-				if (Client.currGameState.redeployStarted)
+				if (game().redeployStarted)
 				{
-					Client.currGameState.redeployStarted = false;
+					game().redeployStarted = false;
 					$('#changeRedeployStatus').html('Start redeploy');
 					$('#redeploy').hide();
 					return;
 				}
-				Client.currGameState.redeployStarted = true;
-				Client.currGameState.regions = [];
+				game().redeployStarted = true;
 				user().startRedeploy();
 				$('#changeRedeployStatus').html('Cancel redeploy');
 				$('#redeploy').show();
@@ -356,7 +352,8 @@ Interface.updateGameTab = function()
 			.button()
 			.click(function(){
 				sendQuery(makeQuery(['action', 'sid', 'regions'], 
-					['redeploy', user().sid, game().redeployRegions]), 
+					['redeploy', user().sid, 
+					convertRedeploymentRequest(game().redeployRegions)]), 
 					redeployResponse);
 			});
 		$('#defend')

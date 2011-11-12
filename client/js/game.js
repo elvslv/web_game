@@ -140,7 +140,6 @@ Game = $.inherit({
 		this.players = players.copy();
 		this.tokenBadgesInGame = tokenBadgesInGame.copy();
 		this.redeployStarted = false;
-		this.redeployRegions = [];
 		this.defendingPlayerIndex = defendingPlayerIndex;
 		this.conqueredRegion = conqueredRegion;
 		this.victimTokensNum = victimTokensNum;
@@ -276,13 +275,14 @@ User = $.inherit({
 	},
 	startRedeploy: function()
 	{
-		Graphics.redeploying = true;
 		regions = this.currentTokenBadge.regions();
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
+		game().redeployRegions = {};
 		for (var i = 0; i < regions.length; ++i)
 		{
-			Client.currGameState.redeployRegions.push({'regionId': regions[i].id, 
-				'tokensNum': regions[i].tokensNum});
+			if (!game().redeployRegions[regions[i].id])
+				game().redeployRegions[regions[i].id] = {};
+			game().redeployRegions[regions[i].id] = regions[i].tokensNum;	
 			this.freeTokens -= regions[i].tokensNum;
 		}
 		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
@@ -298,16 +298,16 @@ createTokenBadge = function(tokenBadge)
 
 createGameByState = function(gameState)
 {
-	mapState = gameState.map;
-	conqueredRegion = undefined;
-	defendingPlayerIndex = undefined;
-	victimTokensNum = gameState.defendingInfo;
+	var mapState = gameState.map,
+		conqueredRegion,
+		defendingPlayerIndex,
+		victimTokensNum = gameState.defendingInfo;
 	if (!Client.currGameState)
 	{
-		regions = [];
+		var regions = [];
 		for (var i = 0; i < mapState.regions.length; ++i)
 		{
-			curReg = mapState.regions[i].currentRegionState;
+			var curReg = mapState.regions[i].currentRegionState;
 			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, 
 				mapState.regions[i].constRegionState, 
 				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
@@ -318,12 +318,12 @@ createGameByState = function(gameState)
 			if (gameState.defendingInfo && i + 1 == gameState.defendingInfo.regionId)
 				conqueredRegion = regions[i];
 		}
-		map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
+		var map = new Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, mapState.thumbnail, mapState.picture, 
 			regions);
 	}
 	else
 	{
-		regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
+		var regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
 		'dragon', 'fortress', 'hero', 'inDecline']
 		for (var i = 0; i < mapState.regions.length; ++i)
 		{
@@ -334,18 +334,17 @@ createGameByState = function(gameState)
 				conqueredRegion = game().map.regions[i];
 		}
 	}
-	tokenBadges = [];
-	visibleBadges = gameState.visibleTokenBadges;
+	var tokenBadges = [], tokenBadge,
+		visibleBadges = gameState.visibleTokenBadges;
 	for (var i = 0; i < visibleBadges.length; ++i)
 	{
 		tokenBadge = new TokenBadge(0, visibleBadges[i].raceName, visibleBadges[i].specialPowerName, i, visibleBadges[i].bonusMoney)
 		tokenBadges.push(tokenBadge);
 	}	
-
-	tokenBadgesInGame = [];
-	players = [];
-	activePlayerIndex = undefined;
-	userFields = ['isReady', 'coins', 'tokensInHand', 'priority', 'inGame'];
+	var tokenBadgesInGame = [],
+		players = [], activePlayerIndex,
+		userFields = ['isReady', 'coins', 'tokensInHand', 'priority', 'inGame'],
+		player;
 	for (var i = 0; i < gameState.players.length; ++i)
 	{
 		if (gameState.players[i].id == gameState.activePlayerId)
@@ -372,7 +371,7 @@ createGameByState = function(gameState)
 		if (gameState.defendingInfo && player.id == gameState.defendingInfo.playerId)
 			defendingPlayerIndex = i;
 	}
-	
+	var result;
 	if (!Client.currGameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
@@ -388,13 +387,13 @@ createGameByState = function(gameState)
 		Client.currGameState.activePlayerIndex = activePlayerIndex;
 		Client.currGameState.state = gameState.state === GAME_START ? 
 			gameState.lastEvent : gameState.state;
-		if (!(defendingPlayerIndex != undefined))
+		if (defendingPlayerIndex){
 			Client.currGameState.defendRegions = [];
-		Client.currGameState.defendingPlayerIndex = defendingPlayerIndex;
-		Client.currGameState.conqueredRegion = conqueredRegion;
-		Client.currGameState.victimTokensNum = victimTokensNum;
-		if (!(Client.currGameState.freeTokensForDefend != undefined))
+			Client.currGameState.defendingPlayerIndex = defendingPlayerIndex;
+			Client.currGameState.conqueredRegion = conqueredRegion;
+			Client.currGameState.victimTokensNum = victimTokensNum;
 			Client.currGameState.freeTokensForDefend = victimTokensNum;
+		}
 		result = Client.currGameState;
 	}
 	return result;
@@ -439,20 +438,20 @@ checkStage = function(newState, attackType)
 
 isDefendingPlayer = function()
 {
-	return (Client.currGameState.defendingPlayerIndex != undefined && 
-		Client.currGameState.players[Client.currGameState.defendingPlayerIndex].id == Client.currentUser.id); 
+	return (game().defendingPlayerIndex !== undefined && 
+		game().players[game().defendingPlayerIndex].id === user().id); 
 }
 
 isActivePlayer = function()
 {
-	return (!(Client.currGameState.defendingPlayerIndex != undefined) && 
-		Client.currGameState.activePlayerIndex != undefined && 
-		Client.currGameState.players[Client.currGameState.activePlayerIndex].id == Client.currentUser.id); 
+	return game().defendingPlayerIndex === undefined && 
+		game().activePlayerIndex !==  undefined && 
+		game().players[game().activePlayerIndex].id == user().id; 
 }
 
 canSelectRaces = function()
 {
-	return isActivePlayer() && user().currentTokenBadge == undefined && 
+	return isActivePlayer() && !user().currentTokenBadge && 
 		checkStage(GAME_SELECT_RACE);
 }
 
@@ -480,14 +479,12 @@ canBeginConquer = function()
 
 canConquer = function(region)
 {
-	if (region.ownerId == user().id && !region.inDecline)
-		return false;
+	return region.ownerId !== user().id && !region.inDecline &&
 	//check for friend!
-	var f1 = getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge), 
-		f2 = getSpecPowByName(user().currentTokenBadge.specPowName).canConquer(region, tokenBadge);
-	if (!(f1 && f2))
-		return false;
-	return !region.isImmune(false);
+	(getRaceByName(user().currentTokenBadge.raceName)
+		.canConquer(region, user().currentTokenBadge) ||
+	getSpecPowByName(user().currentTokenBadge.specPowName)
+		.canConquer(region,user().currentTokenBadge)) && !region.isImmune(false);
 }
 
 canChooseFriend = function()
