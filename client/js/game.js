@@ -96,7 +96,31 @@ Region = $.inherit({
 	getTokenBadge : function()
 	{
 		return game().tokenBadgesInGame[this.tokenBadgeId];
+		/*
+		if (this.tokenBadgeId)
+		{
+			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
+			$('#imgdiv').append('<div class = "' + tokenBadge.raceName + ('Token' + 
+				(tokenBadge.inDecline ? 'Decline' : '')) + '" style = "top: ' + this.y_race + '; left: ' 
+				+ this.x_race + '">' + this.tokensNum + '</div>');
+		}
+		else if (this.tokensNum)
+			$('#imgdiv').append('<div class = "Declined" style = "top: ' + this.y_race + '; left: ' + 
+				this.x_race + '">' + this.tokensNum + '</div>');
+		if (this.encampment)
+			$('#imgdiv').append('<div class = "Encampment" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '">' + this.encampment + '</div>');
+		if (this.dragon)
+			$('#imgdiv').append('<div class = "Dragon" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '"></div>');
+		if (this.fortress)
+			$('#imgdiv').append('<div class = "Fortress" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '"></div>');
+		if (this.hero)
+			$('#imgdiv').append('<div class = "Hero" style = "top: ' + this.y_power + '; left: ' + 
+				this.x_power + '"></div>');(*/
 	},
+
 	getOwner : function()
 	{
 		return game().players[this.ownerId];
@@ -127,7 +151,7 @@ Map = $.inherit(
 
 Game = $.inherit({
 	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
-		tokenBadgesInGame, defendingPlayerIndex, conqueredRegion, victimTokensNum)
+		tokenBadgesInGame)
 	{
 		this.id = id;
 		this.name = name;
@@ -140,11 +164,6 @@ Game = $.inherit({
 		this.players = players.copy();
 		this.tokenBadgesInGame = tokenBadgesInGame.copy();
 		this.redeployStarted = false;
-		this.defendingPlayerIndex = defendingPlayerIndex;
-		this.conqueredRegion = conqueredRegion;
-		this.victimTokensNum = victimTokensNum;
-		this.freeTokensForDefend = victimTokensNum;
-		this.defendRegions = [];
 	},
 	setState: function(state)
 	{
@@ -252,6 +271,7 @@ User = $.inherit({
 		this.tokensInHand = tokensInHand;
 		this.priority = priority;
 		this.inGame = inGame;
+		
 	},
 	//add info for friends in protocol!
 	killRaceInDecline: function()
@@ -267,7 +287,7 @@ User = $.inherit({
 	},
 	regions: function()
 	{	
-		result = [];
+		var result = [];
 		for (var i = 0; i < Client.currGameState.map.regions; ++i)
 			if (Client.currGameState.map.regions[i].ownerId == this.id)
 				result.push(Client.currGameState.map.regions[i]);
@@ -275,18 +295,35 @@ User = $.inherit({
 	},
 	startRedeploy: function()
 	{
-		regions = this.currentTokenBadge.regions();
+		var regions = this.currentTokenBadge.regions();
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
+		this.freeEncampments = 5;
 		game().redeployRegions = {};
+		game().encampmentsRegions = {};
 		for (var i = 0; i < regions.length; ++i)
 		{
 			if (!game().redeployRegions[regions[i].id])
-				game().redeployRegions[regions[i].id] = {};
+				game().redeployRegions[regions[i].id] = 0;
+			if (!game().encampmentsRegions[regions[i].id])
+				game().encampmentsRegions[regions[i].id] = 0;
 			game().redeployRegions[regions[i].id] = regions[i].tokensNum;	
+			game().encampmentsRegions[regions[i].id] = regions[i].encampment;	
 			this.freeTokens -= regions[i].tokensNum;
+			this.freeEncampments -= regions[i].encampment;
 		}
 		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
 		this.freeTokens = Math.max(this.freeTokens, 0);
+	/*	game().heroesRegions = [];
+		game().fortressRegion = undefined;
+		game().freeEncampments = 5;
+		for (var i = 0; i < regions.length; ++i)
+		{
+			if (regions[i].hero)
+				Client.currGameState.heroesRegions.push({'regionId': regions[i].id});
+			if (regions[i].fortress)
+				Client.currGameState.fortressRegion = regions[i].id;
+		}*/
+		
 	}
 });
 
@@ -294,14 +331,16 @@ createTokenBadge = function(tokenBadge)
 {
 	return new TokenBadge(tokenBadge.tokenBadgeId, tokenBadge.raceName, tokenBadge.specialPowerName,
 		tokenBadge.position, tokenBadge.bonusMoney, undefined, tokenBadge.totalTokensNum);
-}
+};
 
 createGameByState = function(gameState)
 {
 	var mapState = gameState.map,
 		conqueredRegion,
 		defendingPlayerIndex,
-		victimTokensNum = gameState.defendingInfo;
+		encampmentsRegions = [],
+		victimTokensNum = gameState.defendingInfo && gameState.defendingInfo.tokensNum;
+	
 	if (!Client.currGameState)
 	{
 		var regions = [];
@@ -367,9 +406,13 @@ createGameByState = function(gameState)
 			player.declinedTokenBadge.inDecline = true;
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		}
+		if (gameState['friendsInfo'] && gameState['friendsInfo']['slaveId'] == player.id)
+			player.friendId = gameState['friendsInfo']['masterId']
+			
 		players.push(player);
-		if (gameState.defendingInfo && player.id == gameState.defendingInfo.playerId)
+		if (gameState.defendingInfo && player.id == gameState.defendingInfo.playerId){
 			defendingPlayerIndex = i;
+		}
 	}
 	var result;
 	if (!Client.currGameState)
@@ -381,23 +424,25 @@ createGameByState = function(gameState)
 	}
 	else
 	{
-		Client.currGameState.tokenBadges = tokenBadges.copy();
-		Client.currGameState.tokenBadgesInGame = tokenBadgesInGame.copy();
-		Client.currGameState.players = players.copy();
-		Client.currGameState.activePlayerIndex = activePlayerIndex;
-		Client.currGameState.state = gameState.state === GAME_START ? 
+		game().tokenBadges = tokenBadges.copy();
+		game().tokenBadgesInGame = tokenBadgesInGame.copy();
+		game().players = players.copy();
+		game().activePlayerIndex = activePlayerIndex;
+		game().state = gameState.state === GAME_START ? 
 			gameState.lastEvent : gameState.state;
-		if (defendingPlayerIndex){
-			Client.currGameState.defendRegions = [];
-			Client.currGameState.defendingPlayerIndex = defendingPlayerIndex;
-			Client.currGameState.conqueredRegion = conqueredRegion;
-			Client.currGameState.victimTokensNum = victimTokensNum;
-			Client.currGameState.freeTokensForDefend = victimTokensNum;
-		}
 		result = Client.currGameState;
+	}											//Redo as quickly as possible
+	if (defendingPlayerIndex && !(game() && game().defendStarted)){
+		result.defendingPlayerIndex = defendingPlayerIndex;
+		result.defendStarted = true;
+		result.players[defendingPlayerIndex].freeTokens = victimTokensNum;
+		console.log('here');
+		result.redeployRegions = {};
+		result.conqueredRegion = conqueredRegion;
 	}
+		
 	return result;
-}
+};
 
 alreadyAttacked = function(attackType)
 {
@@ -473,14 +518,14 @@ canFinishTurn = function()
 
 canBeginConquer = function()
 {
-	return (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER) && 
-		user().tokensInHand > 0);
+	return isActivePlayer() && user().currentTokenBadge &&
+		checkStage(GAME_CONQUER) && user().tokensInHand > 0;
 }
 
 canConquer = function(region)
 {
-	return region.ownerId !== user().id && !region.inDecline &&
-	//check for friend!
+	return region.ownerId !== user().id && !region.inDecline && 
+	!(user().friendId && region.id === user().friendId) &&
 	(getRaceByName(user().currentTokenBadge.raceName)
 		.canConquer(region, user().currentTokenBadge) ||
 	getSpecPowByName(user().currentTokenBadge.specPowName)
@@ -489,7 +534,7 @@ canConquer = function(region)
 
 canChooseFriend = function()
 {
-	result = user().currentTokenBadge != undefined && checkStage(GAME_CHOOSE_FRIEND);
+	var result = user().currentTokenBadge != undefined && checkStage(GAME_CHOOSE_FRIEND);
 	if (result)
 	{
 		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
@@ -500,20 +545,20 @@ canChooseFriend = function()
 
 selectFriend = function(user)
 {
-	specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+	var specialPower = getSpecPowByName(Client.currentUser.currentTokenBadge.specPowName);
 	return specialPower.selectFriend(user);
 }
 
 canThrowDice = function()
 {
-	result = isActivePlayer() && checkStage(GAME_THROW_DICE) && user().currentTokenBadge;
-	result = result && getSpecPowByName(user().currentTokenBadge.specPowName).throwDice();
-	return result;
+	return isActivePlayer() && checkStage(GAME_THROW_DICE) && 
+		user().currentTokenBadge !== undefined && 
+		getSpecPowByName(user().currentTokenBadge.specPowName).throwDice();
 }
 
 canBeginEnchant = function()
 {
-	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_ENCHANT)) ;
+	var result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_ENCHANT)) ;
 	if (result)
 	{
 		race = getRaceByName(user().currentTokenBadge.raceName);
@@ -530,7 +575,8 @@ canEnchant = function(region)
 
 canBeginDragonAttack = function()
 {
-	result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON)) ;
+	var result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON) &&
+		user().tokensInHand > 0) ;
 	if (result)
 	{
 		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
@@ -547,16 +593,16 @@ canDragonAttack = function(region)
 
 canBeginRedeploy = function()
 {
-	if (!(user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
-		user().currentTokenBadge.regions().length))
-		return false;
-	return user().currentTokenBadge.totalTokensNum + 
+	return isActivePlayer() && user().currentTokenBadge && 
+		checkStage(GAME_REDEPLOY) && 
+		user().currentTokenBadge.regions().length > 0 && 
+		user().currentTokenBadge.totalTokensNum + 
 		getRaceByName(user().currentTokenBadge.raceName).turnEndReinforcements(user()) > 0;
 }
 
 canRedeploy = function(region)
 {
-	regions = user().currentTokenBadge.regions();
+	var regions = user().currentTokenBadge.regions();
 	for (var i = 0; i < regions.length; ++i)
 		if (regions[i].id == region.id)
 			return true;
@@ -571,5 +617,45 @@ canBeginDefend = function()
 canDefend = function(region)
 {
 	return region.ownerId == user().id && !(game().conqueredRegion.isAdjacent(region) && 
-		user().currentTokenBadge.hasNotAdjacentRegions(region))
+		user().currentTokenBadge.hasNotAdjacentRegions(game().conqueredRegion))
+}
+
+canBeginSettingEncampments = function()
+{
+	var result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
+		game().redeployStarted ) ;
+	if (result)
+	{
+		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+		result = specialPower.canBeginSettingEncampments();
+	}
+	return result;
+}
+
+canSetEncampments = function(region)
+{
+	var specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
+	return specialPower.setEncampments(region);
+}
+
+canBeginSetHero = function()
+{
+	return game().redeployStarted && 
+		getSpecPowByName(user().currentTokenBadge.specPowName).canBeginSetHero();
+}
+
+canSetHero = function(region)
+{
+	return getSpecPowByName(user().currentTokenBadge.specPowName).setHero(region);
+}
+
+canBeginSetFortress = function()
+{
+	return game().redeployStarted && 
+		getSpecPowByName(user().currentTokenBadge.specPowName).canBeginSetFortress();
+}
+
+canSetFortress = function(region)
+{
+	return getSpecPowByName(user().currentTokenBadge.specPowName).setFortress(region);
 }

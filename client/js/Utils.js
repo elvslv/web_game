@@ -40,7 +40,8 @@ getSvgPath = function(array){
 };
 //converts {"1" : 31, "2" : 54, ...} to [{"regionId" : 1", "tokensNum" : "999"}, ..., {...}]
 convertRedeploymentRequest = function(reg){
-	result = [];
+	var result = [];
+	console.log(reg);
 	for (i in reg) {
 		if (!reg[i]) continue
 		result.push(function(){

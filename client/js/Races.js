@@ -11,8 +11,8 @@ BaseRace = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return (!tokenBadge.regions().length && (region.hasProperty('coast') || 
-			region.hasProperty('border'))) || tokenBadge.regions().length;
+		return !tokenBadge.regions().length &&
+			(region.hasProperty('coast') || region.hasProperty('border'));
 	},
 	attackBonus: function(region, tokenBadge)
 	{
@@ -20,16 +20,15 @@ BaseRace = $.inherit({
 	},
 	decline: function(user)
 	{
-		curTokenBadge = user.currentTokenBadge;
-		user.declinedTokenBadge = curTokenBadge;
-		regions = curTokenBadge.regions();
+		user.declinedTokenBadge = user.currentTokenBadge;
+		var regions = user.declinedTokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 		{
 			regions[i].tokensNum = 1;
 			regions[i].inDecline = True;
 		}
-		curTokenBadge.inDecline = True;
-		curTokenBadge.totalTokensNum = regions.length;
+		user.declinedTokenBadge.inDecline = True;
+		user.declinedTokenBadge.totalTokensNum = regions.length;
 		user.tokensInHand = 0;
 	},
 	turnEndReinforcements: function(user)
@@ -60,7 +59,7 @@ BaseRace = $.inherit({
 	{
 		return;
 	},
-	enchant: function(tokenBadgeId, regionId)
+	enchant: function(region)
 	{
 		return false;
 	},
@@ -116,7 +115,7 @@ RaceHalflings = $.inherit(BaseRace, {
 	decline: function()
 	{
 		this.__base(user);
-		regions = user.currentTokenBadge.regions();
+		var regions = user.currentTokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			regions[i].holeInTheGround = false;
 	},
@@ -133,8 +132,8 @@ RaceGiants = $.inherit(BaseRace, {
 	},
 	attackBonus: function(region, tokenBadge)
 	{
-		res = 0; 
-		regions = tokenBadge.regions();
+		var res = 0, 
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('mountain') && region.adjacent(regions[i]))
 			{
@@ -164,8 +163,8 @@ RaceDwarves = $.inherit(BaseRace, {
 	},
 	incomeBonus: function(tokenBadge)
 	{
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].mine)
 				++res;
@@ -180,8 +179,8 @@ RaceHumans = $.inherit(BaseRace, {
 	},
 	incomeBonus: function(tokenBadge)
 	{
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('farmland'))
 				++res;
@@ -207,8 +206,8 @@ RaceWizards = $.inherit(BaseRace, {
 	},
 	incomeBonus: function(tokenBadge)
 	{
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('magic'))
 				++res;
@@ -281,12 +280,14 @@ RaceSorcerers = $.inherit(BaseRace, {
 	{
 		this.__base('Sorcerers', 5, 18);
 	},
-	enchant: function(tokenBadge, region)
+	enchant: function(region)
 	{
+		tokenBadge = user().currentTokenBadge;
 		return (!(region.isImmune(true) || 
 			!(this.canConquer(region, tokenBadge) && 
-			specialPowerList[tokenBadge.specPowId].canConquer(region, tokenBadge)) ||
+			getSpecPowByName(tokenBadge.specPowName).canConquer(region, tokenBadge)) ||
 			region.tokenBadgeId == tokenBadge.id || 
+			!region.tokenBadgeId ||
 			!region.tokensNum ||
 			region.tokensNum > 1 ||
 			region.inDecline ||
@@ -332,7 +333,7 @@ BaseSpecialPower = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return (tokenBadge.isNeighbor(region) || !tokenBadge.regions().length)&& !region.hasProperty('sea');
+		return tokenBadge.isNeighbor(region) && !region.hasProperty('sea');
 	},
 	attackBonus: function(regionId, tokenBadgeId)
 	{
@@ -344,8 +345,7 @@ BaseSpecialPower = $.inherit({
 	},
 	canDecline: function(user)
 	{
-		if (Client.currGameState.state != GAME_FINISH_TURN)
-			return false;
+		return (Client.currGameState.state == GAME_FINISH_TURN);
 	},
 	decline: function(user)
 	{
@@ -359,7 +359,7 @@ BaseSpecialPower = $.inherit({
 	{
 		return;
 	},
-	dragonAttack: function(tokenBadgeId, regionId, tokensNum)
+	dragonAttack: function(region)
 	{
 		return false;
 	},
@@ -371,11 +371,15 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
-	setEncampments: function(tokenBadge, encampments)
+	setEncampments: function(region)
 	{
 		return false;
 	},
-	setFortified: function(tokenBadge, fortified)
+	canBeginSettingEncampments: function()
+	{
+		return false;
+	},
+	setFortress: function(region)
 	{
 		return false;
 	},
@@ -383,7 +387,15 @@ BaseSpecialPower = $.inherit({
 	{
 		return false;
 	},
-	setHero: function(tokenBadgeId, heroes)
+	setHero: function(region)
+	{
+		return false;
+	},
+	canBeginSetHero: function()
+	{
+		return false;
+	},
+	canBeginSetFortress: function()
 	{
 		return false;
 	},
@@ -427,27 +439,20 @@ SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 	decline: function(user)
 	{
 		this.__base(user);
-		regions = user.regions();
+		var regions = user.regions();
 		for (var i = 0; i < regions.length; ++i)
 			regions[i].encampment = false;
 	},
-	setEncampments: function(tokenBadge, encampments) //should be rewritten for one encampent?
+	canBeginSettingEncampments: function()
 	{
-		freeEncampments = 5;
-		for (var i = 0; i < encampments.length; ++i)
-		{
-			region = Client.currGameState.map.getRegion(encampments[i].regionId);
-			encampmentsNum = encampments[i].encampmentsNum;
-			if (region.tokenBadgeId != tokenBadge.id)
-				return false;
-			if (encampmentsNum > freeEncampments)
-				return false;
-			region.encampent = encampmentsNum;
-			freeEncampments -= encampmentsNum
-		}
 		return true;
-	}
-});
+	},
+	setEncampments: function(region) //should be rewritten for one encampent?
+	{
+		return region.tokenBadgeId === tokenBadge.id; // Why does it function 
+	}													//named like it has a side-effect
+});														//even though it just checks
+														//something instead
 
 SpecialPowerCommando = $.inherit(BaseSpecialPower, {
 	__constructor: function()
@@ -481,14 +486,14 @@ SpecialPowerDiplomat = $.inherit(BaseSpecialPower, {
 SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('Dragon master', 5, 1);
+		this.__base('DragonMaster', 5, 1);
 	},
 	dragonAttack: function(region)
 	{
 		tokenBadge = user().currentTokenBadge;
 		if (region.isImmune())
 			return false;
-		if (!(racesList[tokenBadge.raceId].canConquer(region, tokenBadge) 
+		if (!(getRaceByName(user().currentTokenBadge.raceName).canConquer(region, tokenBadge) 
 			&& this.canConquer(region, tokenBadge)))
 			return false;
 		if (region.tokenBadgeId && region.tokenBadgeId == tokenBadge.id)
@@ -503,7 +508,7 @@ SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 	decline: function(user)
 	{
 		this.__base(user);
-		regions = user.regions();
+		var regions = user.regions();
 		for (var i = 0; i < regions.length; ++i)
 			region.dragon = false;
 	},
@@ -520,10 +525,7 @@ SpecialPowerFlying = $.inherit(BaseSpecialPower, {
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		var f1 = tokenBadge.isNeighbor(region),
-			f2 = tokenBadge.regions().length,
-			f3 = region.hasProperty('sea');
-		return ((!f1 && f2) || !f2) && !f3;
+		return !tokenBadge.isNeighbor(region) && !region.hasProperty('sea');
 
 	}
 });
@@ -535,8 +537,8 @@ SpecialPowerForest = $.inherit(BaseSpecialPower, {
 	},
 	incomeBonus: function(tokenBadge)
 	{
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('forest'))
 				++res;
@@ -550,12 +552,16 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 		this.__base('Fortified', 3, 6);
 		this.maxNum = 6;
 	},
+	canBeginSetFortress: function()
+	{
+		return true;
+	},
 	incomeBonus: function(tokenBadge)
 	{
 		if (tokenBadge.inDecline)
 			return 0;
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].fortress)
 				++res;
@@ -566,27 +572,20 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 		if (region.fortress)
 			tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 	},
-	setFortified: function(tokenBadge, fortified)
+	setFortress: function(region)
 	{
-		user = tokenBadge.ownerId;
-		regionId = fortified['regionId'];
-		region = Client.currGameState.map.getRegion(regionId);
-		if (region.ownerId != user)
+		if (region.tokenBadgeId != user().currentTokenBadge.id 
+			|| region.fortress)
 			return false;
 
-		if (region.fortress)
-			return false;
-
-		regions = tokenBadge.regions();
-		cnt = 0;
+		var regions = user().currentTokenBadge.regions(),
+			cnt = 0;
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].fortress)
 				++cnt;
 		if (cnt >= this.maxNum)
 			return false;
-		if (cnt == tokenBadge.specPowNum)
-			return false;
-		region.fortress = true;
+
 		return true;
 	}
 	
@@ -597,25 +596,25 @@ SpecialPowerHeroic = $.inherit(BaseSpecialPower, {
 	{
 		this.__base('Heroic', 5, 2);
 	},
-	setHero: function(tokenBadge, heroes)
+	setHero: function(region)
 	{
-		regions = tokenBadge.regions();
-		for (var i = 0; i < regions.length; ++i)
-			regions[i].hero = false;
-		user = tokenBadge.ownerId
-		for (var i = 0; i < regions.length; ++i)
-		{
-			region = Client.currGameState.map.getRegion(heroes[i].regionId);	
-			if (region.tokenBadge != tokenBadge)
-				return false;
-			region.hero = true;
-		}
+		var f1 = region.tokenBadgeId == user().currentTokenBadge.id,
+			f2 = game().heroesRegions.length < 2,
+			f3 = !(game().heroesRegions[0] && 
+				region.id == game().heroesRegions[0]['regionId'] || 
+				game().heroesRegions[1] &&
+				region.id == game().heroesRegions[1]['regionId'])
+		
+		return f1 && f2 && f3;
+	},
+	canBeginSetHero: function()
+	{
 		return true;
 	},
 	decline: function(user)
 	{
 		this.__base(self, user);
-		regions = user.regions();
+		var regions = user.regions();
 		for (var i = 0; i < regions.length; ++i)
 			regions[i].hero = false;
 	},
@@ -635,8 +634,8 @@ SpecialPowerHill = $.inherit(BaseSpecialPower, {
 	{
 		if (tokenBadge.inDecline)
 			return 0;
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('hill'))
 				++res;
@@ -695,7 +694,7 @@ SpecialPowerSeafaring = $.inherit(BaseSpecialPower, {
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return (tokenBadge.isNeighbor(region) && tokenBadge.regions().length) || !tokenBadge.regions().length 
+		return tokenBadge.isNeighbor(region);
 	}
 });
 
@@ -720,8 +719,8 @@ SpecialPowerSwamp = $.inherit(BaseSpecialPower, {
 	{
 		if (tokenBadge.inDecline)
 			return 0;
-		res = 0;
-		regions = tokenBadge.regions();
+		var res = 0,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('swamp'))
 				++res;
@@ -738,8 +737,8 @@ SpecialPowerUnderworld = $.inherit(BaseSpecialPower, {
 	{
 		if (this.__base(region, tokenBadge))
 			return true;
-		cav = false;
-		regions = tokenBadge.regions();
+		var cav = false,
+			regions = tokenBadge.regions();
 		for (var i = 0; i < regions.length; ++i)
 			if (regions[i].hasProperty('cavern'))
 			{

@@ -105,6 +105,19 @@ def getDefendingInfo(game):
 	result['tokensNum'] = tokensNum
 	result['regionId'] = lastAttack.conqRegion.id
 	return result
+
+def getFriendsInfo(game):
+	turn = game.turn
+	histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND,
+		game.history)
+	if histEntry:
+		return {'masterId': histEntry[0].userId, 'slaveId': histEntry[0].friend}
+	histEntry = filter(lambda x : x.turn == turn - 1 and x.state == misc.GAME_CHOOSE_FRIEND,
+		game.history)
+	if histEntry:
+		attackedUser = dbi.getXbyY('User', 'id', histEntry[0].friend)
+		if histEntry[0].user.priority > attackedUser.priority:
+			return {'masterId': histEntry[0].userId, 'slaveId': histEntry[0].friend} 
 	
 def getGameState(game):
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
@@ -119,6 +132,10 @@ def getGameState(game):
 	defendingInfo = getDefendingInfo(game)
 	if defendingInfo:
 		result['defendingInfo'] = defendingInfo
+
+	friendsInfo = getFriendsInfo(game)
+	if friendsInfo:
+		result['friendsInfo'] = friendsInfo
 		
 	result['map'] = getMapState(game.map.id, game.id)
 	playerAttrs = ['id', 'name', 'isReady', 'inGame', 'coins', 'tokensInHand']

@@ -90,6 +90,8 @@ $(function() {
 		.button()
 		.click(function() {
 			$('#dialogInfo').text('Please enter username and password');
+			$('#registerLoginOutput span').empty();
+			$('#registerLoginOutput').hide();
 			$('#registerLoginForm').prop('register', true);
 			$('#registerLoginForm').dialog('option', 'title', 'Register');
 			$('#username, #password').val('');
@@ -100,6 +102,8 @@ $(function() {
 		.button()
 		.click(function() {
 			$('#dialogInfo').text("Please enter username and password");
+			$('#registerLoginOutput span').empty();
+			$('#registerLoginOutput').hide();
 			$('#registerLoginForm').prop('register', false);
 			$('#registerLoginForm').dialog('option', 'title', 'Login');
 			$('#username, #password').val('');
@@ -113,7 +117,7 @@ $(function() {
 	$('#getGameList')
 		.button()
 		.click(function() {
-			sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse);
+			sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse, true);
 		});
 	$('#getGameList').button(
 	{
@@ -123,6 +127,8 @@ $(function() {
 	$('#createGame')
 		.button()
 		.click(function() {
+			$('#createGameOutput span').empty();
+			$('#createGameOutput').hide();
 			updateMapList(true);
 		});
 	$('#refreshChat')
@@ -158,31 +164,9 @@ $(function() {
 	$('#createMap')
 	.button()
 	.click(function() {
+		$('#uploadMapOutput span').empty();
+		$('#uploadMapOutput').hide();
 		$('#uploadMap').dialog('open');
-	});
-	$('#submitThmb').click(function() {
-		$(this.form).trigger('submit');
-	}).trigger('click');
-	$('#submitThmb')
-	.submit(function(){
-		var options = 
-		{
-			url: "upload_maps.php",
-			dataType: "json", 
-			success: function(result) 
-			{
-				data = $.parseJSON(result);
-				if (data['result'] != 'ok')
-				{
-					alert(data['error']);
-					return;
-				}
-				filenames.push(data['filename']);
-			},
-				
-		};
-		$("#thmbInput").ajaxForm(options);
-		return false;
 	});
 	$('#createMap').show();
 	$('#register').show();

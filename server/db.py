@@ -20,9 +20,6 @@ pkey = lambda: Column(Integer, primary_key=True)
 fkey = lambda name: Column(Integer, ForeignKey(name, onupdate='CASCADE', ondelete='CASCADE'))
 
 def get_db_string():
-    #if misc.TEST_MODE:
-    #    return 'sqlite:///:memory:'
-    #else:
 	return 'sqlite:///' + (join('game.db') or ':memory:')
 
 class Database:
@@ -33,6 +30,9 @@ class Database:
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
 		self.Session = scoped_session(sessionmaker(bind=self.engine))
+
+	def flush(self):
+		self.session.flush()
 
 	def commit(self):
 		self.session.commit()

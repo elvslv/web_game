@@ -17,9 +17,22 @@ BODY{
 }
 .gallery-a:hover { color: #fff; }
 
+.dialogError{
+	display: none; 
+	min-height: 30px;
+	text-align: center;
+	margin-top: 10px;
+}
+
+.dialogError span{
+	vertical-align: middle;
+	padding-top: 30px;
+}
+
+
 .Amazons, .Dwarves, .Elves, .Giants, .Halflings, .Humans, .Orcs, .Ratmen, .Skeletons, .Sorcerers,
-.Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .Flying,
-.Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp, .Wealthy {
+.Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .DragonMaster, .Flying, .Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp,
+.Underworld, .Wealthy {
 	width: 100px;
 	height:100px;
 }
@@ -41,6 +54,7 @@ BODY{
 .Bivouacking { background: url("images/specialPowers/Bivouacking.jpg") no-repeat; }
 .Commando { background: url("images/specialPowers/Commando.jpg") no-repeat; }
 .Diplomat { background: url("images/specialPowers/Diplomat.jpg") no-repeat; }
+.DragonMaster { background: url("images/specialPowers/DragonMaster.jpg") no-repeat; }
 .Flying { background: url("images/specialPowers/Flying.jpg") no-repeat; }
 .Forest { background: url("images/specialPowers/Forest.jpg") no-repeat; }
 .Fortified { background: url("images/specialPowers/Fortified.jpg") no-repeat; }
@@ -52,6 +66,7 @@ BODY{
 .Seafaring { background: url("images/specialPowers/Seafaring.jpg") no-repeat; }
 .Stout { background: url("images/specialPowers/Stout.jpg") no-repeat; }
 .Swamp { background: url("images/specialPowers/Swamp.jpg") no-repeat; }
+.Underworld { background: url("images/specialPowers/Underworld.jpg") no-repeat; }
 .Wealthy { background: url("images/specialPowers/Wealthy.jpg") no-repeat; }
 .Money {
 	background: url("images/Coins.jpg") no-repeat;
@@ -74,7 +89,7 @@ BODY{
 }
 
 .AmazonsToken, .DwarvesToken, .ElvesToken, .GiantsToken, .HalflingsToken, .HumansToken, .OrcsToken, .RatmenToken, .SkeletonsToken, .SorcerersToken, .TritonsToken, .TrollsToken, .WizardsToken,
-.AmazonsTokenDecline, .DwarvesTokenDecline, .ElvesTokenDecline, .GiantsTokenDecline, .HalflingsTokenDecline, .HumansTokenDecline, .OrcsTokenDecline, .RatmenTokenDecline, .SkeletonsTokenDecline, .SorcerersTokenDecline, .TritonsTokenDecline, .TrollsTokenDecline, .WizardsTokenDecline, .Declined{
+.AmazonsTokenDecline, .DwarvesTokenDecline, .ElvesTokenDecline, .GiantsTokenDecline, .HalflingsTokenDecline, .HumansTokenDecline, .OrcsTokenDecline, .RatmenTokenDecline, .SkeletonsTokenDecline, .SorcerersTokenDecline, .TritonsTokenDecline, .TrollsTokenDecline, .WizardsTokenDecline, .Declined, .Encampment, .Dragon, .Fortress, .Hero{
 	width: 50px;
 	height:50px;
 	position:absolute;
@@ -108,4 +123,12 @@ BODY{
 .TrollsTokenDecline { background: url("images/races/Trolls_small_decline.jpg") no-repeat; }
 .WizardsTokenDecline { background: url("images/races/Wizards_small_decline.jpg") no-repeat; }
 
+<<<<<<< HEAD
 .Declined { background: url("images/races/decline_small.jpg") no-repeat; }
+=======
+.Declined { background: url("images/races/decline.jpg") no-repeat; }
+.Fortress { background: url("images/specialPowers/fortress.jpg") no-repeat; }
+.Encampment { background: url("images/specialPowers/encampment.jpg") no-repeat; }
+.Dragon { background: url("images/specialPowers/dragon.jpg") no-repeat; }
+.Hero { background: url("images/specialPowers/hero.jpg") no-repeat; }
+>>>>>>> origin/master

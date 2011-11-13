@@ -1,4 +1,4 @@
-function sendQuery(query, callback)
+function sendQuery(query, callback, readonly)
 {
 	$.ajax({
 		type: "POST",
@@ -8,14 +8,70 @@ function sendQuery(query, callback)
 		{
 			if (!data['result'])
 			{
-				alert("Unknown server response: " + data);
+				console.error("Unknown server response: " + data);
 				return;
 			}
-			callback(data);
+			switch(data['result'])
+			{
+				case 'badJson': //may it be???
+				case 'badReadinessStatus':
+					console.error('Invalid data');
+					break;
+				case 'badUserSid':
+					gotBadUserSid();
+					break;
+				case 'badGameId': //may it be???
+					console.error('Invalid game id');
+					break;
+				case 'badMapId': 
+					console.error('Invalid map id');
+					break;
+				case 'badPosition': 
+					console.error('Invalid position');
+					break;
+				case 'badStage':
+					alert('Bad stage'); 
+					break;
+				case 'badRegion':
+					alert('Bad region'); 
+					break;
+				case 'badFriendId':
+					console.error('Invalid friend id'); 
+					break;
+				case 'badRegionId':
+					console.error('Invalid region id'); 
+					break;
+				default:
+					callback(data);
+			}
 		},
 		error: function(jqXHR, textStatus, errorThrown)
 		{
-			alert(errorThrown);
+			console.error(errorThrown);
+		},
+		beforeSend: function()
+		{
+			if (!readonly)
+			{
+				$.blockUI(
+				{
+					message: '<img src="css/images/ajax-loader.gif" />',
+					css:
+					{
+						width: '24px',
+						top: '15px',
+						left: '15px',
+						transparent: 0,
+						border: 'none',
+						backgroundColor: '#666666'
+					}
+				});
+			}
+		},
+		complete: function()
+		{
+			if(!readonly)
+				$.unblockUI();
 		}
 		
 	});
@@ -23,12 +79,12 @@ function sendQuery(query, callback)
 
 updateGameList = function()
 {
-	sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse);
+	sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse, true);
 }
 
 updateChat = function()
 {
-	sendQuery(makeQuery(['action', 'since'], ['getMessages', Client.messages.length]), 
+	sendQuery(makeQuery(['action', 'since'], ['getMessages', Client.messages.length], true), 
 		getMessagesResponse);
 }
 
@@ -37,13 +93,13 @@ updateMapList = function(beforeCreateGame)
 	sendQuery(makeQuery(['action'], ['getMapList']), function(data) 
 	{
 		getMapListResponse(data, beforeCreateGame)
-	});
+	}, true);
 }
 
 updateGameState = function()
 {
 	sendQuery(makeQuery(['action', 'gameId'], ['getGameState', Client.currentUser.gameId]), 
-		getGameStateResponse)
+		getGameStateResponse, true)
 }
 
 makeQuery = function(fields, values)

@@ -14,41 +14,45 @@ var paths = {
 Graphics = {};
 
 Graphics.forbidUpdate = function(){
-	return game().redeployStarted || Graphics.dragging;
+	return game().redeployStarted || game().defendStarted || Graphics.dragging;
 };
 
 Graphics.freeTokenBadgeCoords = {
-	'race' : [60, 550],
-	'power' : [120, 550]
+	race : [60, 550],
+	power : [120, 550]
 };
 
 Graphics.REG_DOESNT_EXIST = -1;
 
 
 Graphics.drawTokenBadge = function(reg, drop){	
-												//no arg means we're drawing
-												//free tokens of user under the map pic
-	var num = drop ? 1 : !reg ? user().tokensInHand : reg.tokensNum;
+	var freeTokenBadge = !reg,
+		num = drop ? 1 : freeTokenBadge ? user().freeTokens : reg.tokensNum;
 	if (!num) return;
 	var tokenBadge = drop ? user().currentTokenBadge : 
-			reg ? reg.getTokenBadge() : Graphics.REG_DOESNT_EXIST,	//obfuscation
-		pic = !tokenBadge ? getBaseRace().getPic(true) : 			//intented
+			!freeTokenBadge ? reg.getTokenBadge() : 
+				Graphics.REG_DOESNT_EXIST,	
+		pic = !tokenBadge ? getBaseRace().getPic(true) : 			
 				tokenBadge === Graphics.REG_DOESNT_EXIST ? 			
 				user().currentTokenBadge.getPic() :  
 					tokenBadge.getPic(),
-		coords = reg ? reg.raceCoords : Graphics.freeTokenBadgeCoords.race,
+		coords = freeTokenBadge ? Graphics.freeTokenBadgeCoords.race : reg.raceCoords;
 		race = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
 	race.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"}).toFront();
 	race.num.n = num;
-	race.canDrag = function(){
-		return (!reg || reg.ownerId === user().id) && isActivePlayer() &&
-			game().redeployStarted;
-	};			
+	race.canDrag = (function(t){
+		return function(){
+			return (t || (reg.ownerId === user().id && !reg.inDecline)) && 
+				((game().defendStarted && isDefendingPlayer() && t) ||
+				(game().redeployStarted && isActivePlayer() && !t));
+		};
+	}(freeTokenBadge));
 	race.drag(
 		function(dx, dy){
+			
 			if (!this.canDrag()) return;
 			this.attr({x: this.ox + dx, y: this.oy + dy}); 
 			this.num.attr({x: this.num.ox + dx, y: this.num.oy + dy}); 
@@ -91,11 +95,10 @@ Graphics.drawTokenBadge = function(reg, drop){
 			
 			if (newRegion && newRegion.model && 
 					newRegion.model.ownerId === user().id && 
-					newRegion.model.id !== reg.id){
+					(freeTokenBadge || newRegion.model.id !== reg.id)){
 				if (!newRegion.race) 	
 					Graphics.drawTokenBadge(newRegion.model, true);
 				else {
-					console.log(newRegion.race);
 					newRegion.race.num.n++;
 					newRegion.race.num.attr({"text" : newRegion.race.num.n});
 				}
@@ -103,11 +106,20 @@ Graphics.drawTokenBadge = function(reg, drop){
 					this.num.n--;
 					restore();
 				} else { 
-					delete this.r.race;
+					if (reg)
+						reg.ui.race = undefined;
+					console.log(reg.ui.race);
+					console.log(this.race);
+					this.num.remove();
 					this.remove();
 				}
+				if (!game().redeployRegions[newRegion.model.id])	//not quite the place
+					game().redeployRegions[newRegion.model.id] = 0;
 				game().redeployRegions[newRegion.model.id]++;
-				game().redeployRegions[reg.id]--;
+				if (reg) 
+					game().redeployRegions[reg.id]--;
+				else
+					user().freeTokens--;
 					
 			} else restore(); 
 								
@@ -145,7 +157,8 @@ Graphics.getRegColor = function(region){
 };
 
 Graphics.getRegBoundsColor = function(region){
-	return canBeginConquer() && canConquer(region) ? "yellow" : "black";
+	return canBeginConquer() && canConquer(region) ? "yellow" :  
+		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
 };
 
 Graphics.update = function(map){
@@ -156,6 +169,7 @@ Graphics.update = function(map){
 		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
 		Graphics.drawTokenBadge(cur);
 	}
+	Graphics.freeTokensBadge = Graphics.drawTokenBadge();
 };
 
 		
@@ -199,8 +213,7 @@ Graphics.drawMap = function(map) {
 	for (var i = 0; i < map.regions.length; ++i)
 		drawRegion(map.regions[i]);
 	var frame = paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
-	if (user().freeTokens)
-		Graphics.freeTokensBadge = Graphics.drawTokenBadge(null);
+	Graphics.freeTokenBadge = Graphics.drawTokenBadge();
 
 };
 	
