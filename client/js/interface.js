@@ -687,6 +687,7 @@ Interface.createGameTab = function(gameName)
 Interface.removeGameTab = function()
 {
 	$('#chatGameTab').empty();
+	$('#chatMainTab').empty();
 	$('#chatMainTab').append(HtmlBlocks.chatBlock());
 	$('#messageBox').change(onMessageChange);
 	$('#refreshChat').show();
