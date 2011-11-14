@@ -400,7 +400,7 @@ class RegionState(Base):
 	dragon = Column(Boolean, default = False) 
 	fortress = Column(Boolean, default = False) 
 	hero = Column(Boolean, default = False) 
-	inDecline = Column(Boolean, default = False) 
+	inDecline = Column(Boolean, default = True) 
 
 	game = relationship(Game, backref=backref('regions', cascade = "all,delete"))
 	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename

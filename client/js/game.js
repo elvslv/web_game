@@ -96,29 +96,6 @@ Region = $.inherit({
 	getTokenBadge : function()
 	{
 		return game().tokenBadgesInGame[this.tokenBadgeId];
-		/*
-		if (this.tokenBadgeId)
-		{
-			tokenBadge = game().tokenBadgesInGame[this.tokenBadgeId];
-			$('#imgdiv').append('<div class = "' + tokenBadge.raceName + ('Token' + 
-				(tokenBadge.inDecline ? 'Decline' : '')) + '" style = "top: ' + this.y_race + '; left: ' 
-				+ this.x_race + '">' + this.tokensNum + '</div>');
-		}
-		else if (this.tokensNum)
-			$('#imgdiv').append('<div class = "Declined" style = "top: ' + this.y_race + '; left: ' + 
-				this.x_race + '">' + this.tokensNum + '</div>');
-		if (this.encampment)
-			$('#imgdiv').append('<div class = "Encampment" style = "top: ' + this.y_power + '; left: ' + 
-				this.x_power + '">' + this.encampment + '</div>');
-		if (this.dragon)
-			$('#imgdiv').append('<div class = "Dragon" style = "top: ' + this.y_power + '; left: ' + 
-				this.x_power + '"></div>');
-		if (this.fortress)
-			$('#imgdiv').append('<div class = "Fortress" style = "top: ' + this.y_power + '; left: ' + 
-				this.x_power + '"></div>');
-		if (this.hero)
-			$('#imgdiv').append('<div class = "Hero" style = "top: ' + this.y_power + '; left: ' + 
-				this.x_power + '"></div>');(*/
 	},
 
 	getOwner : function()
@@ -179,11 +156,11 @@ Game = $.inherit({
 	},
 	setTokenBadges: function(tokenBadges)
 	{
-		self.tokenBadges = tokenBadges.copy()
+		this.tokenBadges = tokenBadges.copy()
 	},
 	getTokenBadge: function(pos)
 	{
-		return seld.tokenBades[pos];
+		return this.tokenBades[pos];
 	},
 	isStateAllowed: function(state, attackType)
 	{
@@ -228,7 +205,7 @@ TokenBadge = $.inherit({
 		},
 		isNeighbor: function(region)
 		{
-			regions = this.regions();
+			var regions = this.regions();
 			for (var i = 0; i < regions.length; ++i)
 				for (var j = 0; j < regions[i].adjacent.length; ++j)
 					if (regions[i].adjacent[j] == region.id)
@@ -237,7 +214,7 @@ TokenBadge = $.inherit({
 		},
 		hasNotAdjacentRegions: function(region)
 		{
-			regions = this.regions();
+			var regions = this.regions();
 			for (var i = 0; i < regions.length; ++i)
 			{
 				for (var j = 0; j < regions[i].adjacent.length; ++j)
@@ -247,10 +224,13 @@ TokenBadge = $.inherit({
 					return true;
 			}
 		},
-		getPic : function()
+		getRace : function()
 		{
-			var race = getRaceByName(this.raceName);
-			return this.inDecline ? race.getPic(true) : race.getPic(false);
+			return getRaceByName(this.raceName);
+		},
+		getPower : function()
+		{
+			return getSpecPowByName(this.specPowName);
 		}
 			
 });
@@ -295,36 +275,51 @@ User = $.inherit({
 	},
 	startRedeploy: function()
 	{
-		var regions = this.currentTokenBadge.regions();
+		var regions = this.currentTokenBadge.regions(),
+			specPower = this.specPower(),
+			init = function(elt, obj){	
+				return elt === undefined ? (obj ? {} : 0) : elt;
+			},
+			cur, regs;
+											
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
-		this.freeEncampments = 5;
+		this.freePowerTokens = specPower.bonusNum;
+		
 		game().redeployRegions = {};
-		game().encampmentsRegions = {};
+		rdRegs = game().redeployRegions;
 		for (var i = 0; i < regions.length; ++i)
 		{
-			if (!game().redeployRegions[regions[i].id])
-				game().redeployRegions[regions[i].id] = 0;
-			if (!game().encampmentsRegions[regions[i].id])
-				game().encampmentsRegions[regions[i].id] = 0;
-			game().redeployRegions[regions[i].id] = regions[i].tokensNum;	
-			game().encampmentsRegions[regions[i].id] = regions[i].encampment;	
-			this.freeTokens -= regions[i].tokensNum;
-			this.freeEncampments -= regions[i].encampment;
+			cur = regions[i];
+			rdRegs[cur.id] = init(rdRegs[cur.id]);
+			rdRegs[specPower.regPropName] = init(rdRegs[specPower.regPropName], true);
+			rdRegs[specPower.regPropName][cur.id] = 
+				init(rdRegs[specPower.regPropName][cur.id]);
+			rdRegs[cur.id] = cur.tokensNum;
+			this.freeTokens -= cur.tokensNum;
+			this.freePowerTokens -= cur[specPower.regPropName];
+			if (specPower.needRedeploy())
+				rdRegs[specPower.regPropName][cur.id] =
+					cur[specPower.regPropName];
+			
 		}
 		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
 		this.freeTokens = Math.max(this.freeTokens, 0);
-	/*	game().heroesRegions = [];
-		game().fortressRegion = undefined;
-		game().freeEncampments = 5;
-		for (var i = 0; i < regions.length; ++i)
-		{
-			if (regions[i].hero)
-				Client.currGameState.heroesRegions.push({'regionId': regions[i].id});
-			if (regions[i].fortress)
-				Client.currGameState.fortressRegion = regions[i].id;
-		}*/
-		
+		Graphics.drawFreeBadges();
+	
+	},
+
+	specPower : function()
+	{
+		return user().currentTokenBadge && 
+			user().currentTokenBadge.getPower();
+	},
+
+	race : function()
+	{
+		user().currentTokenBadge && 
+			user().currentTokenBadge.getRace();
 	}
+	
 });
 
 createTokenBadge = function(tokenBadge)
@@ -440,7 +435,6 @@ createGameByState = function(gameState)
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
 	}
-		
 	return result;
 };
 
@@ -524,7 +518,8 @@ canBeginConquer = function()
 
 canConquer = function(region)
 {
-	return region.ownerId !== user().id && !region.inDecline && 
+	return (region.ownerId !== user().id  || 
+		region.ownerId === user().id && region.inDecline) && 
 	!(user().friendId && region.id === user().friendId) &&
 	(getRaceByName(user().currentTokenBadge.raceName)
 		.canConquer(region, user().currentTokenBadge) ||
@@ -576,7 +571,7 @@ canEnchant = function(region)
 canBeginDragonAttack = function()
 {
 	var result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON) &&
-		user().tokensInHand > 0) ;
+		user().tokensInHand > 0) ;	//how so
 	if (result)
 	{
 		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
@@ -620,42 +615,3 @@ canDefend = function(region)
 		user().currentTokenBadge.hasNotAdjacentRegions(game().conqueredRegion))
 }
 
-canBeginSettingEncampments = function()
-{
-	var result = (isActivePlayer() && user().currentTokenBadge && checkStage(GAME_REDEPLOY) && 
-		game().redeployStarted ) ;
-	if (result)
-	{
-		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
-		result = specialPower.canBeginSettingEncampments();
-	}
-	return result;
-}
-
-canSetEncampments = function(region)
-{
-	var specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
-	return specialPower.setEncampments(region);
-}
-
-canBeginSetHero = function()
-{
-	return game().redeployStarted && 
-		getSpecPowByName(user().currentTokenBadge.specPowName).canBeginSetHero();
-}
-
-canSetHero = function(region)
-{
-	return getSpecPowByName(user().currentTokenBadge.specPowName).setHero(region);
-}
-
-canBeginSetFortress = function()
-{
-	return game().redeployStarted && 
-		getSpecPowByName(user().currentTokenBadge.specPowName).canBeginSetFortress();
-}
-
-canSetFortress = function(region)
-{
-	return getSpecPowByName(user().currentTokenBadge.specPowName).setFortress(region);
-}

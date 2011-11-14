@@ -40,17 +40,21 @@ getSvgPath = function(array){
 };
 //converts {"1" : 31, "2" : 54, ...} to [{"regionId" : 1", "tokensNum" : "999"}, ..., {...}]
 convertRedeploymentRequest = function(reg){
-	var result = [];
-	console.log(reg);
-	for (i in reg) {
-		if (!reg[i]) continue
-		result.push(function(){
-				return {
-					regionId: parseInt(i), tokensNum : reg[i]
+	var specPowerName = user().specPower().regPropName,
+		convert = function(array, name){
+			var i, result = [];
+			for (i in array) {
+				if (!array[i] || typeof(array[i]) !== 'number') continue
+					result.push(function(){
+					return {
+						regionId: parseInt(i), tokensNum : array[i]
 					}
+					
 				}());
-	}
-	return result;
+			}
+			return result;
+		}
+	return convert(reg).concat(convert(reg[specPowerName]));
 };
 
 

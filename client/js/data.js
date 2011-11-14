@@ -1,5 +1,9 @@
 var Client = {};
 
+Client.RACE_CODE = 15;
+Client.SPECIAL_POWER_CODE = 16;
+
+
 Client.currentUser = Object();
 
 Client.currGameState = undefined;

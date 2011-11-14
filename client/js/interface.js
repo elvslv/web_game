@@ -308,7 +308,8 @@ Interface.updateGameTab = function()
 
 		color: function(id)
 		{
-			return 'background-color:' + Graphics.colors[id];
+			return 'background-color:' + (Graphics.colors ? 
+				Graphics.colors[id] : 'white');
 		},
 		activePlayer: function()
 		{
