@@ -57,8 +57,8 @@ Interface.dialogs = [
 				turnsNum = $('#turnsNum'),
 				regionList = $('#regionList');
 			query = makeQuery(['action', 'mapName', 'playersNum', 'turnsNum', 'regions', 'thumbnail', 
-				'picture'], ['uploadMap', mapName.val(), playersNum.val(), turnsNum.val(), regionList.val(),
-				'maps/mapThumb.jpg', 'maps/map.jpg']);
+				'picture'], ['uploadMap', mapName.val(), parseInt(playersNum.val()), 
+				parseInt(turnsNum.val()), regionList.val(), 'maps/mapThumb.jpg', 'maps/map.jpg']);
 			sendQuery(query, uploadMapResponse);
 		}
 	}];

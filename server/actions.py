@@ -58,6 +58,12 @@ def act_uploadMap(data):
 	name = data['mapName']
 	playersNum = int(data['playersNum'])
 	result = list()
+	if not misc.TEST_MODE:
+		if not data['thumbnail']:
+			data['thumbnail'] = misc.DEFAULT_THUMB
+		if not data['picture']:
+			data['picture'] = misc.DEFAULT_MAP_PICTURE
+			
 	checkFiles(data['thumbnail'], data['picture'])
 	newMap = Map(name, playersNum, data['turnsNum'], data['thumbnail'], 
 		data['picture'])

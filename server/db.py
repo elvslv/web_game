@@ -81,15 +81,28 @@ class Database:
 	def addRegion(self, id, map_, regInfo):
 		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
+		coords = None
+		
+		if not misc.TEST_MODE:
+			if not('x_race' in regInfo and 'y_race' in regInfo and\
+			'x_power' in regInfo and 'y_power' in regInfo and 'coords' in regInfo and\
+			len(regInfo['coords']) > 2):
+				raise BadFieldException('badRegion')
+			checkFields.checkListCorrectness(regInfo, 'coords', int)
+			coords = regInfo['coords'][0]
+			for i in range(1, len(regInfo['coords'])):
+				coords += ', ' + regInfo['coords'][i]
+				
 		if not 'population' in regInfo:
 			regInfo['population'] = 0
-
+			
 		reg = Region(id, regInfo['population'], map_, 
 			regInfo['x_race'] if 'x_race' in regInfo else None, 
 			regInfo['y_race'] if 'y_race' in regInfo else None, 
 			regInfo['x_power'] if 'x_power' in regInfo else None, 
 			regInfo['y_power'] if 'y_power' in regInfo else None,
-			regInfo['coords'] if 'coords' in regInfo else None)
+			coords if coords else None)
+			
 		for descr in regInfo['landDescription']:
 			if not descr in misc.possibleLandDescription[:11]:
 				raise BadFieldException('unknownLandDescription')
