@@ -33,6 +33,11 @@ HtmlBlocks.mainTab = function()
 									"<button id = \"createMap\"style = \"display:none\">Create new map</button>"+
 								"</td>"+
 							"</tr>"+
+							"<tr>"+
+								"<td>"+
+									"<button id = \"loadGame\"style = \"display:none\">Load game</button>"+
+								"</td>"+
+							"</tr>"+
 						"</table>"+
 					"</td>"+
 					"<td rowspan = 4 valign = \"top\">"+
@@ -157,6 +162,11 @@ HtmlBlocks.gameTab = function()
 			'<tr>' +
 				'<td colspan = "2">' +
 					'<button id = "defend" style = "display: none">Defend</button>' +
+				'</td>' +
+			'</tr>' +
+			'<tr>' +
+				'<td colspan = "2">' +
+					'<button id = "saveGame" style = "display: none">Save game</button>' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +

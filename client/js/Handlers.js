@@ -68,6 +68,16 @@ defendClick = function()
 		game().defendRegions]), defendResponse);
 }
 
+saveGameClick = function()
+{
+	sendQuery(makeQuery(['action', 'gameId', 'sid'],
+		['saveGame', game().id, user().sid]), saveGameResponse);
+}
+
+loadGameClick = function()
+{
+}
+
 btnSetHeroClick = function()
 {
 	if ($('#btnSetHero').html() == 'Set hero')

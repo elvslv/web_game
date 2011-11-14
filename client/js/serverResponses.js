@@ -432,4 +432,30 @@ function defendResponse(data)
  	}
 }
 
+function saveGameResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'ok':
+			$('#savedGameActions').val($.toJSON(data['actions']));
+			$('#saveGameForm').dialog('open');
+			break; //state will be changed on the next getGameState()
+		default:
+			console.error('Unknown server response' + data);
+ 	}
+}
 
+function loadGameResponse(data)
+{
+	switch(data['result'])
+	{
+		case 'ok':
+			alert('Game was successfully loaded');
+			break; 
+		default:
+			$('#loadGameOutput').html('Invalid actions: ' + data['result']);
+			$('#loadGameOutput').show();
+			$('#loadGameForm').dialog('close');
+			Interface.checkForExistingGame();
+ 	}
+}

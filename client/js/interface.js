@@ -61,7 +61,29 @@ Interface.dialogs = [
 				parseInt(turnsNum.val()), regionList.val(), 'maps/mapThumb.jpg', 'maps/map.jpg']);
 			sendQuery(query, uploadMapResponse);
 		}
-	}];
+	},
+	{
+		'name': 'loadGameForm',
+		'title': 'Load game',
+		'ok': function()
+		{
+			if (!$('#gameActions').val().length)
+				$('#loadGameOutput').html('List of actions can not be empty');
+			else
+				sendQuery(makeQuery(['action', 'sid', 'actions'],
+					['loadGame', user().sid, $.evalJSON($('#gameActions').val())]),
+					loadGameResponse);
+		}
+	},
+	{
+		'name': 'saveGameForm',
+		'title': 'Save game',
+		'ok': function()
+		{
+			$(this).dialog('close');
+		}
+	}
+	];
 
 Interface.updatePage = function()
 {
@@ -121,6 +143,7 @@ Interface.updateGameTab = function()
 		$('#changeRedeployStatus').button().click(changeRedeployStatusClick);
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
+		$('#saveGame').button().click(saveGameClick);
 		$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
 		{
 			opts: 
@@ -173,6 +196,7 @@ Interface.updateGameTab = function()
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
+	$('#saveGame').show();
 	$('#imgdiv').empty();
 	for (var i = 0; i < game().map.regions.length; ++i)
 		game().map.regions[i].drawTokenBadge();
@@ -310,6 +334,21 @@ Interface.fillGameList = function(games)
 	var lastSortIndex = 0;
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
+		for (var j = 0; j < Client.gameList[i].players.length; ++j)
+			if (Client.gameList[i].players[j].userId === 
+					Client.currentUser.id)
+			{
+				Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
+				Client.currentUser.gameId = Client.gameList[i].gameId;
+				break;
+			}
+		if (Client.currentUser.gameId)
+		{
+			$('#createGame').hide();
+			$('#gameList').hide();
+			Interface.createGameTab();
+			break;
+		}
 		while ((lastSortIndex < showingGames.length) && 
 			(showingGames[lastSortIndex] < Client.gameList[i].gameId))
 			++lastSortIndex;
@@ -343,7 +382,7 @@ Interface.fillGameList = function(games)
 			}
 		}
 	}
-	
+	Interface.checkForExistingGame();
 }
 
 
@@ -360,14 +399,8 @@ Interface.changeOnRegistration = function()
 	$('#registerLoginForm').dialog('close');
 }
 
-Interface.changeOnLogin = function() 
+Interface.checkForExistingGame = function()
 {
-	$('#userInfo').text('Hi, ' + Client.currentUser.username + '!');
-	$('#login, #register').hide();
-	$('#logout, #createGame').show();
-	$('#registerLoginForm').dialog('close');
-	Client.currentUser.isReady = undefined;
-	Client.currentUser.gameId = undefined;
 	if (Client.gameList)
 	{
 		for (var i = 0; i < Client.gameList.length; ++i)
@@ -389,6 +422,16 @@ Interface.changeOnLogin = function()
 			}
 		}
 	}
+}
+
+Interface.changeOnLogin = function() 
+{
+	$('#userInfo').text('Hi, ' + Client.currentUser.username + '!');
+	$('#login, #register').hide();
+	$('#logout, #createGame, #loadGame').show();
+	$('#registerLoginForm').dialog('close');
+	Client.currentUser.isReady = undefined;
+	Client.currentUser.gameId = undefined;
 }
 		
 Interface.createGameTab = function(gameName)

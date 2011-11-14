@@ -81,11 +81,14 @@ $(function() {
 		});
 	filenames = [];
 	$('#createMap')
-	.button()
-	.click(function() {
-		$('#uploadMapOutput span').empty();
-		$('#uploadMapOutput').hide();
-		$('#uploadMap').dialog('open');
+		.button()
+		.click(function() {
+			$('#uploadMapOutput span').empty();
+			$('#uploadMapOutput').hide();
+			$('#uploadMap').dialog('open');
+		});
+	$('#loadGame').button().click(function(){
+		$('#loadGameForm').dialog('open');
 	});
 	$('#createMap').show();
 	$('#register').show();
