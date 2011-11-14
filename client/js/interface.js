@@ -199,33 +199,10 @@ Interface.getRegionInfo = function(reg){
 				}
 			},
 			{
-				id: 'btnDragonAttack',
-				text: 'Dragon attack',
-				click: function() {
-					sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-								['dragonAttack', user().sid, reg.id]), dragonAttackResponse);
-							$(this).dialog('close');
-				}
-			},
-			{
 				id: 'btnCancel',
 				text: 'Cancel',
 				click: function() {
 					$(this).dialog('close');
-				}
-			},
-			{
-				id: 'btnSetHero',
-				text: 'Set hero',
-				click: function() {
-					Client.currGameState.heroRegions.push(j);
-				}
-			},
-			{
-				id: 'btnSetFortress',
-				text: 'Set fortress',
-				click: function() {
-					Client.currGameState.fortressRegions.push(j);
 				}
 			}
 		]});
@@ -234,14 +211,32 @@ Interface.getRegionInfo = function(reg){
 			$('#btnConquer').hide();
 		if (!(canBeginEnchant() && canEnchant(reg)))
 			$('#btnEnchant').hide();
-		if (!(canBeginDragonAttack() && canDragonAttack(reg)))
-			$('#btnDragonAttack').hide();
-		$('#btnSetHero').hide();
-		$('#btnSetFortress').hide();
 	}
 };
 
-	
+
+Interface.redeployHandler = function()
+{
+	var table = {
+			hero : Client.HERO_CODE,
+			fortress : Client.FORTRESS_CODE,
+			encampments : Client.ENCAMPMENTS_CODE,
+		},
+		cmds = ['action', 'sid', 'regions'],
+		params = ['redeploy', user().sid, 
+			convertRedeploymentRequest(game().redeployRegions,
+				Client.REDEPLOYMENT_CODE)],
+		specPower = user().specPower(),
+		code = table[specPower.regPropName];
+	if (specPower.needRedeploy()) {
+		console.log(specPower);
+		cmds.push(specPower.redeployReqName);
+		params.push(convertRedeploymentRequest(
+			game().redeployRegions[specPower.regPropName], code));
+	}
+	sendQuery(makeQuery(cmds, params), redeployResponse);
+}
+
 Interface.updateGameTab = function()
 {
 	if (Interface.needToCreateGameTab)
@@ -285,18 +280,14 @@ Interface.updateGameTab = function()
 			});
 		$('#redeploy')
 			.button()
-			.click(function(){
-				sendQuery(makeQuery(['action', 'sid', 'regions'], 
-					['redeploy', user().sid, 
-					convertRedeploymentRequest(game().redeployRegions)]), 
-					redeployResponse);
-			});
+			.click(Interface.redeployHandler);
 		$('#defend')
 			.button()
 			.click(function(){
 				sendQuery(makeQuery(['action', 'sid', 'regions'], 
 					['defend', user().sid, 
-					convertRedeploymentRequest(game().redeployRegions)]), 
+					convertRedeploymentRequest(game().redeployRegions, 
+						Client.REDEPLOYMENT_CODE)]), 
 					defendResponse);
 			});
 		Graphics.drawMap(game().map);

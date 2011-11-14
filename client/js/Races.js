@@ -343,13 +343,14 @@ for (var i = 0; i < racesList.length; ++i)
 	racesList[i].setId(i);
 
 BaseSpecialPower = $.inherit({
-	__constructor: function(name, tokensNum, bonusNum, regPropName)
+	__constructor: function(name, tokensNum, bonusNum, regPropName, redeployReqName)
 	{
 		this.name = name;
 		this.tokensNum = tokensNum;
 		this.bonusNum = bonusNum;
 		this.power = true;
 		this.regPropName = regPropName;
+		this.redeployReqName = redeployReqName;
 	},
 	setId: function(id)
 	{
@@ -441,8 +442,6 @@ BaseSpecialPower = $.inherit({
 	},
 	canDrop: function(region) 
 	{
-		console.log(game().redeployRegions[this.regPropName]);
-		console.log(game().redeployRegions[this.regPropName][region.id]);
 		return canRedeploy(region) && 
 			(!game().redeployRegions[this.regPropName] || 
 				!game().redeployRegions[this.regPropName][region.id]); 
@@ -500,7 +499,7 @@ SpecialPowerBerserk = $.inherit(BaseSpecialPower, {
 SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('Bivouacking', 5, 5, 'encampment');
+		this.__base('Bivouacking', 5, 5, 'encampment', 'encampments');
 	},
 	decline: function(user)
 	{
@@ -514,6 +513,10 @@ SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 		return true;
 	},
 	needRedeploy : function()
+	{
+		return true;
+	},
+	canDrop : function()
 	{
 		return true;
 	}
@@ -627,7 +630,7 @@ SpecialPowerForest = $.inherit(BaseSpecialPower, {
 SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('Fortified', 3, 6, 'fortress');
+		this.__base('Fortified', 3, 6, 'fortress', 'fortified');
 	},
 	incomeBonus: function(tokenBadge)
 	{
@@ -657,6 +660,15 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 	needRedeploy : function()
 	{
 		return false;
+	},
+
+	canDrop : function()
+	{
+		var count = 0;
+		for (prop in  game().redeployRegions[this.regPropName])
+			if (game().redeployRegions[this.regPropName].hasOwnProperty(prop))
+				count++;
+		return count < 1;
 	}
 	
 });
@@ -664,7 +676,7 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 SpecialPowerHeroic = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('Heroic', 5, 2, 'hero');
+		this.__base('Heroic', 5, 2, 'hero', 'heroes');
 	},
 	decline: function(user)
 	{

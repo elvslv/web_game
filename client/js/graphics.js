@@ -152,11 +152,10 @@ Graphics.drawRegionBadges = function(region){
 			region.tokensNum);
 	if (tBadge && tBadge.getPower().needRendering())
 		Graphics.drawTokenBadge(region, tBadge.getPower(), 
-			region[tBadge.getPower().regPropName]);
+			0 + region[tBadge.getPower().regPropName]);
 };
 
 Graphics.drawFreeBadges = function(){
-	console.log(user().freePowerTokens)
 	Graphics.raceBadge = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
 	Graphics.powerBadge = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
 };	
@@ -215,7 +214,7 @@ Graphics.drawMap = function(map) {
 		r.model = region;
 		Graphics.drawRegionBadges(region);
 		r.hover(selectRegion(r, true), selectRegion(r, false));
-		r.click(Interface.getRegionInfo(region));	//???
+		r.click(Interface.getRegionInfo(region));
 		r.canDrop = function(badgeType){
 			if (game().redeployStarted || badgeType.name === 'DragonMaster')
 				return badgeType.canDrop(region);						

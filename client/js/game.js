@@ -316,7 +316,7 @@ User = $.inherit({
 
 	race : function()
 	{
-		user().currentTokenBadge && 
+		return user().currentTokenBadge && 
 			user().currentTokenBadge.getRace();
 	}
 	
@@ -408,14 +408,14 @@ createGameByState = function(gameState)
 		if (gameState.defendingInfo && player.id == gameState.defendingInfo.playerId){
 			defendingPlayerIndex = i;
 		}
+		console.log(defendingPlayerIndex);
 	}
 	var result;
 	if (!Client.currGameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
 			(gameState.state == GAME_START) ? gameState.lastEvent : gameState.state,
-			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
-			defendingPlayerIndex, conqueredRegion, victimTokensNum);
+			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame)
 	}
 	else
 	{
@@ -427,11 +427,10 @@ createGameByState = function(gameState)
 			gameState.lastEvent : gameState.state;
 		result = Client.currGameState;
 	}											//Redo as quickly as possible
-	if (defendingPlayerIndex && !(game() && game().defendStarted)){
+	if (defendingPlayerIndex !== undefined && !(game() && game().defendStarted)){
 		result.defendingPlayerIndex = defendingPlayerIndex;
 		result.defendStarted = true;
 		result.players[defendingPlayerIndex].freeTokens = victimTokensNum;
-		console.log('here');
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
 	}
