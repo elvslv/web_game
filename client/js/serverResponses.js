@@ -295,8 +295,8 @@ function conquerResponse(data)
 			alert('Not enough tokens, dice: ' + data['dice']); 
 			break;
 		case 'ok':
-			if (data['dice'] != undefined)
-				alert('dice: ' + data['dice']);
+			alert('Your attack was successfull' + 
+				(data['dice'] != undefined ? 'dice: ' + data['dice'] : ''));
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
