@@ -254,7 +254,7 @@ class Game(Base):
 				break
 			nextPlayer = nextPlayer[0]
 			if not nextPlayer.inGame:
-				nextPlayer += countCoins(nextPlayer)
+				nextPlayer += countCoins(nextPlayer)['totalCoinsNum']
 				curPlayer = nextPlayer
 			else:
 				return nextPlayer

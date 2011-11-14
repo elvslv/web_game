@@ -85,12 +85,18 @@ def generateTokenBadges(randSeed, num):
 	return result
 
 def countCoins(user):
+	statistics = list()
 	income = len(user.regions)
-	races = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
-	for race in races:
-		income += callRaceMethod(race.raceId, 'incomeBonus', race)
-		income += callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
-	return income
+	statistics.append(['Regions', income])
+	tokenBadges = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
+	for race in tokenBadges:
+		m = callRaceMethod(race.raceId, 'incomeBonus', race)
+		statistics.append([races.racesList[race.raceId].name, m])
+		income += m
+		m = callSpecialPowerMethod(race.specPowId, 'incomeBonus', race)
+		statistics.append([races.specialPowerList[race.specPowId].name, m])
+		income += m
+	return {'totalCoinsNum': income, 'statistics': statistics}
 
 def getDefendingInfo(game):
 	if not (len(game.history) and game.history[-1].warHistory and game.history[-1].warHistory.victimBadge):

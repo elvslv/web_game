@@ -278,7 +278,13 @@ function finishTurnResponse(data)
 	switch(data['result'])
 	{
 		case 'ok':
-			break; //state will be changed on the next getGameState()
+			msg = data['incomeCoins'] ? ('You got ' + data['incomeCoins'] + ' coins on this turn.\n') : '';
+			msg += 'Total coins number: ' + data['coins'] + '\n';
+			msg += 'Statistics: \n';
+			for (var i = 0; i < data['statistics'].length; ++i)
+				msg += data['statistics'][i][0] + ': ' + data['statistics'][i][1] + '\n';
+			alert(msg);
+			break; 
 		default:
 			console.error('Unknown server response' + data);
  	}

@@ -188,7 +188,8 @@ def act_finishTurn(data):
 		game.getLastState() != GAME_REDEPLOY and game.getLastState() != GAME_CHOOSE_FRIEND :  
 		raise BadFieldException('badStage')
 
-	user.coins += countCoins(user)
+	incomeCoins = countCoins(user)
+	user.coins += incomeCoins['totalCoinsNum']
 	user.tokensInHand = 0
 	nextPlayer = game.getNextPlayer()
 #	for rec in races:
@@ -198,7 +199,8 @@ def act_finishTurn(data):
 	dbi.updateHistory(user, GAME_FINISH_TURN, None)
 	dbi.updateGameHistory(game, data)
 	prepareForNextTurn(game, nextPlayer)
-	return {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins}
+	return {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins, 
+		'incomeCoins':incomeCoins['totalCoinsNum'], 'statistics': incomeCoins['statistics']}
 
 def act_defend(data):			## Should be renamed to retreat
 	user = dbi.getXbyY('User', 'sid', data['sid'])
