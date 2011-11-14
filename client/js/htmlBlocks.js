@@ -88,7 +88,7 @@ HtmlBlocks.gameTab = function()
 				'<td>' +
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
-				'<td rowspan = "12" valign = "top">' +
+				'<td rowspan = "9" valign = "top">' +
 					'<div style = "margin-left: 250px; position: relative">' +
 						'<div id = "imgdiv" style = "position: absolute;">' +
 						'</div>' +
