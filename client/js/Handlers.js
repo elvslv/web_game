@@ -74,11 +74,8 @@ saveGameClick = function()
 		['saveGame', game().id, user().sid]), saveGameResponse);
 }
 
-loadGameClick = function()
-{
-}
 
-btnSetHeroClick = function()
+btnSetHeroClick = function(j)
 {
 	if ($('#btnSetHero').html() == 'Set hero')
 	{
@@ -103,7 +100,7 @@ btnSetHeroClick = function()
 	}
 }
 
-btnSetFortressClick = function()
+btnSetFortressClick = function(j)
 {
 	if ($('#btnSetFortress').html() == 'Set fortress')
 	{
@@ -121,7 +118,7 @@ btnSetFortressClick = function()
 	}
 }
 
-changeConfirmDialogForRedeploy = function()
+changeConfirmDialogForRedeploy = function(j)
 {
 	if (game().redeployStarted && canRedeploy(game().map.regions[j - 1]))
 	{
@@ -154,7 +151,7 @@ changeConfirmDialogForRedeploy = function()
 	}
 }
 
-changeConfirmDialogForDefend = function()
+changeConfirmDialogForDefend = function(j)
 {
 	if (canBeginDefend() && canDefend(game().map.regions[j - 1]))
 	{
@@ -196,7 +193,7 @@ changeConfirmDialogForDefend = function()
 	}
 }
 
-changeConfirmDialogForEncampments = function()
+changeConfirmDialogForEncampments = function(j)
 {
 	if (canBeginSettingEncampments() && canSetEncampments(game().map.regions[j - 1]))
 	{
@@ -237,7 +234,7 @@ changeConfirmDialogForEncampments = function()
 	}
 }
 
-changeConfirmDialogForHeroes = function()
+changeConfirmDialogForHeroes = function(j)
 {
 	if (canBeginSetHero())
 	{
@@ -255,7 +252,7 @@ changeConfirmDialogForHeroes = function()
 		$('#btnSetHero').hide();
 }
 
-changeConfirmDialogForFortress = function()
+changeConfirmDialogForFortress = function(j)
 {
 	if (canBeginSetFortress())
 	{
@@ -348,10 +345,10 @@ regionClick = function(j)
 			$('#btnEnchant').hide();
 		if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
 			$('#btnDragonAttack').hide();
-		changeConfirmDialogForRedeploy();
-		changeConfirmDialogForDefend();
-		changeConfirmDialogForEncampments();
-		changeConfirmDialogForHeroes();
-		changeConfirmDialogForFortress();
+		changeConfirmDialogForRedeploy(j);
+		changeConfirmDialogForDefend(j);
+		changeConfirmDialogForEncampments(j);
+		changeConfirmDialogForHeroes(j);
+		changeConfirmDialogForFortress(j);
 	}
 }

@@ -302,7 +302,7 @@ function conquerResponse(data)
 			break;
 		case 'ok':
 			alert('Your attack was successfull' + 
-				(data['dice'] != undefined ? 'dice: ' + data['dice'] : ''));
+				(data['dice'] != undefined ? ', \n dice: ' + data['dice'] : ''));
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);

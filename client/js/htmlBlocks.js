@@ -118,20 +118,11 @@ HtmlBlocks.gameTab = function()
 					//'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
 				'</td>' +
 			'</tr>' +
-			(tokenBadges.length 
-			?
-				'<tr>' +
-					'<td colspan = "2">' +
-						'Visible token badges:' +
-					'</td>' +
-				'</tr>' +
-				'<tr>' +
-					'<td colspan = "2" id = "visibleTokenBadges">' +
-						//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
-					'</td>' +
-				'</tr>' 
-			: 
-				'') +
+			'<tr>' +
+				'<td colspan = "2" id = "visibleTokenBadges">' +
+					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
+				'</td>' +
+			'</tr>' 
 			'<tr>' +
 				'<td colspan = "2">' +
 					'<button id = "finishTurn" style = "display: none">Finish turn</button>' +

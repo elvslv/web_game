@@ -535,7 +535,7 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 			return True
 		cav = False
 		for reg in tokenBadge.regions:
-			if reg.cavern:
+			if reg.region.cavern:
 				cav = True
 				break
 
