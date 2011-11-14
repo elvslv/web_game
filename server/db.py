@@ -468,6 +468,8 @@ class Message(Base):
     text = Column(Text)
     time = Column(Integer)
 
+    senderUser = relationship(User)
+
     def __init__(self, sender, text, time): 
         self.sender = sender
         self.text = text

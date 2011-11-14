@@ -4,7 +4,7 @@ $(function() {
 	var mainBlock = HtmlBlocks.mainTab();
 	$('#ui-tabs-0').append(mainBlock);
 	$('#chatMainTab').append(HtmlBlocks.chatBlock());
-	//$('#messageBox').change(function(){onMessageChange()});
+	Interface.updateChatBox();
 	Interface.updatePage();
 	for (var i = 0; i < Interface.dialogs.length; ++i)
 	{
@@ -60,17 +60,6 @@ $(function() {
 			$('#createGameOutput span').empty();
 			$('#createGameOutput').hide();
 			updateMapList(true);
-		});
-	$('#refreshChat')
-		.button()
-		.click(function() {
-			updateChat();
-		});
-	$('#sendMessage')
-		.button()
-		.click(function() {
-			sendQuery(makeQuery(['action', 'text', 'sid'], ['sendMessage', $('#messageBox').val(), 
-				Client.currentUser.sid]), sendMessageResponse);
 		});
 	$('#browseMaps')
 		.button()

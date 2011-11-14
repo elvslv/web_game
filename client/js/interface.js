@@ -87,6 +87,23 @@ Interface.prepareForActions = function()
 	Interface.prepareForDefend();
 }
 
+Interface.updateChatBox = function()
+{		
+	$('#messageBox').change(onMessageChange);
+	$('#refreshChat')
+		.button()
+		.click(function() {
+			updateChat();
+		});
+	$('#sendMessage')
+		.button()
+		.click(function() {
+			sendQuery(makeQuery(['action', 'text', 'sid'], ['sendMessage', $('#messageBox').val(), 
+				Client.currentUser.sid]), sendMessageResponse);
+		});
+	$('#refreshChat').show();
+}
+
 Interface.updateGameTab = function()
 {
 	if (Interface.needToCreateGameTab)
@@ -96,8 +113,8 @@ Interface.updateGameTab = function()
 		$('#ui-tabs-1').append(HtmlBlocks.gameTab());
 		$('#chatMainTab').empty();
 		$('#chatGameTab').append(HtmlBlocks.chatBlock());
-		$('#messageBox').change(onMessageChange);
 		$('#chatGameTab').css({width: '100%'});
+		Interface.updateChatBox();
 		$('#setRadinessStatusInGame').button().click(setReadinessStatusClick);
 		$('#finishTurn').button().click(finishTurnClick);
 		$('#throwDice').button().click(throwDiceClick);
@@ -385,8 +402,7 @@ Interface.removeGameTab = function()
 	$('#chatGameTab').empty();
 	$('#chatMainTab').empty();
 	$('#chatMainTab').append(HtmlBlocks.chatBlock());
-	$('#messageBox').change(onMessageChange);
-	$('#refreshChat').show();
+	Interface.updateChatBox();
 	$('#tabs').tabs('remove', 1);
 }
 
