@@ -28,7 +28,20 @@ BODY{
 	vertical-align: middle;
 	padding-top: 30px;
 }
+.messageBox{
+	width: 100%; 
+	overflow-y: auto; 
+	margin-top:0px; 
+	height: 100%;
+}
 
+.chat{
+	overflow-y: auto; 
+	height: 100%; 
+	max-height: 300px; 
+	min-height: 100px;
+	width: 100%;
+}
 
 .Amazons, .Dwarves, .Elves, .Giants, .Halflings, .Humans, .Orcs, .Ratmen, .Skeletons, .Sorcerers,
 .Tritons, .Trolls, .Wizards, .Alchemist, .Berserk, .Bivouacking, .Commando, .Diplomat, .DragonMaster, .Flying, .Forest, .Fortified, .Heroic, .Hill, .Merchant, .Mounted, .Pillaging, .Seafaring, .Stout, .Swamp,

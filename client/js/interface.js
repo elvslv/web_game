@@ -2,87 +2,6 @@ var Interface = {};
 
 Interface.needToCreateGameTab = false;
 
-Interface.gameTab = function()
-{
-	return '<table>' +
-		'<tr>' +
-			'<td>' +
-				'<button id = "leaveGame">leave</button>' +
-			'</td>' +
-			'<td rowspan = "12" valign = "top">' +
-				'<div style = "margin-left: 250px; position: relative">' +
-					'<div id = "imgdiv" style = "position: absolute;">' +
-					'</div>' +
-					'<img id = "imgmap" src = "' + game().map.picture + '" usemap = "#map">' +
-					'<map name = "map" id = "map" valign = "top">' +
-					'</map>' +
-				'<div>' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td colspan = "2">' +
-				'<button id = "setRadinessStatusInGame" style = "display: none"></button>' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td colspan = "2">' +
-				'Players:' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td colspan = "2" id = "usersInCurGame">' +
-				//'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
-			'</td>' +
-		'</tr>' +
-		(tokenBadges.length 
-		?
-			'<tr>' +
-				'<td colspan = "2">' +
-					'Visible token badges:' +
-				'</td>' +
-			'</tr>' +
-			'<tr>' +
-				'<td colspan = "2" id = "visibleTokenBadges">' +
-					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
-				'</td>' +
-			'</tr>' 
-		: 
-			'') +
-		'<tr>' +
-			'<td colspan = "2">' +
-				'<button id = "finishTurn" style = "display: none">Finish turn</button>' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td>' +
-				'<select id = "possibleFriends" style = "display: none">' +
-				'</select>' +
-			'</td>' +
-			'<td>' +
-				'<button id = "selectFriend" style = "display: none">Select friend</button>' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td colspan = "2">'  +
-				'<button id = "throwDice" style = "display: none">Throw dice</button>' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td>' +
-				'<button id = "changeRedeployStatus" style = "display: none">Start redeploy</button>' +
-			'</td>' +
-			'<td>' +
-				'<button id = "redeploy" style = "display: none">redeploy</button>' +
-			'</td>' +
-		'</tr>' +
-		'<tr>' +
-			'<td>' +
-				'<button id = "defend" style = "display: none">Defend</button>' +
-			'</td>' +
-		'</tr>' +
-	'</table>';
-}
-
 Interface.defaultDialogOptions = {
 	'autoOpen': false,
 	'height': 300,
@@ -174,7 +93,11 @@ Interface.updateGameTab = function()
 	{
 		Interface.needToCreateGameTab = false;
 		$('#tabs').tabs('add', '#ui-tabs-1', Client.currGameState.name, 1);
-		$('#ui-tabs-1').append(Interface.gameTab());
+		$('#ui-tabs-1').append(HtmlBlocks.gameTab());
+		$('#chatMainTab').empty();
+		$('#chatGameTab').append(HtmlBlocks.chatBlock());
+		$('#messageBox').change(onMessageChange);
+		$('#chatGameTab').css({width: '100%'});
 		$('#setRadinessStatusInGame')
 			.button()
 			.click(function(){
@@ -230,7 +153,7 @@ Interface.updateGameTab = function()
 					cmds.push('fortified');
 					params.push({'regionId': game().fortressRegion});
 				}
-				sendQuery(makeQuery(cmds,params), redeployResponse);
+				sendQuery(makeQuery(cmds, params), redeployResponse);
 			});
 		$('#defend')
 			.button()
@@ -728,7 +651,7 @@ Interface.changeOnLogin = function()
 {
 	$('#userInfo').text('Hi, ' + Client.currentUser.username + '!');
 	$('#login, #register').hide();
-	$('#logout, #createGame, #sendMessage').show();
+	$('#logout, #createGame').show();
 	$('#registerLoginForm').dialog('close');
 	Client.currentUser.isReady = undefined;
 	Client.currentUser.gameId = undefined;
@@ -763,6 +686,10 @@ Interface.createGameTab = function(gameName)
 
 Interface.removeGameTab = function()
 {
+	$('#chatGameTab').empty();
+	$('#chatMainTab').append(HtmlBlocks.chatBlock());
+	$('#messageBox').change(onMessageChange);
+	$('#refreshChat').show();
 	$('#tabs').tabs('remove', 1);
 }
 
