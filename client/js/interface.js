@@ -187,7 +187,8 @@ Interface.updateGameTab = function()
 	}).appendTo('#usersInCurGame');	
 	
 	$('#visibleTokenBadges').empty();
-	$('#visibleTokenBadges').append('<p>Visible token badges: </p>');
+	if (Client.currGameState.tokenBadges.length)
+		$('#visibleTokenBadges').append('<p>Visible token badges: </p>');
 	$('#visibleTokenBadgesTemplate').tmpl(Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
 
 	$('#leaveGame')
