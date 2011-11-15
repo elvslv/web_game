@@ -467,7 +467,7 @@ Interface.changeOnLogout = function()
 	$('#userInfo').text("You're not logged in, please login or register");
 	$('#username, #password').val('');
 	$('#login, [id=register]').show();
-	$('#logout, [id*=join], [id*=leave], #createGame, #sendMessage').hide();
+	$('#logout, [id*=join], [id*=leave], #createGame, #sendMessage, #loadGame').hide();
 	Interface.removeGameTab();
 }
 
