@@ -132,13 +132,15 @@ def act_doSmth(data):
 	return {'result': 'ok'}
 
 def createDefaultMaps():
-	for map_ in misc.defaultMaps:
-		act_uploadMap(map_)
+	if misc.TEST_MODE:
+		for map_ in misc.defaultMaps:
+			act_uploadMap(map_)
+	else:
+		act_uploadMap(misc.defaultMaps[7])
 
 def act_resetServer(data):
 	misc.LAST_SID = 0
 	misc.LAST_TIME = 0
-	misc.TEST_MODE = True
 	if 'randseed' in data:
 		misc.TEST_RANDSEED = data['randseed']
 	else:

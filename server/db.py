@@ -88,7 +88,6 @@ class Database:
 			'x_power' in regInfo and 'y_power' in regInfo and 'coords' in regInfo and\
 			len(regInfo['coords']) > 2):
 				raise BadFieldException('badRegion')
-		if 'coords' in regInfo:
 			checkFields.checkListCorrectness(regInfo, 'coords', int)
 			coords = str(regInfo['coords'][0])
 			for i in range(1, len(regInfo['coords'])):
