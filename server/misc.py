@@ -562,13 +562,13 @@ defaultMaps = [
 				'y_power': 195,
 				'coords': [0, 158, 46, 146, 126, 151, 154, 135, 132, 256, 92, 233, 0, 282]
 	 		},
-			{
+			{#7
 	 			'landDescription' : ['mountain', 'coast', 'mountain', 'mine', 'cavern'],  
 	 			'adjacent' : [2, 3, 6, 8, 11, 12],
 				'x_race': 150,
 				'y_race': 190,
-				'x_power': 167,
-				'y_power': 35,
+				'x_power': 208,
+				'y_power': 174,
 				'coords': [154, 135, 202, 107, 258, 104, 273, 142, 297, 143, 305, 172, 268, 222, 191, 247, 132, 256]
 	 		},
 			{
