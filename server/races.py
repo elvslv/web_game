@@ -269,7 +269,7 @@ class BaseSpecialPower:
 	def clearRegion(self, tokenBadge, region):
 		pass
 
-	def throwDice(self):
+	def throwDice(self, game):
 		raise BadFieldException('badAction')
 
 	def setEncampments(self, tokenBadge, encampments):
@@ -295,8 +295,8 @@ class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Berserk', 4)
 
-	def throwDice(self):
-		return misc.throwDice()
+	def throwDice(self, game):
+		return misc_game.throwDice(game)
 
 
 class SpecialPowerBivouacking(BaseSpecialPower):

@@ -2,11 +2,15 @@ from db import Database, User, Message, Game, Map, Adjacency, RegionState, Histo
 import races
 import misc
 from gameExceptions import BadFieldException
-import random
 import sys
 import db
 from sqlalchemy import and_
 from sqlalchemy.sql.expression import asc
+
+def generateNextNum(game):
+	game.prevGeneratedNum = (misc.A * game.prevGeneratedNum) % misc.M
+	dbi.commit()
+	return game.prevGeneratedNum
 
 def clearFromRace(reg):
 	ans = 0
@@ -15,10 +19,10 @@ def clearFromRace(reg):
 		callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
 	return ans
 
-def throwDice():
+def throwDice(game):
 	if misc.TEST_MODE: return 0
-	dice = random.randint(1, 6)
-	if dice > 3: dice = 0
+	dice = generateNextNum(game) % 6
+	if dice > 2: dice = 0
 	return dice
 
 def prepareForNextTurn(game, newActPlayer):
@@ -45,8 +49,8 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 		for tokenBadge in game.tokenBadges:
 			racesInStack.remove(tokenBadge.raceId)
 			specialPowersInStack.remove(tokenBadge.specPowId)
-		raceId = random.choice(racesInStack)
-		specialPowerId = random.choice(specialPowersInStack)
+		raceId = racesInStack[generateNextNum(game) % len(racesInStack)]
+		specialPowerId = specialPowersInStack[generateNextNum(game) % len(specialPowersInStack)]
 	return raceId, specialPowerId
 
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
@@ -69,20 +73,6 @@ def callRaceMethod(raceId, methodName, *args):
 def callSpecialPowerMethod(specialPowerId, methodName, *args):
 	specialPower = races.specialPowerList[specialPowerId]
 	return getattr(specialPower, methodName)(*args) ##join these 2 functions?
-
-def generateTokenBadges(randSeed, num):
-	random.seed(randSeed)
-	racesInStack = range(0, misc.RACE_NUM)
-	specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-	result = list()
-	for i in range(num):
-		raceId = random.choice(racesInStack)
-		specialPowerId = random.choice(specialPowersInStack)
-		result.append({'race': races.racesList[raceId].name, 
-			'specialPower': races.specialPowerList[specialPowerId].name})
-		racesInStack.remove(raceId)
-		specialPowersInStack.remove(specialPowerId)
-	return result
 
 def countCoins(user):
 	statistics = list()
@@ -277,5 +267,3 @@ def makeDecline(user):
 def clearGameStateAtTheEndOfTurn(gameId):
 	pass
 
-if __name__=='__main__':
-	print generateTokenBadges(int(sys.argv[1]), int(sys.argv[2]))

@@ -296,6 +296,7 @@ User = $.inherit({
 	startRedeploy: function()
 	{
 		regions = this.currentTokenBadge.regions();
+		Client.currGameState.redeployRegions = [];
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
 		for (var i = 0; i < regions.length; ++i)
 		{

@@ -193,10 +193,13 @@ class Game(Base):
 	turn = Column(Integer, default=0)
 	activePlayerId = Column(Integer)
 	mapId = fkey('maps.id')
+	randseed = Column(Integer)
+	prevGeneratedNum = Column(Integer)
+	
 	map = relationship(Map)
 	
 	
-	def __init__(self, name, descr, map): 
+	def __init__(self, name, descr, map, randseed): 
 		if misc.TEST_MODE:
 			if dbi.query(Game).filter(Game.name == name).filter(Game.state 
 				!= misc.GAME_ENDED).first():
@@ -205,7 +208,9 @@ class Game(Base):
 		self.descr = descr
 		self.state = misc.GAME_WAITING
 		self.map = map
-
+		self.randseed = randseed
+		self.prevGeneratedNum = randseed
+		
 	def playersInGame(self):
 		return filter(lambda x: x.inGame == True, self.players)
 

@@ -451,11 +451,13 @@ function loadGameResponse(data)
 	{
 		case 'ok':
 			alert('Game was successfully loaded');
+			$('#loadGameForm').dialog('close');
+			Interface.checkForExistingGame();
 			break; 
 		default:
 			$('#loadGameOutput').html('Invalid actions: ' + data['result']);
 			$('#loadGameOutput').show();
-			$('#loadGameForm').dialog('close');
-			Interface.checkForExistingGame();
+
  	}
+	
 }

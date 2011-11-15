@@ -3,7 +3,6 @@ import parseJson
 import os
 import sys
 import json
-import random
 import misc
 import actions
 import db

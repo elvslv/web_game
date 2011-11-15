@@ -29,6 +29,7 @@ def act_login(data):
 	username = data['username']
 	passwd = data['password']
 	user = dbi.getUserByNameAndPwd(username, passwd)
+	random.seed(math.trunc(time.time()))
 	while 1:
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
 		if not dbi.getXbyY('User', 'sid', sid, False): break
@@ -93,15 +94,18 @@ def act_createGame(data):
 	descr = None
 	if 'gameDescr' in data:
 		descr = data['gameDescr']
-	newGame = Game(data['gameName'], descr, map_)
+	randseed = math.trunc(time.time())
+	if 'randseed' in data:
+		randseed = data['randseed']
+	newGame = Game(data['gameName'], descr, map_, randseed)
 	dbi.addUnique(newGame, 'gameName')
 	initRegions(map_, newGame)
 	user.game = newGame
 	user.priority = 1
 	user.inGame = True
+	data['randseed'] = randseed
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'gameId': newGame.id}
-	
 
 def act_joinGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
