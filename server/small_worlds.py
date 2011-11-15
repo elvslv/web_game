@@ -9,6 +9,7 @@ import sys
 import json
 import traceback
 import optparse
+import actions
 
 class UploadException(Exception):
 	def __init__(self, value):
@@ -41,6 +42,7 @@ def serve_ajax():
 
 def main():
 	run(reloader=True, host='localhost', port=PORT)
+	actions.doAction({"action" : "resetServer"})
 	return 0
 
 if __name__ == '__main__':

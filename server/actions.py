@@ -157,8 +157,7 @@ def act_resetServer(data):
 def act_saveGame(data):
 	result = list()
 	game = dbi.getXbyY('Game', 'id', data['gameId'])
-	row = filter(lambda x: x.gameId == game.id, game.gameHistory)
-	for action in row:
+	for action in game.gameHistory:
 		result.append(json.loads(action.action))
 	return {'result': 'ok', 'actions': result}
 

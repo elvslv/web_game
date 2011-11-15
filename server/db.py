@@ -83,26 +83,31 @@ class Database:
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
 		coords = None
 		
-		if not misc.TEST_MODE:
-			if not('x_race' in regInfo and 'y_race' in regInfo and\
-			'x_power' in regInfo and 'y_power' in regInfo and 'coords' in regInfo and\
-			len(regInfo['coords']) > 2):
-				raise BadFieldException('badRegion')
-			checkFields.checkListCorrectness(regInfo, 'coords', int)
-			coords = str(regInfo['coords'][0])
-			for i in range(1, len(regInfo['coords'])):
-				coords += ', ' + str(regInfo['coords'][i])
+	#	if not misc.TEST_MODE:
+		#	if not('x_race' in regInfo and 'y_race' in regInfo and\
+		#	'x_power' in regInfo and 'y_power' in regInfo and 'coords' in regInfo and\
+		#	len(regInfo['coords']) > 2):
+		#		raise BadFieldException('badRegion')
+		#	checkFields.checkListCorrectness(regInfo, 'coords', int)
+		#	coords = str(regInfo['coords'][0])
+		#	for i in range(1, len(regInfo['coords'])):
+		#		coords += ', ' + str(regInfo['coords'][i])
 				
 		if not 'population' in regInfo:
 			regInfo['population'] = 0
+
+			
+#		reg = Region(id, regInfo['population'], map_, 
+#			regInfo['x_race'] if 'x_race' in regInfo else None, 
+#			regInfo['y_race'] if 'y_race' in regInfo else None, 
+#			regInfo['x_power'] if 'x_power' in regInfo else None, 
+#			regInfo['y_power'] if 'y_power' in regInfo else None,
+#			coords if coords else None)
 			
 		reg = Region(id, regInfo['population'], map_, 
-			regInfo['x_race'] if 'x_race' in regInfo else None, 
-			regInfo['y_race'] if 'y_race' in regInfo else None, 
-			regInfo['x_power'] if 'x_power' in regInfo else None, 
-			regInfo['y_power'] if 'y_power' in regInfo else None,
-			coords if coords else None)
-			
+			regInfo['raceCoords'] if 'raceCoords' in regInfo else None, 
+			regInfo['powerCoords'] if 'powerCoords' in regInfo else None,
+			regInfo['coordinates'] if 'coordinates' in regInfo else None)
 		for descr in regInfo['landDescription']:
 			if not descr in misc.possibleLandDescription[:11]:
 				raise BadFieldException('unknownLandDescription')
@@ -378,28 +383,22 @@ class Region(Base):
 	hill = Column(Boolean, default=False) 
 	swamp = Column(Boolean, default=False) 
 	cavern = Column(Boolean, default=False)
-	x_race = Column(Integer)
-	y_race = Column(Integer)
-	x_power = Column(Integer)
-	y_power = Column(Integer)
-	coords = Column(Text)
-	
+	raceCoords = Column(String)
+	powerCoords = Column(String)
+	coordinates = Column(String)
 	map = relationship(Map, backref=backref('regions', order_by=id))
 	neighbors = relationship('Adjacency' , cascade="all,delete", 
 		primaryjoin='and_(Region.id==Adjacency.regId,\
 		Region.mapId==Adjacency.mapId)')
 		
 
-	def __init__(self, id, defTokensNum, map_, x_race, y_race, x_power, y_power, 
-		coords): 
+	def __init__(self, id, defTokensNum, map_, raceCoords, powerCoords, coordinates): 
 		self.id = id
 		self.defTokensNum = defTokensNum
 		self.map = map_
-		self.x_race = x_race
-		self.y_race = y_race
-		self.x_power = x_power
-		self.y_power = y_power
-		self.coords = coords
+		self.raceCoords = str(raceCoords)
+		self.powerCoords = str(powerCoords)
+		self.coordinates = str(coordinates)
 
 	def getState(self, gameId):
 		state = filter(lambda x : x.gameId == gameId, self.states)
@@ -427,7 +426,7 @@ class RegionState(Base):
 	dragon = Column(Boolean, default = False) 
 	fortress = Column(Boolean, default = False) 
 	hero = Column(Boolean, default = False) 
-	inDecline = Column(Boolean, default = False) 
+	inDecline = Column(Boolean, default = True) 
 
 	game = relationship(Game, backref=backref('regions', cascade = "all,delete"))
 	tokenBadge = relationship(TokenBadge, backref=backref('regions'))    # rename

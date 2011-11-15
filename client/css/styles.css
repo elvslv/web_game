@@ -108,36 +108,40 @@ BODY{
 	position:absolute;
 	z-index: 100;
 }
-.AmazonsToken { background: url("images/races/Amazons small.jpg") no-repeat; }
-.DwarvesToken { background: url("images/races/Dwarves small.jpg") no-repeat; }
-.ElvesToken { background: url("images/races/Elves small.jpg") no-repeat; }
-.GiantsToken { background: url("images/races/Giants small.jpg") no-repeat; }
-.HalflingsToken { background: url("images/races/Halflings small.jpg") no-repeat; }
-.HumansToken { background: url("images/races/Humans small.jpg") no-repeat; }
-.OrcsToken { background: url("images/races/Orcs small.jpg") no-repeat; }
-.RatmenToken { background: url("images/races/Ratmen small.jpg") no-repeat; }
-.SkeletonsToken { background: url("images/races/Skeletons small.jpg") no-repeat; }
-.SorcerersToken { background: url("images/races/Sorcerers small.jpg") no-repeat; }
-.TritonsToken { background: url("images/races/Tritons small.jpg") no-repeat; }
-.TrollsToken { background: url("images/races/Trolls small.jpg") no-repeat; }
-.WizardsToken { background: url("images/races/Wizards small.jpg") no-repeat; }
+.AmazonsToken { background: url("images/races/Amazons_small.jpg") no-repeat; }
+.DwarvesToken { background: url("images/races/Dwarves_small.jpg") no-repeat; }
+.ElvesToken { background: url("images/races/Elves_small.jpg") no-repeat; }
+.GiantsToken { background: url("images/races/Giants_small.jpg") no-repeat; }
+.HalflingsToken { background: url("images/races/Halflings_small.jpg") no-repeat; }
+.HumansToken { background: url("images/races/Humans_small.jpg") no-repeat; }
+.OrcsToken { background: url("images/races/Orcs_small.jpg") no-repeat; }
+.RatmenToken { background: url("images/races/Ratmen_small.jpg") no-repeat; }
+.SkeletonsToken { background: url("images/races/Skeletons_small.jpg") no-repeat; }
+.SorcerersToken { background: url("images/races/Sorcerers_small.jpg") no-repeat; }
+.TritonsToken { background: url("images/races/Tritons_small.jpg") no-repeat; }
+.TrollsToken { background: url("images/races/Trolls_small.jpg") no-repeat; }
+.WizardsToken { background: url("images/races/Wizards_small.jpg") no-repeat; }
 
-.AmazonsTokenDecline { background: url("images/races/Amazons small decline.jpg") no-repeat; }
-.DwarvesTokenDecline { background: url("images/races/Dwarves small decline.jpg") no-repeat; }
-.ElvesTokenDecline { background: url("images/races/Elves small decline.jpg") no-repeat; }
-.GiantsTokenDecline { background: url("images/races/Giants small decline.jpg") no-repeat; }
-.HalflingsTokenDecline { background: url("images/races/Halflings small decline.jpg") no-repeat; }
-.HumansTokenDecline { background: url("images/races/Humans small decline.jpg") no-repeat; }
-.OrcsTokenDecline { background: url("images/races/Orcs small decline.jpg") no-repeat; }
-.RatmenTokenDecline { background: url("images/races/Ratmen small decline.jpg") no-repeat; }
-.SkeletonsTokenDecline { background: url("images/races/Skeletons small decline.jpg") no-repeat; }
-.SorcerersTokenDecline { background: url("images/races/Sorcerers small decline.jpg") no-repeat; }
-.TritonsTokenDecline { background: url("images/races/Tritons small decline.jpg") no-repeat; }
-.TrollsTokenDecline { background: url("images/races/Trolls small decline.jpg") no-repeat; }
-.WizardsTokenDecline { background: url("images/races/Wizards small decline.jpg") no-repeat; }
+.AmazonsTokenDecline { background: url("images/races/Amazons_small_decline.jpg") no-repeat; }
+.DwarvesTokenDecline { background: url("images/races/Dwarves_small_decline.jpg") no-repeat; }
+.ElvesTokenDecline { background: url("images/races/Elves_small_decline.jpg") no-repeat; }
+.GiantsTokenDecline { background: url("images/races/Giants_small_decline.jpg") no-repeat; }
+.HalflingsTokenDecline { background: url("images/races/Halflings_small_decline.jpg") no-repeat; }
+.HumansTokenDecline { background: url("images/races/Humans_small_decline.jpg") no-repeat; }
+.OrcsTokenDecline { background: url("images/races/Orcs small_decline.jpg") no-repeat; }
+.RatmenTokenDecline { background: url("images/races/Ratmen_small_decline.jpg") no-repeat; }
+.SkeletonsTokenDecline { background: url("images/races/Skeletons_small_decline.jpg") no-repeat; }
+.SorcerersTokenDecline { background: url("images/races/Sorcerers_small_decline.jpg") no-repeat; }
+.TritonsTokenDecline { background: url("images/races/Tritons_small_decline.jpg") no-repeat; }
+.TrollsTokenDecline { background: url("images/races/Trolls_small_decline.jpg") no-repeat; }
+.WizardsTokenDecline { background: url("images/races/Wizards_small_decline.jpg") no-repeat; }
 
+<<<<<<< HEAD
+.Declined { background: url("images/races/decline_small.jpg") no-repeat; }
+=======
 .Declined { background: url("images/races/decline.jpg") no-repeat; }
 .Fortress { background: url("images/specialPowers/fortress.jpg") no-repeat; }
 .Encampment { background: url("images/specialPowers/encampment.jpg") no-repeat; }
 .Dragon { background: url("images/specialPowers/dragon.jpg") no-repeat; }
 .Hero { background: url("images/specialPowers/hero.jpg") no-repeat; }
+>>>>>>> origin/master

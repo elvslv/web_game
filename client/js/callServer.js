@@ -104,7 +104,7 @@ updateGameState = function()
 
 makeQuery = function(fields, values)
 {
-	result = {};
+	var result = {};
 	for (var i = 0; i < fields.length; ++i)
 		result[fields[i]] = values[i];
 	return result;

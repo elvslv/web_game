@@ -14,7 +14,7 @@ function registerResponse(data)
 			break;
 		case 'ok':
 			$('#registerLoginOutput').hide();
-			alert("You're were registered, congratulations!");
+			alert("You were registered, congratulations!");
 			Interface.changeOnRegistration();
 			break;
 		default:
@@ -170,7 +170,7 @@ function setReadinessStatusResponse(data)
 			alert("You're not playing");
 			break;
 		case 'badGameState': 
-			alert('You can not join game that have been already started or finished');
+			alert('You cannot do it while playing');
 			break;
 		case 'ok':
 			Interface.changeOnSetReadinessStatus();
@@ -240,6 +240,7 @@ function getGameStateResponse(data)
 	{
 		case 'ok':
 			Client.currGameState = createGameByState(data['gameState']);
+			if (game().state !== GAME_WAITING) Graphics.assignColors();
 			Interface.updateGameTab();
 			break;
 		default:
@@ -275,6 +276,7 @@ function declineResponse(data)
 
 function finishTurnResponse(data)
 {
+	var msg;
 	switch(data['result'])
 	{
 		case 'ok':
@@ -375,6 +377,9 @@ function redeployResponse(data)
 {
 	switch(data['result'])
 	{
+		case 'notEnoughTokensForRedeployment':
+			alert('notEnoughTokensForRedeployment'); 
+			break;
 		case 'noTokensForRedeployment':
 			alert('noTokensForRedeployment'); 
 			break;
@@ -403,6 +408,11 @@ function redeployResponse(data)
 			alert('badSetHeroCommand');
 			break;
 		case 'ok':
+			game().redeployStarted = false;
+			if (Graphics.freeTokens.ui.power)
+				Graphics.freeTokens.ui.power.remove();
+			if (Graphics.freeTokens.ui.race)
+				Graphics.freeTokens.ui.race.remove();
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
@@ -426,6 +436,7 @@ function defendResponse(data)
 			alert('thereAreTokensInTheHand'); 
 			break;
 		case 'ok':
+			game().defendStarted = false;
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);

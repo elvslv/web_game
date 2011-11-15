@@ -25,15 +25,14 @@ throwDiceClick = function()
 
 changeRedeployStatusClick = function()
 {
-	if (Client.currGameState.redeployStarted)
+	if (game().redeployStarted)
 	{
-		Client.currGameState.redeployStarted = false;
+		game().redeployStarted = false;
 		$('#changeRedeployStatus').html('Start redeploy');
 		$('#redeploy').hide();
 		return;
 	}
-	Client.currGameState.redeployStarted = true;
-	Client.currGameState.regions = [];
+	game().redeployStarted = true;
 	user().startRedeploy();
 	$('#changeRedeployStatus').html('Cancel redeploy');
 	$('#redeploy').show();
@@ -41,6 +40,24 @@ changeRedeployStatusClick = function()
 
 redeployClick = function()
 {
+	var table = {
+			hero : Client.HERO_CODE,
+			fortress : Client.FORTRESS_CODE,
+			encampment : Client.ENCAMPMENTS_CODE,
+		},
+		cmds = ['action', 'sid', 'regions'],
+		params = ['redeploy', user().sid, 
+			convertRedeploymentRequest(game().redeployRegions,
+				Client.REDEPLOYMENT_CODE)],
+		specPower = user().specPower(),
+		code = table[specPower.regPropName];
+	if (code) {
+		console.log(specPower);
+		cmds.push(specPower.redeployReqName);
+		params.push(convertRedeploymentRequest(
+			game().redeployRegions[specPower.regPropName], code));
+	}
+/*
 	var cmds = ['action', 'sid', 'regions'];
 	var params = ['redeploy', user().sid, game().redeployRegions];
 	if (game().encampmentsRegions.length)
@@ -57,15 +74,16 @@ redeployClick = function()
 	{
 		cmds.push('fortified');
 		params.push({'regionId': game().fortressRegion});
-	}
+	}*/
+	
 	sendQuery(makeQuery(cmds, params), redeployResponse);
 }
 
 defendClick = function()
 {
-	game().defendStarted = false;
-	sendQuery(makeQuery(['action', 'sid', 'regions'],['defend', user().sid, 
-		game().defendRegions]), defendResponse);
+	sendQuery(makeQuery(['action', 'sid', 'regions'], 
+		['defend', user().sid, convertRedeploymentRequest(game().redeployRegions, 
+				Client.REDEPLOYMENT_CODE)]), defendResponse);
 }
 
 saveGameClick = function()
@@ -268,14 +286,14 @@ changeConfirmDialogForFortress = function(j)
 		$('#btnSetFortress').hide();
 }
 
-regionClick = function(j)
+regionClick = function(reg)
 {
 	return function(){
 		$('#confirmInfo').empty();
 		$('#confirmOutput span').empty();
 		$('#confirmOutput').hide();
-		$('#confirmInfo').append(game().map.regions[j - 1].htmlRegionInfo());
-		$('#confirmInfo').append(
+		$('#confirmInfo').append(reg.htmlRegionInfo());
+/*		$('#confirmInfo').append(
 			'<laber id = "lblPossibleTokensNumForRedeploy" '+
 			'for="possibleTokensNumForRedeploy" style = "display: none">Redeploy</label>' +
 			'<select id = "possibleTokensNumForRedeploy" style = "display: none">' +
@@ -287,10 +305,10 @@ regionClick = function(j)
 		$('#confirmInfo').append(
 			'<laber id = "lblPossibleEncampmentsNum"' +
 			'for="possibleEncampmentsNum" style = "display: none">Set encampments</label>' +
-			'<select id = "possibleEncampmentsNum" style = "display: none"></select><br>');
+			'<select id = "possibleEncampmentsNum" style = "display: none"></select><br>');*/
 		$('#confirm').dialog({
 			height:250,
-			title: 'region ' + j,
+			title: 'region ' + reg.id,
 			modal: true,
 			buttons: [
 				{
@@ -298,7 +316,7 @@ regionClick = function(j)
 					text: 'Conquer',
 					click: function() {
 						sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-							['conquer', user().sid, j]), conquerResponse);	
+							['conquer', user().sid, reg.id]), conquerResponse);	
 						$(this).dialog('close');
 					}
 				},
@@ -307,27 +325,27 @@ regionClick = function(j)
 					text: 'Enchant',
 					click: function() {
 						sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-							['enchant', user().sid, j]), enchantResponse);
+							['enchant', user().sid, reg.id]), enchantResponse);
 						$(this).dialog('close');
 					}
 				},
-				{
+		/*		{
 					id: 'btnDragonAttack',
 					text: 'Dragon attack',
 					click: function() {
 						sendQuery(makeQuery(['action', 'sid', 'regionId'], 
-							['dragonAttack', user().sid, j]), dragonAttackResponse);
+							['dragonAttack', user().sid, reg.id]), dragonAttackResponse);
 						$(this).dialog('close');
 					}
-				},
+				},*/
 				{
 					id: 'btnCancel',
 					text: 'Cancel',
 					click: function() {
 						$(this).dialog('close');
 					}
-				},
-				{
+				}				
+		/*		,{
 					id: 'btnSetHero',
 					click: btnSetHeroClick						
 				},
@@ -335,20 +353,20 @@ regionClick = function(j)
 					id: 'btnSetFortress',
 					text: 'Set fortress',
 					click: btnSetFortressClick
-				}
+				}*/
 			]
 		});
 		$('#confirm').dialog('open');
-		if (!(canBeginConquer() && canConquer(game().map.regions[j - 1])))
+		if (!(canBeginConquer() && canConquer(reg)))
 			$('#btnConquer').hide();
-		if (!(canBeginEnchant() && canEnchant(game().map.regions[j - 1])))
+		if (!(canBeginEnchant() && canEnchant(reg)))
 			$('#btnEnchant').hide();
-		if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
+	/*	if (!(canBeginDragonAttack() && canDragonAttack(game().map.regions[j - 1])))
 			$('#btnDragonAttack').hide();
 		changeConfirmDialogForRedeploy(j);
 		changeConfirmDialogForDefend(j);
 		changeConfirmDialogForEncampments(j);
 		changeConfirmDialogForHeroes(j);
-		changeConfirmDialogForFortress(j);
+		changeConfirmDialogForFortress(j);*/
 	}
 }

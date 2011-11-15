@@ -119,10 +119,9 @@ def getGameState(game):
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
 	gameNameAttrs = ['gameId', 'gameName', 'gameDescription', 'state', 
 		'currentTurn', 'activePlayerId']
-
 	result = dict()
-	result['lastEvent'] = game.getLastState()
-
+	if game.history:
+		result['lastEvent'] = game.getLastState()
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 
@@ -135,11 +134,9 @@ def getGameState(game):
 		result['friendsInfo'] = friendsInfo
 		
 	result['map'] = getMapState(game.map.id, game.id)
-
 	playerAttrs = ['id', 'name', 'isReady', 'inGame', 'coins', 'tokensInHand']
 	playerAttrNames = ['userId', 'username', 'isReady', 'inGame' 'coins', 
 		'tokensInHand']
-
 	players = game.players
 	resPlayers = list()
 	priority = 0
@@ -179,10 +176,11 @@ def endOfGame(game, coins = None):
 	else:
 		gameState = getGameState(game)
 		game.resetPlayersState()
-		tables = ['CurrentRegionStates', 'TokenBadges']
-		for table in tables:
-			queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table
-			dbi.engine.execute(queryStr, gameId)
+		dbi.delete(game)
+	#	tables = ['CurrentRegionStates', 'TokenBadges']
+	#	for table in tables:
+	#		queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table
+	#		dbi.engine.execute(queryStr, gameId)
 		return {'result': 'ok', 'gameState': gameState}
 
 
@@ -203,19 +201,22 @@ def getMapState(mapId, gameId = None):
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
 	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
 		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
-
 	for region in map_.regions:
 		curReg = dict()
-		curReg['x_race'] = region.x_race
-		curReg['y_race'] = region.y_race
-		curReg['x_power'] = region.x_power
-		curReg['y_power'] = region.y_power
-		curReg['coords'] = region.coords
+		curReg['raceCoords'] = region.raceCoords
+		curReg['powerCoords'] = region.powerCoords
+		curReg['coordinates'] = region.coordinates
 		curReg['constRegionState'] = list()
 		
 		for i in range(len(constRegionAttrs)):
-			if getattr(region, constRegionAttrs[i]):
-				curReg['constRegionState'].append(constRegionAttrs[i])
+			attr = getattr(region, constRegionAttrs[i])
+			if not attr: continue
+			if constRegionAttrs[i] in ('mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland'):
+				curReg['landscape'] = constRegionAttrs[i]
+			elif constRegionAttrs[i] in ('mine', 'cavern', 'magic'):
+				curReg['bonus'] = constRegionAttrs[i]
+			curReg['constRegionState'].append(constRegionAttrs[i])
+			 
 				
 		curReg['adjacentRegions'] = region.getNeighbors()
 		if gameId:

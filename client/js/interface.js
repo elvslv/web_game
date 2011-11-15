@@ -93,7 +93,7 @@ Interface.updatePage = function()
 		updateGameList();
 	//updateChat();
 	window.setTimeout("Interface.updatePage()", 5000);
-}
+};
 
 
 
@@ -107,7 +107,8 @@ Interface.prepareForActions = function()
 	Interface.prepareForThrowDice();
 	Interface.prepareForRedeploy();
 	Interface.prepareForDefend();
-}
+};
+
 
 Interface.updateChatBox = function()
 {		
@@ -144,64 +145,47 @@ Interface.updateGameTab = function()
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
 		$('#saveGame').button().click(saveGameClick);
-		$('#regionsTemplate').tmpl(Client.currGameState.map.regions,
-		{
-			opts: 
-			{
-				coords: function(regionId)
-				{
-					return '"' + game().map.regions[regionId - 1].x_race + ', ' +
-						game().map.regions[regionId - 1].y_race + ', ' + '50"';
-				}
-			}
-		}).appendTo('#map');
-		$('#imgmap').maphilight();
-		for (var i = 0; i < game().map.regions.length; ++i)
-		{
-			$('#region' + (i + 1)).live('click', regionClick(i + 1));
-		}
+		Graphics.drawMap(game().map);
 	}
 	
 	$('#usersInCurGame').empty();
-	$('#usersInCurGameTemplate').tmpl(Client.currGameState.players,
+	$('#usersInCurGameTemplate').tmpl(game().players,
 	{
-		
+
+		color: function(id)
+		{
+			return 'background-color:' + (Graphics.colors ? 
+				Graphics.colors[id] : 'white');
+		},
 		activePlayer: function()
 		{
-			return Client.currGameState.activePlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.activePlayerIndex].id : 
-				undefined;
+			return game().activePlayerIndex !== undefined &&
+				game().players[game().activePlayerIndex].id;
 		},
 		defendingPlayer: function()
 		{
-			return Client.currGameState.defendingPlayerIndex != undefined ? Client.currGameState.players[Client.currGameState.defendingPlayerIndex].id : 
-				undefined;
+			return game().defendingPlayerIndex !== undefined && 
+				game().players[game().defendingPlayerIndex].id;
 		},
 		currentUser: function()
 		{
 			return Client.currentUser.id;
-		},
-		freeTokensForDefend: function()
-		{
-			return Client.currGameState.freeTokensForDefend;
 		}
 	}).appendTo('#usersInCurGame');	
-	
+	Graphics.update(game().map);
 	$('#visibleTokenBadges').empty();
-	if (Client.currGameState.tokenBadges.length)
+	if (game().tokenBadges.length)
 		$('#visibleTokenBadges').append('<p>Visible token badges: </p>');
 	$('#visibleTokenBadgesTemplate').tmpl(Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
 
 	$('#leaveGame')
 		.button()
 		.click(function(){
-			sendQuery(makeQuery(['action', 'sid'], ['leaveGame', Client.currentUser.sid]), 
+			sendQuery(makeQuery(['action', 'sid'], ['leaveGame', user().sid]), 
 				leaveGameResponse);
 		});
 	$('#leaveGame').show();
 	$('#saveGame').show();
-	$('#imgdiv').empty();
-	for (var i = 0; i < game().map.regions.length; ++i)
-		game().map.regions[i].drawTokenBadge();
 	Interface.prepareForActions();
 }
 
@@ -358,7 +342,7 @@ Interface.fillGameList = function(games)
 			(showingGames[lastSortIndex] === Client.gameList[i].gameId))
 			$('#gameList:nth-child(' + (i + 1) + ') ul').show();
 		
-		if (Client.currentUser.gameId == Client.gameList[i].gameId)	
+		if (Client.currentUser.gameId === Client.gameList[i].gameId)	
 			Client.currentUser.gameIndex = i;
 		$('#join' + Client.gameList[i].gameId)
 			.button()

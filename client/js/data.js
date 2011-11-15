@@ -1,15 +1,17 @@
 var Client = {};
 
+Client.REDEPLOYMENT_CODE = -1;
+Client.HERO_CODE = -2;
+Client.FORTRESS_CODE = -3;
+Client.ENCAMPMENTS_CODE = -4;
+
+
 Client.currentUser = Object();
 
+Client.currGameState = undefined;
+	
 Client.gameList = [];
 
-Client.states = [
-	'start',
-	'waiting',
-	'processing',
-	'finished',
-];
 	
 Client.gameProperties = [
 	"gameName", "gameDescr", "mapId", "activePlayer", "state", "turn", 

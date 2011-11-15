@@ -94,12 +94,12 @@ HtmlBlocks.gameTab = function()
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
 				'<td rowspan = "8" valign = "top">' +
-					'<div style = "margin-left: 250px; position: relative">' +
-						'<div id = "imgdiv" style = "position: absolute;">' +
+					'<div id="map" style = "margin-left: 250px;>' +
+					/*	'<div id = "imgdiv" style = "position: absolute;">' +
 						'</div>' +
 						'<img id = "imgmap" src = "' + game().map.picture + '" usemap = "#map">' +
 						'<map name = "map" id = "map" valign = "top">' +
-						'</map>' +
+						'</map>' +*/
 					'<div>' +
 				'</td>' +
 			'</tr>' +
@@ -115,12 +115,12 @@ HtmlBlocks.gameTab = function()
 			'</tr>' +
 			'<tr>' +
 				'<td colspan = "2" id = "usersInCurGame">' +
-					//'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
+					'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
 				'<td colspan = "2" id = "visibleTokenBadges">' +
-					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
+					'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
