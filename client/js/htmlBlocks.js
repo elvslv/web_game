@@ -122,7 +122,7 @@ HtmlBlocks.gameTab = function()
 				'<td colspan = "2" id = "visibleTokenBadges">' +
 					//'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
 				'</td>' +
-			'</tr>' 
+			'</tr>' +
 			'<tr>' +
 				'<td colspan = "2">' +
 					'<button id = "finishTurn" style = "display: none">Finish turn</button>' +
