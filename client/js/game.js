@@ -268,9 +268,9 @@ User = $.inherit({
 	regions: function()
 	{	
 		var result = [];
-		for (var i = 0; i < Client.currGameState.map.regions; ++i)
-			if (Client.currGameState.map.regions[i].ownerId == this.id)
-				result.push(Client.currGameState.map.regions[i]);
+		for (var i = 0; i < game().map.regions.length; ++i)
+			if (game().map.regions[i].ownerId === this.id)
+				result.push(game().map.regions[i]);
 		return result;	
 	},
 	startRedeploy: function()
@@ -298,12 +298,14 @@ User = $.inherit({
 			this.freeTokens -= cur.tokensNum;
 			this.freePowerTokens -= cur[specPower.regPropName];
 			if (specPower.needRedeploy())
-				rdRegs[specPower.regPropName][cur.id] =
-					cur[specPower.regPropName];
+				rdRegs[specPower.regPropName][cur.id] = 0 +	cur[specPower.regPropName];
 			
 		}
+		console.log(rdRegs);
 		this.freeTokens += getRaceByName(this.currentTokenBadge.raceName).turnEndReinforcements(this);
 		this.freeTokens = Math.max(this.freeTokens, 0);
+		if (this.race().deleteAdditionalUnits)
+			this.race().deleteAdditionalUnits();
 		Graphics.drawFreeBadges();
 	
 	},
@@ -362,10 +364,11 @@ createGameByState = function(gameState)
 		for (var i = 0; i < mapState.regions.length; ++i)
 		{
 			for (var j = 0; j < regionFields.length; ++j)
-				Client.currGameState.map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
+				game().map.regions[i][regionFields[j]] = mapState.regions[i].currentRegionState[regionFields[j]];
 			if (gameState.defendingInfo && 
 				game().map.regions[i].id === gameState.defendingInfo.regionId)
 				conqueredRegion = game().map.regions[i];
+			
 		}
 	}
 	var tokenBadges = [], tokenBadge,
@@ -383,7 +386,7 @@ createGameByState = function(gameState)
 	{
 		if (gameState.players[i].id == gameState.activePlayerId)
 			activePlayerIndex = i;
-		player = (gameState.players[i].id == Client.currentUser.id) ? player = Client.currentUser : 
+		player = (gameState.players[i].id === user().id) ? user(): 
 			new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
 		for (var j = 0; j < userFields.length; ++j)
 			player[userFields[j]] = gameState.players[i][userFields[j]];
@@ -393,22 +396,22 @@ createGameByState = function(gameState)
 				gameState.players[i].currentTokenBadge);
 			player.currentTokenBadge.inDecline = false;
 			tokenBadgesInGame[player.currentTokenBadge.id] = player.currentTokenBadge;
-		}
+		} else
+			player.currentTokenBadge = undefined;
 		if (gameState.players[i].declinedTokenBadge)
 		{
 			player.declinedTokenBadge = createTokenBadge(
 				gameState.players[i].declinedTokenBadge);
 			player.declinedTokenBadge.inDecline = true;
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
-		}
+		} else
+			player.declinedTokenBadge = undefined;
 		if (gameState['friendsInfo'] && gameState['friendsInfo']['slaveId'] == player.id)
 			player.friendId = gameState['friendsInfo']['masterId']
-			
 		players.push(player);
-		if (gameState.defendingInfo && player.id == gameState.defendingInfo.playerId){
+		if (gameState.defendingInfo && player.id === gameState.defendingInfo.playerId){
 			defendingPlayerIndex = i;
 		}
-		console.log(defendingPlayerIndex);
 	}
 	var result;
 	if (!Client.currGameState)
@@ -427,12 +430,15 @@ createGameByState = function(gameState)
 			gameState.lastEvent : gameState.state;
 		result = Client.currGameState;
 	}											//Redo as quickly as possible
+	result.defendingPlayerIndex = defendingPlayerIndex;
 	if (defendingPlayerIndex !== undefined && !(game() && game().defendStarted)){
 		result.defendingPlayerIndex = defendingPlayerIndex;
-		result.defendStarted = true;
 		result.players[defendingPlayerIndex].freeTokens = victimTokensNum;
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
+		Graphics.update(result.map);
+		if (user().id === result.players[defendingPlayerIndex].id)
+			result.defendStarted = true;
 	}
 	return result;
 };
@@ -458,8 +464,8 @@ checkStage = function(newState, attackType)
 		{
 			case GAME_FINISH_TURN:
 				tokenBadge = user().currentTokenBadge;
-				result = !(tokenBadge && getRaceByName(tokenBadge.raceName).needRedeployment() && 
-					game().state != GAME_REDEPLOY && game().state != GAME_CHOOSE_FRIEND);
+				result = !(tokenBadge && 
+					game().state !== GAME_REDEPLOY && game().state !== GAME_CHOOSE_FRIEND);
 				break;
 			case GAME_CONQUER:
 				//check for dice!!!

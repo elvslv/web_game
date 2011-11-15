@@ -369,6 +369,9 @@ function redeployResponse(data)
 {
 	switch(data['result'])
 	{
+		case 'notEnoughTokensForRedeployment':
+			alert('notEnoughTokensForRedeployment'); 
+			break;
 		case 'noTokensForRedeployment':
 			alert('noTokensForRedeployment'); 
 			break;
@@ -398,6 +401,10 @@ function redeployResponse(data)
 			break;
 		case 'ok':
 			game().redeployStarted = false;
+			if (Graphics.freeTokens.ui.power)
+				Graphics.freeTokens.ui.power.remove();
+			if (Graphics.freeTokens.ui.race)
+				Graphics.freeTokens.ui.race.remove();
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);

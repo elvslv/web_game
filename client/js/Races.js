@@ -40,10 +40,6 @@ BaseRace = $.inherit({
 	{
 		return 0;
 	},
-	needRedeployment: function()
-	{
-		return false;
-	},
 	incomeBonus: function(user)
 	{
 		return 0;
@@ -246,10 +242,31 @@ RaceAmazons = $.inherit(BaseRace, {
 	{
 		return 4;
 	},
-	needRedeployment: function()
+
+	deleteAdditionalUnits : function()
 	{
-		return true;
+		var n = 4 - user().tokensInHand,
+			regions = user().regions(),
+			loop = function(needCheck){
+				var i, lbl;
+				for (i = 0; i < regions.length; i++){
+					if (n <=0 ) return true;
+					console.log(i);
+					console.log(regions);
+					lbl = regions[i].ui.race.num;
+					if (!needCheck || lbl.n > 1){
+						game().redeployRegions[regions[i].id]--;
+						n--;
+						lbl.n--;
+					lbl.attr({"text" : lbl.n});
+					}
+				}
+				return false;
+			}
+		loop(true) && loop(false);			
 	}
+
+	
 });
 
 
@@ -454,7 +471,6 @@ BaseSpecialPower = $.inherit({
 		}, rdRegs = game().redeployRegions;
 		newReg.ui.addUnit(this);
 		rdRegs[this.regPropName] = init(rdRegs[this.regPropName], true);
-		console.log(rdRegs[this.regPropName]);
 		rdRegs[this.regPropName][newReg.id] = init(rdRegs[this.regPropName][newReg.id]);
 		rdRegs[this.regPropName][newReg.id]++;
 		if (oldReg) 
@@ -516,9 +532,9 @@ SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 	{
 		return true;
 	},
-	canDrop : function()
+	canDrop : function(region)
 	{
-		return true;
+		return canRedeploy(region);
 	}
 	
 
@@ -652,9 +668,16 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 	{
 		return true;
 	},
-	canStartRedeploy : function(from)
+	canStartRedeploy : function(reg)
 	{
-		return !from;
+		if (reg) return true;
+		var count = 0;
+		for (prop in  game().redeployRegions[this.regPropName]){
+			if (game().redeployRegions[this.regPropName].hasOwnProperty(prop) &&
+				game().redeployRegions[this.regPropName][prop] > 0)
+				count++;
+		}
+		return count < 1;
 	}, 
 
 	needRedeploy : function()
@@ -662,13 +685,9 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 		return false;
 	},
 
-	canDrop : function()
+	canDrop : function(region)
 	{
-		var count = 0;
-		for (prop in  game().redeployRegions[this.regPropName])
-			if (game().redeployRegions[this.regPropName].hasOwnProperty(prop))
-				count++;
-		return count < 1;
+		return canRedeploy(region);
 	}
 	
 });

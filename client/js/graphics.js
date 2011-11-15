@@ -17,17 +17,23 @@ Graphics.forbidUpdate = function(){
 	return game().redeployStarted || game().defendStarted || Graphics.dragging;
 };
 
-Graphics.freeTokenBadgeCoords = {
+Graphics.freeTokens = {
 	raceCoords : [60, 550],
-	powerCoords : [270, 550]
+	powerCoords : [270, 550],
+	ui : {}
 };
 
 Graphics.drawTokenBadge = function(reg, badgeType, num){	
 	if (!num) return;
 	var pic = badgeType.getPic(reg !== null && reg.inDecline),
-		place = reg || Graphics.freeTokenBadgeCoords,
+		place = reg || Graphics.freeTokens,
 		coords = badgeType.race ? place.raceCoords : place.powerCoords,
-		badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
+		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
+		badge; 
+
+	console.log(previousBadge);
+	if (previousBadge) previousBadge.remove();
+	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
 	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
@@ -142,8 +148,9 @@ Graphics.getRegColor = function(region){
 };
 
 Graphics.getRegBoundsColor = function(region){
-	return canBeginConquer() && canConquer(region) ? "yellow" :  
-		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
+	return "black";
+	//canBeginConquer() && canConquer(region) ? "yellow" :  
+		//canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
 };
 
 Graphics.drawRegionBadges = function(region){
@@ -156,20 +163,13 @@ Graphics.drawRegionBadges = function(region){
 };
 
 Graphics.drawFreeBadges = function(){
-	Graphics.raceBadge = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
-	Graphics.powerBadge = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
+	Graphics.freeTokens.ui.race = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
+	Graphics.freeTokens.ui.power = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
 };	
 
-Graphics.needDraw = function(){
-	return !(game().state === GAME_WAITING || 
-		game().state === GAME_PROCESSING);
-};
-
-
 Graphics.update = function(map){
-	if (!Graphics.paper) return;
-	var cur, i
 	if (Graphics.forbidUpdate()) return;
+	var cur, i
 	for (i = 0; i < map.regions.length; ++i){
 		cur = map.regions[i];
 		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
@@ -180,7 +180,6 @@ Graphics.update = function(map){
 
 		
 Graphics.drawMap = function(map) {
-	if (!Graphics.needDraw()) return;
 	Graphics.paper = Raphael("map", 630, 620);
 	var paper = Graphics.paper,
 		assignColors = function(){

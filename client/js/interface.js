@@ -220,7 +220,7 @@ Interface.redeployHandler = function()
 	var table = {
 			hero : Client.HERO_CODE,
 			fortress : Client.FORTRESS_CODE,
-			encampments : Client.ENCAMPMENTS_CODE,
+			encampment : Client.ENCAMPMENTS_CODE,
 		},
 		cmds = ['action', 'sid', 'regions'],
 		params = ['redeploy', user().sid, 
@@ -228,7 +228,7 @@ Interface.redeployHandler = function()
 				Client.REDEPLOYMENT_CODE)],
 		specPower = user().specPower(),
 		code = table[specPower.regPropName];
-	if (specPower.needRedeploy()) {
+	if (code) {
 		console.log(specPower);
 		cmds.push(specPower.redeployReqName);
 		params.push(convertRedeploymentRequest(
@@ -469,7 +469,7 @@ Interface.fillGameList = function(games)
 			(showingGames[lastSortIndex] === Client.gameList[i].gameId))
 			$('#gameList:nth-child(' + (i + 1) + ') ul').show();
 		
-		if (Client.currentUser.gameId == Client.gameList[i].gameId)	
+		if (Client.currentUser.gameId === Client.gameList[i].gameId)	
 			Client.currentUser.gameIndex = i;
 		$('#join' + Client.gameList[i].gameId)
 			.button()
