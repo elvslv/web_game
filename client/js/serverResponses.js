@@ -305,6 +305,7 @@ function conquerResponse(data)
 		case 'ok':
 			alert('Your attack was successfull' + 
 				(data['dice'] != undefined ? ', \n dice: ' + data['dice'] : ''));
+			Interface.prepareForConquest();
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
@@ -410,13 +411,14 @@ function redeployResponse(data)
 			break;
 		case 'ok':
 			game().redeployStarted = false;
+			user().freePowerTokens = 0;
 			if (Graphics.freeTokens.ui.power){
 				Graphics.freeTokens.ui.power.remove();
-				console.log('done');
+				delete Graphics.freeTokens.ui.power;
 			}
 			if (Graphics.freeTokens.ui.race){
 				Graphics.freeTokens.ui.race.remove();
-				console.log('done');
+				delete Graphics.freeTokens.ui.race;
 			}
 			break; //state will be changed on the next getGameState()
 		default:

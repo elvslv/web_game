@@ -102,6 +102,13 @@ def getDefendingInfo(game):
 	result['regionId'] = lastAttack.conqRegion.id
 	return result
 
+def hasDragonAttacked(game):
+	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc.GAME_CONQUER and 
+		x.warHistory.attackType == misc.ATTACK_DRAGON, game.history)
+	return True if len(histEntry) > 0 else False 
+	
+	
+
 def getFriendsInfo(game):
 	turn = game.turn
 	histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND,
@@ -122,6 +129,7 @@ def getGameState(game):
 	result = dict()
 	if game.history:
 		result['lastEvent'] = game.getLastState()
+	result['dragonAttacked'] = hasDragonAttacked(game)
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 

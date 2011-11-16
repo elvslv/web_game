@@ -108,6 +108,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForRedeploy();
 	Interface.prepareForDefend();
 	Interface.prepareForDragonAttack();
+	Interface.prepareForConquest();
 };
 
 
@@ -171,7 +172,19 @@ Interface.updateGameTab = function()
 		currentUser: function()
 		{
 			return Client.currentUser.id;
+		},
+
+		showTokensInHand : function()
+		{
+			return !(game().redeployStarted  || game().defendStarted);
+		},
+
+		freeTokens : function()
+		{
+			return user().freeTokens;
 		}
+
+		
 	}).appendTo('#usersInCurGame');	
 	Graphics.update(game().map);
 	$('#visibleTokenBadges').empty();
@@ -255,6 +268,21 @@ Interface.prepareForDragonAttack = function()
 {
 	if (canBeginDragonAttack())
 		user().freePowerTokens = user().specPower().bonusNum;
+}
+
+Interface.prepareForConquest = function()
+{
+	var reg, i;
+	if (canBeginConquer()){
+		if (!game().conquestStarted){
+			for (i = 0; i < game().map.regions.length; i++){
+				reg = game().map.regions[i];
+				reg.conquerable = canConquer(reg);
+			}
+			game().conquestStarted = true;
+		}
+	} else
+		game().conquestStarted = false;	
 }
 
 Interface.prepareForSelectFriend = function()

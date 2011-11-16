@@ -60,7 +60,7 @@ Region = $.inherit({
 		if (this.holeInTheGround)
 			result += '<p>Hole in the ground</p>';
 		if (this.encampment)
-			result += '<p>Encampment</p>';
+			result += '<p>Encampments: ' + this.encampment + '</p>';
 		if (this.dragon)
 			result += '<p>Dragon</p>';
 		if (this.fortress)
@@ -207,8 +207,7 @@ TokenBadge = $.inherit({
 		{
 			var regions = this.regions();
 			for (var i = 0; i < regions.length; ++i)
-				for (var j = 0; j < regions[i].adjacent.length; ++j)
-					if (regions[i].adjacent[j] == region.id)
+				if (regions[i].isAdjacent(region))
 						return true; 
 			return false;
 		},
@@ -420,11 +419,13 @@ createGameByState = function(gameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
 			(gameState.state == GAME_START) ? gameState.lastEvent : gameState.state,
-			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame)
+			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
+			gameState.dragonAttacked)
 	}
 	else
 	{
 		game().tokenBadges = tokenBadges.copy();
+		game().dragonAttacked = gameState.dragonAttacked;
 		game().tokenBadgesInGame = tokenBadgesInGame.copy();
 		game().players = players.copy();
 		game().activePlayerIndex = activePlayerIndex;
@@ -442,6 +443,7 @@ createGameByState = function(gameState)
 		if (user().id === result.players[defendingPlayerIndex].id)
 			result.defendStarted = true;
 	}
+			
 	return result;
 };
 
@@ -450,7 +452,7 @@ alreadyAttacked = function(attackType)
 	switch(attackType)
 	{
 		case ATTACK_DRAGON:
-			break;
+			return game().dragonAttacked;
 		case ATTACK_ENCHANT:
 			break;
 	}
@@ -528,10 +530,9 @@ canConquer = function(region)
 	return (region.ownerId !== user().id  || 
 		region.ownerId === user().id && region.inDecline) && 
 	!(user().friendId && region.id === user().friendId) &&
-	(getRaceByName(user().currentTokenBadge.raceName)
-		.canConquer(region, user().currentTokenBadge) ||
-	getSpecPowByName(user().currentTokenBadge.specPowName)
-		.canConquer(region,user().currentTokenBadge)) && !region.isImmune(false);
+	(user().race().canConquer(region, user().currentTokenBadge) ||
+	 user().specPower().canConquer(region,user().currentTokenBadge)) 
+	 	&& !region.isImmune(false);
 }
 
 canChooseFriend = function()

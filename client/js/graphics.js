@@ -153,8 +153,8 @@ Graphics.getRegColor = function(region){
 };
 
 Graphics.getRegBoundsColor = function(region){
-	 //canBeginConquer() && canConquer(region) ? "yellow" :  
-	return	canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
+	return	region.conquerable ? "yellow" : 
+		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
 };
 
 Graphics.drawRegionBadges = function(region){
