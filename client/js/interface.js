@@ -107,6 +107,7 @@ Interface.prepareForActions = function()
 	Interface.prepareForThrowDice();
 	Interface.prepareForRedeploy();
 	Interface.prepareForDefend();
+	Interface.prepareForDragonAttack();
 };
 
 
@@ -248,6 +249,12 @@ Interface.prepareForDefend = function()
 		$('#defend').show();
 	else
 		$('#defend').hide();
+}
+
+Interface.prepareForDragonAttack = function()
+{
+	if (canBeginDragonAttack())
+		user().freePowerTokens = user().specPower().bonusNum;
 }
 
 Interface.prepareForSelectFriend = function()

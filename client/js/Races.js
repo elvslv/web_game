@@ -574,13 +574,13 @@ SpecialPowerDiplomat = $.inherit(BaseSpecialPower, {
 SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('DragonMaster', 5, 1);
+		this.__base('DragonMaster', 5, 1, 'dragon');
 	},
 	canDrop: function(region)
 	{
 		var tokenBadge = user().currentTokenBadge;
 		return !region.isImmune() && canConquer(region, tokenBadge) &&
-			!(region.tokenBadgeId && region.tokenBadgeId == tokenBadge.id)
+			!(region.tokenBadgeId && region.tokenBadgeId === tokenBadge.id)
 	},
 	clearRegion: function(tokenBadge, region)
 	{
@@ -613,6 +613,7 @@ SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 	{
 		return false;
 	}
+
 });
 
 SpecialPowerFlying = $.inherit(BaseSpecialPower, {

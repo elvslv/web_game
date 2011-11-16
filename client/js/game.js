@@ -348,8 +348,8 @@ createGameByState = function(gameState)
 			var curReg = mapState.regions[i].currentRegionState;
 			regions.push(new Region(i + 1, mapState.regions[i].adjacentRegions, 
 				mapState.regions[i].constRegionState, 
-				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, curReg.encampment,
-				curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, 
+				curReg.ownerId, curReg.tokenBadgeId, curReg.tokensNum, curReg.holeInTheGround, 
+				curReg.encampment, curReg.dragon, curReg.fortress, curReg.hero, curReg.inDecline, 
 				mapState.regions[i].raceCoords, mapState.regions[i].powerCoords, 
 				mapState.regions[i].coordinates));
 
@@ -582,16 +582,11 @@ canBeginDragonAttack = function()
 	if (result)
 	{
 		specialPower = getSpecPowByName(user().currentTokenBadge.specPowName);
-		result = specialPower.canBeginDragonAttack();
+		result = specialPower.name === 'DragonMaster';
 	}
 	return result;
 }
 
-canDragonAttack = function(region)
-{
-	return getSpecPowByName(user().currentTokenBadge.specPowName).dragonAttack(region);
-	
-}
 
 canBeginRedeploy = function()
 {

@@ -16,7 +16,8 @@ Graphics = {};
 Graphics.colors = [];
 
 Graphics.forbidUpdate = function(){
-	return game().redeployStarted || game().defendStarted || Graphics.dragging;
+	return !game() || game().redeployStarted || 
+		game().defendStarted || Graphics.dragging;
 };
 
 Graphics.freeTokens = {
@@ -30,11 +31,14 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 	var pic = badgeType.getPic(reg !== null && reg.inDecline),
 		place = reg || Graphics.freeTokens,
 		coords = badgeType.race ? place.raceCoords : place.powerCoords,
-//		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
+		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
 		badge; 
 
 //	console.log(previousBadge);
-//	if (previousBadge) previousBadge.remove();
+	if (previousBadge) {
+		previousBadge.remove();
+		delete previousBadge;
+	}
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
 	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
@@ -46,8 +50,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 			return (!reg || (reg.ownerId === user().id && !reg.inDecline)) && 
 				((game().defendStarted && !badgeType.power && !reg) ||
 				(game().redeployStarted && badgeType.canStartRedeploy(reg)) ||
-				(badgeType.name === 'DragonMaster' &&		//should change it someday
-					canBeginDragonAttack() && canDragonAttack()));
+				(badgeType.name === 'DragonMaster'));
 		};	
 	}(badgeType));
 	
@@ -150,9 +153,8 @@ Graphics.getRegColor = function(region){
 };
 
 Graphics.getRegBoundsColor = function(region){
-	return "black";
-	//canBeginConquer() && canConquer(region) ? "yellow" :  
-		//canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
+	 //canBeginConquer() && canConquer(region) ? "yellow" :  
+	return	canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
 };
 
 Graphics.drawRegionBadges = function(region){
@@ -175,6 +177,7 @@ Graphics.update = function(map){
 	for (i = 0; i < map.regions.length; ++i){
 		cur = map.regions[i];
 		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
+		cur.ui.attr({"stroke" : Graphics.getRegBoundsColor(cur)});
 		Graphics.drawRegionBadges(cur);
 	}
 	Graphics.drawFreeBadges();

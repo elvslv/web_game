@@ -367,6 +367,7 @@ function dragonAttackResponse(data)
 	switch(data['result'])
 	{
 		case 'ok':
+			user().freePowerTokens = 0;
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
@@ -409,10 +410,14 @@ function redeployResponse(data)
 			break;
 		case 'ok':
 			game().redeployStarted = false;
-			if (Graphics.freeTokens.ui.power)
+			if (Graphics.freeTokens.ui.power){
 				Graphics.freeTokens.ui.power.remove();
-			if (Graphics.freeTokens.ui.race)
+				console.log('done');
+			}
+			if (Graphics.freeTokens.ui.race){
 				Graphics.freeTokens.ui.race.remove();
+				console.log('done');
+			}
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
