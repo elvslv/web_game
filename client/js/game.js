@@ -47,6 +47,11 @@ Region = $.inherit({
 		this.raceCoords = parseArray(raceCoords);
 		this.powerCoords = parseArray(powerCoords);
 		this.coords = toPolygon(parseArray(coords), hratio, vratio);
+		for (var i = 0; i < props.length; ++i)
+			if (includes(props[i], ['mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland']))
+				this.landscape = props[i];
+			else if (includes(props[i], ['mine', 'cavern', 'magic']))
+				this.bonus = props[i];
 		
 	},
 	htmlRegionInfo: function()

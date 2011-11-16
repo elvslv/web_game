@@ -1,14 +1,14 @@
 var paths = {
-	"forest" : "css/images/forest.jpg",
-	"swamp" : "css/images/swamp.jpg",
-	"sea" : "css/images/sea.jpg",
-	"hill" : "css/images/hill.jpg",
-	"mountain" : "css/images/mountain.jpg",
-	"farmland" : "css/images/farmland.jpg",
-	"magic" : "css/images/magic.jpg",
-	"cavern" : "css/images/cavern.jpg",
-	"mine" : "css/images/mine.jpg",
-	"natives" : "css/images/races/elves small.jpg"
+	"forest" : "url('css/images/forest.jpg')",
+	"swamp" : "url('css/images/swamp.jpg')",
+	"sea" : "url('css/images/sea.jpg')",
+	"hill" : "url('css/images/hill.jpg')",
+	"mountain" : "url('css/images/mountain.jpg')",
+	"farmland" : "url('css/images/farmland.jpg')",
+	"magic" : "url('css/images/magic.jpg')",
+	"cavern" : "url('css/images/cavern.jpg')",
+	"mine" : "url('css/images/mine.jpg')",
+	"natives" : "url('css/images/races/elves small.jpg')"
 };
 
 var defaultWidth = 634,
