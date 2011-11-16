@@ -30,7 +30,7 @@ possiblePrevCmd[GAME_CHOOSE_FRIEND] = [GAME_REDEPLOY];
 
 Region = $.inherit({
 	__constructor: function(id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
-		encampment, dragon, fortress, hero, inDecline, raceCoords, powerCoords, coords)
+		encampment, dragon, fortress, hero, inDecline, raceCoords, powerCoords, coords, hratio, vratio)
 	{
 		this.id = id;							
 		this.adjacent = adjacent.copy();
@@ -46,7 +46,12 @@ Region = $.inherit({
 		this.inDecline = inDecline;
 		this.raceCoords = parseArray(raceCoords);
 		this.powerCoords = parseArray(powerCoords);
-		this.coords = toPolygon(parseArray(coords));
+		this.coords = toPolygon(parseArray(coords), hratio, vratio);
+		for (var i = 0; i < props.length; ++i)
+			if (includes(props[i], ['mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland']))
+				this.landscape = props[i];
+			else if (includes(props[i], ['mine', 'cavern', 'magic']))
+				this.bonus = props[i];
 	},
 	htmlRegionInfo: function()
 	{
@@ -128,7 +133,7 @@ Map = $.inherit(
 
 Game = $.inherit({
 	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
-		tokenBadgesInGame. dragonAttacked)
+		tokenBadgesInGame, dragonAttacked)
 	{
 		this.id = id;
 		this.name = name;

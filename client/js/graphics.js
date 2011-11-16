@@ -238,7 +238,7 @@ RaphaelGraphics = $.inherit({
 	for (i = 0; i < map.regions.length; ++i){
 		cur = map.regions[i];
 			cur.ui.animate({fill : this.getRegColor(cur)}, 1000);
-			cur.ui.attr({"stroke" : this.getRegBoundsColor(cur)});
+			cur.ui.attr({"stroke" : RaphaelGraphics.getRegBoundsColor(cur)});
 			this.drawRegionBadges(cur);
 	}
 		this.drawFreeBadges();
@@ -262,8 +262,9 @@ RaphaelGraphics = $.inherit({
 		},
 {
 	getRegBoundsColor: function(region){
-	return	region.conquerable ? "yellow" : 
-		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";	},
+		return	region.conquerable ? "yellow" : 
+			canBeginDefend() && canDefend(region) ? "fuchsia" : "black";	
+	},
 });
 
 
