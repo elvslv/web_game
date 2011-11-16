@@ -20,7 +20,7 @@ RaphaelGraphics = $.inherit({
 	__constructor: function(map, div, width, height)
 	{
 		this.map = map;
-		this.div = div ? $(div) : "map";
+		this.div = div ? div : "map";
 		this.width = width ? width : defaultWidth1;
 		this.height = height ? height: defaultHeight1;
 		this.colors = [];
