@@ -128,7 +128,7 @@ Map = $.inherit(
 
 Game = $.inherit({
 	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
-		tokenBadgesInGame)
+		tokenBadgesInGame. dragonAttacked)
 	{
 		this.id = id;
 		this.name = name;
@@ -141,6 +141,7 @@ Game = $.inherit({
 		this.players = players.copy();
 		this.tokenBadgesInGame = tokenBadgesInGame.copy();
 		this.redeployStarted = false;
+		this.dragonAttacked = dragonAttacked;
 	},
 	setState: function(state)
 	{
