@@ -115,10 +115,11 @@
 		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
 		<p style="margin: 10px;">Coins: ${coins}</p>
 		<p id = "freeTokens" style="margin: 10px;">Tokens in hand: 
-		{{if $item.data.id == $item.defendingPlayer()}}
-			{{html  $item.freeTokensForDefend()}}
-		{{else}}
+		{{if $item.showTokensInHand()}}
 			${tokensInHand}
+		{{else}}
+			{{html  $item.freeTokens()}}
+			
 		{{/if}}</p>
 		<table>
 			{{if $item.data.currentTokenBadge}}

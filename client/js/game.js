@@ -30,7 +30,7 @@ possiblePrevCmd[GAME_CHOOSE_FRIEND] = [GAME_REDEPLOY];
 
 Region = $.inherit({
 	__constructor: function(id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
-		encampment, dragon, fortress, hero, inDecline, raceCoords, powerCoords, coords, hratio, vratio)
+		encampment, dragon, fortress, hero, inDecline, raceCoords, powerCoords, coords)
 	{
 		this.id = id;							
 		this.adjacent = adjacent.copy();
@@ -46,13 +46,7 @@ Region = $.inherit({
 		this.inDecline = inDecline;
 		this.raceCoords = parseArray(raceCoords);
 		this.powerCoords = parseArray(powerCoords);
-		this.coords = toPolygon(parseArray(coords), hratio, vratio);
-		for (var i = 0; i < props.length; ++i)
-			if (includes(props[i], ['mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland']))
-				this.landscape = props[i];
-			else if (includes(props[i], ['mine', 'cavern', 'magic']))
-				this.bonus = props[i];
-		
+		this.coords = toPolygon(parseArray(coords));
 	},
 	htmlRegionInfo: function()
 	{
@@ -66,7 +60,7 @@ Region = $.inherit({
 		if (this.holeInTheGround)
 			result += '<p>Hole in the ground</p>';
 		if (this.encampment)
-			result += '<p>Encampment</p>';
+			result += '<p>Encampments: ' + this.encampment + '</p>';
 		if (this.dragon)
 			result += '<p>Dragon</p>';
 		if (this.fortress)
@@ -134,7 +128,7 @@ Map = $.inherit(
 
 Game = $.inherit({
 	__constructor: function(id, name, descr, map, state, turn, activePlayerIndex, tokenBadges, players, 
-		tokenBadgesInGame)
+		tokenBadgesInGame. dragonAttacked)
 	{
 		this.id = id;
 		this.name = name;
@@ -147,6 +141,7 @@ Game = $.inherit({
 		this.players = players.copy();
 		this.tokenBadgesInGame = tokenBadgesInGame.copy();
 		this.redeployStarted = false;
+		this.dragonAttacked = dragonAttacked;
 	},
 	setState: function(state)
 	{
@@ -213,8 +208,7 @@ TokenBadge = $.inherit({
 		{
 			var regions = this.regions();
 			for (var i = 0; i < regions.length; ++i)
-				for (var j = 0; j < regions[i].adjacent.length; ++j)
-					if (regions[i].adjacent[j] == region.id)
+				if (regions[i].isAdjacent(region))
 						return true; 
 			return false;
 		},
@@ -372,7 +366,7 @@ createGameByState = function(gameState)
 		for (var i = 0; i < mapState.regions.length; ++i)
 			if (gameState.defendingInfo && i + 1 == gameState.defendingInfo.regionId)
 				conqueredRegion = regions[i];
-	}
+		}
 	else
 	{
 		var regionFields = ['ownerId','tokenBadgeId', 'tokensNum', 'holeInTheGround', 'encampment',
@@ -434,11 +428,13 @@ createGameByState = function(gameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
 			(gameState.state == GAME_START) ? gameState.lastEvent : gameState.state,
-			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame)
+			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
+			gameState.dragonAttacked)
 	}
 	else
 	{
 		game().tokenBadges = tokenBadges.copy();
+		game().dragonAttacked = gameState.dragonAttacked;
 		game().tokenBadgesInGame = tokenBadgesInGame.copy();
 		game().players = players.copy();
 		game().activePlayerIndex = activePlayerIndex;
@@ -453,7 +449,7 @@ createGameByState = function(gameState)
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
 		if (Graphics)
-			Graphics.update(result.map);
+		Graphics.update(result.map);
 		if (user().id === result.players[defendingPlayerIndex].id)
 			result.defendStarted = true;
 	}
@@ -465,7 +461,7 @@ alreadyAttacked = function(attackType)
 	switch(attackType)
 	{
 		case ATTACK_DRAGON:
-			break;
+			return game().dragonAttacked;
 		case ATTACK_ENCHANT:
 			break;
 	}
@@ -543,10 +539,9 @@ canConquer = function(region)
 	return (region.ownerId !== user().id  || 
 		region.ownerId === user().id && region.inDecline) && 
 	!(user().friendId && region.id === user().friendId) &&
-	(getRaceByName(user().currentTokenBadge.raceName)
-		.canConquer(region, user().currentTokenBadge) ||
-	getSpecPowByName(user().currentTokenBadge.specPowName)
-		.canConquer(region,user().currentTokenBadge)) && !region.isImmune(false);
+	(user().race().canConquer(region, user().currentTokenBadge) ||
+	 user().specPower().canConquer(region,user().currentTokenBadge)) 
+	 	&& !region.isImmune(false);
 }
 
 canChooseFriend = function()
@@ -602,11 +597,6 @@ canBeginDragonAttack = function()
 	return result;
 }
 
-canDragonAttack = function(region)
-{
-	return getSpecPowByName(user().currentTokenBadge.specPowName).dragonAttack(region);
-	
-}
 
 canBeginRedeploy = function()
 {

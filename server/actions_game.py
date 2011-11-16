@@ -133,7 +133,7 @@ def act_redeploy(data):
 	if not tokenBadge: raise BadFieldException('badStage')
 	user.game.checkStage(GAME_REDEPLOY, user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	tokenBadge.totalTokensNum +=callRaceMethod(raceId, 'turnEndReinforcements', user)
+	tokenBadge.totalTokensNum += callRaceMethod(raceId, 'turnEndReinforcements', user)
 	unitsNum = tokenBadge.totalTokensNum
 	if not unitsNum: raise BadFieldException('noTokensForRedeployment')
 	if not tokenBadge.regions:

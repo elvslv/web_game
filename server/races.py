@@ -318,7 +318,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
 				raise BadFieldException('notEnoughEncampentsForRedeployment')
-				region.encampent = encampmentsNum
+			region.encampment = encampmentsNum
 			freeEncampments -= encampmentsNum
 
 class SpecialPowerCommando(BaseSpecialPower):
@@ -357,7 +357,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def dragonAttack(self, tokenBadge, regState):
 		regState.checkIfImmune()
 		if not(racesList[tokenBadge.raceId].canConquer(regState.region, tokenBadge) 
-			and self.canConquer(regState.region, tokenBadge)):
+			or self.canConquer(regState.region, tokenBadge)):
 			raise BadFieldException('badRegion')
 			
 		attackedTokenBadge = regState.tokenBadge
@@ -375,9 +375,10 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		for region in tokenBadge.regions: 
 			region.dragon = False
 		regState.tokenBadge = tokenBadge
-		regState.dragon= True
+		regState.dragon = True
 		regState.tokensNum = 1
 		regState.owner = tokenBadge.owner
+		regState.inDecline = False
 		tokenBadge.owner.tokensInHand -= 1
 		dbi.updateWarHistory(tokenBadge.owner, attackedTokenBadge.id if 
 			attackedTokenBadge else None, tokenBadge.id, None, regState.regionId,

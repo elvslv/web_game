@@ -306,6 +306,7 @@ function conquerResponse(data)
 		case 'ok':
 			alert('Your attack was successfull' + 
 				(data['dice'] != undefined ? ', \n dice: ' + data['dice'] : ''));
+			Interface.prepareForConquest();
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
@@ -368,6 +369,7 @@ function dragonAttackResponse(data)
 	switch(data['result'])
 	{
 		case 'ok':
+			user().freePowerTokens = 0;
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
@@ -410,10 +412,15 @@ function redeployResponse(data)
 			break;
 		case 'ok':
 			game().redeployStarted = false;
-			if (Graphics.freeTokens.ui.power)
+			user().freePowerTokens = 0;
+			if (Graphics.freeTokens.ui.power){
 				Graphics.freeTokens.ui.power.remove();
-			if (Graphics.freeTokens.ui.race)
+				delete Graphics.freeTokens.ui.power;
+			}
+			if (Graphics.freeTokens.ui.race){
 				Graphics.freeTokens.ui.race.remove();
+				delete Graphics.freeTokens.ui.race;
+			}
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
