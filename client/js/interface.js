@@ -47,7 +47,7 @@ Interface.dialogs = [
 		'title': 'Maps',
 		'ok': function(){
 			for (var i = 0; i < Client.mapList.length; ++i)
-				Client.mapList[i].graphics.clear();
+				Client.mapList[i].graphicsThmb.clear();
 			$('#browseMapsForm').dialog('close');
 		}
 	}, 
