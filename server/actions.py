@@ -186,7 +186,7 @@ def act_getMapList(data):
 	result['maps'] = list()
 	maps = dbi.query(Map).all()
 	for map_ in maps:
-		result['maps'].append(getShortMapState(map_))
+		result['maps'].append(getMapState(map_.id))
 	return result
 
 def act_getGameList(data):

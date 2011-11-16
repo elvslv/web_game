@@ -4,6 +4,7 @@ BODY{
 }
 .user{
 	margin-left: 10px;
+	width: 250px;
 }
 
 .gallery-img {
@@ -136,12 +137,8 @@ BODY{
 .TrollsTokenDecline { background: url("images/races/Trolls_small_decline.jpg") no-repeat; }
 .WizardsTokenDecline { background: url("images/races/Wizards_small_decline.jpg") no-repeat; }
 
-<<<<<<< HEAD
-.Declined { background: url("images/races/decline_small.jpg") no-repeat; }
-=======
 .Declined { background: url("images/races/decline.jpg") no-repeat; }
 .Fortress { background: url("images/specialPowers/fortress.jpg") no-repeat; }
 .Encampment { background: url("images/specialPowers/encampment.jpg") no-repeat; }
 .Dragon { background: url("images/specialPowers/dragon.jpg") no-repeat; }
 .Hero { background: url("images/specialPowers/hero.jpg") no-repeat; }
->>>>>>> origin/master

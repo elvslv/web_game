@@ -240,7 +240,8 @@ function getGameStateResponse(data)
 	{
 		case 'ok':
 			Client.currGameState = createGameByState(data['gameState']);
-			if (game().state !== GAME_WAITING) Graphics.assignColors();
+			if (Graphics && game().state !== GAME_WAITING) 
+				Graphics.assignColors();
 			Interface.updateGameTab();
 			break;
 		default:

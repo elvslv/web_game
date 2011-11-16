@@ -58,7 +58,7 @@
 		<ul>
 			<p>Number of turns: ${turnsNum}</p>
 			<p>Maximum players number: ${playersNum}</p>
-			<p><a href = {{html $item.data.picture}} id = {{html 'mapPict'.concat($item.data.mapId)}}><img src = {{html $item.data.thumbnail}}></a></p>
+			<div id = {{html 'mapPict'.concat($item.data.mapId)}} style = "width: 100px; height: 100px;"></div>
 			<button id = {{html 'chooseMap'.concat($item.data.mapId)}}>
 				Choose map
 			</button>

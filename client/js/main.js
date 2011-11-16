@@ -74,8 +74,11 @@ $(function() {
 					.click(function() {
 						$('#map' + $(this).prop('mapId')).prop('selected', true);
 						$('#browseMapsForm').dialog('close');
-					})
-				$('#mapPict' + Client.mapList[i].mapId).fancybox();
+					});
+				Client.mapList[i].graphics = new RaphaelGraphics(createMap(Client.mapList[i], 
+					100 / defaultWidth, 100 / defaultHeight), '#mapPict' + Client.mapList[i].mapId,
+					100, 100)
+				Client.mapList[i].graphics.drawMapThmb();
 			}
 			$('#browseMapsForm').dialog('open');
 		});

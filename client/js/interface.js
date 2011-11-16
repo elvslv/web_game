@@ -45,7 +45,11 @@ Interface.dialogs = [
 	{
 		'name': 'browseMapsForm',
 		'title': 'Maps',
-		'ok': function(){}
+		'ok': function(){
+			for (var i = 0; i < Client.mapList.length; ++i)
+				Client.mapList[i].graphics.clear();
+			$('#browseMapsForm').dialog('close');
+		}
 	}, 
 	{
 		'name': 'uploadMap',
@@ -145,7 +149,8 @@ Interface.updateGameTab = function()
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
 		$('#saveGame').button().click(saveGameClick);
-		Graphics.drawMap(game().map);
+		Graphics = new RaphaelGraphics(game().map);
+		Graphics.drawMap();
 	}
 	
 	$('#usersInCurGame').empty();

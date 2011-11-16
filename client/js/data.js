@@ -28,6 +28,8 @@ Client.uploaderParams = [
 	{name: 'uploadThumbnail', maxSize: 500 * 1024}, 
 	{name: 'uploadPicture', maxSize: 5 * 1024 * 1024}]
 
+var Graphics = undefined;
+
 user = function()
 {
 	return Client.currentUser;

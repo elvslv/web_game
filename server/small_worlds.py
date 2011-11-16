@@ -42,7 +42,7 @@ def serve_ajax():
 
 def main():
 	run(reloader=True, host='localhost', port=PORT)
-	actions.doAction({"action" : "resetServer"})
+	#actions.doAction({"action" : "resetServer"})
 	return 0
 
 if __name__ == '__main__':

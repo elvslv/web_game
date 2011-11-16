@@ -18,12 +18,16 @@ parseArray = function(array){
 
 //converts [[1, 2], ...,[...]] to [{x : 1, y : 2}, ..., {...}]  
 
-toPolygon = function(array){
+toPolygon = function(array, hratio, vratio){
+	if (!hratio)
+		hratio = 1;
+	if (!vratio)
+		vratio = 1;
 	var i, poly = [];
 	for (i = 0; i < array.length; i++) {
 		poly.push(function(){
 				return {
-					x: array[i][0], y : array[i][1]
+					x: array[i][0] * hratio, y : array[i][1] * vratio
 					}
 				}());			
 	}
