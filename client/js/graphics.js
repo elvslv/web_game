@@ -266,6 +266,7 @@ Graphics.makePreview = function(map, div, width, height){
 		}, i;
 	for (i = 0; i < map.regions.length; ++i)
 		drawRegionThmb(map.regions[i]);
+	return paper;
 };
 	
 	
