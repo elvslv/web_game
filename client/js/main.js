@@ -75,18 +75,17 @@ $(function() {
 						$('#map' + $(this).prop('mapId')).prop('selected', true);
 						$('#browseMapsForm').dialog('close');
 					});
-				Client.mapList[i].graphicsThmb = new RaphaelGraphics(createMap(Client.mapList[i], 
-					100 / defaultWidth, 100 / defaultHeight), 'mapPict' + Client.mapList[i].mapId,
+				Client.mapList[i].graphicsThmb = Graphics.makePreview(createMap(Client.mapList[i],
+					100 / Graphics.gameField.mapWidth, 100 /  Graphics.gameField.mapHeight),  
+						'mapPict' + Client.mapList[i].mapId,
 					100, 100);
-				Client.mapList[i].graphicsThmb.drawMapThmb();
 				$('#mapPict' +  Client.mapList[i].mapId)
 					.click(function(j){
 						return function()
 						{
 							$('#mapPreview').empty();
-							Client.mapList[j].graphics = new RaphaelGraphics(createMap(Client.mapList[j]), 
-								'mapPreview');
-							Client.mapList[j].graphics.drawMapThmb();
+							Client.mapList[j].graphics = Graphics.makePreview(createMap(Client.mapList[j]), 
+								'mapPreview', Graphics.gameField.mapWidth, Graphics.gameField.mapHeight);
 							$('#mapPreview').modal({zIndex: 3000});
 							$('#mapPreview')
 								.click(function(){$.modal.close()})
