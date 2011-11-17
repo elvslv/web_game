@@ -1,6 +1,5 @@
 Graphics = {};
 
-Graphics.cnt = 0;
 
 Graphics.landscapePictures = {
 	"forest" : "url('css/images/forest.jpg')",
@@ -206,6 +205,7 @@ Graphics.assignColors = function(){
 
 Graphics.drawMap = function(map) {
 	Graphics.paper = Raphael("map", Graphics.gameField.height, Graphics.gameField.height);
+	Graphics.cnt = 0;
 	var paper = Graphics.paper,
 		selectRegion = function(reg, sel){
 			return function(){
@@ -272,6 +272,7 @@ Graphics.makePreview = function(map, div, width, height){
 		}, i;
 	for (i = 0; i < map.regions.length; ++i)
 		drawRegionThmb(map.regions[i]);
+	return paper;
 };
 	
 	

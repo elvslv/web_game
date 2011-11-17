@@ -174,7 +174,7 @@ def act_redeploy(data):
 		clearFromRace(region)	
 		region.owner = None
 		region.tokenBadge = None
-
+	user.tokensInHand = 0
 	dbi.updateHistory(user, GAME_REDEPLOY, user.currentTokenBadge.id)
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
