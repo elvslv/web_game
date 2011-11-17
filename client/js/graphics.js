@@ -164,13 +164,18 @@ Graphics.getRegBoundsColor = function(region){
 		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
 };
 
-Graphics.drawRegionBadges = function(region){
-	var tBadge = region.getTokenBadge();
-	Graphics.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
-			region.tokensNum);
-	if (tBadge && tBadge.getPower().needRendering())
-		Graphics.drawTokenBadge(region, tBadge.getPower(), 
-			0 + region[tBadge.getPower().regPropName]);
+Graphics.drawRegionBadges = function(region, prevRegion){
+	var tBadge = region.getTokenBadge(),
+		prevTBadge = prevRegion ? prevRegion.getTokenBadge(): undefined,
+		race = tBadge ? tBadge.getRace() : getBaseRace(),
+		prevRace = prevTBadge ? prevTBadge.getRace() : getBaseRace(),
+		power = tBadge ? tBadge.getPower() : undefined,
+		prevPower = prevTBadge ? prevTBadge.getPower() : undefined;
+	if (!(Graphics.cnt >= 2 && prevRegion && race.name === prevRace.name && region.tokensNum == prevRegion.tokensNum))
+		Graphics.drawTokenBadge(region, race, region.tokensNum);
+	if (power && !(Graphics.cnt >= 2 && prevRegion && prevPower && power.name == prevPower.name && region[power.regPropName] == 
+			prevRegion[prevPower.regPropName]))
+		Graphics.drawTokenBadge(region, power, 0 + region[power.regPropName]);
 };
 
 Graphics.drawFreeBadges = function(){
@@ -182,12 +187,15 @@ Graphics.update = function(map){
 	if (Graphics.forbidUpdate()) return;
 	var cur, i
 	for (i = 0; i < map.regions.length; ++i){
-		cur = map.regions[i];
+		var cur = map.regions[i],
+			prev = Graphics.map ? Graphics.map.regions[i]: undefined;
 		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
 		cur.ui.attr({"stroke" : Graphics.getRegBoundsColor(cur)});
-		Graphics.drawRegionBadges(cur);
+		Graphics.drawRegionBadges(cur, prev);
 	}
 	Graphics.drawFreeBadges();
+	Graphics.map = map;
+	Graphics.cnt++;
 };
 
 Graphics.assignColors = function(){
@@ -200,6 +208,7 @@ Graphics.assignColors = function(){
 
 Graphics.drawMap = function(map) {
 	Graphics.paper = Raphael("map", Graphics.gameField.height, Graphics.gameField.height);
+	Graphics.cnt = 0;
 	var paper = Graphics.paper,
 		selectRegion = function(reg, sel){
 			return function(){

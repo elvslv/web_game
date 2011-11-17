@@ -93,7 +93,7 @@ HtmlBlocks.gameTab = function()
 				'<td width = "100%">' +
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
-				'<td rowspan = "8" valign = "top">' +
+				'<td rowspan = "9" valign = "top">' +
 					'<div id="map">' +
 					'<div>' +
 				'</td>' +
