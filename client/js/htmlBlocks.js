@@ -9,11 +9,6 @@ HtmlBlocks.mainTab = function()
 						"<table id = \"tableGames\" width = \"400px\">"+
 							"<tr>"+
 								"<td>"+
-									"<button id = \"getGameList\" style = \"display: none\">Refresh game list</button>"+
-								"</td>"+
-							"</tr>"+
-							"<tr>"+
-								"<td>"+
 									"<p id = \"gameListInfo\"></p>"+
 								"</td>"+
 							"</tr>"+
@@ -93,7 +88,7 @@ HtmlBlocks.gameTab = function()
 				'<td width = "100%">' +
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
-				'<td rowspan = "9" valign = "top">' +
+				'<td rowspan = "8" valign = "top">' +
 					'<div id="map">' +
 					'<div>' +
 				'</td>' +

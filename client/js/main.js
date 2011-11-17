@@ -44,16 +44,6 @@ $(function() {
 		.click(function() {
 			sendQuery(makeQuery(['action', 'sid'], ['logout', Client.currentUser.sid]), logoutResponse);
 		});
-	$('#getGameList')
-		.button()
-		.click(function() {
-			sendQuery(makeQuery(['action'], ['getGameList']), getGameListResponse, true);
-		});
-	$('#getGameList').button(
-	{
-		icons: {primary:'ui-icon-refresh'},
-		text: true
-	});
 	$('#createGame')
 		.button()
 		.click(function() {
@@ -109,6 +99,5 @@ $(function() {
 	$('#register').show();
 	$('#login').show();
 	$('#refreshChat').show();
-	$('#getGameList').show();
 	$('#tabs').show();
 });
