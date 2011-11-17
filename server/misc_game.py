@@ -239,7 +239,7 @@ def leave(user):
 				user.game.state = misc.GAME_ENDED
 			user.game = None
 		else:
-			if user.currentTokenBadge or user.declinedTokenBadge:
+			if user.currentTokenBadge:
 				makeDecline(user, True)
 			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
 					endOfGame(user.game)
