@@ -185,12 +185,8 @@ def endOfGame(game, coins = None):
 		gameState = getGameState(game)
 		game.resetPlayersState()
 		dbi.delete(game)
-	#	tables = ['CurrentRegionStates', 'TokenBadges']
-	#	for table in tables:
-	#		queryStr = 'DELETE FROM %s WHERE GameId=%%s' % table
-	#		dbi.engine.execute(queryStr, gameId)
+		dbi.commit()
 		return {'result': 'ok', 'gameState': gameState}
-
 
 def getShortMapState(map_):
 	result = dict()
