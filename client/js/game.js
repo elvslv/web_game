@@ -370,7 +370,7 @@ createGameByState = function(gameState)
 		map = createMap(mapState);
 		for (var i = 0; i < mapState.regions.length; ++i)
 			if (gameState.defendingInfo && i + 1 == gameState.defendingInfo.regionId)
-				conqueredRegion = regions[i];
+				conqueredRegion = map.regions[i];
 		}
 	else
 	{

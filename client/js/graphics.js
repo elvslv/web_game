@@ -1,5 +1,6 @@
 Graphics = {};
 
+Graphics.cnt = 0;
 
 Graphics.landscapePictures = {
 	"forest" : "url('css/images/forest.jpg')",
@@ -42,7 +43,10 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		coords = badgeType.race ? place.raceCoords : place.powerCoords,
 		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
 		badge; 
-	if (previousBadge) {
+	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
+		return previousBadge;
+	if(previousBadge)
+	{
 		previousBadge.remove();
 		delete previousBadge;
 	}
@@ -52,6 +56,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"}).toFront();
 	badge.num.n = num;
+	badge.pic = pic;
 	badge.canDrag = (function(badgeType){
 		return function(){
 			return (!reg || (reg.ownerId === user().id && !reg.inDecline)) && 
@@ -160,8 +165,8 @@ Graphics.getRegColor = function(region){
 };
 
 Graphics.getRegBoundsColor = function(region){
-	return	region.conquerable ? "yellow" : 
-		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
+	return	"black";/*region.conquerable ? "yellow" : 
+		canBeginDefend() && canDefend(region) ? "fuchsia" : */
 };
 
 Graphics.drawRegionBadges = function(region){
@@ -188,6 +193,7 @@ Graphics.update = function(map){
 		Graphics.drawRegionBadges(cur);
 	}
 	Graphics.drawFreeBadges();
+	Graphics.cnt++;
 };
 
 Graphics.assignColors = function(){
