@@ -21,7 +21,7 @@ class BaseRace:
 	def attackBonus(self, region, tokenBadge):
 		return 0
 	
-	def decline(self, user): 
+	def decline(self, user, leaveGame): 
 		curTokenBadge = user.currentTokenBadge
 		user.declinedTokenBadge = curTokenBadge
 		for region in curTokenBadge.regions:
@@ -85,8 +85,8 @@ class RaceHalflings(BaseRace):
 	def getInitBonusNum(self):
 		return 2
 
-	def decline(self, user):
-		BaseRace.decline(user)
+	def decline(self, user, leaveGame):
+		BaseRace.decline(self, user, leaveGame)
 		for region in user.currentTokenBadge.regions: region.holeInTheGround = False
 		
 	def clearRegion(self, tokenBadge, region):
@@ -250,8 +250,8 @@ class BaseSpecialPower:
 	def incomeBonus(self, tokenBadge):
 		return 0
 
-	def decline(self, user):
-		if user.game.getLastState() != GAME_FINISH_TURN:
+	def decline(self, user, leaveGame):
+		if not leaveGame and user.game.getLastState() != GAME_FINISH_TURN:
 			raise BadFieldException('badStage')
 
 	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
@@ -300,8 +300,8 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Bivouacking', 5, 5)
 	
-	def decline(self, user):
-		BaseSpecialPower.decline(self, user)
+	def decline(self, user, leaveGame):
+		BaseSpecialPower.decline(self, user, leaveGame)
 		for region in user.regions:
 			region.encampment = False
 		
@@ -388,8 +388,8 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		tokenBadge.specPowNum -= 1
 		region.dragon = False
 		
-	def decline(self, user):
-		BaseSpecialPower.decline(self, user)
+	def decline(self, user, leaveGame):
+		BaseSpecialPower.decline(self, user, leaveGame)
 		for region in user.regions: region.dragon = False
 		
 class SpecialPowerFlying(BaseSpecialPower):
@@ -461,8 +461,8 @@ class SpecialPowerHeroic(BaseSpecialPower):
 
 			regState.hero = True
 
-	def decline(self, user):
-		BaseSpecialPower.decline(self, user)
+	def decline(self, user, leaveGame):
+		BaseSpecialPower.decline(self, user, leaveGame)
 		for region in user.regions:
 			region.hero = False
 
@@ -512,7 +512,7 @@ class SpecialPowerStout(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Stout', 4) 
 
-	def decline(self, user):
+	def decline(self, user, leaveGame):
 		pass
 
 class SpecialPowerSwamp(BaseSpecialPower):

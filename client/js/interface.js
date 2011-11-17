@@ -151,6 +151,14 @@ Interface.updateGameTab = function()
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
 		$('#saveGame').button().click(saveGameClick);
+		$('#leaveGame')
+			.button()
+			.click(function(){
+				sendQuery(makeQuery(['action', 'sid'], ['leaveGame', user().sid]), 
+					leaveGameResponse);
+		});
+		$('#leaveGame').show();
+		$('#saveGame').show();
 		Graphics = new RaphaelGraphics(game().map);
 		Graphics.drawMap();
 	}
@@ -197,14 +205,6 @@ Interface.updateGameTab = function()
 		$('#visibleTokenBadges').append('<p>Visible token badges: </p>');
 	$('#visibleTokenBadgesTemplate').tmpl(Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
 
-	$('#leaveGame')
-		.button()
-		.click(function(){
-			sendQuery(makeQuery(['action', 'sid'], ['leaveGame', user().sid]), 
-				leaveGameResponse);
-		});
-	$('#leaveGame').show();
-	$('#saveGame').show();
 	Interface.prepareForActions();
 }
 

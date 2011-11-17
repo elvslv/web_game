@@ -7,6 +7,7 @@ import MySQLdb
 import sys
 import random
 import json
+import misc_game
 
 from gameExceptions import BadFieldException
 from sqlalchemy import func 
@@ -127,7 +128,7 @@ def act_leaveGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
 	if not user.inGame: raise BadFieldException('notInGame')
-	leave(user)
+	misc_game.leave(user)
 	dbi.updateGameHistory(game, data)
 	return {'result': 'ok'}
 

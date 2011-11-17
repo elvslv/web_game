@@ -243,8 +243,8 @@ def leave(user):
 				user.game.state = misc.GAME_ENDED
 			user.game = None
 		else:
-			if user.currentTokenBadge:
-				makeDecline(user)
+			if user.currentTokenBadge or user.declinedTokenBadge:
+				makeDecline(user, True)
 			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
 					endOfGame(user.game)
 
@@ -264,13 +264,13 @@ def initRegions(map, game):
 		regState = RegionState(region, game)
 		dbi.add(regState)
 
-def makeDecline(user):
+def makeDecline(user, leaveGame = False):
 	raceId, specialPowerId = user.currentTokenBadge.raceId, user.currentTokenBadge.specPowId
 	if user.declinedTokenBadge:
 		user.killRaceInDecline()
 		dbi.delete(user.declinedTokenBadge)
-	callSpecialPowerMethod(specialPowerId, 'decline', user)	
-	callRaceMethod(raceId, 'decline', user)	
+	callSpecialPowerMethod(specialPowerId, 'decline', user, leaveGame)	
+	callRaceMethod(raceId, 'decline', user, leaveGame)	
 	user.currentTokenBadge = None
 
 def clearGameStateAtTheEndOfTurn(gameId):
