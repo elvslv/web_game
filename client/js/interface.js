@@ -359,20 +359,23 @@ Interface.fillGameList = function(games)
 	var lastSortIndex = 0;
 	for (var i = 0; i < Client.gameList.length; ++i)
 	{
-		for (var j = 0; j < Client.gameList[i].players.length; ++j)
-			if (Client.gameList[i].players[j].userId === 
-					Client.currentUser.id)
+		if (Client.currentUser)
+		{
+			for (var j = 0; j < Client.gameList[i].players.length; ++j)
+				if (Client.gameList[i].players[j].userId === 
+						Client.currentUser.id)
+				{
+					Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
+					Client.currentUser.gameId = Client.gameList[i].gameId;
+					break;
+				}
+			if (Client.currentUser.gameId)
 			{
-				Client.currentUser.isReady = Client.gameList[i].players[j].isReady;
-				Client.currentUser.gameId = Client.gameList[i].gameId;
+				$('#createGame').hide();
+				$('#gameList').hide();
+				Interface.createGameTab();
 				break;
 			}
-		if (Client.currentUser.gameId)
-		{
-			$('#createGame').hide();
-			$('#gameList').hide();
-			Interface.createGameTab();
-			break;
 		}
 		while ((lastSortIndex < showingGames.length) && 
 			(showingGames[lastSortIndex] < Client.gameList[i].gameId))
