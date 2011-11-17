@@ -151,8 +151,7 @@ Interface.updateGameTab = function()
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
 		$('#saveGame').button().click(saveGameClick);
-		Graphics = new RaphaelGraphics(game().map);
-		Graphics.drawMap();
+		Graphics.drawMap(game().map);
 	}
 	
 	$('#usersInCurGame').empty();

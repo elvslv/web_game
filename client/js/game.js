@@ -453,7 +453,6 @@ createGameByState = function(gameState)
 		result.players[defendingPlayerIndex].freeTokens = victimTokensNum;
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
-		if (Graphics)
 		Graphics.update(result.map);
 		if (user().id === result.players[defendingPlayerIndex].id)
 			result.defendStarted = true;
