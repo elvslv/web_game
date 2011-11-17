@@ -151,6 +151,7 @@ Interface.updateGameTab = function()
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
 		$('#saveGame').button().click(saveGameClick);
+		Graphics.drawMap(game().map);
 		$('#leaveGame')
 			.button()
 			.click(function(){

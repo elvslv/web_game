@@ -35,6 +35,10 @@ RaphaelGraphics = $.inherit({
 			return !game() || game().redeployStarted || 
 		game().defendStarted || Graphics.dragging;
 	},
+	getRegBoundsColor: function(region){
+		return	region.conquerable ? "yellow" : 
+			canBeginDefend() && canDefend(region) ? "fuchsia" : "black";	
+	},
 	drawRegionThmb: function(region){
 		var fillStyle = this.getRegPath(region),
 		r = this.paper.path(getSvgPath(region.coords))
@@ -54,9 +58,10 @@ RaphaelGraphics = $.inherit({
 			this.drawRegionThmb(this.map.regions[i]);
 	},
 	selectRegion: function(reg, sel){
+		var that = this;
 		return function(){
 			reg.animate({stroke: sel ? "red" : 
-				RaphaelGraphics.getRegBoundsColor(reg.model)}, 300);
+				that.getRegBoundsColor(reg.model)}, 300);
 			if (!this.dragging)
 				reg.toFront();
 			if (reg.race) {
@@ -71,7 +76,7 @@ RaphaelGraphics = $.inherit({
 	},
 	drawRegion: function(region){
 		var fillStyle = this.getRegColor(region),
-		strokeStyle = RaphaelGraphics.getRegBoundsColor(region),
+		strokeStyle = this.getRegBoundsColor(region),
 		r = this.paper.path(getSvgPath(region.coords))
 			.attr({fill: fillStyle, stroke : strokeStyle,
 			"stroke-width": 3, "stroke-linecap": "round"});
@@ -97,10 +102,193 @@ RaphaelGraphics = $.inherit({
 		};
 		return r;
 	},
+
+	offset: function(){
+		var br = $.browser, left, top;
+		if (br.opera || br.webkit) { 
+			left = this.paper.canvas.offsetLeft;
+			top = this.paper.canvas.offsetTop;
+		} else {
+			left = $(this.paper.canvas).offset().left;
+			top = $(this.paper.canvas).offset().top;
+		}
+		return {
+			left : left - $(document).scrollLeft(),		//check again 
+			top : top - $(document).scrollTop()
+		};						
+	},
 	drawTokenBadge: function(reg, badgeType, num){	
+		if (!num) return;
+		var pic = badgeType.getPic(reg !== null && reg.inDecline),
+			place = reg || this.freeTokens,
+			coords = badgeType.race ? place.raceCoords : place.powerCoords,
+			previousBadge = badgeType.race ? place.ui.race : place.ui.power,
+			badge; 
+		if (previousBadge) {
+			previousBadge.remove();
+			delete previousBadge;
+		}
+		badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
+				.attr({fill : "url(" + pic +")"}).toFront();
+		badge.num = this.paper.text(coords[0] + 36, coords[1] + 14, num)
+			.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
+			"text-anchor": "start"}).toFront();
+		badge.num.n = num;
+		badge.canDrag = (function(badgeType){
+			return function(){
+				return (!reg || (reg.ownerId === user().id && !reg.inDecline)) && 
+					((game().defendStarted && !badgeType.power && !reg) ||
+					(game().redeployStarted && badgeType.canStartRedeploy(reg)) ||
+					(badgeType.name === 'DragonMaster'));
+			};	
+		}(badgeType));
+	
+		badge.drag(
+			function(dx, dy){
+				if (!this.canDrag()) return;
+				this.attr({x: this.ox + dx, y: this.oy + dy}); 
+				this.num.attr({x: this.num.ox + dx, y: this.num.oy + dy}); 
+		
+			},
+			function(){
+				if (!this.canDrag()) return;
+				that.dragging = true;
+				if (this.num.n > 1) {
+					this.tempCopy = this.clone();
+					this.tempCopy.num = this.num.clone();
+					this.tempCopy.num.attr({"text" : this.num.n - 1});
+					this.num.attr({"text" : 1});
+				}	 
+				this.ox = this.attr("x");
+				this.oy = this.attr("y");
+				this.num.ox = this.num.attr("x");
+				this.num.oy = this.num.attr("y");
+				this.toFront();
+				this.num.toFront();
+			},
+			function(){
+				if (!this.canDrag()) return;
+				console.log(this);
+				var offset = that.offset(),
+					posX = this.getBBox().x + offset.left,
+					posY = this.getBBox().y + offset.top,
+					element = this.getElementByPoint(posX, posY),
+					newRegion, 
+					that = this,
+					last = function(){
+						return !that.tempCopy;
+					},	
+					restore = function(){
+						that.num.attr({"text" : that.num.n});
+						that.attr({x: that.ox, y: that.oy}); 
+						that.num.attr({x: that.num.ox, y: that.num.oy});
+					}, 
+					deleteBadge = function(reg){
+						if (reg){
+							if (badgeType.race) reg.ui.race = undefined;
+							else reg.ui.power = undefined;
+						}
+						that.num.remove();
+						that.remove();
+					},
+					onSuccess = function(oldRegion, newRegion){
+						badgeType.onDropSuccess(oldRegion, newRegion);
+						if (!last()) {
+							that.num.n--;
+							restore();
+						} else 
+							deleteBadge(oldRegion);
+					};
+				
+				if (element) newRegion = element.r ? element.r : element; 
+			
+				if (newRegion && newRegion.model &&	
+					newRegion.canDrop(badgeType) && 
+					(!reg || newRegion.model.id !== reg.id))
+
+					onSuccess(reg, newRegion.model);
+				else 
+					restore(); 
+
+				if (!last()) {
+					this.tempCopy.remove();
+					delete this.tempCopy;
+				}
+					this.dragging = false;
+			});
+		if (reg){
+			if (badgeType.race) reg.ui.race = badge;
+			else reg.ui.power = badge;
+			badge.r = reg.ui;
+		}
+		return badge;
+		},
+		getRegColor: function(region){
+			return region.ownerId ? this.colors[region.ownerId] : "silver";
+		},
+		drawRegionBadges: function(region){
+			var tBadge = game() ? region.getTokenBadge() : undefined;
+			this.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
+				region.tokensNum);
+		if (tBadge && tBadge.getPower().needRendering())
+			this.drawTokenBadge(region, tBadge.getPower(), 
+				0 + region[tBadge.getPower().regPropName]);
+		},
+		drawFreeBadges: function(){
+			this.freeTokens.ui.race = this.drawTokenBadge(null, user().race(), 
+				user().freeTokens);
+			this.freeTokens.ui.power = this.drawTokenBadge(null, user().specPower(), 
+				user().freePowerTokens);
+		},
+		update: function(map){
+			if (this.forbidUpdate()) return;
+			var cur, i
+			for (i = 0; i < map.regions.length; ++i){
+				cur = map.regions[i];
+				cur.ui.animate({fill : this.getRegColor(cur)}, 1000);
+				cur.ui.attr({"stroke" : this.getRegBoundsColor(cur)});
+				this.drawRegionBadges(cur);
+			}
+			this.drawFreeBadges();
+		},
+		assignColors: function(){
+			if (this.colors.length) return;
+		var i;
+		for (i = 0; i < game().players.length; i++) 
+			this.colors[game().players[i].id] = Raphael.getColor();
+		},
+		drawMap: function() {
+			for (var i = 0; i < this.map.regions.length; ++i)
+				this.drawRegion(this.map.regions[i]);
+			var frame = this.paper.rect(0, 515, 630, 105).
+					attr({fill: "LightYellow", stroke: "black"});
+			this.drawFreeBadges();
+		},	
+		clear: function()
+		{
+			this.paper.clear();
+		}
+});
+
+Graphics = {};
+
+Graphics.colors = [];
+
+Graphics.forbidUpdate = function(){
+	return !game() || game().redeployStarted || 
+		game().defendStarted || Graphics.dragging;
+};
+
+Graphics.freeTokens = {
+	raceCoords : [60, 550],
+	powerCoords : [270, 550],
+	ui : {}
+};
+
+Graphics.drawTokenBadge = function(reg, badgeType, num){	
 	if (!num) return;
 	var pic = badgeType.getPic(reg !== null && reg.inDecline),
-			place = reg || this.freeTokens,
+		place = reg || Graphics.freeTokens,
 		coords = badgeType.race ? place.raceCoords : place.powerCoords,
 		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
 		badge; 
@@ -112,7 +300,7 @@ RaphaelGraphics = $.inherit({
 	}
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
-		badge.num = this.paper.text(coords[0] + 36, coords[1] + 14, num)
+	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"}).toFront();
 	badge.num.n = num;
@@ -124,17 +312,17 @@ RaphaelGraphics = $.inherit({
 				(badgeType.name === 'DragonMaster'));
 		};	
 	}(badgeType));
-	
+
 	badge.drag(
 		function(dx, dy){
 			if (!this.canDrag()) return;
 			this.attr({x: this.ox + dx, y: this.oy + dy}); 
 			this.num.attr({x: this.num.ox + dx, y: this.num.oy + dy}); 
-		
+
 		},
 		function(){
 			if (!this.canDrag()) return;
-				this.dragging = true;
+			Graphics.dragging = true;
 			if (this.num.n > 1) {
 				this.tempCopy = this.clone();
 				this.tempCopy.num = this.num.clone();
@@ -150,10 +338,10 @@ RaphaelGraphics = $.inherit({
 		},
 		function(){
 			if (!this.canDrag()) return;
-				var offset = this.offset(),
+			var offset = Graphics.offset(),
 				posX = this.getBBox().x + offset.left,
 				posY = this.getBBox().y + offset.top,
-					element = this.getElementByPoint(posX, posY),
+				element = Graphics.paper.getElementByPoint(posX, posY),
 				newRegion, 
 				that = this,
 				last = function(){
@@ -180,9 +368,9 @@ RaphaelGraphics = $.inherit({
 					} else 
 						deleteBadge(oldRegion);
 				};
-				
+
 			if (element) newRegion = element.r ? element.r : element; 
-			
+
 			if (newRegion && newRegion.model &&	
 					newRegion.canDrop(badgeType) && 
 					(!reg || newRegion.model.id !== reg.id))
@@ -194,7 +382,7 @@ RaphaelGraphics = $.inherit({
 				this.tempCopy.remove();
 				delete this.tempCopy;
 			}
-				this.dragging = false;
+			Graphics.dragging = false;
 		});
 	if (reg){
 		if (badgeType.race) reg.ui.race = badge;
@@ -202,70 +390,118 @@ RaphaelGraphics = $.inherit({
 		badge.r = reg.ui;
 	}
 	return badge;
-	},
-	offset: function(){
+};
+
+Graphics.offset = function(){
 	var br = $.browser, left, top;
 	if (br.opera || br.webkit) { 
-			left = this.paper.canvas.offsetLeft;
-			top = this.paper.canvas.offsetTop;
+		left = Graphics.paper.canvas.offsetLeft;
+		top = Graphics.paper.canvas.offsetTop;
 	} else{
-			left = $(this.paper.canvas).offset().left;
-			top = $(this.paper.canvas).offset().top;
+		left = $(Graphics.paper.canvas).offset().left;
+		top = $(Graphics.paper.canvas).offset().top;
 	}
 	return {
 			left : left - $(document).scrollLeft(),		//check again 
 			top : top - $(document).scrollTop()
 	};						
-	},
-	getRegColor: function(region){
-		return region.ownerId ? this.colors[region.ownerId] : "silver";
-	},
-	drawRegionBadges: function(region){
-		var tBadge = game() ? region.getTokenBadge() : undefined;
-		this.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
+};							
+
+Graphics.getRegColor = function(region){
+	return region.ownerId ? Graphics.colors[region.ownerId] : "silver";
+};
+
+Graphics.getRegBoundsColor = function(region){
+	return	region.conquerable ? "yellow" : 
+		canBeginDefend() && canDefend(region) ? "fuchsia" : "black";
+};
+
+Graphics.drawRegionBadges = function(region){
+	var tBadge = region.getTokenBadge();
+	Graphics.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
 			region.tokensNum);
 	if (tBadge && tBadge.getPower().needRendering())
-			this.drawTokenBadge(region, tBadge.getPower(), 
+		Graphics.drawTokenBadge(region, tBadge.getPower(), 
 			0 + region[tBadge.getPower().regPropName]);
-	},
-	drawFreeBadges: function(){
-		this.freeTokens.ui.race = this.drawTokenBadge(null, user().race(), user().freeTokens);
-		this.freeTokens.ui.power = this.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
-	},
-	update: function(map){
-		if (this.forbidUpdate()) return;
+};
+
+Graphics.drawFreeBadges = function(){
+	Graphics.freeTokens.ui.race = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
+	Graphics.freeTokens.ui.power = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
+};	
+
+Graphics.update = function(map){
+	if (Graphics.forbidUpdate()) return;
 	var cur, i
 	for (i = 0; i < map.regions.length; ++i){
 		cur = map.regions[i];
-			cur.ui.animate({fill : this.getRegColor(cur)}, 1000);
-			cur.ui.attr({"stroke" : RaphaelGraphics.getRegBoundsColor(cur)});
-			this.drawRegionBadges(cur);
+		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
+		cur.ui.attr({"stroke" : Graphics.getRegBoundsColor(cur)});
+		Graphics.drawRegionBadges(cur);
 	}
-		this.drawFreeBadges();
-	},
-	assignColors: function(){
-		if (this.colors.length) return;
+	Graphics.drawFreeBadges();
+};
+
+Graphics.assignColors = function(){
+	if (Graphics.colors.length) return;
 	var i;
 	for (i = 0; i < game().players.length; i++) 
-			this.colors[game().players[i].id] = Raphael.getColor();
-	},
-	drawMap: function() {
-		for (var i = 0; i < this.map.regions.length; ++i)
-			this.drawRegion(this.map.regions[i]);
-		var frame = this.paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
-		this.drawFreeBadges();
-	},
-	clear: function()
-	{
-		this.paper.clear();
+		Graphics.colors[game().players[i].id] = Raphael.getColor();
+};
+
+
+Graphics.drawMap = function(map) {
+	Graphics.paper = Raphael("map", 630, 620);
+	var paper = Graphics.paper,
+		selectRegion = function(reg, sel){
+			return function(){
+				reg.animate({stroke: sel ? "red" : 
+					Graphics.getRegBoundsColor(reg.model)}, 300);
+				if (!Graphics.dragging)
+					reg.toFront();
+				if (reg.race) {
+					reg.race.toFront();
+					reg.race.num.toFront();
+				}
+				if (reg.power) {
+					reg.power.toFront();
+					reg.power.num.toFront();
+				}
 			}
 		},
-{
-	getRegBoundsColor: function(region){
-		return	region.conquerable ? "yellow" : 
-			canBeginDefend() && canDefend(region) ? "fuchsia" : "black";	
-	},
-});
+		drawRegion = function(region){
+			var fillStyle = Graphics.getRegColor(region),
+			strokeStyle = Graphics.getRegBoundsColor(region),
+			r = paper.path(getSvgPath(region.coords))
+				.attr({fill: fillStyle, stroke : strokeStyle,
+				"stroke-width": 3, "stroke-linecap": "round"});
+			region.ui = r;
+			r.model = region;
+			Graphics.drawRegionBadges(region);
+			r.hover(selectRegion(r, true), selectRegion(r, false));
+			r.click(regionClick(region));
+			r.canDrop = function(badgeType){
+				if (game().redeployStarted || badgeType.name === 'DragonMaster')
+					return badgeType.canDrop(region);						
+				else
+					return badgeType.race && canDefend(region);
+		};
+		r.addUnit = function(badgeType){
+			var field = badgeType.race ? 'race' : 'power';
+			if (!this[field]) 
+				Graphics.drawTokenBadge(region, badgeType, 1)
+			else {
+				this[field].num.n++;
+				this[field].num.attr({"text" : this[field].num.n});
+			}
+		};
+		return r;
+	};
+	for (var i = 0; i < map.regions.length; ++i)
+		drawRegion(map.regions[i]);
+	var frame = paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
+	Graphics.drawFreeBadges();
 
+};
 
 	
