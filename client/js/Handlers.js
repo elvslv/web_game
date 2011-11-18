@@ -373,6 +373,5 @@ regionClick = function(reg)
 
 showVisibleTokenBadgesClick = function()
 {
-
 	$('#showVisibleTokenBadgesDialog').dialog('open');
 }
