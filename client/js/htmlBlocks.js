@@ -88,7 +88,7 @@ HtmlBlocks.gameTab = function()
 				'<td colspan = "2">' +
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
-				'<td rowspan = "8" valign = "top" width = "100%">' +
+				'<td rowspan = "10" valign = "top" width = "100%">' +
 					'<div id="map">' +
 					'<div>' +
 				'</td>' +
@@ -99,18 +99,13 @@ HtmlBlocks.gameTab = function()
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
-				'<td colspan = "2">' +
-					'Players:' +
-				'</td>' +
-			'</tr>' +
-			'<tr>' +
-				'<td id = "usersInCurGame" colspan = "2">' +
+				'<td id = "usersInCurGame" colspan = "2" valign = "top">' +
 					'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
-				'<td colspan = "2" id = "visibleTokenBadges">' +
-					'{{tmpl(tokenBadges, $item.opts) "#visibleTokenBadgesTemplate"}}' +
+				'<td colspan = "2">' +
+					'<button id = "showVisibleTokenBadges"style = "display: none">Show visible token badges</button>' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +

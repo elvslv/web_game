@@ -370,3 +370,32 @@ regionClick = function(reg)
 		changeConfirmDialogForFortress(j);*/
 	}
 }
+
+showVisibleTokenBadgesClick = function()
+{
+	$('#visibleTokenBadges').empty();
+	if (game().tokenBadges.length)
+	{
+		$('#visibleTokenBadgesTemplate').tmpl(
+			Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
+		if (canSelectRaces())
+			for (var i = 0; i < game().tokenBadges.length; ++i)
+				if (canSelectRace(i))
+				{
+					$('#select' + i)
+						.button({icons: { primary: "ui-icon-check" }})
+						.click(function(j){
+							return function(){
+								sendQuery(makeQuery(['action', 'sid', 'position'], 
+									['selectRace', Client.currentUser.sid, j]), 
+									selectRaceResponse);					
+							}
+					}(i));
+					$('#select' + i).show();	
+				}
+	}
+	else
+		$('#visibleTokenBadges').html("<p>Game is not started yet</p>");
+	
+	$('#showVisibleTokenBadgesDialog').dialog('open');
+}

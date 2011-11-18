@@ -86,6 +86,14 @@ Interface.dialogs = [
 		{
 			$(this).dialog('close');
 		}
+	},
+	{
+		'name': 'showVisibleTokenBadgesDialog',
+		'title': 'Visible token badges',
+		'ok': function()
+		{
+			$(this).dialog('close');
+		}
 	}
 	];
 
@@ -151,13 +159,15 @@ Interface.updateGameTab = function()
 		$('#redeploy').button().click(redeployClick);
 		$('#defend').button().click(defendClick);
 		$('#saveGame').button().click(saveGameClick);
+		$('#showVisibleTokenBadges').button().click(showVisibleTokenBadgesClick);
 		$('#leaveGame')
 			.button()
 			.click(function(){
 				sendQuery(makeQuery(['action', 'sid'], ['leaveGame', user().sid]), 
 					leaveGameResponse);
 		});
-		$('#leaveGame').show();
+		showVisibleTokenBadges
+		$('#leaveGame, #saveGame, #showVisibleTokenBadges').show();
 		$('#saveGame').show();
 		Graphics.drawMap(game().map);
 	}
@@ -202,11 +212,6 @@ Interface.updateGameTab = function()
 		
 	}).appendTo('#usersInCurGame');	
 	Graphics.update(game().map);
-	$('#visibleTokenBadges').empty();
-	if (game().tokenBadges.length)
-		$('#visibleTokenBadges').append('<p>Visible token badges: </p>');
-	$('#visibleTokenBadgesTemplate').tmpl(Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
-
 	Interface.prepareForActions();
 }
 
@@ -225,20 +230,29 @@ Interface.prepareForSetReadinessStatus = function()
 
 Interface.prepareForRaceSelect = function()
 {
-	if (canSelectRaces())
-		for (var i = 0; i < game().tokenBadges.length; ++i)
-			if (canSelectRace(i))
-			{
-				$('#select' + i)
-					.button({icons: { primary: "ui-icon-check" }})
-					.click(function(j){
-						return function(){
-							sendQuery(makeQuery(['action', 'sid', 'position'], 
-								['selectRace', Client.currentUser.sid, j]), selectRaceResponse);					
-						}
-				}(i));
-				$('#select' + i).show();	
-			}
+	$('#visibleTokenBadges').empty();
+	if (game().tokenBadges.length)
+	{
+		$('#visibleTokenBadgesTemplate').tmpl(
+			Client.currGameState.tokenBadges).appendTo('#visibleTokenBadges');
+		if (canSelectRaces())
+			for (var i = 0; i < game().tokenBadges.length; ++i)
+				if (canSelectRace(i))
+				{
+					$('#select' + i)
+						.button({icons: { primary: "ui-icon-check" }})
+						.click(function(j){
+							return function(){
+								sendQuery(makeQuery(['action', 'sid', 'position'], 
+									['selectRace', Client.currentUser.sid, j]), 
+									selectRaceResponse);					
+							}
+					}(i));
+					$('#select' + i).show();	
+				}
+	}
+	else
+		$('#visibleTokenBadges').html("<p>Game is not started yet</p>");
 }
 
 Interface.prepareForDecline = function()
