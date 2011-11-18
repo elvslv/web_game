@@ -104,32 +104,30 @@
 <script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
 	<div class = "user" style=${$item.color($item.data.id)}>
 		<p>
-			{{if $item.data.id == $item.currentUser()}}<i><b>{{/if}}
-			${username}
-			{{if $item.data.id == $item.currentUser()}}</b></i>{{/if}}
-			{{if $item.data.id == $item.activePlayer()}} -- active player {{else}}
-			{{if $item.data.id == $item.defendingPlayer()}} -- defending player {{/if}}
-			{{/if}}
 		</p>
-		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
-		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
-		<p style="margin: 10px;">Coins: ${coins}</p>
-		<p id = "freeTokens" style="margin: 10px;">Tokens in hand: 
-		{{if $item.showTokensInHand()}}
-			${tokensInHand}
-		{{else}}
-			{{html  $item.freeTokens()}}
-			
-		{{/if}}</p>
 		<table>
-			{{if $item.data.currentTokenBadge}}
 			<tr>
-				<td colspan = "3">Current token badge:</td>
+				<td colspan = "2">
+					{{if $item.data.id == $item.currentUser()}}<i><b>{{/if}}
+					${username}
+					{{if $item.data.id == $item.currentUser()}}</b></i>{{/if}}
+					{{if $item.data.id == $item.activePlayer()}} -- active player {{else}}
+						{{if $item.data.id == $item.defendingPlayer()}} -- defending player {{/if}}
+					{{/if}}
+					{{if !$item.gameStarted}}
+						{{if $item.data.isReady}}<p style="margin: 10px;">, ready</p>{{/if}}
+					{{/if}}
+					{{if !$item.data.inGame}}<p style="margin: 10px;">, not in game</p>{{/if}}
+				</td>
+				<td class = "Money">
+					<span>${coins}</span>
+				</td>
 			</tr>
+			{{if $item.data.currentTokenBadge}}
 			<tr>
 				<td class = {{html ''.concat($item.data.currentTokenBadge.raceName)}}></td>
 				<td class =  {{html ''.concat($item.data.currentTokenBadge.specPowName)}}></td>
-				<td>{{html $item.data.currentTokenBadge.totalTokensNum}}</td>
+				<td valign = "top">{{html $item.data.currentTokenBadge.totalTokensNum}}</td>
 				{{if $item.data.id === $item.currentUser()}}
 					<td>
 						<button id = "decline" style = "display: none">Decline</button>
@@ -138,9 +136,6 @@
 			<tr>
 			{{/if}}
 			{{if $item.data.declinedTokenBadge != undefined}}
-			<tr>
-				<td colspan = "3">Declined token badge:</td>
-			</tr>
 			<tr>
 				<td class = {{html ''.concat($item.data.declinedTokenBadge.raceName)}}></td>
 				<td class =  {{html ''.concat($item.data.declinedTokenBadge.specPowName)}}></td>

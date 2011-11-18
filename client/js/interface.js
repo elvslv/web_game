@@ -190,10 +190,13 @@ Interface.updateGameTab = function()
 		{
 			return !(game().redeployStarted  || game().defendStarted);
 		},
-
 		freeTokens : function()
 		{
 			return user().freeTokens;
+		},
+		gameStarted: function()
+		{
+			return game().state != GAME_WAITING;
 		}
 
 		
