@@ -370,3 +370,9 @@ regionClick = function(reg)
 		changeConfirmDialogForFortress(j);*/
 	}
 }
+
+showVisibleTokenBadgesClick = function()
+{
+
+	$('#showVisibleTokenBadgesDialog').dialog('open');
+}
