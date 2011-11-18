@@ -1,3 +1,4 @@
+import misc_game
 from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, WarHistoryEntry, dbi
 from checkFields import *
 from misc_game import *
@@ -99,7 +100,7 @@ def act_conquer(data):
 	unitsNum = user.tokensInHand
 	dice = user.game.getLastState() == GAME_THROW_DICE and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
-		dice = throwDice(game)
+		dice = misc_game.throwDice(game)
 	unitPrice -= dice if dice else 0				# How do I turn None into 0? int() doesn't seem to work
 	unitPrice = max(unitPrice, 1)
 	if unitsNum < unitPrice:

@@ -85,10 +85,10 @@ HtmlBlocks.gameTab = function()
 {
 	return '<table>' +
 			'<tr>' +
-				'<td width = "100%">' +
+				'<td colspan = "2">' +
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
-				'<td rowspan = "8" valign = "top">' +
+				'<td rowspan = "8" valign = "top" width = "100%">' +
 					'<div id="map">' +
 					'<div>' +
 				'</td>' +
@@ -99,17 +99,13 @@ HtmlBlocks.gameTab = function()
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
-				'<td>' +
+				'<td colspan = "2">' +
 					'Players:' +
-				'</td>' +
-				'<td>' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
-				'<td id = "usersInCurGame"">' +
+				'<td id = "usersInCurGame" colspan = "2">' +
 					'{{tmpl(players, $item.opts) "#usersInCurGameTemplate"}}' +
-				'</td>' +
-				'<td>' +
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
@@ -155,7 +151,7 @@ HtmlBlocks.gameTab = function()
 				'</td>' +
 			'</tr>' +
 			'<tr>' +
-				'<td colspan = "2" id = "chatGameTab" style = "width: 100%">' +
+				'<td colspan = "3" id = "chatGameTab" style = "width: 100%">' +
 				'</td>' +
 			'</tr>' +
 		'</table>';
