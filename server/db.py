@@ -83,26 +83,18 @@ class Database:
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
 		coords = None
 		
-	#	if not misc.TEST_MODE:
-		#	if not('x_race' in regInfo and 'y_race' in regInfo and\
-		#	'x_power' in regInfo and 'y_power' in regInfo and 'coords' in regInfo and\
-		#	len(regInfo['coords']) > 2):
-		#		raise BadFieldException('badRegion')
-		#	checkFields.checkListCorrectness(regInfo, 'coords', int)
-		#	coords = str(regInfo['coords'][0])
-		#	for i in range(1, len(regInfo['coords'])):
-		#		coords += ', ' + str(regInfo['coords'][i])
-				
+		if not misc.TEST_MODE:
+			if not('raceCoords' in regInfo and len(regInfo['raceCoords'] == 2) and \
+				'powerCoords' in regInfo and len(regInfo['powerCoords'] == 2) and\
+				len(regInfo['coordinates']) > 2 ):
+				raise BadFieldException('badRegion')
+			checkFields.checkListCorrectness(regInfo, 'raceCoords', int)
+			checkFields.checkListCorrectness(regInfo, 'powerCoords', int)
+			checkFields.checkListCorrectness(regInfo, 'coordinates', int)
+			
 		if not 'population' in regInfo:
 			regInfo['population'] = 0
 
-			
-#		reg = Region(id, regInfo['population'], map_, 
-#			regInfo['x_race'] if 'x_race' in regInfo else None, 
-#			regInfo['y_race'] if 'y_race' in regInfo else None, 
-#			regInfo['x_power'] if 'x_power' in regInfo else None, 
-#			regInfo['y_power'] if 'y_power' in regInfo else None,
-#			coords if coords else None)
 			
 		reg = Region(id, regInfo['population'], map_, 
 			regInfo['raceCoords'] if 'raceCoords' in regInfo else None, 
