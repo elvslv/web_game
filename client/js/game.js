@@ -128,6 +128,11 @@ Map = $.inherit(
 				return this.regions[i];
 
 		//what should we do if we didn't find region?
+	},
+
+	sortedRegions : function()
+	{
+		return this.regions.copy().sort(function(a, b) {return a.ownerId > b.ownerId;});
 	}
 });
 

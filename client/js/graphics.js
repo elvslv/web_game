@@ -37,7 +37,7 @@ Graphics.freeTokens = {
 
 Graphics.drawTokenBadge = function(reg, badgeType, num){	
 	if (!num) return;
-	var pic = badgeType.getPic(reg !== null && reg.inDecline),
+	var pic = badgeType.getPic(reg && reg.inDecline),
 		place = reg || Graphics.freeTokens,
 		coords = badgeType.race ? place.raceCoords : place.powerCoords,
 		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
@@ -159,13 +159,16 @@ Graphics.offset = function(){
 	};						
 };							
 
-Graphics.getRegColor = function(region){
-	return region.ownerId ? Graphics.colors[region.ownerId] : "silver";
+Graphics.getRegBoundsColor = function(region){
+	return region.ownerId ? Graphics.colors[region.ownerId] : "black";
 };
 
-Graphics.getRegBoundsColor = function(region){
-	return	"black";/*region.conquerable ? "yellow" : 
-		canBeginDefend() && canDefend(region) ? "fuchsia" : */
+Graphics.getRegColorAndOpacity = function(reg){
+	var conq = canBeginConquer() && canConquer(reg), 
+		def =  canBeginDefend() && canDefend(reg),
+		color = conq ? 'yellow' : def ? 'blue' : 'white';
+	return [color, conq || def ? 0.6 : 0];
+
 };
 
 Graphics.drawRegionBadges = function(region){
@@ -177,6 +180,7 @@ Graphics.drawRegionBadges = function(region){
 			0 + region[tBadge.getPower().regPropName]);
 };
 
+
 Graphics.drawFreeBadges = function(){
 	Graphics.freeTokens.ui.race = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
 	Graphics.freeTokens.ui.power = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
@@ -184,11 +188,14 @@ Graphics.drawFreeBadges = function(){
 
 Graphics.update = function(map){
 	if (Graphics.forbidUpdate()) return;
-	var cur, i
-	for (i = 0; i < map.regions.length; ++i){
-		cur = map.regions[i];
-		cur.ui.animate({fill : Graphics.getRegColor(cur)}, 1000);
-		cur.ui.attr({"stroke" : Graphics.getRegBoundsColor(cur)});
+	var regions = map.sortedRegions(), cur, i,
+		attrs;
+	
+	for (i = 0; i < regions.length; ++i){
+		cur = regions[i];
+		cur.ui.animate({"stroke" : Graphics.getRegBoundsColor(cur)}, 1000);
+		attrs = Graphics.getRegColorAndOpacity(cur);
+		cur.ui.animate({fill : attrs[0], 'fill-opacity' : attrs[1]}, 1000);
 		Graphics.drawRegionBadges(cur);
 	}
 	Graphics.drawFreeBadges();
@@ -207,12 +214,13 @@ Graphics.drawMap = function(map) {
 	Graphics.paper = Raphael("map", Graphics.gameField.height, Graphics.gameField.height);
 	Graphics.cnt = 0;
 	var paper = Graphics.paper,
+		regions = map.sortedRegions(),
 		selectRegion = function(reg, sel){
 			return function(){
-				reg.animate({stroke: sel ? "red" : 
-					Graphics.getRegBoundsColor(reg.model)}, 300);
-				if (!Graphics.dragging)
-					reg.toFront();
+				var attrs = Graphics.getRegColorAndOpacity(reg.model),
+					color = sel? 'red' : attrs[0],
+					opacity = sel ? 0.7 : attrs[1];
+				reg.animate({'fill-opacity': opacity, fill : color}, 300);
 				if (reg.race) {
 					reg.race.toFront();
 					reg.race.num.toFront();
@@ -224,11 +232,14 @@ Graphics.drawMap = function(map) {
 			}
 		},
 		drawRegion = function(region){
-			var fillStyle = Graphics.getRegColor(region),
-			strokeStyle = Graphics.getRegBoundsColor(region),
-			r = paper.path(getSvgPath(region.coords))
-				.attr({fill: fillStyle, stroke : strokeStyle,
-				"stroke-width": 3, "stroke-linecap": "round"});
+			var landscape = Graphics.getRegLandscape(region),
+				strokeStyle = Graphics.getRegBoundsColor(region),
+				r0 = paper.path(getSvgPath(region.coords))
+					.attr({fill: landscape})
+				r =	paper.path(getSvgPath(region.coords))
+					.attr({fill: "red", 'fill-opacity' : 0, 
+					stroke : strokeStyle, "stroke-width": 3, 
+					"stroke-linecap": "round"});
 			region.ui = r;
 			r.model = region;
 			Graphics.drawRegionBadges(region);
@@ -251,8 +262,8 @@ Graphics.drawMap = function(map) {
 		};
 		return r;
 	};
-	for (var i = 0; i < map.regions.length; ++i)
-		drawRegion(map.regions[i]);
+	for (var i = 0; i < regions.length; ++i)
+		drawRegion(regions[i]);
 	var frame = paper.rect(0, 515, 630, 105).attr({fill: "LightYellow", stroke: "black"});
 	Graphics.drawFreeBadges();
 
