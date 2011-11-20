@@ -30,7 +30,8 @@ def act_login(data):
 	username = data['username']
 	passwd = data['password']
 	user = dbi.getUserByNameAndPwd(username, passwd)
-	random.seed(math.trunc(time.time()))
+	if not misc.TEST_MODE:
+		random.seed(math.trunc(time.time()))
 	while 1:
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
 		if not dbi.getXbyY('User', 'sid', sid, False): break
@@ -104,6 +105,7 @@ def act_createGame(data):
 	user.game = newGame
 	user.priority = 1
 	user.inGame = True
+	dbi.flush(user)
 	data['randseed'] = randseed
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'gameId': newGame.id}

@@ -6,10 +6,11 @@ import sys
 import db
 from sqlalchemy import and_
 from sqlalchemy.sql.expression import asc
+import random
 
 def generateNextNum(game):
 	game.prevGeneratedNum = (misc.A * game.prevGeneratedNum) % misc.M
-	dbi.commit()
+	dbi.flush(game)
 	return game.prevGeneratedNum
 
 def clearFromRace(reg):
@@ -46,19 +47,28 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 	else:
 		racesInStack = range(0, misc.RACE_NUM)
 		specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
-		for tokenBadge in game.tokenBadges:
+		tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
+		for tokenBadge in tokenBadges:
 			racesInStack.remove(tokenBadge.raceId)
 			specialPowersInStack.remove(tokenBadge.specPowId)
-		raceId = racesInStack[generateNextNum(game) % len(racesInStack)]
-		specialPowerId = specialPowersInStack[generateNextNum(game) % len(specialPowersInStack)]
+		if misc.TEST_MODE:
+			raceId = random.choice(racesInStack)
+			specialPowerId = random.choice(specialPowersInStack)
+		else:
+			raceId = racesInStack[generateNextNum(game) % len(racesInStack)]
+			specialPowerId = specialPowersInStack[generateNextNum(game) % len(specialPowersInStack)]
 	return raceId, specialPowerId
 
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	raceId, specPowerId = getNextRaceAndPowerFromStack(game, vRace, vSpecialPower)
-	tokenBadgesInStack = filter(lambda x: not x.owner and not x.inDecline and x.pos < lastIndex, game.tokenBadges) 
-	for tokenBadge in tokenBadgesInStack: tokenBadge.pos += 1
-	dbi.add(TokenBadge(raceId, specPowerId, game.id))
-	dbi.commit()
+	tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
+	tokenBadgesInStack = filter(lambda x: not x.owner and not x.inDecline and x.pos < lastIndex, tokenBadges) 
+	for tokenBadge in tokenBadgesInStack: 
+		tokenBadge.pos += 1
+		dbi.flush(tokenBadge)
+	tokBadge = TokenBadge(raceId, specPowerId, game.id)
+	dbi.add(tokBadge)
+	dbi.flush(tokBadge)
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
@@ -106,8 +116,6 @@ def hasDragonAttacked(game):
 	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc.GAME_CONQUER and 
 		x.warHistory.attackType == misc.ATTACK_DRAGON, game.history)
 	return True if len(histEntry) > 0 else False 
-	
-	
 
 def getFriendsInfo(game):
 	turn = game.turn
@@ -185,7 +193,7 @@ def endOfGame(game, coins = None):
 		gameState = getGameState(game)
 		game.resetPlayersState()
 		dbi.delete(game)
-		dbi.commit()
+		dbi.flush(game)
 		return {'result': 'ok', 'gameState': gameState}
 
 def getShortMapState(map_):

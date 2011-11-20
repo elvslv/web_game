@@ -15,14 +15,14 @@ def act_setReadinessStatus(data):
 		raise BadFieldException('badGameState')
 
 	user.isReady = data['isReady']
-	dbi.commit()
+	dbi.flush(user)
 	maxPlayersNum = game.map.playersNum
 	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
 	if maxPlayersNum == readyPlayersNum:
 		# Starting
 		game.activePlayerId = min(game.players, key=lambda x: x.priority).id
 		game.state = GAME_START
-		dbi.commit()
+		dbi.flush(game)
 		#generate first 6 races
 		if misc.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
 			vRaces = data['visibleRaces']
@@ -59,7 +59,7 @@ def act_selectRace(data):
 	chosenBadge.totalTokensNum = tokensNum
 	chosenBadge.specPowNum = races.specialPowerList[specialPowerId].bonusNum
 	chosenBadge.pos = None
-	dbi.commit()
+	dbi.flush(chosenBadge)
 	updateRacesOnDesk(game, position)
 	dbi.updateHistory(user, GAME_SELECT_RACE, chosenBadge.id)
 	dbi.updateGameHistory(game, data)
@@ -201,8 +201,12 @@ def act_finishTurn(data):
 	dbi.updateHistory(user, GAME_FINISH_TURN, None)
 	dbi.updateGameHistory(game, data)
 	prepareForNextTurn(game, nextPlayer)
-	return {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins, 
+	if misc.TEST_MODE:
+		result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins}
+	else:	
+		result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins, 
 		'incomeCoins':incomeCoins['totalCoinsNum'], 'statistics': incomeCoins['statistics']}
+	return result
 
 def act_defend(data):			## Should be renamed to retreat
 	user = dbi.getXbyY('User', 'sid', data['sid'])

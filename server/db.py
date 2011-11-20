@@ -29,10 +29,11 @@ class Database:
 
 	def __init__(self):
 		Base.metadata.create_all(self.engine)
-		self.Session = scoped_session(sessionmaker(bind=self.engine))
+		self.Session = scoped_session(sessionmaker(bind=self.engine, autoflush = True))
 
-	def flush(self):
+	def flush(self, obj):
 		self.session.flush()
+		self.session.refresh(obj)
 
 	def commit(self):
 		self.session.commit()
@@ -74,7 +75,7 @@ class Database:
 	def addUnique(self, obj, name):
 		try:
 			self.add(obj)
-			self.commit()
+			self.flush(obj)
 		except IntegrityError:
 			raise BadFieldException("""%sTaken""" % name)
     
@@ -139,10 +140,11 @@ class Database:
 		defense, attackType):
 		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
 		self.add(hist)
-		self.commit()
-		self.add(WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
-			defense, dice, attackType))
-		self.commit()
+		self.flush(hist)
+		warHist = WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 
+			defense, dice, attackType)
+		self.add(warHist)
+		self.flush(warHist)
 
 def db_instance():
 	if Database.instance is None:
@@ -321,6 +323,7 @@ class User(Base):
 	tokensInHand = Column(Integer, default = 0)
 	priority = Column(Integer)
 	inGame = Column(Boolean, default=False)
+	isAI = Column(Boolean, default = False)
 	
 	game = relationship(Game, backref=backref('players', order_by=priority))
 	currentTokenBadge = relationship(TokenBadge, cascade="all,delete", 
@@ -329,13 +332,14 @@ class User(Base):
 	declinedTokenBadge = relationship(TokenBadge, cascade="all,delete", 
 			primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
-	def __init__(self, username, password):
+	def __init__(self, username, password, ai = False):
 		if misc.TEST_MODE:
 			if dbi.query(User).filter(User.name == username).first():
 				raise BadFieldException('usernameTaken')
 				
 		self.name = username
 		self.password = password
+		self.isAI = ai
 
 	def checkForFriends(self, attackedUser):			
 		if not attackedUser: return

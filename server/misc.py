@@ -25,7 +25,7 @@ C = 0
 M = 2 << 31 - 1
 
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=False
+TEST_MODE=True
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -182,7 +182,8 @@ actionFields = {
 			'type': unicode, 
 			'mandatory': False,
 			'max': MAX_GAMEDESCR_LEN	
-		}
+		},
+		{'name': 'ai', 'type': int, 'mandatory': False}
 	],
 	'getGameList': [
 		{'name': 'sid', 'type': int, 'mandatory': False}
