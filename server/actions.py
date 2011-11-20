@@ -15,7 +15,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
 from actions_game import *
 from misc import *
-	
+from Ai import AI
+
 def act_register(data):
 	username = data['username']
 	passwd = data['password']
@@ -30,12 +31,7 @@ def act_login(data):
 	username = data['username']
 	passwd = data['password']
 	user = dbi.getUserByNameAndPwd(username, passwd)
-	if not misc.TEST_MODE:
-		random.seed(math.trunc(time.time()))
-	while 1:
-		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
-		if not dbi.getXbyY('User', 'sid', sid, False): break
-	user.sid = sid
+	user.sid = misc_game.getSid()
 	return {'result': 'ok', 'sid': sid, 'userId': user.id}
 
 def act_logout(data):
@@ -106,6 +102,18 @@ def act_createGame(data):
 	user.priority = 1
 	user.inGame = True
 	dbi.flush(user)
+	if 'ai' in data:
+		for i in range(data['ai']):
+			ai = User(None, None, True)
+			ai.sid = misc_game.getSid()
+			ai.gameId = newGame.id
+			ai.isReady = True
+			ai.priority = i + 2
+			ai.inGame = True
+			dbi.add(ai)
+			dbi.flush(ai)
+			ai1 = AI('localhost:3030', newGame, ai.id, ai.sid)
+			
 	if not misc.TEST_MODE:
 		data['randseed'] = randseed
 	dbi.updateGameHistory(user.game, data)

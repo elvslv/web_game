@@ -476,7 +476,5 @@ function loadGameResponse(data)
 		default:
 			$('#loadGameOutput').html('Invalid actions: ' + data['result']);
 			$('#loadGameOutput').show();
-
  	}
-	
 }

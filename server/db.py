@@ -312,7 +312,7 @@ class User(Base):
 	__tablename__ = 'users'
 
 	id = pkey()
-	name = uniqString(MAX_USERNAME_LEN)
+	name = string(MAX_USERNAME_LEN)
 	password = string (MAX_PASSWORD_LEN)
 	sid = Column(Integer, unique=True)
 	gameId = Column(Integer, ForeignKey('games.id', onupdate='CASCADE', ondelete='SET NULL'))
@@ -333,9 +333,10 @@ class User(Base):
 			primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
 	def __init__(self, username, password, ai = False):
-		if misc.TEST_MODE:
-			if dbi.query(User).filter(User.name == username).first():
-				raise BadFieldException('usernameTaken')
+		if not (ai or (username and password)):
+			raise BadFieldException('badUsername' if not username else 'badPassword')
+		if dbi.query(User).filter(User.name == username).first():
+			raise BadFieldException('usernameTaken')
 				
 		self.name = username
 		self.password = password

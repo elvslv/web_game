@@ -71,7 +71,7 @@ def generateSidForTest():
 	global LAST_SID
 	LAST_SID = LAST_SID + 1
 	return LAST_SID
-	
+
 def generateSids(n):
 	global LAST_SID
 	LAST_SID = X0
@@ -207,9 +207,8 @@ actionFields = {
 			'min': 0,
 			'max': 1
 		},
-                {'name': 'visibleRaces', 'type': list, 'mandatory': False},
-                {'name': 'visibleSpecialPowers', 'type': list, 'mandatory': 
-False}
+		{'name': 'visibleRaces', 'type': list, 'mandatory': False},
+		{'name': 'visibleSpecialPowers', 'type': list, 'mandatory': False}
 	],
 	'selectRace': [
 		{'name': 'sid', 'type': int, 'mandatory': True}, 
