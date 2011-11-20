@@ -16,7 +16,8 @@ class BaseRace:
 		self.raceId = id
 
 	def canConquer(self, region, tokenBadge):
-		return not region.sea and not tokenBadge.regions and (region.coast or region.border)
+		ans = (not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.regions
+		return ans
 					
 	def attackBonus(self, region, tokenBadge):
 		return 0
@@ -242,7 +243,8 @@ class BaseSpecialPower:
 		self.specialPowerId = id
 
 	def canConquer(self, region, tokenBadge):
-		return tokenBadge.isNeighbor(region) and not region.sea
+		return (tokenBadge.isNeighbor(region) or not tokenBadge.regions) and\
+			not region.sea
 		
 	def attackBonus(self, regionId, tokenBadgeId):
 		return 0
@@ -397,7 +399,8 @@ class SpecialPowerFlying(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
 	def canConquer(self, region, tokenBadge):
-		return not tokenBadge.isNeighbor(region) and not region.sea
+		return ((not tokenBadge.isNeighbor(region) and tokenBadge.regions) or\
+			not tokenBadge.regions) and not region.sea
 
 class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
@@ -505,7 +508,8 @@ class SpecialPowerSeafaring(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Seafaring', 5) 
 	
 	def canConquer(self, region, tokenBadge):
-		return tokenBadge.isNeighbor(region); 
+		return (tokenBadge.isNeighbor(region) and tokenBadge.regions) or not\
+			tokenBadge.regions 
 
 
 class SpecialPowerStout(BaseSpecialPower):

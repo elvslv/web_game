@@ -80,7 +80,7 @@ def act_conquer(data):
 	user.checkForFriends(owner)
 	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
 	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
-	if not (f1 or f2):
+	if not (f1 and f2):
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
 	attackedRace = None

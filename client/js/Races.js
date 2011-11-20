@@ -12,9 +12,8 @@ BaseRace = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return !tokenBadge.regions().length &&
-			(region.hasProperty('coast') || region.hasProperty('border')) &&
-			!region.hasProperty('sea');
+		return ((!tokenBadge.regions().length && (region.hasProperty('coast') || 
+			region.hasProperty('border'))) || tokenBadge.regions().length)
 	},
 	attackBonus: function(region, tokenBadge)
 	{
@@ -377,7 +376,7 @@ BaseSpecialPower = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return tokenBadge.isNeighbor(region) && !region.hasProperty('sea');
+		return (tokenBadge.isNeighbor(region) || !tokenBadge.regions().length)&& !region.hasProperty('sea');	
 	},
 	attackBonus: function(regionId, tokenBadgeId)
 	{
@@ -637,8 +636,10 @@ SpecialPowerFlying = $.inherit(BaseSpecialPower, {
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return !tokenBadge.isNeighbor(region) && !region.hasProperty('sea');
-
+		var f1 = tokenBadge.isNeighbor(region),
+			f2 = tokenBadge.regions().length,
+			f3 = region.hasProperty('sea');
+		return ((!f1 && f2) || !f2) && !f3;
 	}
 });
 
@@ -817,7 +818,7 @@ SpecialPowerSeafaring = $.inherit(BaseSpecialPower, {
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return tokenBadge.isNeighbor(region);
+		return (tokenBadge.isNeighbor(region) && tokenBadge.regions().length) || !tokenBadge.regions().length 
 	}
 });
 

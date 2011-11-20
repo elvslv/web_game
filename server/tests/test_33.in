@@ -48,7 +48,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Fortified", "Forest",  "Dragon master","Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Fortified", "Forest",  "DragonMaster","Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",

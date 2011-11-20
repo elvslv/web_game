@@ -48,7 +48,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Trolls", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Bivouacking", "Dragon master", "Forest", "Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Bivouacking", "DragonMaster", "Forest", "Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",

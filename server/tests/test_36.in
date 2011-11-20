@@ -47,7 +47,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Dragon master", "Forest", "Fortified", "Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["DragonMaster", "Forest", "Fortified", "Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -108,7 +108,7 @@
 			"regionId" : 2
 		}
 	],
-	"description": "special power Dragon master - region is not immune after decline"
+	"description": "special power DragonMaster - region is not immune after decline"
 }
 
 

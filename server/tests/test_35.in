@@ -48,7 +48,7 @@
 			"sid": 2,
 			"isReady": 1,
 			"visibleRaces": ["Ratmen", "Dwarves", "Amazons", "Elves", "Giants", "Halflings"],
-			"visibleSpecialPowers": ["Forest",  "Dragon master","Fortified", "Berserk", "Commando", "Diplomat"]
+			"visibleSpecialPowers": ["Forest",  "DragonMaster","Fortified", "Berserk", "Commando", "Diplomat"]
 		},
 		{
 			"action": "selectRace",
@@ -143,7 +143,7 @@
 			"regionId" : 2
 		}
 	],
-	"description": "special power Dragon master"
+	"description": "special power DragonMaster"
 }
 
 

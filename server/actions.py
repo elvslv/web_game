@@ -106,7 +106,8 @@ def act_createGame(data):
 	user.priority = 1
 	user.inGame = True
 	dbi.flush(user)
-	data['randseed'] = randseed
+	if not misc.TEST_MODE:
+		data['randseed'] = randseed
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'gameId': newGame.id}
 
