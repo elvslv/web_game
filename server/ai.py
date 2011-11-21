@@ -1,10 +1,10 @@
 import httplib
 import json
 import threading
-import misc
 import time
 import races
 
+from misc import *
 from gameExceptions import BadFieldException
 
 class Region:
@@ -58,7 +58,7 @@ class Game:
 		
 	def checkStage(self, state, ai, attackType = None):
 		lastEvent = self.state
-		badStage = not (lastEvent in misc.possiblePrevCmd[state]) 
+		badStage = not (lastEvent in possiblePrevCmd[state]) 
 		if attackType:
 			badStage = badStage and ai.badAttack(attackType)
 		return badStage
@@ -81,6 +81,13 @@ class TokenBadge:
 		self.totalTokensNum = totalTokensNum
 		self.specPowNum = specPowNum
 
+	def regions(self, game):
+		result = list()
+		for region in game.map.regions:
+			if region.tokenBadgeId == self.id:
+				result.append(region)
+		return result
+
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
 	'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
 
@@ -96,12 +103,20 @@ def createMap(mapState):
 			*curReg))
 	return Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, regions);
 
+def createTokenBadge(tokenBadge, declined):
+	return TokenBadge(tokenBadge.id, tokenBadge.raceName, tokenBadge.specialPowerName,
+				None, None, declined, tokenBadge.totalTokensNum)
+	
 class AI(threading.Thread):
 	def __init__(self, host, game, id, sid):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
 		self.game = game
 		self.sid = sid
 		self.id = id
+		self.conqueredRegions = list()
+		self.dragon = None #regions
+		self.enchant = None
+		self.friend = None
 		
 	def sendCmd(self, obj):
 		self.conn.request("POST", "/ajax", obj)
@@ -133,6 +148,17 @@ class AI(threading.Thread):
 			tokenBadge = TokenBadge(0, visibleBadge.raceName, visibleBadge.specialPowerName,
 				i, visibleBadge.bonusMoney)
 			tokenBadges.append(tokenBadge)
+		for player in gameState['players']:
+			if player['id'] == self.id:
+				self.coins = player['coins']
+				self.tokensInHand = player['tokensInHand']
+				if player['currentTokenBadge']:
+					self.currentTokenBadge = createTokenBadge(player['currentTokenBadge'], 
+						False)
+				if player['declinedTokenBadge']:
+					self.declinedTokenBadge = createTokenBadge(player['declinedTokenBadge'], 
+						True)	
+
 		if not self.gameState:
 			self.gameState = Game(gameState.gameId, map, 
 				gameState.lastEvent if (gameState.state == GAME_START) else gameState.state,
@@ -145,19 +171,92 @@ class AI(threading.Thread):
 		
 		if 'defendingInfo' in gameState:
 			self.gameState['defendingInfo'] = gameState['defendingInfo']
-			
+
+	def selectRace(self):
+		maxTokensNum = 0
+		bestTokens = list()
+
+		for i, visibleBadge in enumerate(self.gameState.visibleTokenBages):
+			if self.coins >= 5 - i:
+				if visibleBadge.race.maxNum + visibleBadge.specialPower.tokensNum >= maxTokensNum:
+					maxTokensNum = visibleBadge.race.maxNum + visibleBadge.specialPower.tokensNum
+					if visibleBadge.race.maxNum + visibleBadge.specialPower.tokensNum > maxTokensNum:
+						bestTokens = list()
+					bestTokens.append({'tok': visibleBadge, 
+						'num': visibleBadge.race.initNum + visibleBadge.specialPower.tokensNum})
+
+		if not len(bestTokens):
+			return False
+		badge = sorted(bestTokens, key = lambda bestToken: bestToken.num, reverse = True)[0]['tok']
+		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'pos': bagde.pos})
+		if result['result'] != 'ok':
+			raise BadFieldException('unknown error in select race')
+		return True
+	
 	def defend(self):
 		pass
+
+	def shouldDecline(self):
+		return self.currentTokenBadge and self.gameState.checkStage(GAME_DECLINE) and\
+			self.currentTokenBadge.totalTokensNum - len(self.currentTokenBadge.regions()) < 4
+
+	def decline(self):
+		data = self.sendCmd({'action': 'decline', 'sid': self.sid})
+		if data['result'] != 'ok':
+			raise BadFieldException('unknown error in decline')
+
+	def shouldFinishTurn():
+		return self.gameState.checkStage(GAME_FINISH_TURN)
+
+	def finishTurn():
+		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
+		if data['result'] != 'ok':
+			raise BadFieldException('unknown error in decline')
+		self.conqueredRegions = list()
+		self.dragon = None #regions
+		self.enchant = None
+		self.friend = None
+
+	def shouldSelectFriend():
+		return self.gameState.checkStage(GAME_CHOOSE_FRIEND) and not self.friend
+
+	def selectFriend():
+		players = [player.id for player in self.gameState.players]
+		for region in self.conqueredRegions:
+			try:
+				players.remove(region.owner)
+			except:
+				pass
+
+		if len(players):
+			data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
+				'friendId': players[0]})
+			if data['result'] != 'ok':
+				raise BadFieldException('unknown error in select friend')
+			self.friend = players[0]
+
+	def getNextAct(self):
+		if self.id == defendingPlayer:
+			return self.defend
+		if not self.currentTokenBadge and self.gameState.checkStage(GAME_SELECT_RACE)
+			return self.selectRace
+		if self.shouldDecline():
+			return self.decline
+		if self.shouldSelectFriend():
+			return self.selectFriend
+		if self.shouldFinishTurn():
+			return self.finishTurn
+		if not self.canConquer() #should redeploy
+			return self.redeploy
+		return self.conquer
 
 	def run(self):
 		while True:
 			data = self.getGameState()
 			activePlayer = self.gameState['activePlayerId']
 			defendingPlayer = self.gameState['defendingInfo']['playerId'] if 'defendingInfo' in self.gameState else None
-			if data['state'] == misc.GAME_WAITING or not self.id in (activePlayer, defendingPlayer) or\
+			if data['state'] == GAME_WAITING or not self.id in (activePlayer, defendingPlayer) or\
 				(self.id == activePlayer and defendingPlayer):
 				time.sleep(5)
 				continue
-			if self.id == defendingPlayer:
-				self.defend()
-
+			
