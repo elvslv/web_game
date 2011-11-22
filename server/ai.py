@@ -22,6 +22,8 @@ class Region:
 		self.fortress = fortress
 		self.hero = hero
 		self.inDecline = inDecline
+		for prop in props:
+			setattr(self, prop, True)
 
 	def isAdjacent(self, region):
 		return region.id in self.adjacent 
@@ -81,12 +83,13 @@ class TokenBadge:
 		self.totalTokensNum = totalTokensNum
 		self.specPowNum = specPowNum
 
-	def regions(self, game):
+	def getRegions(self, game):
 		result = list()
 		for region in game.map.regions:
 			if region.tokenBadgeId == self.id:
 				result.append(region)
 		return result
+
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
 	'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
@@ -116,7 +119,7 @@ class AI(threading.Thread):
 		self.conqueredRegions = list()
 		self.dragon = None #regions
 		self.enchant = None
-		self.friend = None
+		self.slaveId = None
 		
 	def sendCmd(self, obj):
 		self.conn.request("POST", "/ajax", obj)
@@ -157,7 +160,7 @@ class AI(threading.Thread):
 						False)
 				if player['declinedTokenBadge']:
 					self.declinedTokenBadge = createTokenBadge(player['declinedTokenBadge'], 
-						True)	
+						True)
 
 		if not self.gameState:
 			self.gameState = Game(gameState.gameId, map, 
@@ -171,7 +174,12 @@ class AI(threading.Thread):
 		
 		if 'defendingInfo' in gameState:
 			self.gameState['defendingInfo'] = gameState['defendingInfo']
-
+		if 'friendsInfo' in gameState and 'slaveId' in gameState['friendsInfo'] and\
+				gameState['friendsInfo']['slaveId']== self.id:
+				self.masterId = gameState['friendsInfo']['masterId']
+		else:
+			self.masterId = None 
+				
 	def selectRace(self):
 		maxTokensNum = 0
 		bestTokens = list()
@@ -198,7 +206,7 @@ class AI(threading.Thread):
 
 	def shouldDecline(self):
 		return self.currentTokenBadge and self.gameState.checkStage(GAME_DECLINE) and\
-			self.currentTokenBadge.totalTokensNum - len(self.currentTokenBadge.regions()) < 4
+			self.currentTokenBadge.totalTokensNum - len(self.currentTokenBadge.getRegions()) < 4
 
 	def decline(self):
 		data = self.sendCmd({'action': 'decline', 'sid': self.sid})
@@ -215,10 +223,10 @@ class AI(threading.Thread):
 		self.conqueredRegions = list()
 		self.dragon = None #regions
 		self.enchant = None
-		self.friend = None
+		self.slaveId = None
 
 	def shouldSelectFriend():
-		return self.gameState.checkStage(GAME_CHOOSE_FRIEND) and not self.friend
+		return self.gameState.checkStage(GAME_CHOOSE_FRIEND) and not self.slaveId
 
 	def selectFriend():
 		players = [player.id for player in self.gameState.players]
@@ -233,7 +241,32 @@ class AI(threading.Thread):
 				'friendId': players[0]})
 			if data['result'] != 'ok':
 				raise BadFieldException('unknown error in select friend')
-			self.friend = players[0]
+			self.slaveId = players[0]
+
+	def canConquer(self, region):
+		f1 = region.ownerId != self.id or region.ownerId == self.id and region.inDecline
+		f2 = not(self.masterId and self.masterId == region.ownerId)
+		self.currentTokenBadge.regions = self.currentTokenBadge.getRegions()
+		f3 = self.race.canConquer(region, self.currentTokenBadge)
+		f4 = self.race.canConquer(region, self.currentTokenBadge)
+		f5 = not region.isImmune(False)
+		return f1 and f2 and f3 and f4 and f5
+
+	def getConquerableRegions(self):
+		result = list()
+		if not(self.gameState.checkStage(GAME_CONQUER) and self.currentTokenBadge and self.tokensInHand):
+			return result
+		for region in self.gameState.map.regions:
+			if self.canConquer(region):
+				result.append(region)
+
+	def redeploy(self):
+		regions = list()
+		for region in self.currentTokenBadge.getRegions():
+			regions.append({'regionId': region.id, 'tokensNum': region.tokensNum})
+		data = self.sendCmd({'action': 'redeploy', 'sid': self.sid, 'regions': regions})
+		if data['result'] != 'ok':
+			raise BadFieldException('unknown error in redeploy')
 
 	def getNextAct(self):
 		if self.id == defendingPlayer:
@@ -244,11 +277,12 @@ class AI(threading.Thread):
 			return self.decline
 		if self.shouldSelectFriend():
 			return self.selectFriend
-		if self.shouldFinishTurn():
-			return self.finishTurn
-		if not self.canConquer() #should redeploy
-			return self.redeploy
-		return self.conquer
+		if self.currentTokenBadge:
+			self.conquerableRegions = self.getConquerableRegions()
+			if not len(self.conquerableRegions) #should redeploy
+				return self.redeploy
+			return self.conquer
+		return self.finishTurn
 
 	def run(self):
 		while True:
