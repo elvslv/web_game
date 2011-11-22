@@ -547,7 +547,7 @@ canConquer = function(region)
 {
 	return (region.ownerId !== user().id  || 
 		region.ownerId === user().id && region.inDecline) && 
-	!(user().friendId && region.id === user().friendId) &&
+	!(user().friendId && region.ownerId === user().friendId) &&
 	(user().race().canConquer(region, user().currentTokenBadge) &&
 	 user().specPower().canConquer(region,user().currentTokenBadge)) 
 	 	&& !region.isImmune(false);
