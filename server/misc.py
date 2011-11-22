@@ -273,6 +273,9 @@ False}
 	'dragonAttack': [
 		{'name': 'sid', 'type': int, 'mandatory': True},
 		{'name': 'regionId', 'type': int, 'mandatory': True}
+	],
+	'aiJoin': [
+		{'name': 'gameId', 'type': int, 'mandatory': True}
 	]
 }
 

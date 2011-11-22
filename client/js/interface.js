@@ -166,7 +166,6 @@ Interface.updateGameTab = function()
 				sendQuery(makeQuery(['action', 'sid'], ['leaveGame', user().sid]), 
 					leaveGameResponse);
 		});
-		showVisibleTokenBadges
 		$('#leaveGame, #saveGame, #showVisibleTokenBadges').show();
 		$('#saveGame').show();
 		Graphics.drawMap(game().map);

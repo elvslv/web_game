@@ -111,15 +111,18 @@ def createTokenBadge(tokenBadge, declined):
 				None, None, declined, tokenBadge.totalTokensNum)
 	
 class AI(threading.Thread):
-	def __init__(self, host, game, id, sid):
+	def __init__(self, host, game ):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
-		self.game = game
-		self.sid = sid
-		self.id = id
+		self.game = game 
 		self.conqueredRegions = list()
 		self.dragon = None #regions
 		self.enchant = None
 		self.slaveId = None
+		data = self.sendCmd({'action': 'aiJoin', 'gameId': game.id})
+		if data['result'] != 'ok':
+			raise BadFieldException('unknown result in aiJoin')
+		self.id = data['id']
+		self.sid = data['sid']
 		
 	def sendCmd(self, obj):
 		self.conn.request("POST", "/ajax", obj)
@@ -271,7 +274,7 @@ class AI(threading.Thread):
 	def getNextAct(self):
 		if self.id == defendingPlayer:
 			return self.defend
-		if not self.currentTokenBadge and self.gameState.checkStage(GAME_SELECT_RACE)
+		if not self.currentTokenBadge and self.gameState.checkStage(GAME_SELECT_RACE):
 			return self.selectRace
 		if self.shouldDecline():
 			return self.decline
@@ -279,7 +282,7 @@ class AI(threading.Thread):
 			return self.selectFriend
 		if self.currentTokenBadge:
 			self.conquerableRegions = self.getConquerableRegions()
-			if not len(self.conquerableRegions) #should redeploy
+			if not len(self.conquerableRegions): #should redeploy
 				return self.redeploy
 			return self.conquer
 		return self.finishTurn

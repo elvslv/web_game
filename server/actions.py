@@ -15,7 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
 from actions_game import *
 from misc import *
-from Ai import AI
+from ai import AI
 
 def act_register(data):
 	username = data['username']
@@ -95,7 +95,8 @@ def act_createGame(data):
 	randseed = math.trunc(time.time())
 	if 'randseed' in data:
 		randseed = data['randseed']
-	newGame = Game(data['gameName'], descr, map_, randseed)
+	newGame = Game(data['gameName'], descr, map_, randseed, data['ai'] if 'ai' in\
+		data else None)
 	dbi.addUnique(newGame, 'gameName')
 	initRegions(map_, newGame)
 	user.game = newGame
@@ -104,16 +105,8 @@ def act_createGame(data):
 	dbi.flush(user)
 	if 'ai' in data:
 		for i in range(data['ai']):
-			ai = User(None, None, True)
-			ai.sid = misc_game.getSid()
-			ai.gameId = newGame.id
-			ai.isReady = True
-			ai.priority = i + 2
-			ai.inGame = True
-			dbi.add(ai)
-			dbi.flush(ai)
-			ai1 = AI('localhost:3030', newGame, ai.id, ai.sid)
-			
+			ai = AI('localhost:3030', newGame)
+
 	if not misc.TEST_MODE:
 		data['randseed'] = randseed
 	dbi.updateGameHistory(user.game, data)

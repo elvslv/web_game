@@ -194,11 +194,12 @@ class Game(Base):
 	mapId = fkey('maps.id')
 	randseed = Column(Integer)
 	prevGeneratedNum = Column(Integer)
+	ai = Column(Integer)
 	
 	map = relationship(Map)
 	
 	
-	def __init__(self, name, descr, map, randseed): 
+	def __init__(self, name, descr, map, randseed, ai): 
 		if misc.TEST_MODE:
 			if dbi.query(Game).filter(Game.name == name).filter(Game.state 
 				!= misc.GAME_ENDED).first():
@@ -209,6 +210,7 @@ class Game(Base):
 		self.map = map
 		self.randseed = randseed
 		self.prevGeneratedNum = randseed
+		self.ai = ai
 		
 	def playersInGame(self):
 		return filter(lambda x: x.inGame == True, self.players)
