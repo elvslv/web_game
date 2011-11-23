@@ -1,4 +1,4 @@
-function sendQuery(query, callback, readonly)
+function sendQuery(query, callback, readonly, param)
 {
 	$.ajax({
 		type: "POST",
@@ -42,7 +42,7 @@ function sendQuery(query, callback, readonly)
 					console.error('Invalid region id'); 
 					break;
 				default:
-					callback(data);
+					callback(data, param);
 			}
 		},
 		error: function(jqXHR, textStatus, errorThrown)

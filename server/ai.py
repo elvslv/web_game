@@ -49,8 +49,6 @@ class Map:
 class Game:
 	def __init__(self, id, map, state, turn, activePlayerId, visibleTokenBadges, players):
 		self.id = id
-		self.name = name
-		self.descr = descr
 		self.map = map
 		self.state = state
 		self.turn = turn
@@ -96,37 +94,39 @@ currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround'
 
 def createMap(mapState):
 	regions = list()
-	for region in mapState.regions:
+	for i, region in enumerate(mapState['regions']):
 		curReg = list()
 		if 'currentRegionState' in region:
 			curState = region['currentRegionState']
 			for field in currentRegionFields:
 				curReg.append(curState[field] if field in curState else None)
-		regions.append(Region(region.id, region.adjacentRegions, region.constRegionState, 
+		regions.append(Region(i + 1, region['adjacentRegions'], region['constRegionState'], 
 			*curReg))
-	return Map(mapState.mapId, mapState.playersNum, mapState.turnsNum, regions);
+	return Map(mapState['mapId'], mapState['playersNum'], mapState['turnsNum'], regions);
 
 def createTokenBadge(tokenBadge, declined):
 	return TokenBadge(tokenBadge.id, tokenBadge.raceName, tokenBadge.specialPowerName,
 				None, None, declined, tokenBadge.totalTokensNum)
 	
 class AI(threading.Thread):
-	def __init__(self, host, game ):
+	def __init__(self, host, game, sid, id ):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
-		self.game = game 
+		self.gameId = game.id 
 		self.conqueredRegions = list()
 		self.dragon = None #regions
 		self.enchant = None
 		self.slaveId = None
-		data = self.sendCmd({'action': 'aiJoin', 'gameId': game.id})
-		if data['result'] != 'ok':
-			raise BadFieldException('unknown result in aiJoin')
-		self.id = data['id']
-		self.sid = data['sid']
+		self.sid = sid
+		self.id = id
+		self.gameState = None
+		threading.Thread.__init__(self)
+		self.start()
 		
 	def sendCmd(self, obj):
-		self.conn.request("POST", "/ajax", obj)
-		data = json.loads(conn.getresponse().read())
+		self.conn.request("POST", "/ajax", json.dumps(obj))
+		r1 = self.conn.getresponse()
+		res = r1.read()
+		data = json.loads(res)
 		if not 'result' in data:
 			raise BadFieldException('Unknown result')
 		if (data['result'] in ('badJson', 'badReadinessStatus', 'badUserSid', 
@@ -135,48 +135,50 @@ class AI(threading.Thread):
 		return data
 
 	def getGameState(self):
-		data = self.sendCmd({'action': 'getGameState', 'gameId': self.game.id})
+		data = self.sendCmd({'action': 'getGameState', 'gameId': self.gameId})
 		gameState = data['gameState']
 		map = None
 		if not self.gameState:
 			map = createMap(data['gameState']['map'])
 		else:
+			regions = list()
 			for i, region in enumerate(data['gameState']['map']):
 				curReg = list()
 				if 'currentRegionState' in region:
 					curState = region['currentRegionState']
 					for field in currentRegionFields:
-						self.game.map.regions[i][field] = curState[field] if field in curState else None
+						region[field] = curState[field] if field in curState else None
+				regions.append(region)
+			self.gameState.map.regions = regions
 		
 		tokenBadges = list()
 		visibleBadges = gameState['visibleTokenBadges']
 		for visibleBadge in visibleBadges:
-			tokenBadge = TokenBadge(0, visibleBadge.raceName, visibleBadge.specialPowerName,
-				i, visibleBadge.bonusMoney)
+			tokenBadge = TokenBadge(0, visibleBadge['raceName'], visibleBadge['specialPowerName'],
+				i, visibleBadge['bonusMoney'])
 			tokenBadges.append(tokenBadge)
 		for player in gameState['players']:
 			if player['id'] == self.id:
 				self.coins = player['coins']
 				self.tokensInHand = player['tokensInHand']
-				if player['currentTokenBadge']:
+				if 'currentTokenBadge' in player:
 					self.currentTokenBadge = createTokenBadge(player['currentTokenBadge'], 
 						False)
-				if player['declinedTokenBadge']:
+				if 'declinedTokenBadge' in player:
 					self.declinedTokenBadge = createTokenBadge(player['declinedTokenBadge'], 
 						True)
 
 		if not self.gameState:
-			self.gameState = Game(gameState.gameId, map, 
-				gameState.lastEvent if (gameState.state == GAME_START) else gameState.state,
-				gameState.currentTurn, gameState.activePlayerId, tokenBadges, gameState['players'])
+			self.gameState = Game(gameState['gameId'], map, 
+				gameState['lastEvent'] if (gameState['state'] == GAME_START) else gameState['state'],
+				gameState['currentTurn'], gameState['activePlayerId'], tokenBadges, gameState['players'])
 		else:
 			self.gameState.visibleTokenBadges = tokenBadges
 			self.gameState.players = gameState['players']
-			self.gameState.activePlayerId = gameState['activePlayerIndex'];
-			self.gameState.state = gameState.lastEvent if gameState.state == GAME_START else gameState.state;
+			self.gameState.activePlayerId = gameState['activePlayerId'];
+			self.gameState.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state'];
 		
-		if 'defendingInfo' in gameState:
-			self.gameState['defendingInfo'] = gameState['defendingInfo']
+		self.gameState.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
 		if 'friendsInfo' in gameState and 'slaveId' in gameState['friendsInfo'] and\
 				gameState['friendsInfo']['slaveId']== self.id:
 				self.masterId = gameState['friendsInfo']['masterId']
@@ -288,11 +290,12 @@ class AI(threading.Thread):
 		return self.finishTurn
 
 	def run(self):
+		time.sleep(5)
 		while True:
-			data = self.getGameState()
-			activePlayer = self.gameState['activePlayerId']
-			defendingPlayer = self.gameState['defendingInfo']['playerId'] if 'defendingInfo' in self.gameState else None
-			if data['state'] == GAME_WAITING or not self.id in (activePlayer, defendingPlayer) or\
+			self.getGameState()
+			activePlayer = self.gameState.activePlayerId
+			defendingPlayer = self.gameState.defendingInfo['playerId'] if self.gameState.defendingInfo else None
+			if self.gameState.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\
 				(self.id == activePlayer and defendingPlayer):
 				time.sleep(5)
 				continue

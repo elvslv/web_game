@@ -13,9 +13,13 @@ $(function() {
 		dialog.dialog('option', 'title', Interface.dialogs[i].title);
 		dialog.dialog('option', 'buttons', {
 			'Ok': Interface.dialogs[i].ok, 
-			'Cancel': function(){$(this).dialog('close')
-		}});
-			}
+			'Cancel': function(){$(this).dialog('close')}
+		});
+		if (Interface.dialogs[i]['width'])
+			dialog.dialog('option', 'width', Interface.dialogs[i].width);
+		if (Interface.dialogs[i]['height'])
+			dialog.dialog('option', 'height', Interface.dialogs[i].height);
+	}
 	$('#register')
 		.button()
 		.click(function() {
@@ -44,6 +48,11 @@ $(function() {
 		.click(function() {
 			sendQuery(makeQuery(['action', 'sid'], ['logout', Client.currentUser.sid]), logoutResponse);
 		});
+	$('#aiCnt').spinner({min: 0, max: 5});
+	$('#mapList').change(function(){
+		$('#aiCnt').spinner('option', 'max', 
+			Client.mapList[$('#mapList').prop('selectedIndex')].playersNum);
+	});
 	$('#createGame')
 		.button()
 		.click(function() {
@@ -100,4 +109,6 @@ $(function() {
 	$('#login').show();
 	$('#refreshChat').show();
 	$('#tabs').show();
+	sendQuery({'action': 'login', 'username': 'user', 'password': '123456'},
+			loginResponse, false, true);
 });

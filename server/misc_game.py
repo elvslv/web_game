@@ -7,10 +7,13 @@ import db
 from sqlalchemy import and_
 from sqlalchemy.sql.expression import asc
 import random
+import math
+import time
 
 def getSid():
 	if not misc.TEST_MODE:
 		random.seed(math.trunc(time.time()))
+	sid = None
 	while 1:
 		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
 		if not dbi.getXbyY('User', 'sid', sid, False): break

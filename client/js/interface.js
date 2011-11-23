@@ -31,15 +31,18 @@ Interface.dialogs = [
 	{
 		'name': 'createGameForm',
 		'title': 'Create new game',
+		'width': 450,
+		'height': 300,
 		'ok': function() 
 		{
 			var gameName = $('#gameName'),
 				gameDescription = $('#gameDescription'),
 				mapId = Client.mapList[$('#mapList').prop('selectedIndex')].mapId,
 				sid = Client.currentUser.sid,
-				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId'],
-					['createGame', sid, gameName.val(), gameDescription.val(), mapId]);
-			sendQuery(query, createGameResponse);
+				ai = parseInt($('#aiCnt').spinner('value')),
+				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId', 'ai'],
+					['createGame', sid, gameName.val(), gameDescription.val(), mapId, ai]);
+			sendQuery(query, createGameResponse, false, ai);
 		}
 	}, 
 	{

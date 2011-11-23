@@ -293,20 +293,3 @@ def act_throwDice(data):
 	dbi.updateHistory(user, GAME_THROW_DICE, user.currentTokenBadge.id, dice)
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'dice': dice}	
-
-def act_aiJoin(data):
-	game = dbi.getXbyY('Game', 'id', data['gameId'])
-	if game.ai == dbi.query(User).filter(and_(User.gameId == game.id, User.isAI == 
-		True)).count():
-		raise BadFieldException('tooManyAIInGame')
-	lastPriority = dbi.query(func.max(User.priority)).filter(User.gameId == game.id)
-	ai = User(None, None, True)
-	ai.sid = getSid()
-	ai.gameId = game.id
-	ai.isReady = True
-	ai.priority = lastPriority + 1
-	ai.inGame = True
-	dbi.add(ai)
-	dbi.flush(ai)
-	return {'result': 'ok', 'sid': ai.sid, 'id': ai.id}
-	

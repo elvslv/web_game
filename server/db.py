@@ -85,13 +85,13 @@ class Database:
 		coords = None
 		
 		if not misc.TEST_MODE:
-			if not('raceCoords' in regInfo and len(regInfo['raceCoords'] == 2) and \
-				'powerCoords' in regInfo and len(regInfo['powerCoords'] == 2) and\
+			if not('raceCoords' in regInfo and len(regInfo['raceCoords']) == 2 and \
+				'powerCoords' in regInfo and len(regInfo['powerCoords']) == 2 and\
 				len(regInfo['coordinates']) > 2 ):
 				raise BadFieldException('badRegion')
 			checkFields.checkListCorrectness(regInfo, 'raceCoords', int)
 			checkFields.checkListCorrectness(regInfo, 'powerCoords', int)
-			checkFields.checkListCorrectness(regInfo, 'coordinates', int)
+			checkFields.checkListCorrectness(regInfo, 'coordinates', list)
 			
 		if not 'population' in regInfo:
 			regInfo['population'] = 0

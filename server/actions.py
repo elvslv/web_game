@@ -32,7 +32,7 @@ def act_login(data):
 	passwd = data['password']
 	user = dbi.getUserByNameAndPwd(username, passwd)
 	user.sid = misc_game.getSid()
-	return {'result': 'ok', 'sid': sid, 'userId': user.id}
+	return {'result': 'ok', 'sid': user.sid, 'userId': user.id}
 
 def act_logout(data):
 	leave(dbi.getXbyY('User', 'sid', data['sid']))
@@ -74,7 +74,8 @@ def act_uploadMap(data):
 		for regInfo in regions:
 			try:	
 				dbi.addRegion(curId, newMap, regInfo)
-			except KeyError:
+			except KeyError, e:
+				print e
 				raise BadFieldException('badRegion')
 			curId += 1
 		i = 0
@@ -87,6 +88,7 @@ def act_uploadMap(data):
 
 def act_createGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	print 1
 	if user.gameId: raise BadFieldException('alreadyInGame')
 	map_ = dbi.getXbyY('Map', 'id', data['mapId'])
 	descr = None
@@ -97,18 +99,18 @@ def act_createGame(data):
 		randseed = data['randseed']
 	newGame = Game(data['gameName'], descr, map_, randseed, data['ai'] if 'ai' in\
 		data else None)
+	print 2
 	dbi.addUnique(newGame, 'gameName')
 	initRegions(map_, newGame)
+	print 3
 	user.game = newGame
 	user.priority = 1
 	user.inGame = True
 	dbi.flush(user)
-	if 'ai' in data:
-		for i in range(data['ai']):
-			ai = AI('localhost:3030', newGame)
-
+	print 4
 	if not misc.TEST_MODE:
 		data['randseed'] = randseed
+	print 11
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'gameId': newGame.id}
 
@@ -157,6 +159,8 @@ def act_resetServer(data):
 	random.seed(misc.TEST_RANDSEED)
 	dbi.clear()
 	createDefaultMaps()
+	user = User('user', '123456')
+	dbi.add(user)
 	return {'result': 'ok'}
 
 def act_saveGame(data):
@@ -235,6 +239,26 @@ def act_getGameState(data):
 def act_getVisibleTokenBadges(data):
 	return {'result': 'ok', 'visibleTokenBadges': getVisibleTokenBadges(data['gameId'])}
 
+def act_aiJoin(data):
+	game = dbi.getXbyY('Game', 'id', data['gameId'])
+	if game.state != GAME_WAITING:
+		raise BadFieldException('badGameState')
+	maxPlayersNum = game.map.playersNum
+	if len(game.players) >= maxPlayersNum:
+		raise BadFieldException('tooManyPlayers')
+	maxPriority = max(game.players, key=lambda x: x.priority).priority
+	aiCnt = len(filter(lambda x: x.isAI ==True, game.players))
+	ai = User('AI%d' % aiCnt, None, True)
+	ai.sid = getSid()
+	ai.gameId = game.id
+	ai.isReady = True
+	ai.priority = maxPriority + 1
+	ai.inGame = True
+	dbi.add(ai)
+	dbi.flush(ai)
+	ai1 = AI('localhost:3030', game, ai.sid, ai.id)
+	return {'result': 'ok'}
+
 def doAction(data, check = True):
 	try:
 		dbi.session = dbi.Session()
@@ -246,13 +270,16 @@ def doAction(data, check = True):
 		dbi.commit()
 		return res
 	except BadFieldException, e: 
+		print e
 		dbi.rollback()
 		return {'result': e.value}
 	except (DatabaseError, DBAPIError, OperationalError), e:
+		print e
 		dbi.rollback()
 		return {'result': 'databaseError', 'statement': str(e.statement) if ('statement' in e) else None, 
 			'params': str(e.params) if ('params' in e) else None, 'orig': str(e.orig) if ('orig' in e) else None}
 	except Exception, e:
+		print e
 		dbi.rollback()
 		raise e
 	finally:

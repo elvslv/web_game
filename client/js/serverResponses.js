@@ -22,7 +22,7 @@ function registerResponse(data)
 	}
 }
 
-function loginResponse(data)
+function loginResponse(data, param)
 {
 	$('#registerLoginOutput').show();
 	var sid, username;
@@ -39,9 +39,15 @@ function loginResponse(data)
 			$('#registerLoginOutput').hide();
 			sid = data['sid'];
 			userId = data['userId'];
-			username = $('#username').val();
+			username = param ? 'user' : $('#username').val();
 			Client.currentUser = new User(userId, username, sid);
 			Interface.changeOnLogin();
+			if (param)
+			{
+				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId', 'ai'],
+					['createGame', sid, '1', '', 1, 1]);
+				sendQuery(query, createGameResponse, false, 1);
+			}
 			break;
 		default:
 			$('#registerLoginOutput span').text('Unknown server response' + data.toString());
@@ -91,6 +97,7 @@ function getMapListResponse(data, beforeCreateGame)
 	Client.mapList = data['maps'];
 	$('#mapList').empty();
 	$('#mapChooseTemplate').tmpl(Client.mapList).appendTo('#mapList');
+	$('#aiCnt').spinner('option', 'max', Client.mapList[0].playersNum);
 	if (beforeCreateGame)
 		$('#createGameForm').dialog('open');
 }
@@ -135,7 +142,7 @@ function leaveGameResponse(data)
 	}
 }
 
-function createGameResponse(data)
+function createGameResponse(data, ai)
 {
 	switch(data['result'])
 	{
@@ -156,6 +163,8 @@ function createGameResponse(data)
 			Client.currentUser.gameId = data.gameId;
 			Interface.changeOnCreateGame(data);
 			$('#createGameForm').dialog('close');
+			for (var i = 0; i < ai; ++i)
+				sendQuery({'action': 'aiJoin', 'gameId': data.gameId}, true)
 			break;
 		default:
 			console.error('Unknown server response' + data.toString());
