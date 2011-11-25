@@ -10,9 +10,10 @@ import json
 import traceback
 import optparse
 import actions
+import misc_game
 
 STATIC_FILES_ROOT = join("./client/")
-PORT = 3030
+PORT = 8080
 
 app = bottle.app()
 app.catchall = False
@@ -34,8 +35,9 @@ def serve_ajax():
 		return e
 
 def main():
-	run(reloader=True, host='localhost', port=PORT)
+	actions.doAction({'action': 'startAI'}, False)
+	run(host='localhost', port=PORT)
 	return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+	sys.exit(main())

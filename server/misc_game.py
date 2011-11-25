@@ -291,3 +291,4 @@ def makeDecline(user, leaveGame = False):
 def clearGameStateAtTheEndOfTurn(gameId):
 	pass
 
+

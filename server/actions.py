@@ -256,8 +256,16 @@ def act_aiJoin(data):
 	ai.inGame = True
 	dbi.add(ai)
 	dbi.flush(ai)
-	ai1 = AI('localhost:3030', game, ai.sid, ai.id)
+	ai1 = AI('localhost:8080', game, ai.sid, ai.id)
 	return {'result': 'ok'}
+
+def act_startAI(data):
+	print "startAI"
+	result = dbi.query(User).filter(User.isAI == True).all()
+	for inst in result:
+		game = dbi.getXbyY('Game', 'id', inst.gameId)
+		print "start AI: %d,%d, %d", game.id, inst.sid, inst.id
+		ai = AI('localhost:8080', game, inst.sid, inst.id)
 
 def doAction(data, check = True):
 	try:

@@ -267,6 +267,7 @@ function selectRaceResponse(data)
 			break;
 		case 'ok':
 			Client.currentTokenBadge = data['tokenBadgeId'];
+			$('#showVisibleTokenBadgesDialog').dialog('close');
 			break;
 		default:
 			console.error('Unknown server response' + data);
