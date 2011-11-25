@@ -22,6 +22,8 @@ class Region:
 		self.fortress = fortress
 		self.hero = hero
 		self.inDecline = inDecline
+		for prop in possibleLandDescription[:11]:
+			setattr(self, prop, False)
 		for prop in props:
 			setattr(self, prop, True)
 
@@ -82,12 +84,19 @@ class TokenBadge:
 		self.totalTokensNum = totalTokensNum
 		self.specPowNum = specPowNum
 
-	def getRegions(self, game):
+	def getRegions(self):
 		result = list()
-		for region in game.map.regions:
+		for region in self.game.map.regions:
 			if region.tokenBadgeId == self.id:
 				result.append(region)
 		return result
+
+	def isNeighbor(self, region):
+		regions = self.getRegions()
+		for reg in regions:
+			if region in reg.adjacent:
+				return True
+		return False
 
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
@@ -106,8 +115,8 @@ def createMap(mapState):
 	return Map(mapState['mapId'], mapState['playersNum'], mapState['turnsNum'], regions);
 
 def createTokenBadge(tokenBadge, declined):
-	return TokenBadge(tokenBadge.id, tokenBadge.raceName, tokenBadge.specialPowerName,
-				None, None, declined, tokenBadge.totalTokensNum)
+	return TokenBadge(tokenBadge['tokenBadgeId'], tokenBadge['raceName'], 
+		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'])
 	
 class AI(threading.Thread):
 	def __init__(self, host, game, sid, id ):
@@ -121,6 +130,7 @@ class AI(threading.Thread):
 		self.id = id
 		self.gameState = None
 		self.currentTokenBadge = None
+		self.declinedTokenBadge = None
 		threading.Thread.__init__(self)
 		self.start()
 		
@@ -167,9 +177,13 @@ class AI(threading.Thread):
 				if 'currentTokenBadge' in player:
 					self.currentTokenBadge = createTokenBadge(player['currentTokenBadge'], 
 						False)
+				else:
+					self.currentTokenBadge = None
 				if 'declinedTokenBadge' in player:
 					self.declinedTokenBadge = createTokenBadge(player['declinedTokenBadge'], 
 						True)
+				else:
+					self.declinedTokenBadge = None
 
 		if not self.gameState:
 			self.gameState = Game(gameState['gameId'], map, 
@@ -187,7 +201,12 @@ class AI(threading.Thread):
 				self.masterId = gameState['friendsInfo']['masterId']
 		else:
 			self.masterId = None 
-				
+
+		if self.currentTokenBadge:
+			self.currentTokenBadge.game = self.gameState
+		if self.declinedTokenBadge:
+			self.declinedTokenBadge.game = self.gameState
+			
 	def selectRace(self):
 		maxTokensNum = 0
 		bestTokens = list()
@@ -255,8 +274,8 @@ class AI(threading.Thread):
 		f1 = region.ownerId != self.id or region.ownerId == self.id and region.inDecline
 		f2 = not(self.masterId and self.masterId == region.ownerId)
 		self.currentTokenBadge.regions = self.currentTokenBadge.getRegions()
-		f3 = self.race.canConquer(region, self.currentTokenBadge)
-		f4 = self.race.canConquer(region, self.currentTokenBadge)
+		f3 = self.currentTokenBadge.race.canConquer(region, self.currentTokenBadge)
+		f4 = self.currentTokenBadge.specPower.canConquer(region, self.currentTokenBadge)
 		f5 = not region.isImmune(False)
 		return f1 and f2 and f3 and f4 and f5
 
@@ -267,7 +286,8 @@ class AI(threading.Thread):
 		for region in self.gameState.map.regions:
 			if self.canConquer(region):
 				result.append(region)
-
+		return result
+		
 	def redeploy(self):
 		regions = list()
 		for region in self.currentTokenBadge.getRegions():
