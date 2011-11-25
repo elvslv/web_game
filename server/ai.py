@@ -60,7 +60,6 @@ class Game:
 		
 	def checkStage(self, state, ai, attackType = None):
 		lastEvent = self.state
-		print lastEvent, state
 		badStage = not (lastEvent in possiblePrevCmd[state]) 
 		if attackType:
 			badStage = badStage and ai.badAttack(attackType)
@@ -135,7 +134,6 @@ class AI(threading.Thread):
 		self.start()
 		
 	def sendCmd(self, obj):
-		print json.dumps(obj)
 		self.conn.request("POST", "/ajax", json.dumps(obj))
 		r1 = self.conn.getresponse()
 		res = r1.read()
@@ -155,13 +153,12 @@ class AI(threading.Thread):
 			map = createMap(data['gameState']['map'])
 		else:
 			regions = list()
-			for i, region in enumerate(data['gameState']['map']):
+			for i, region in enumerate(self.gameState.map.regions):
 				curReg = list()
-				if 'currentRegionState' in region:
-					curState = region['currentRegionState']
+				if 'currentRegionState' in data['gameState']['map']['regions']:
+					curState = data['gameState']['map']['regions']['currentRegionState']
 					for field in currentRegionFields:
-						region[field] = curState[field] if field in curState else None
-				regions.append(region)
+						setattr(region, field, curState[field] if field in curState else None)
 			self.gameState.map.regions = regions
 		
 		tokenBadges = list()
@@ -253,7 +250,10 @@ class AI(threading.Thread):
 		self.slaveId = None
 
 	def shouldSelectFriend(self):
-		return self.gameState.checkStage(GAME_CHOOSE_FRIEND, self) and not self.slaveId
+		f1 = self.gameState.checkStage(GAME_CHOOSE_FRIEND, self)
+		f2 = not self.slaveId
+		f3 = self.currentTokenBadge and self.currentTokenBadge.specPower.canSelectFriend()
+		return f1 and f2 and f3
 
 	def selectFriend(self):
 		players = [player['id'] for player in self.gameState.players]
@@ -287,6 +287,12 @@ class AI(threading.Thread):
 			if self.canConquer(region):
 				result.append(region)
 		return result
+
+	def conquer(self):
+		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 
+			'regionId': self.conquerableRegions[0].id})
+		if data['result'] != 'ok':
+				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 		
 	def redeploy(self):
 		regions = list()
@@ -308,21 +314,20 @@ class AI(threading.Thread):
 			return self.selectFriend
 		if self.currentTokenBadge:
 			self.conquerableRegions = self.getConquerableRegions()
-			if not len(self.conquerableRegions): #should redeploy
+			if not len(self.conquerableRegions) and self.gameState.checkStage(GAME_REDEPLOY, self):
 				return self.redeploy
-			return self.conquer
+			if self.gameState.checkStage(GAME_CONQUER, self):
+				return self.conquer
 		return self.finishTurn
 
 	def run(self):
 		time.sleep(10)
-		print 'aaaa'
 		while True:
 			self.getGameState()
 			activePlayer = self.gameState.activePlayerId
 			defendingPlayer = self.gameState.defendingInfo['playerId'] if self.gameState.defendingInfo else None
 			if self.gameState.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\
 				(self.id == activePlayer and defendingPlayer):
-				print 'sleep'
 				time.sleep(5)
 				continue
 			self.getNextAct()()

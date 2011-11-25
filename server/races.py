@@ -277,6 +277,9 @@ class BaseSpecialPower:
 	def setFortified(self, tokenBadge, fortified):
 		raise BadFieldException('badSpecialPower')
 
+	def canSelectFriend(self):
+		return False
+
 	def selectFriend(self, user, data):
 		raise BadFieldException('badSpecialPower')
 
@@ -334,7 +337,9 @@ class SpecialPowerDiplomat(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Diplomat', 5, 1)
 		
-
+	def canSelectFriend(self):
+		return True
+		
 	def selectFriend(self, user, data):
 		if not('friendId' in data and isinstance(data['friendId'], int)):
 			raise BadFieldException('badFriendId')

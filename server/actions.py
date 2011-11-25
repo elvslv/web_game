@@ -75,7 +75,6 @@ def act_uploadMap(data):
 			try:	
 				dbi.addRegion(curId, newMap, regInfo)
 			except KeyError, e:
-				print e
 				raise BadFieldException('badRegion')
 			curId += 1
 		i = 0
@@ -88,7 +87,6 @@ def act_uploadMap(data):
 
 def act_createGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	print 1
 	if user.gameId: raise BadFieldException('alreadyInGame')
 	map_ = dbi.getXbyY('Map', 'id', data['mapId'])
 	descr = None
@@ -99,18 +97,14 @@ def act_createGame(data):
 		randseed = data['randseed']
 	newGame = Game(data['gameName'], descr, map_, randseed, data['ai'] if 'ai' in\
 		data else None)
-	print 2
 	dbi.addUnique(newGame, 'gameName')
 	initRegions(map_, newGame)
-	print 3
 	user.game = newGame
 	user.priority = 1
 	user.inGame = True
 	dbi.flush(user)
-	print 4
 	if not misc.TEST_MODE:
 		data['randseed'] = randseed
-	print 11
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'gameId': newGame.id}
 
@@ -260,11 +254,9 @@ def act_aiJoin(data):
 	return {'result': 'ok'}
 
 def act_startAI(data):
-	print "startAI"
 	result = dbi.query(User).filter(User.isAI == True).all()
 	for inst in result:
 		game = dbi.getXbyY('Game', 'id', inst.gameId)
-		print "start AI: %d,%d, %d", game.id, inst.sid, inst.id
 		ai = AI('localhost:8080', game, inst.sid, inst.id)
 
 def doAction(data, check = True):
