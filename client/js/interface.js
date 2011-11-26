@@ -514,12 +514,14 @@ Interface.changeOnLogout = function()
 	$('#username, #password').val('');
 	$('#login, [id=register]').show();
 	$('#logout, [id*=join], [id*=leave], #createGame, #sendMessage, #loadGame').hide();
+	$('#gameList').show();
 	Interface.removeGameTab();
 }
 
 Interface.changeOnLeave = function() 
 {
 	$('[id*=join], #createGame').show();
+	$('#gameList').show();
 	Interface.removeGameTab();
 }
 
