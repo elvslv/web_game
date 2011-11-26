@@ -36,12 +36,12 @@ Graphics.freeTokens = {
 };
 
 Graphics.drawTokenBadge = function(reg, badgeType, num){	
-	if (!num) return;
-	var pic = badgeType.getPic(reg && reg.inDecline),
-		place = reg || Graphics.freeTokens,
+	if (!badgeType) return;
+	var place = reg || Graphics.freeTokens,
 		coords = badgeType.race ? place.raceCoords : place.powerCoords,
 		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
-		badge; 
+		pic = badgeType.getPic(reg && reg.inDecline),
+		badge;
 	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
 		return previousBadge;
 	if(previousBadge)
@@ -49,6 +49,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		previousBadge.remove();
 		delete previousBadge;
 	}
+	if (!num) return;
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"}).toFront();
 	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
@@ -175,9 +176,8 @@ Graphics.drawRegionBadges = function(region){
 	var tBadge = region.getTokenBadge();
 	Graphics.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
 			region.tokensNum);
-	if (tBadge && tBadge.getPower().needRendering())
-		Graphics.drawTokenBadge(region, tBadge.getPower(), 
-			0 + region[tBadge.getPower().regPropName]);
+	tBadge && Graphics.drawTokenBadge(region, tBadge.getPower(), 
+				0 + region[tBadge.getPower().regPropName]);
 };
 
 
@@ -237,12 +237,13 @@ Graphics.drawMap = function(map) {
 				r0 = paper.path(getSvgPath(region.coords))
 					.attr({fill: landscape})
 				r =	paper.path(getSvgPath(region.coords))
-					.attr({fill: "red", 'fill-opacity' : 0, 
-					stroke : strokeStyle, "stroke-width": 3, 
-					"stroke-linecap": "round"});
+					.attr({	stroke : strokeStyle, "stroke-width": 3, 
+					"stroke-linecap": "round"}),
+					attrs = Graphics.getRegColorAndOpacity(region);
 			region.ui = r;
 			r.model = region;
 			Graphics.drawRegionBadges(region);
+			r.animate({fill : attrs[0], 'fill-opacity' : attrs[1]}, 1000);
 			r.hover(selectRegion(r, true), selectRegion(r, false));
 			r.click(regionClick(region));
 			r.canDrop = function(badgeType){

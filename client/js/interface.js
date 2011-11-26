@@ -403,7 +403,7 @@ Interface.fillGameList = function(games)
 			(showingGames[lastSortIndex] === Client.gameList[i].gameId))
 			$('#gameList:nth-child(' + (i + 1) + ') ul').show();
 		
-		if (Client.currentUser.gameId === Client.gameList[i].gameId)	
+		if (user() && user().gameId === Client.gameList[i].gameId)	
 			Client.currentUser.gameIndex = i;
 		$('#join' + Client.gameList[i].gameId)
 			.button()
@@ -448,7 +448,7 @@ Interface.changeOnRegistration = function()
 
 Interface.checkForExistingGame = function()
 {
-	if (Client.gameList)
+	if (user() && Client.gameList)
 	{
 		for (var i = 0; i < Client.gameList.length; ++i)
 		{

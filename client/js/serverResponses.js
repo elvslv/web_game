@@ -279,7 +279,16 @@ function declineResponse(data)
 	switch(data['result'])
 	{
 		case 'ok':
-			break; //state will be changed on the next getGameState()
+			if (Graphics.freeTokens.ui.power){
+				Graphics.freeTokens.ui.power.remove();
+				delete Graphics.freeTokens.ui.power;
+			}
+			if (Graphics.freeTokens.ui.race){
+				Graphics.freeTokens.ui.race.remove();
+				delete Graphics.freeTokens.ui.race;
+			}
+			finishTurnClick();
+			break;
 		default:
 			console.error('Unknown server response' + data);
  	}
@@ -315,7 +324,7 @@ function conquerResponse(data)
 			break;
 		case 'ok':
 			alert('Your attack was successfull' + 
-				(data['dice'] != undefined ? ', \n dice: ' + data['dice'] : ''));
+				(data['dice'] !== undefined ? ', \n dice: ' + data['dice'] : ''));
 			Interface.prepareForConquest();
 			break; //state will be changed on the next getGameState()
 		default:
@@ -431,6 +440,9 @@ function redeployResponse(data)
 				Graphics.freeTokens.ui.race.remove();
 				delete Graphics.freeTokens.ui.race;
 			}
+			$('#changeRedeployStatus').html('Start redeploy');
+			if (!user().specPower().canActAfterRedeployment())
+				finishTurnClick();
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
