@@ -65,6 +65,9 @@ class Game:
 			badStage = badStage and ai.badAttack(attackType)
 		return not badStage
 
+	def getLastState(self):
+		return self.state
+
 class TokenBadge:
 	def __init__(self, id, raceName, specPowerName, pos, bonusMoney, inDecline = None,
 			totalTokensNum = None, specPowNum = None):
@@ -83,8 +86,10 @@ class TokenBadge:
 		self.totalTokensNum = totalTokensNum
 		self.specPowNum = specPowNum
 
-	def getRegions(self):
-		return filter(lambda x: x.tokenBadgeId == self.id, self.game.map.regions)
+	def getRegions(self, defReg = None):
+		return filter(lambda x: x.tokenBadgeId == self.id and (not defReg or not x.isAdjacent(defReg)),
+			self.game.map.regions)
+
 	
 	def isNeighbor(self, region):
 		return len(filter(lambda x: x.isAdjacent(region), self.getRegions())) > 0
@@ -119,7 +124,7 @@ class AI(threading.Thread):
 		self.slaveId = None
 		self.sid = sid
 		self.id = id
-		self.gameState = None
+		self.game = None
 		self.currentTokenBadge = None
 		self.declinedTokenBadge = None
 		threading.Thread.__init__(self)
@@ -141,10 +146,10 @@ class AI(threading.Thread):
 		data = self.sendCmd({'action': 'getGameState', 'gameId': self.gameId})
 		gameState = data['gameState']
 		map_ = None
-		if not self.gameState:
+		if not self.game:
 			map_ = createMap(data['gameState']['map'])
 		else:
-			for i, region in enumerate(self.gameState.map.regions):
+			for i, region in enumerate(self.game.map.regions):
 				if 'currentRegionState' in data['gameState']['map']['regions'][i]:
 					curState = data['gameState']['map']['regions'][i]['currentRegionState']
 					for field in currentRegionFields:
@@ -170,16 +175,16 @@ class AI(threading.Thread):
 				else:
 					self.declinedTokenBadge = None
 
-		if not self.gameState:
-			self.gameState = Game(gameState['gameId'], map_, 
+		if not self.game:
+			self.game = Game(gameState['gameId'], map_, 
 				gameState['lastEvent'] if (gameState['state'] == GAME_START) else gameState['state'],
 				gameState['currentTurn'], gameState['activePlayerId'], tokenBadges, gameState['players'])
 		else:
-			self.gameState.visibleTokenBadges = tokenBadges
-			self.gameState.players = gameState['players']
-			self.gameState.activePlayerId = gameState['activePlayerId'];
-			self.gameState.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state'];
-		self.gameState.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
+			self.game.visibleTokenBadges = tokenBadges
+			self.game.players = gameState['players']
+			self.game.activePlayerId = gameState['activePlayerId'];
+			self.game.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state'];
+		self.game.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
 		if 'friendsInfo' in gameState and 'slaveId' in gameState['friendsInfo'] and\
 				gameState['friendsInfo']['slaveId']== self.id:
 				self.masterId = gameState['friendsInfo']['masterId']
@@ -187,15 +192,15 @@ class AI(threading.Thread):
 			self.masterId = None 
 
 		if self.currentTokenBadge:
-			self.currentTokenBadge.game = self.gameState
+			self.currentTokenBadge.game = self.game
 		if self.declinedTokenBadge:
-			self.declinedTokenBadge.game = self.gameState
+			self.declinedTokenBadge.game = self.game
 			
 	def selectRace(self):
 		maxTokensNum = 0
 		bestTokens = list()
 
-		for i, visibleBadge in enumerate(self.gameState.visibleTokenBadges):
+		for i, visibleBadge in enumerate(self.game.visibleTokenBadges):
 			if self.coins >= 5 - i:
 				if visibleBadge.race.maxNum + visibleBadge.specPower.tokensNum >= maxTokensNum:
 					maxTokensNum = visibleBadge.race.maxNum + visibleBadge.specPower.tokensNum
@@ -213,10 +218,22 @@ class AI(threading.Thread):
 		return True
 	
 	def defend(self):
-		pass
-
+		defInfo = self.game.defendingInfo
+		tokenBadge = self.currentTokenBadge
+		tokensNum = defInfo['tokensNum']
+		defRegion = self.game.map.getRegion(defInfo['regionId'])
+		regionsToRetreat = tokenBadge.getRegions(defRegion) or tokenBadge.getRegions()
+		request = list()
+		request.append({'regionId' : regionsToRetreat[0].id, 'tokensNum' : tokensNum})
+		data = self.sendCmd({'action': 'defend', 'sid': self.sid, 'regions': request})
+		if data['result'] != 'ok':
+				raise BadFieldException('unknown error in defend: %s' % data['result'])
+		
+		
 	def shouldDecline(self):
-		return self.currentTokenBadge and self.gameState.checkStage(GAME_DECLINE, self) and\
+		print self.currentTokenBadge.specPower.canDecline(self, False)
+		return self.currentTokenBadge and self.currentTokenBadge.specPower.canDecline(self, False) and\
+			self.game.checkStage(GAME_DECLINE, self) and\
 			self.currentTokenBadge.totalTokensNum - len(self.currentTokenBadge.getRegions()) < 4
 
 	def decline(self):
@@ -225,7 +242,7 @@ class AI(threading.Thread):
 			raise BadFieldException('unknown error in decline %s' % data['result'])
 
 	def shouldFinishTurn(self):
-		return self.gameState.checkStage(GAME_FINISH_TURN, self)
+		return self.game.checkStage(GAME_FINISH_TURN, self)
 
 	def finishTurn(self):
 		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
@@ -237,13 +254,13 @@ class AI(threading.Thread):
 		self.slaveId = None
 
 	def shouldSelectFriend(self):
-		f1 = self.gameState.checkStage(GAME_CHOOSE_FRIEND, self)
+		f1 = self.game.checkStage(GAME_CHOOSE_FRIEND, self)
 		f2 = not self.slaveId
 		f3 = self.currentTokenBadge and self.currentTokenBadge.specPower.canSelectFriend()
 		return f1 and f2 and f3
 
 	def selectFriend(self):
-		players = [player['id'] for player in self.gameState.players]
+		players = [player['id'] for player in self.game.players]
 		for region in self.conqueredRegions:
 			try:
 				players.remove(region.owner)
@@ -264,14 +281,13 @@ class AI(threading.Thread):
 		f3 = self.currentTokenBadge.race.canConquer(region, self.currentTokenBadge)
 		f4 = self.currentTokenBadge.specPower.canConquer(region, self.currentTokenBadge)
 		f5 = not region.isImmune(False)
-		print (f1, f2, f3, f4, f5)
 		return f1 and f2 and f3 and f4 and f5
 
 	def getConquerableRegions(self):
 		result = list()
-		if not(self.gameState.checkStage(GAME_CONQUER, self) and self.currentTokenBadge and self.tokensInHand):
+		if not(self.game.checkStage(GAME_CONQUER, self) and self.currentTokenBadge and self.tokensInHand):
 			return result
-		for region in self.gameState.map.regions:
+		for region in self.game.map.regions:
 			if self.canConquer(region):
 				result.append(region)
 		return result
@@ -279,11 +295,11 @@ class AI(threading.Thread):
 	def conquer(self):
 		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 
 			'regionId': self.conquerableRegions[0].id})
-		if data['result'] != 'ok':
+		if not(data['result'] == 'ok' or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 		
 	def redeploy(self):
-		# Won't work on amazons 
+		# Won't work on amazons
 		regions = list()
 		print self.currentTokenBadge.getRegions()
 		for region in self.currentTokenBadge.getRegions():
@@ -293,10 +309,10 @@ class AI(threading.Thread):
 			raise BadFieldException('unknown error in redeploy %s' % data['result'])
 
 	def getNextAct(self):
-		defendingPlayer = self.gameState.defendingInfo['playerId'] if self.gameState.defendingInfo else None
+		defendingPlayer = self.game.defendingInfo['playerId'] if self.game.defendingInfo else None
 		if self.id == defendingPlayer:
 			return self.defend
-		if not self.currentTokenBadge and self.gameState.checkStage(GAME_SELECT_RACE, self):
+		if not self.currentTokenBadge and self.game.checkStage(GAME_SELECT_RACE, self):
 			return self.selectRace
 		if self.shouldDecline():
 			return self.decline
@@ -304,10 +320,10 @@ class AI(threading.Thread):
 			return self.selectFriend
 		if self.currentTokenBadge:
 			self.conquerableRegions = self.getConquerableRegions()
-			if self.gameState.state == GAME_UNSUCCESSFULL_CONQUER or\
-				(not len(self.conquerableRegions) and self.gameState.checkStage(GAME_REDEPLOY, self)):
+			if self.game.state == GAME_UNSUCCESSFULL_CONQUER or\
+				(not len(self.conquerableRegions) and self.game.checkStage(GAME_REDEPLOY, self)):
 				return self.redeploy
-			if self.gameState.checkStage(GAME_CONQUER, self):
+			if self.game.checkStage(GAME_CONQUER, self):
 				return self.conquer
 		return self.finishTurn
 
@@ -315,9 +331,9 @@ class AI(threading.Thread):
 		time.sleep(10)
 		while True:
 			self.getGameState()
-			activePlayer = self.gameState.activePlayerId
-			defendingPlayer = self.gameState.defendingInfo['playerId'] if self.gameState.defendingInfo else None
-			if self.gameState.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\
+			activePlayer = self.game.activePlayerId
+			defendingPlayer = self.game.defendingInfo['playerId'] if self.game.defendingInfo else None
+			if self.game.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\
 				(self.id == activePlayer and defendingPlayer):
 				time.sleep(5)
 				continue

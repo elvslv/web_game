@@ -252,8 +252,11 @@ class BaseSpecialPower:
 	def incomeBonus(self, tokenBadge):
 		return 0
 
+	def canDecline(self, user, leaveGame):
+		return leaveGame or user.game.getLastState() != GAME_FINISH_TURN
+
 	def decline(self, user, leaveGame):
-		if not leaveGame and user.game.getLastState() != GAME_FINISH_TURN:
+		if self.canDecline(user, leaveGame):
 			raise BadFieldException('badStage')
 
 	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
@@ -521,8 +524,8 @@ class SpecialPowerStout(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Stout', 4) 
 
-	def decline(self, user, leaveGame):
-		pass
+	def canDecline(self, user, leaveGame):
+		return true
 
 class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
