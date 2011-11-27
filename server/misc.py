@@ -559,7 +559,7 @@ defaultMaps = [
 	 		},
 
 			{																		#7
-	 			'landDescription' : ['mountain', 'coast', 'mine', 'mountain', 'cavern'],  
+	 			'landDescription' : ['mountain', 'border', 'coast', 'mine', 'mountain', 'cavern'],  
 	 			'adjacent' : [2, 3, 6, 8, 11, 12],
 				'coordinates' : [[154, 135], [202, 107], [258, 104], [273, 142], [297, 143], [305, 172], [268, 222], [191, 247], [132, 256]],
 				'raceCoords': [150, 190],
@@ -603,7 +603,7 @@ defaultMaps = [
 	 		},
 
 			{																		#12
-	 			'landDescription' : ['coast', 'farmland'], 
+	 			'landDescription' : ['coast', 'farmland', 'border'], 
 				'coordinates' : [[217, 339], [281, 331], [312, 290], [308, 254], [268, 222], [191, 247], [160, 255], [155, 342]],
 	 			'adjacent' : [7, 8, 11, 13, 15, 17],
 				'raceCoords': [214, 253],

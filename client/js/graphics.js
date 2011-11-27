@@ -176,7 +176,8 @@ Graphics.drawRegionBadges = function(region){
 	var tBadge = region.getTokenBadge();
 	Graphics.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
 			region.tokensNum);
-	tBadge && Graphics.drawTokenBadge(region, tBadge.getPower(), 
+	tBadge && tBadge.getPower().needRendering() && 
+		Graphics.drawTokenBadge(region, tBadge.getPower(), 
 				0 + region[tBadge.getPower().regPropName]);
 };
 

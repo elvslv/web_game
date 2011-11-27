@@ -148,19 +148,15 @@ class AI(threading.Thread):
 	def getGameState(self):
 		data = self.sendCmd({'action': 'getGameState', 'gameId': self.gameId})
 		gameState = data['gameState']
-		map = None
+		map_ = None
 		if not self.gameState:
-			map = createMap(data['gameState']['map'])
+			map_ = createMap(data['gameState']['map'])
 		else:
-			regions = list()
 			for i, region in enumerate(self.gameState.map.regions):
-				curReg = list()
-				if 'currentRegionState' in data['gameState']['map']['regions']:
-					curState = data['gameState']['map']['regions']['currentRegionState']
+				if 'currentRegionState' in data['gameState']['map']['regions'][i]:
+					curState = data['gameState']['map']['regions'][i]['currentRegionState']
 					for field in currentRegionFields:
 						setattr(region, field, curState[field] if field in curState else None)
-			self.gameState.map.regions = regions
-		
 		tokenBadges = list()
 		visibleBadges = gameState['visibleTokenBadges']
 		for i, visibleBadge in enumerate(visibleBadges):
@@ -183,7 +179,7 @@ class AI(threading.Thread):
 					self.declinedTokenBadge = None
 
 		if not self.gameState:
-			self.gameState = Game(gameState['gameId'], map, 
+			self.gameState = Game(gameState['gameId'], map_, 
 				gameState['lastEvent'] if (gameState['state'] == GAME_START) else gameState['state'],
 				gameState['currentTurn'], gameState['activePlayerId'], tokenBadges, gameState['players'])
 		else:
@@ -191,7 +187,6 @@ class AI(threading.Thread):
 			self.gameState.players = gameState['players']
 			self.gameState.activePlayerId = gameState['activePlayerId'];
 			self.gameState.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state'];
-		
 		self.gameState.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
 		if 'friendsInfo' in gameState and 'slaveId' in gameState['friendsInfo'] and\
 				gameState['friendsInfo']['slaveId']== self.id:
@@ -277,6 +272,7 @@ class AI(threading.Thread):
 		f3 = self.currentTokenBadge.race.canConquer(region, self.currentTokenBadge)
 		f4 = self.currentTokenBadge.specPower.canConquer(region, self.currentTokenBadge)
 		f5 = not region.isImmune(False)
+		print (f1, f2, f3, f4, f5)
 		return f1 and f2 and f3 and f4 and f5
 
 	def getConquerableRegions(self):

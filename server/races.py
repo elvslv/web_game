@@ -16,7 +16,7 @@ class BaseRace:
 		self.raceId = id
 
 	def canConquer(self, region, tokenBadge):
-		ans = (not tokenBadge.regions and (region.coast or region.border)) or tokenBadge.regions
+		ans = (not tokenBadge.regions and region.border) or tokenBadge.regions
 		return ans
 					
 	def attackBonus(self, region, tokenBadge):

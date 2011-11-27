@@ -12,8 +12,8 @@ BaseRace = $.inherit({
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		return ((!tokenBadge.regions().length && (region.hasProperty('coast') || 
-			region.hasProperty('border'))) || tokenBadge.regions().length)
+		return (!tokenBadge.regions().length &&  
+			region.hasProperty('border')) || tokenBadge.regions().length;
 	},
 	enchant: function(region)
 	{
@@ -311,6 +311,11 @@ BaseSpecialPower = $.inherit({
 	needRedeploy : function()
 	{
 		return false;
+	},
+
+	needRendering : function()
+	{
+		return false;
 	}
 });
 
@@ -344,6 +349,10 @@ SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 	canDrop : function(region)
 	{
 		return canRedeploy(region);
+	},
+	needRendering : function()
+	{
+		return true;
 	}
 	
 
@@ -470,6 +479,10 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 	canDrop : function(region)
 	{
 		return canRedeploy(region);
+	},
+	needRendering : function()
+	{
+		return true;
 	}
 	
 });
@@ -481,6 +494,10 @@ SpecialPowerHeroic = $.inherit(BaseSpecialPower, {
 	},
 
 	needRedeploy : function()
+	{
+		return true;
+	},
+	needRendering : function()
 	{
 		return true;
 	}
