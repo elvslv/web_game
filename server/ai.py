@@ -49,9 +49,11 @@ class Map:
 				
 
 class Game:
-	def __init__(self, id, map, state, turn, activePlayerId, visibleTokenBadges, players):
+	def __init__(self, id, tokenBadgesInGame, 
+					map_, state, turn, activePlayerId, visibleTokenBadges, players):
 		self.id = id
-		self.map = map
+		self.tokenBadgesInGame = tokenBadgesInGame
+		self.map = map_
 		self.state = state
 		self.turn = turn
 		self.activePlayerId = activePlayerId
@@ -68,10 +70,14 @@ class Game:
 	def getLastState(self):
 		return self.state
 
+	def getTokenBadgeById(self, id):
+		return filter(lambda x: x.id == id, self.tokenBadgesInGame)[0]
+
 class TokenBadge:
-	def __init__(self, id, raceName, specPowerName, pos, bonusMoney, inDecline = None,
+	def __init__(self, id, raceName, specPowerName, owner, pos, bonusMoney, inDecline = None,
 			totalTokensNum = None, specPowNum = None):
 		self.id = id
+		self.owner = owner
 		for race in races.racesList:
 			if race.name == raceName:
 				self.race = race
@@ -94,6 +100,7 @@ class TokenBadge:
 	def isNeighbor(self, region):
 		return len(filter(lambda x: x.isAdjacent(region), self.getRegions())) > 0
 
+	
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
 	'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
@@ -110,9 +117,9 @@ def createMap(mapState):
 			*curReg))
 	return Map(mapState['mapId'], mapState['playersNum'], mapState['turnsNum'], regions);
 
-def createTokenBadge(tokenBadge, declined):
+def createTokenBadge(tokenBadge, owner, declined):
 	return TokenBadge(tokenBadge['tokenBadgeId'], tokenBadge['raceName'], 
-		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'])
+		tokenBadge['specialPowerName'], owner, None, None, declined, tokenBadge['totalTokensNum'])
 	
 class AI(threading.Thread):
 	def __init__(self, host, game, sid, id ):
@@ -158,29 +165,30 @@ class AI(threading.Thread):
 		visibleBadges = gameState['visibleTokenBadges']
 		for i, visibleBadge in enumerate(visibleBadges):
 			tokenBadge = TokenBadge(0, visibleBadge['raceName'], visibleBadge['specialPowerName'],
-				i, visibleBadge['bonusMoney'])
+				None, i, visibleBadge['bonusMoney'])
 			tokenBadges.append(tokenBadge)
+		tokenBadgesInGame = list()	
 		for player in gameState['players']:
+			if 'currentTokenBadge' in player:
+				tokenBadge = createTokenBadge(player['currentTokenBadge'], player['id'], False)
+				tokenBadgesInGame.append(tokenBadge);
+				if player['id'] == self.id: self.currentTokenBadge = tokenBadge
+			elif 'declinedTokenBadge' in player:
+				tokenBadge = createTokenBadge(player['declinedTokenBadge'], player['id'], True)
+				tokenBadgesInGame.append(tokenBadge);
+				if player['id'] == self.id: self.declinedTokenBadge = tokenBadge
+				
 			if player['id'] == self.id:
 				self.coins = player['coins']
 				self.tokensInHand = player['tokensInHand']
-				if 'currentTokenBadge' in player:
-					self.currentTokenBadge = createTokenBadge(player['currentTokenBadge'], 
-						False)
-				else:
-					self.currentTokenBadge = None
-				if 'declinedTokenBadge' in player:
-					self.declinedTokenBadge = createTokenBadge(player['declinedTokenBadge'], 
-						True)
-				else:
-					self.declinedTokenBadge = None
 
 		if not self.game:
-			self.game = Game(gameState['gameId'], map_, 
+			self.game = Game(gameState['gameId'], tokenBadgesInGame, map_, 
 				gameState['lastEvent'] if (gameState['state'] == GAME_START) else gameState['state'],
 				gameState['currentTurn'], gameState['activePlayerId'], tokenBadges, gameState['players'])
 		else:
 			self.game.visibleTokenBadges = tokenBadges
+			self.game.tokenBadgesInGame = tokenBadgesInGame
 			self.game.players = gameState['players']
 			self.game.activePlayerId = gameState['activePlayerId'];
 			self.game.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state'];
@@ -292,8 +300,16 @@ class AI(threading.Thread):
 		return result
 
 	def conquer(self):
-		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 
-			'regionId': self.conquerableRegions[0].id})
+		players = sorted(self.game.players, key=lambda x: x['coins'])
+		regions = set(self.conquerableRegions)
+		curSet = None
+		for player in players:
+			curSet = set(filter(lambda x: x.ownerId == player['id'], self.game.map.regions))
+			curSet &= regions
+			if len(curSet): break
+		if not len(curSet): curSet = regions
+		chosenRegion = min(curSet, key=lambda x: x.tokensNum)
+		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': chosenRegion.id})
 		if not(data['result'] == 'ok' or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 		
