@@ -47,9 +47,6 @@ class BaseRace:
 	def defenseBonus(self):
 		return 0
 
-	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
-		pass
-
 	def conquered(self, regionId, tokenBadgeId):
 		pass
 
@@ -258,9 +255,6 @@ class BaseSpecialPower:
 	def decline(self, user, leaveGame):
 		if self.canDecline(user, leaveGame):
 			raise BadFieldException('badStage')
-
-	def updateBonusStateAtTheEndOfTurn(self, tokenBadgeId):
-		pass
 
 	def turnFinished(self, tokenBadgeId):
 		pass
@@ -543,9 +537,9 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 			return True
 		cav = False
 		for reg in tokenBadge.regions:
-			if reg.region.cavern:
-				cav = True
-				break
+			if reg.region and reg.region.cavern or reg.cavern:			### For AI compatibility
+				cav = True												### Of course by tommorow
+				break													### It won't be here
 
 		return (region.cavern and cav)
 		
