@@ -253,7 +253,7 @@ class BaseSpecialPower:
 		return 0
 
 	def canDecline(self, user, leaveGame):
-		return leaveGame or user.game.getLastState() != GAME_FINISH_TURN
+		return leaveGame or user.game.getLastState() == GAME_FINISH_TURN
 
 	def decline(self, user, leaveGame):
 		if self.canDecline(user, leaveGame):

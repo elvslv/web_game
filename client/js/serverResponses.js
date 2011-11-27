@@ -279,14 +279,8 @@ function declineResponse(data)
 	switch(data['result'])
 	{
 		case 'ok':
-			if (Graphics.freeTokens.ui.power){
-				Graphics.freeTokens.ui.power.remove();
-				delete Graphics.freeTokens.ui.power;
-			}
-			if (Graphics.freeTokens.ui.race){
-				Graphics.freeTokens.ui.race.remove();
-				delete Graphics.freeTokens.ui.race;
-			}
+			Graphics.deleteBadge(Graphics.freeTokens.ui.power);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
 			finishTurnClick();
 			break;
 		default:
@@ -432,14 +426,9 @@ function redeployResponse(data)
 		case 'ok':
 			game().redeployStarted = false;
 			user().freePowerTokens = 0;
-			if (Graphics.freeTokens.ui.power){
-				Graphics.freeTokens.ui.power.remove();
-				delete Graphics.freeTokens.ui.power;
-			}
-			if (Graphics.freeTokens.ui.race){
-				Graphics.freeTokens.ui.race.remove();
-				delete Graphics.freeTokens.ui.race;
-			}
+			console.log(Graphics.freeTokens.ui.power);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.power);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
 			$('#changeRedeployStatus').html('Start redeploy');
 			if (!user().specPower().canActAfterRedeployment())
 				finishTurnClick();

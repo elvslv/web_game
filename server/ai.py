@@ -231,7 +231,6 @@ class AI(threading.Thread):
 		
 		
 	def shouldDecline(self):
-		print self.currentTokenBadge.specPower.canDecline(self, False)
 		return self.currentTokenBadge and self.currentTokenBadge.specPower.canDecline(self, False) and\
 			self.game.checkStage(GAME_DECLINE, self) and\
 			self.currentTokenBadge.totalTokensNum - len(self.currentTokenBadge.getRegions()) < 4
@@ -301,7 +300,6 @@ class AI(threading.Thread):
 	def redeploy(self):
 		# Won't work on amazons
 		regions = list()
-		print self.currentTokenBadge.getRegions()
 		for region in self.currentTokenBadge.getRegions():
 			regions.append({'regionId': region.id, 'tokensNum': region.tokensNum})
 		data = self.sendCmd({'action': 'redeploy', 'sid': self.sid, 'regions': regions})

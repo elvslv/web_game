@@ -35,6 +35,17 @@ Graphics.freeTokens = {
 	ui : {}
 };
 
+Graphics.deleteBadge = function(badge){
+	if (badge){
+		if (!badge.removed){
+			badge.num.remove();
+			delete badge.num;
+			badge.remove();
+		}
+		delete badge;
+	}
+};
+
 Graphics.drawTokenBadge = function(reg, badgeType, num){	
 	if (!badgeType) return;
 	var place = reg || Graphics.freeTokens,
@@ -44,17 +55,13 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		badge;
 	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
 		return previousBadge;
-	if(previousBadge)
-	{
-		previousBadge.remove();
-		delete previousBadge;
-	}
+	Graphics.deleteBadge(previousBadge);
 	if (!num) return;
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
-				.attr({fill : "url(" + pic +")"}).toFront();
+				.attr({fill : "url(" + pic +")"});
 	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
-			"text-anchor": "start"}).toFront();
+			"text-anchor": "start"});
 	badge.num.n = num;
 	badge.pic = pic;
 	badge.canDrag = (function(badgeType){
@@ -195,9 +202,10 @@ Graphics.update = function(map){
 		cur = regions[i];
 		cur.ui.animate({"stroke" : Graphics.getRegBoundsColor(cur)}, 1000);
 		attrs = Graphics.getRegColorAndOpacity(cur);
-		cur.ui.animate({fill : attrs[0], 'fill-opacity' : attrs[1]}, 1000);
+		cur.ui.attr({fill : attrs[0], 'fill-opacity' : attrs[1]});
 		cur.ui.toFront();
 		Graphics.drawRegionBadges(cur);
+		cur.ui.badgesToFront();
 	}
 	Graphics.drawFreeBadges();
 	Graphics.cnt++;
@@ -218,25 +226,19 @@ Graphics.drawMap = function(map) {
 		regions = map.sortedRegions(),
 		selectRegion = function(reg, sel){
 			return function(){
+				if (Graphics.dragging) return;
 				var attrs = Graphics.getRegColorAndOpacity(reg.model),
 					color = sel? 'red' : attrs[0],
 					opacity = sel ? 0.7 : attrs[1];
 				reg.animate({'fill-opacity': opacity, fill : color}, 300);
-				if (reg.race) {
-					reg.race.toFront();
-					reg.race.num.toFront();
-				}
-				if (reg.power) {
-					reg.power.toFront();
-					reg.power.num.toFront();
-				}
+				reg.badgesToFront();
 			}
 		},
 		drawRegion = function(region){
 			var landscape = Graphics.getRegLandscape(region),
 				strokeStyle = Graphics.getRegBoundsColor(region),
 				r0 = paper.path(getSvgPath(region.coords))
-					.attr({fill: landscape})
+					.attr({fill: landscape});
 				r =	paper.path(getSvgPath(region.coords))
 					.attr({	stroke : strokeStyle, "stroke-width": 3, 
 					"stroke-linecap": "round"}),
@@ -260,6 +262,16 @@ Graphics.drawMap = function(map) {
 			else {
 				this[field].num.n++;
 				this[field].num.attr({"text" : this[field].num.n});
+			}
+		};
+		r.badgesToFront = function(){
+			if (this.race) {
+				this.race.toFront();
+				this.race.num.toFront();
+			}
+			if (this.power) {
+				this.power.toFront();
+				this.power.num.toFront();
 			}
 		};
 		return r;

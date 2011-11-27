@@ -246,7 +246,7 @@ User = $.inherit({
 			cur, regs;
 											
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
-		this.freePowerTokens = specPower.bonusNum;
+		this.freePowerTokens = this.specPower().redeployReqName && specPower.bonusNum;
 		
 		game().redeployRegions = {};
 		rdRegs = game().redeployRegions;
@@ -550,7 +550,8 @@ canEnchant = function(region)
 canBeginDragonAttack = function()
 {
 	return isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON) &&
-		user().tokensInHand > 0 && user().specPower().dragonAttack();	
+		user().tokensInHand > 0 && user().specPower().dragonAttack() &&
+		!user().currentTokenBadge.regions().some(function (x){return x.dragon});	
 }
 
 
