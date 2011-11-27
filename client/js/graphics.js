@@ -176,8 +176,7 @@ Graphics.drawRegionBadges = function(region){
 	var tBadge = region.getTokenBadge();
 	Graphics.drawTokenBadge(region, tBadge ? tBadge.getRace() : getBaseRace(), 
 			region.tokensNum);
-	tBadge && tBadge.getPower().needRendering() && 
-		Graphics.drawTokenBadge(region, tBadge.getPower(), 
+	tBadge && Graphics.drawTokenBadge(region, tBadge.getPower(), 
 				0 + region[tBadge.getPower().regPropName]);
 };
 
@@ -197,6 +196,7 @@ Graphics.update = function(map){
 		cur.ui.animate({"stroke" : Graphics.getRegBoundsColor(cur)}, 1000);
 		attrs = Graphics.getRegColorAndOpacity(cur);
 		cur.ui.animate({fill : attrs[0], 'fill-opacity' : attrs[1]}, 1000);
+		cur.ui.toFront();
 		Graphics.drawRegionBadges(cur);
 	}
 	Graphics.drawFreeBadges();

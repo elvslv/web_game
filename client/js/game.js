@@ -550,7 +550,7 @@ canEnchant = function(region)
 canBeginDragonAttack = function()
 {
 	return isActivePlayer() && user().currentTokenBadge && checkStage(GAME_CONQUER, ATTACK_DRAGON) &&
-		user().tokensInHand > 0;	
+		user().tokensInHand > 0 && user().specPower().dragonAttack();	
 }
 
 

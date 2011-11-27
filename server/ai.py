@@ -84,18 +84,10 @@ class TokenBadge:
 		self.specPowNum = specPowNum
 
 	def getRegions(self):
-		result = list()
-		for region in self.game.map.regions:
-			if region.tokenBadgeId == self.id:
-				result.append(region)
-		return result
-
+		return filter(lambda x: x.tokenBadgeId == self.id, self.game.map.regions)
+	
 	def isNeighbor(self, region):
-		regions = self.getRegions()
-		for reg in regions:
-			if region in reg.adjacent:
-				return True
-		return False
+		return len(filter(lambda x: x.isAdjacent(region), self.getRegions())) > 0
 
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
@@ -291,7 +283,9 @@ class AI(threading.Thread):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 		
 	def redeploy(self):
+		# Won't work on amazons 
 		regions = list()
+		print self.currentTokenBadge.getRegions()
 		for region in self.currentTokenBadge.getRegions():
 			regions.append({'regionId': region.id, 'tokensNum': region.tokensNum})
 		data = self.sendCmd({'action': 'redeploy', 'sid': self.sid, 'regions': regions})
@@ -310,7 +304,8 @@ class AI(threading.Thread):
 			return self.selectFriend
 		if self.currentTokenBadge:
 			self.conquerableRegions = self.getConquerableRegions()
-			if not len(self.conquerableRegions) and self.gameState.checkStage(GAME_REDEPLOY, self):
+			if self.gameState.state == GAME_UNSUCCESSFULL_CONQUER or\
+				(not len(self.conquerableRegions) and self.gameState.checkStage(GAME_REDEPLOY, self)):
 				return self.redeploy
 			if self.gameState.checkStage(GAME_CONQUER, self):
 				return self.conquer

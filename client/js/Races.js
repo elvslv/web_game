@@ -311,12 +311,8 @@ BaseSpecialPower = $.inherit({
 	needRedeploy : function()
 	{
 		return false;
-	},
-
-	needRendering : function()
-	{
-		return false;
 	}
+
 });
 
 SpecialPowerAlchemist = $.inherit(BaseSpecialPower, {
@@ -349,13 +345,7 @@ SpecialPowerBivouacking = $.inherit(BaseSpecialPower, {
 	canDrop : function(region)
 	{
 		return canRedeploy(region);
-	},
-	needRendering : function()
-	{
-		return true;
 	}
-	
-
 
 });														
 														
@@ -417,7 +407,7 @@ SpecialPowerDragonMaster = $.inherit(BaseSpecialPower, {
 				['dragonAttack', user().sid, newReg.id]), dragonAttackResponse);
 	
 	},
-	needRendering : function()
+	dragonAttack : function()
 	{
 		return true;
 	},
@@ -479,10 +469,6 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 	canDrop : function(region)
 	{
 		return canRedeploy(region);
-	},
-	needRendering : function()
-	{
-		return true;
 	}
 	
 });
@@ -494,10 +480,6 @@ SpecialPowerHeroic = $.inherit(BaseSpecialPower, {
 	},
 
 	needRedeploy : function()
-	{
-		return true;
-	},
-	needRendering : function()
 	{
 		return true;
 	}
