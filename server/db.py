@@ -220,27 +220,6 @@ class Game(Base):
 		if not tokenBadge: raise BadFieldException('badPosition')
 		return tokenBadge[0]
 
-	def checkStage(self, state, user, attackType = None):
-		lastEvent = self.history[-1]
-		badStage = not (lastEvent.state in misc.possiblePrevCmd[state]) 
-		if attackType:
-			curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
-				x.userId == user.id and x.state == misc.GAME_CONQUER, 
-				user.game.history)
-			if curTurnHistory:
-				if filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory):
-					badStage = True
-		if lastEvent.state == misc.GAME_CONQUER:
-			battle = lastEvent.warHistory
-			victim = battle.victimBadge
-			canDefend = victim != None  and\
-				not victim.inDecline and\
-				battle.attackType != misc.ATTACK_ENCHANT and\
-				battle.victimTokensNum > 1
-			badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
-		if badStage or (user.id != self.activePlayerId and state != misc.GAME_DEFEND):
-			raise BadFieldException('badStage')
-
 	def getDefendingRegion(self, player):
 		lastWarHistoryEntry = self.history[-1].warHistory
 		return lastWarHistoryEntry.conqRegion.region

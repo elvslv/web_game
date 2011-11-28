@@ -216,7 +216,8 @@ def act_defend(data):			## Should be renamed to retreat
 	user.game.checkStage(GAME_DEFEND, user)
 	attackedRegion = user.game.getDefendingRegion(user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	tokensNum = user.game.history[-1].warHistory.victimTokensNum + callRaceMethod(raceId, 'sufferCasualties', tokenBadge)
+	callRaceMethod(raceId, 'sufferCasualties', tokenBadge)
+	tokensNum = user.game.history[-1].warHistory.victimTokensNum - callRaceMethod(raceId, 'getCasualties')
 	notAdjacentRegions = []
 	for terr in tokenBadge.regions:
 		if terr.region.id not in attackedRegion.getNeighbors():##~~

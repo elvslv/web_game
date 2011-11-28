@@ -50,23 +50,25 @@ class BaseRace:
 	def conquered(self, regionId, tokenBadgeId):
 		pass
 
+	def canEnchant(self):
+		return False
+
 	def enchant(self, tokenBadgeId, regionId):
 		return BadFieldException('badRace')
 
 	def clearRegion(self, tokenBadge, region):
-		region.encampent = 0
+		region.encampment = 0
 		region.fortress = False
 		region.dragon = False
 		region.holeInTheGround = False
 		region.hero = False
 		return -1
 
-	def sufferCasualties_(self, tokenBadge):
-		return -1
+	def getCasualties(self):
+		return 1
 		
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
-		return -1
 
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -161,10 +163,10 @@ class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
-	def sufferCasualties(self, tokenBadge):
+	def getCasualties(self):
 		return 0
 
-	def sufferCasualties_(self, tokenBadge):
+	def sufferCasualties(self, tokenBadge):
 		return 0
 
 	def clearRegion(self, tokenBadge, region):
@@ -185,6 +187,9 @@ class RaceSorcerers(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
+	def canEnchant(self):
+		return True
+	
 	def enchant(self, tokenBadge, regState):
 		game =  tokenBadge.owner.game
 		victimBadge = regState.tokenBadge
@@ -244,6 +249,9 @@ class BaseSpecialPower:
 	def canConquer(self, region, tokenBadge):
 		return (tokenBadge.isNeighbor(region) or not tokenBadge.regions) and\
 			not region.sea
+
+	def canUseDragon(self):
+		return False
 		
 	def attackBonus(self, regionId, tokenBadgeId):
 		return 0
@@ -393,6 +401,9 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def clearRegion(self, tokenBadge, region):
 		tokenBadge.specPowNum -= 1
 		region.dragon = False
+
+	def canUseDragon(self):
+		return True
 		
 	def decline(self, user, leaveGame):
 		BaseSpecialPower.decline(self, user, leaveGame)

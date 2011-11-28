@@ -59,7 +59,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 	if (!num) return;
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"});
-	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
+	badge.num = Graphics.paper.text(coords[0] + 32, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"});
 	badge.num.n = num;
