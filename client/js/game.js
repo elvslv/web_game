@@ -267,8 +267,7 @@ User = $.inherit({
 		this.freeTokens = Math.max(this.freeTokens, 0);
 		if (this.race().deleteAdditionalUnits)
 			this.race().deleteAdditionalUnits();
-		Graphics.drawFreeBadges();
-	
+		
 	},
 
 	specPower : function()
@@ -493,7 +492,8 @@ canFinishTurn = function()
 canBeginConquer = function()
 {
 	return isActivePlayer() && user().currentTokenBadge &&
-		checkStage(GAME_CONQUER) && user().tokensInHand > 0;
+		checkStage(GAME_CONQUER) && user().tokensInHand > 0 && 
+		!game().redeployStarted;
 }
 
 canConquer = function(region)

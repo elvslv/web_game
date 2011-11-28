@@ -3,8 +3,8 @@ import json
 import threading
 import time
 import races
-import Queue
 
+from Queue import Queue
 from misc import *
 from gameExceptions import BadFieldException
 
@@ -23,6 +23,7 @@ class Region:
 		self.dragon = dragon
 		self.fortress = fortress
 		self.hero = hero
+		self.visited = False
 		self.inDecline = inDecline
 		for prop in possibleLandDescription[:11]:
 			setattr(self, prop, False)
@@ -74,7 +75,6 @@ class Game:
 		return self.state
 
 	def getTokenBadgeById(self, id):
-		print self.tokenBadgesInGame
 		return filter(lambda x: x.id == id, self.tokenBadgesInGame)[0]
 
 	
@@ -161,6 +161,7 @@ class AI(threading.Thread):
 			map_ = createMap(data['gameState']['map'])
 		else:
 			for i, region in enumerate(self.game.map.regions):
+				region.visited = False
 				if 'currentRegionState' in data['gameState']['map']['regions'][i]:
 					curState = data['gameState']['map']['regions'][i]['currentRegionState']
 					for field in currentRegionFields:
@@ -204,10 +205,8 @@ class AI(threading.Thread):
 		else:
 			self.masterId = None 
 
-		if self.currentTokenBadge:
-			self.currentTokenBadge.game = self.game
-		if self.declinedTokenBadge:
-			self.declinedTokenBadge.game = self.game
+		for tokenBadge in self.game.tokenBadgesInGame:
+			tokenBadge.game = self.game
 			
 	def selectRace(self):
 		maxTokensNum = 0
@@ -319,7 +318,7 @@ class AI(threading.Thread):
 
 	def canBeAttackedFromOutsideTheMap(self):
 		return len(filter(lambda x: 'currentTokenBadge' not in x or\
-			not len(self.game.getTokenBadgeById(x['currentTokenBadge']).getRegions()), 
+			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions()), 
 				self.game.players))
 		
 	def redeploy(self):
@@ -332,7 +331,7 @@ class AI(threading.Thread):
 			req[region.id] = 1
 			freeUnits -= 1
 			if not freeUnits: break
-			if alwaysZeroDist:
+			if alwaysZeroDist and region.border:
 				region.distFromEnemy = 0
 				continue				
 			q = Queue()
@@ -345,7 +344,7 @@ class AI(threading.Thread):
 				cur = q.get()
 				for reg in cur.adjacent:
 					if reg.visited: continue
-					if reg.ownerId:
+					if reg.ownerId and not reg.inDecline and reg.ownerId != self.id:
 						stop = True
 						break
 					reg.visited = True
@@ -353,21 +352,19 @@ class AI(threading.Thread):
 				dist += 1
 			region.distFromEnemy = dist
 		if freeUnits:
-			minDist = min(regions, key=lambda x: x.distFromEnemy)
-			strategicRegions = filter(lambda x: x.distFromEnemy==minDist)
+			minDist = min(regions, key=lambda x: x.distFromEnemy).distFromEnemy
+			borders = filter(lambda x: x.distFromEnemy == minDist, regions)
 			(div, mod) = divmod(freeUnits, len(strategicRegions))
 			if div:
-				for region in strategicRegions: req[region.id] += div
+				for region in borders: req[region.id] += div
 			if mod:
-				for region in strategicRegions:
+				for region in borders:
 					mod -= 1
 					req[region.id] += 1
 					if not mod: break
 		request = []
 		for k, v in req.items():
 			request.append({'regionId' : k, 'tokensNum' : v})
-	#	for region in self.currentTokenBadge.getRegions():
-	#		regions.append({'regionId': region.id, 'tokensNum': region.tokensNum})
 		data = self.sendCmd({'action': 'redeploy', 'sid': self.sid, 'regions': request})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in redeploy %s' % data['result'])

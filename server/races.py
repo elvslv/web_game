@@ -537,8 +537,8 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 			return True
 		cav = False
 		for reg in tokenBadge.regions:
-			if reg.region and reg.region.cavern or reg.cavern:			### For AI compatibility
-				cav = True												### Of course by tommorow
+			if reg.cavern or hasattr(reg, region) and reg.region.cavern:### For AI compatibility
+				cav = True												### Of course by tomorrow
 				break													### It won't be here
 
 		return (region.cavern and cav)

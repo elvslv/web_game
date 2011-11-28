@@ -69,7 +69,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 			return (!reg || (reg.ownerId === user().id && !reg.inDecline)) && 
 				((game().defendStarted && !badgeType.power && !reg) ||
 				(game().redeployStarted && badgeType.canStartRedeploy(reg)) ||
-				(badgeType.name === 'DragonMaster'));
+				(badgeType.name === 'DragonMaster') && !reg);
 		};	
 	}(badgeType));
 
@@ -118,6 +118,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 						else reg.ui.power = undefined;
 					}
 					that.num.remove();
+					delete that.num;
 					that.remove();
 				},
 				onSuccess = function(oldRegion, newRegion){
@@ -139,9 +140,10 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 			else restore(); 
 
 			if (!last()) {
-				this.tempCopy.remove();
+				Graphics.deleteBadge(this.tempCopy);
 				delete this.tempCopy;
 			}
+							
 			Graphics.dragging = false;
 		});
 	if (reg){
@@ -210,6 +212,11 @@ Graphics.update = function(map){
 	Graphics.drawFreeBadges();
 	Graphics.cnt++;
 };
+
+Graphics.resetHighlight = function(map){
+	map.regions.forEach(function(x){x.ui.attr({'fill-opacity' : 0})});
+};
+		
 
 Graphics.assignColors = function(){
 	if (Graphics.colors.length) return;

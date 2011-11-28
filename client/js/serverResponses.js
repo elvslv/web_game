@@ -456,6 +456,8 @@ function defendResponse(data)
 			break;
 		case 'ok':
 			game().defendStarted = false;
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
+			Graphics.resetHighlight(game().map)
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);
