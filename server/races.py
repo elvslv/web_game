@@ -96,9 +96,10 @@ class RaceGiants(BaseRace):
 
 	def attackBonus(self, region, tokenBadge):
 		res = 0
-		lands = filter(lambda x: x.region.mountain, tokenBadge.regions)
+		lands = filter(lambda x: x.region.mountain if hasattr(x, 'region') else x.mountain, 
+					tokenBadge.regions)
 		for  land in lands:
-			if region.adjacent(land.region):					#Need better names
+			if region.isAdjacent(land.region if hasattr(land, 'region') else land):					
 					res = -1
 					break
 		return res

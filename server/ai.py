@@ -37,7 +37,6 @@ class Region:
 		return self.holeInTheGround or self.dragon or self.hero or\
 			(enchanting and (self.encampment or not self.tokensNum or\
 				self.tokensNum > 1 or self.inDecline))
-
 class Map:
 	def __init__(self, id, playersNum, turnsNum, regions):
 		self.id = id
@@ -75,7 +74,8 @@ class Game:
 		return self.state
 
 	def getTokenBadgeById(self, id):
-		return filter(lambda x: x.id == id, self.tokenBadgesInGame)[0]
+		res = filter(lambda x: x.id == id, self.tokenBadgesInGame)
+		return res[0] if res else None
 
 	
 class TokenBadge:
@@ -263,7 +263,7 @@ class AI(threading.Thread):
 		self.dragon = None #regions
 		self.enchant = None
 		self.slaveId = None
-
+	
 	def shouldSelectFriend(self):
 		f1 = self.game.checkStage(GAME_CHOOSE_FRIEND, self)
 		f2 = not self.slaveId
@@ -303,17 +303,37 @@ class AI(threading.Thread):
 				result.append(region)
 		return result
 
+	
+	def getRegionPrice(self, reg):
+		tokenBadge = self.game.getTokenBadgeById(reg.tokenBadgeId)
+		enemyDefense = tokenBadge.race.defenseBonus() if tokenBadge else 0
+		return max(BASIC_CONQUER_COST + reg.encampment + reg.fortress +
+			reg.encampment + reg.fortress + reg.tokensNum + reg.mountain + enemyDefense +
+			self.currentTokenBadge.race.attackBonus(reg, self.currentTokenBadge) + 
+			self.currentTokenBadge.specPower.attackBonus(reg, self.currentTokenBadge), 1)
+
+	def getNonEmptyConqueredRegions(self):
+		return len(filter(lambda x: x.nonEmpty,  self.conqueredRegions))
+
 	def conquer(self):
 		players = sorted(self.game.players, key=lambda x: x['coins'])
 		regions = set(self.conquerableRegions)
+		chosenRegion = None
 		cur = None
+		found = False
 		for player in players:
 			cur = filter(lambda x: x.ownerId == player['id'], regions)
-			if len(cur): break
-		if not len(cur): cur = regions
-		chosenRegion = min(cur, key=lambda x: x.tokensNum)
+			if len(cur): 
+				chosenRegion = min(cur, key=lambda x: self.getRegionPrice(x))
+				if self.tokensInHand >= self.getRegionPrice(chosenRegion):
+					found = True
+					break
+		if not found: chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x))
+		chosenRegion.nonEmpty = chosenRegion.tokensNum > 0
 		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': chosenRegion.id})
-		if not(data['result'] == 'ok' or data['result'] == 'badTokensNum'):
+		ok = data['result'] == 'ok'
+		if ok: self.conqueredRegions.append(chosenRegion)
+		if not(ok or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 
 	def canBeAttackedFromOutsideTheMap(self):
@@ -332,7 +352,7 @@ class AI(threading.Thread):
 			freeUnits -= 1
 			if not freeUnits: break
 			if alwaysZeroDist and region.border:
-				region.distFromEnemy = 0
+				region.distFromEnemy = 1
 				continue				
 			q = Queue()
 			cur = None
@@ -352,9 +372,11 @@ class AI(threading.Thread):
 				dist += 1
 			region.distFromEnemy = dist
 		if freeUnits:
+			print map(lambda x: (x.distFromEnemy, x.id), regions)
 			minDist = min(regions, key=lambda x: x.distFromEnemy).distFromEnemy
 			borders = filter(lambda x: x.distFromEnemy == minDist, regions)
-			(div, mod) = divmod(freeUnits, len(strategicRegions))
+			print map(lambda x: x.id, borders)
+			(div, mod) = divmod(freeUnits, len(borders))
 			if div:
 				for region in borders: req[region.id] += div
 			if mod:

@@ -306,7 +306,7 @@ class TokenBadge(Base):
 			
 	def isNeighbor(self, region):
 		for reg in self.regions:
-			if region.adjacent(reg.region):
+			if region.isAdjacent(reg.region):
 				return True
 		return False
         
@@ -407,7 +407,7 @@ class Region(Base):
 	def getNeighbors(self):
 		return  map(lambda x : x.neighborId, self.neighbors) 
 
-	def adjacent(self, region):
+	def isAdjacent(self, region):
 		return region.id in self.getNeighbors() 
 
 class RegionState(Base):
