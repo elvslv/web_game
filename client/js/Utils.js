@@ -61,7 +61,6 @@ convertRedeploymentRequest = function(array, type){
 					}		
 			}());
 		}
-	console.log(result);
 	return type === Client.FORTRESS_CODE ? result[0] : result;
 };
 

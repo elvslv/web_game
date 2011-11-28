@@ -480,8 +480,7 @@ canSelectRace = function(i)
 
 canDecline = function()
 {
-	return isActivePlayer() && user().currentTokenBadge && 
-		getSpecPowByName(user().currentTokenBadge.specPowName).canDecline(user());
+	return isActivePlayer() && user().currentTokenBadge && getSpecPowByName(user().currentTokenBadge.specPowName).canDecline(user());
 }
 
 canFinishTurn = function()

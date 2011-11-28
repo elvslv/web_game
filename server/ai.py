@@ -4,9 +4,11 @@ import threading
 import time
 import races
 
-from Queue import Queue
+
+from misc_ai import *
 from misc import *
 from gameExceptions import BadFieldException
+
 
 
 class Region:
@@ -235,9 +237,11 @@ class AI(threading.Thread):
 		tokensNum = defInfo['tokensNum']
 		defRegion = self.game.map.getRegion(defInfo['regionId'])
 		regionsToRetreat = tokenBadge.getRegions(defRegion) or tokenBadge.getRegions()
+		calcDistances(self, regionsToRetreat)
 		request = list()
-		request.append({'regionId' : regionsToRetreat[0].id, 'tokensNum' : tokensNum})
-		data = self.sendCmd({'action': 'defend', 'sid': self.sid, 'regions': request})
+		distributeUnits(borders, freeUnits, request)
+		data = self.sendCmd({'action': 'defend', 'sid': self.sid, 
+			'regions': convertRedeploymentRequest(request, REDEPLOYMENT_CODE)})
 		if data['result'] != 'ok':
 				raise BadFieldException('unknown error in defend: %s' % data['result'])
 		
@@ -341,53 +345,47 @@ class AI(threading.Thread):
 			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions()), 
 				self.game.players))
 		
+
 	def redeploy(self):
-		alwaysZeroDist = self.canBeAttackedFromOutsideTheMap()
+		codeTable = {
+			'heroes' :     HERO_CODE,
+			'fortified' :  FORTRESS_CODE,
+			'encampments' : ENCAMPMENTS_CODE
+		};
 		regions = self.currentTokenBadge.getRegions()
+		calcDistances(self, regions)
 		tokenBadge = self.currentTokenBadge
 		freeUnits = tokenBadge.totalTokensNum + tokenBadge.race.turnEndReinforcements(self)
 		req = {}
-		for region in regions:
+		redplReqName = tokenBadge.specPower.redeployReqName
+		code = codeTable[redplReqName] if redplReqName in codeTable else None
+		if code: req[redplReqName] = {}			
+		for region in regions: 
+			if code == ENCAMPMENTS_CODE:
+				req['encampments'][region.id] = 0
 			req[region.id] = 1
 			freeUnits -= 1
-			if not freeUnits: break
-			if alwaysZeroDist and region.border:
-				region.distFromEnemy = 1
-				continue				
-			q = Queue()
-			cur = None
-			dist = 0
-			q.put(region)
-			region.visited = True		
-			stop = False		
-			while not (q.empty() or stop):			
-				cur = q.get()
-				for reg in cur.adjacent:
-					if reg.visited: continue
-					if reg.ownerId and not reg.inDecline and reg.ownerId != self.id:
-						stop = True
-						break
-					reg.visited = True
-					q.put(reg)
-				dist += 1
-			region.distFromEnemy = dist
-		if freeUnits:
-			print map(lambda x: (x.distFromEnemy, x.id), regions)
-			minDist = min(regions, key=lambda x: x.distFromEnemy).distFromEnemy
-			borders = filter(lambda x: x.distFromEnemy == minDist, regions)
-			print map(lambda x: x.id, borders)
-			(div, mod) = divmod(freeUnits, len(borders))
-			if div:
-				for region in borders: req[region.id] += div
-			if mod:
-				for region in borders:
-					mod -= 1
-					req[region.id] += 1
-					if not mod: break
-		request = []
-		for k, v in req.items():
-			request.append({'regionId' : k, 'tokensNum' : v})
-		data = self.sendCmd({'action': 'redeploy', 'sid': self.sid, 'regions': request})
+		minDist = min(regions, key=lambda x: x.distFromEnemy).distFromEnemy
+		borders = filter(lambda x: x.distFromEnemy == minDist, regions)
+		if code == HERO_CODE:
+			n = 2
+			for reg in sorted(regions, key=lambda x: x.distFromEnemy):
+				req['heroes'][reg.id] = 1
+				n -= 1
+				borders.remove(reg)
+				if not n: break
+		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortified, regions)) < 6:
+			reg = borders[0]
+			req['fortified'][reg.id] = 1
+			borders.remove(reg)
+		distributeUnits(borders, freeUnits, req)
+		if code == ENCAMPMENTS_CODE:
+			distributeUnits(borders, 5, req['encampments'])
+		redeployRequest = convertRedeploymentRequest(req, REDEPLOYMENT_CODE)
+		cmd = {'action': 'redeploy', 'sid': self.sid, 'regions': redeployRequest}
+		if code: 
+			cmd[redplReqName] = convertRedeploymentRequest(req[redplReqName], code)
+		data = self.sendCmd(cmd)
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in redeploy %s' % data['result'])
 

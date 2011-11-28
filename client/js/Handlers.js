@@ -53,7 +53,6 @@ redeployClick = function()
 		specPower = user().specPower(),
 		code = table[specPower.regPropName];
 	if (code) {
-		console.log(specPower);
 		cmds.push(specPower.redeployReqName);
 		params.push(convertRedeploymentRequest(
 			game().redeployRegions[specPower.regPropName], code));

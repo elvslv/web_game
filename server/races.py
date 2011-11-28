@@ -232,10 +232,11 @@ for i in range(len(racesList)):
 	racesList[i].setId(i)
 
 class BaseSpecialPower:
-	def __init__(self, name, tokensNum, bonusNum=None):
+	def __init__(self, name, tokensNum, bonusNum=None, redeployReqName=None):
 		self.name = name
 		self.tokensNum = tokensNum
 		self.bonusNum = bonusNum
+		self.redeployReqName = redeployReqName
 
 	def setId(self, id):
 		self.specialPowerId = id
@@ -301,7 +302,7 @@ class SpecialPowerBerserk(BaseSpecialPower):
 
 class SpecialPowerBivouacking(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Bivouacking', 5, 5)
+		BaseSpecialPower.__init__(self, 'Bivouacking', 5, 5, 'encampments')
 	
 	def decline(self, user, leaveGame):
 		BaseSpecialPower.decline(self, user, leaveGame)
@@ -414,7 +415,7 @@ class SpecialPowerForest(BaseSpecialPower):
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortified', 3, 6)
+		BaseSpecialPower.__init__(self, 'Fortified', 3, 6, 'fortified')
 		self.maxNum = 6
 
 	def clearRegion(self, tokenBadge, region):
@@ -446,7 +447,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Heroic', 5, 2)
+		BaseSpecialPower.__init__(self, 'Heroic', 5, 2, 'heroes')
 
  	def setHero(self, tokenBadge, heroes):
 		checkObjectsListCorrection(heroes, 
@@ -520,7 +521,7 @@ class SpecialPowerStout(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Stout', 4) 
 
 	def canDecline(self, user, leaveGame):
-		return true
+		return True
 
 class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
@@ -538,9 +539,10 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 			return True
 		cav = False
 		for reg in tokenBadge.regions:
-			if reg.cavern or hasattr(reg, region) and reg.region.cavern:### For AI compatibility
-				cav = True												### Of course by tomorrow
-				break													### It won't be here
+			if hasattr(reg, 'cavern') and reg.cavern or \
+					hasattr(reg, 'region') and reg.region.cavern:### For AI compatibility
+				cav = True												
+				break													
 
 		return (region.cavern and cav)
 		

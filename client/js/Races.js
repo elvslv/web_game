@@ -126,6 +126,7 @@ RaceAmazons = $.inherit(BaseRace, {
 	},
 	deleteAdditionalUnits : function()
 	{
+		console.log(user().tokensInHand);
 		var n = 4 - user().tokensInHand,
 			regions = user().regions(),
 			loop = function(needCheck){
@@ -139,20 +140,22 @@ RaceAmazons = $.inherit(BaseRace, {
 						n--;
 						lbl.n--;
 						if (!lbl.n) {
-							regions[i].ui.race.remove();
-							delete regions[i].ui.race;
-							lbl.remove();
-							delete lbl;
+							Graphics.deleteBadge(regions[i].ui.race);
 						} else
 							lbl.attr({"text" : lbl.n});
 					}
 				}
 				return false;
-			}
+			}, m;
+		if (user().tokensInHand > 4){
+			m = --Graphics.freeTokens.ui.race.num.n;
+			Graphics.freeTokens.ui.race.num.attr({text : m});
+		} else
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
 		loop(true);
-		while (n) loop(false);			
+		while (n) loop(false);
 	}
-
+	
 	
 });
 
@@ -251,7 +254,7 @@ BaseSpecialPower = $.inherit({
 	},
 	canDecline: function(user)
 	{
-		return (Client.currGameState.state == GAME_FINISH_TURN);
+		return Client.currGameState.state === GAME_FINISH_TURN;
 	},
 	dragonAttack: function(region)
 	{
