@@ -247,7 +247,6 @@ User = $.inherit({
 											
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
 		this.freePowerTokens = this.specPower().redeployReqName && specPower.bonusNum;
-		
 		game().redeployRegions = {};
 		rdRegs = game().redeployRegions;
 		for (var i = 0; i < regions.length; ++i)
@@ -267,6 +266,7 @@ User = $.inherit({
 		this.freeTokens = Math.max(this.freeTokens, 0);
 		if (this.race().deleteAdditionalUnits)
 			this.race().deleteAdditionalUnits();
+		Graphics.drawFreeBadges();
 		
 	},
 
@@ -565,10 +565,8 @@ canBeginRedeploy = function()
 canRedeploy = function(region)
 {
 	var regions = user().currentTokenBadge.regions();
-	for (var i = 0; i < regions.length; ++i)
-		if (regions[i].id == region.id)
-			return true;
-	return false;
+	console.log(regions);
+	return regions.some(function(x){return x.id === region.id;});
 }
 
 canBeginDefend = function()

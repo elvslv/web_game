@@ -132,8 +132,8 @@ class AI(threading.Thread):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
 		self.gameId = game.id 
 		self.conqueredRegions = list()
-		self.dragon = None #regions
-		self.enchantUsed = None
+		self.dragonUsed = False #regions
+		self.enchantUsed = False
 		self.slaveId = None
 		self.sid = sid
 		self.id = id
@@ -239,6 +239,7 @@ class AI(threading.Thread):
 		regionsToRetreat = tokenBadge.getRegions(defRegion) or tokenBadge.getRegions()
 		findRegionsInDanger(self, regionsToRetreat)
 		request = {}
+		for region in regionsToRetreat: request[region.id] = 0
 		distributeUnits(regionsToRetreat, tokensNum, request)
 		data = self.sendCmd({'action': 'defend', 'sid': self.sid, 
 			'regions': convertRedeploymentRequest(request, REDEPLOYMENT_CODE)})
@@ -264,7 +265,7 @@ class AI(threading.Thread):
 
 	def dragonAttack(self):
 		region = max(self.conquerableRegions, key=lambda x: x.tokensNum)
-		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': region.id})
+		data = self.sendCmd({'action': 'dragonAttack', 'sid': self.sid, 'regionId': region.id})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in dragon attack %s' % data['result'])
 		self.dragonUsed = True
@@ -277,8 +278,8 @@ class AI(threading.Thread):
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in finish turn %s' % data['result'])
 		self.conqueredRegions = list()
-		self.dragon = None #regions
-		self.enchantUsed = None
+		self.dragonUsed = False #regions
+		self.enchantUsed = False
 		self.slaveId = None
 	
 	def shouldSelectFriend(self):
@@ -313,7 +314,7 @@ class AI(threading.Thread):
 
 	def canUseDragon(self):
 		return self.currentTokenBadge.specPower.canUseDragon() and not self.dragonUsed and\
-			self.tokensNum > 0 and\
+			self.tokensInHand > 0 and\
 			not len(filter(lambda x: x.dragon, self.currentTokenBadge.getRegions()))
 
 	def getConquerableRegions(self):
@@ -371,7 +372,6 @@ class AI(threading.Thread):
 			'encampments' : ENCAMPMENTS_CODE
 		};
 		regions = self.currentTokenBadge.getRegions()
-		findRegionsInDanger(self, regions)
 		tokenBadge = self.currentTokenBadge
 		freeUnits = tokenBadge.totalTokensNum + tokenBadge.race.turnEndReinforcements(self)
 		req = {'redeployment' : {}}
@@ -383,6 +383,7 @@ class AI(threading.Thread):
 				req['encampments'][region.id] = 0
 			req['redeployment'][region.id] = 1
 			freeUnits -= 1
+		findRegionsInDanger(self, regions)
 		borders = filter(lambda x: x.inDanger, regions)
 		if code == HERO_CODE:
 			n = 2
@@ -390,13 +391,15 @@ class AI(threading.Thread):
 				req['heroes'][reg.id] = 1
 				n -= 1
 				if reg in borders:
+					print 'this is the part where region would be removed'
 					borders.remove(reg)
 				if not n: break
 		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortified, regions)) < 6:
 			reg = borders[0]
 			req['fortified'][reg.id] = 1
 			borders.remove(reg)
-		distributeUnits(borders, freeUnits, req['redeployment'])
+		if freeUnits:
+			distributeUnits(borders if len(borders) else regions, freeUnits, req['redeployment'])
 		if code == ENCAMPMENTS_CODE:
 			distributeUnits(borders, 5, req['encampments'])
 		redeployRequest = convertRedeploymentRequest(req['redeployment'], REDEPLOYMENT_CODE)

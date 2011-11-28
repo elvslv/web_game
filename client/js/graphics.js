@@ -192,6 +192,7 @@ Graphics.drawRegionBadges = function(region){
 
 Graphics.drawFreeBadges = function(){
 	Graphics.freeTokens.ui.race = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
+	console.log(user().freePowerTokens)
 	Graphics.freeTokens.ui.power = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
 };	
 
