@@ -35,7 +35,7 @@ class BaseRace:
 	def turnEndReinforcements(self, user):
 		return 0
 
-	def turnStartReinforcements(self, user):		
+	def turnStartReinforcements(self):		
 		return 0
 
 	def needRedeployment(self):
@@ -145,7 +145,7 @@ class RaceAmazons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Amazons', 6, 15)
 
-	def turnStartReinforcements(self, user):
+	def turnStartReinforcements(self):
 		return 4
 
 	def needRedeployment(self):
@@ -381,8 +381,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			
 		misc_game.clearFromRace(regState)
 		if attackedTokenBadge:
-			attackedTokenBadge.totalTokensNum += racesList[attackedTokenBadge.raceId].sufferCasualties(
-				attackedTokenBadge)
+			racesList[attackedTokenBadge.raceId].sufferCasualties(attackedTokenBadge)
 		else:
 			attackedTokensNum = 0
 		##check anything else?

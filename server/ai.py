@@ -81,10 +81,9 @@ class Game:
 
 	
 class TokenBadge:
-	def __init__(self, id, raceName, specPowerName, owner, pos, bonusMoney, inDecline = None,
+	def __init__(self, id, raceName, specPowerName, pos, bonusMoney, inDecline = None,
 			totalTokensNum = None, specPowNum = None):
 		self.id = id
-		self.owner = owner
 		for race in races.racesList:
 			if race.name == raceName:
 				self.race = race
@@ -106,6 +105,8 @@ class TokenBadge:
 	def isNeighbor(self, region):
 		return len(filter(lambda x: x.isAdjacent(region), self.getRegions())) > 0
 
+	def characteristic(self):
+		return self.race.initialNum + self.specPower.tokensNum + self.race.turnStartReinforcements()
 	
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
@@ -123,9 +124,9 @@ def createMap(mapState):
 			*curReg))
 	return Map(mapState['mapId'], mapState['playersNum'], mapState['turnsNum'], regions)
 
-def createTokenBadge(tokenBadge, owner, declined):
+def createTokenBadge(tokenBadge, declined):
 	return TokenBadge(tokenBadge['tokenBadgeId'], tokenBadge['raceName'], 
-		tokenBadge['specialPowerName'], owner, None, None, declined, tokenBadge['totalTokensNum'])
+		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'])
 	
 class AI(threading.Thread):
 	def __init__(self, host, game, sid, id ):
@@ -172,16 +173,16 @@ class AI(threading.Thread):
 		visibleBadges = gameState['visibleTokenBadges']
 		for i, visibleBadge in enumerate(visibleBadges):
 			tokenBadge = TokenBadge(0, visibleBadge['raceName'], visibleBadge['specialPowerName'],
-				None, i, visibleBadge['bonusMoney'])
+				i, visibleBadge['bonusMoney'])
 			tokenBadges.append(tokenBadge)
 		tokenBadgesInGame = list()	
 		for player in gameState['players']:
 			if 'currentTokenBadge' in player:
-				tokenBadge = createTokenBadge(player['currentTokenBadge'], player['id'], False)
+				tokenBadge = createTokenBadge(player['currentTokenBadge'], False)
 				tokenBadgesInGame.append(tokenBadge);
 				if player['id'] == self.id: self.currentTokenBadge = tokenBadge
 			elif 'declinedTokenBadge' in player:
-				tokenBadge = createTokenBadge(player['declinedTokenBadge'], player['id'], True)
+				tokenBadge = createTokenBadge(player['declinedTokenBadge'], True)
 				tokenBadgesInGame.append(tokenBadge);
 				if player['id'] == self.id: self.declinedTokenBadge = tokenBadge
 				
@@ -211,22 +212,13 @@ class AI(threading.Thread):
 			tokenBadge.game = self.game
 			
 	def selectRace(self):
-		maxTokensNum = 0
-		bestTokens = list()
-
-		for i, visibleBadge in enumerate(self.game.visibleTokenBadges):
-			if self.coins >= 5 - i:
-				if visibleBadge.race.maxNum + visibleBadge.specPower.tokensNum >= maxTokensNum:
-					maxTokensNum = visibleBadge.race.maxNum + visibleBadge.specPower.tokensNum
-					if visibleBadge.race.maxNum + visibleBadge.specPower.tokensNum > maxTokensNum:
-						bestTokens = list()
-					bestTokens.append({'tok': visibleBadge, 
-						'num': visibleBadge.race.initialNum + visibleBadge.specPower.tokensNum})
-
-		if not len(bestTokens):
-			return False
-		badge = sorted(bestTokens, key = lambda bestToken: bestToken['num'], reverse = True)[0]['tok']
-		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': badge.pos})
+		visibleBadges = self.game.visibleTokenBadges
+		#chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
+		#	key=lambda x: x.characteristic())
+		chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and\
+			(x.specPower.name=='DragonMaster' or x.specPower.redeployReqName), visibleBadges)
+		if not len(chosenBadge): return False
+		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge[0].pos})
 		if result['result'] != 'ok':
 			raise BadFieldException('unknown error in select race %s' % result['result'])
 		return True
@@ -384,7 +376,7 @@ class AI(threading.Thread):
 			req['redeployment'][region.id] = 1
 			freeUnits -= 1
 		findRegionsInDanger(self, regions)
-		borders = filter(lambda x: x.inDanger, regions)
+		borders = filter(lambda x: x.inDanger and not x.dragon, regions)
 		if code == HERO_CODE:
 			n = 2
 			for reg in sorted(regions, key=lambda x: int(x.inDanger), reverse=True):

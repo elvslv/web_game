@@ -50,7 +50,7 @@ def act_selectRace(data):
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId
-	addUnits = callRaceMethod(raceId, 'turnStartReinforcements', user)
+	addUnits = callRaceMethod(raceId, 'turnStartReinforcements')
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum					
 	user.coins += chosenBadge.bonusMoney - price
 	user.currentTokenBadge = chosenBadge
