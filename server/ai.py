@@ -213,10 +213,10 @@ class AI(threading.Thread):
 			
 	def selectRace(self):
 		visibleBadges = self.game.visibleTokenBadges
-		#chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
-		#	key=lambda x: x.characteristic())
-		chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and\
-			(x.specPower.name=='DragonMaster' or x.specPower.redeployReqName), visibleBadges)
+		chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
+			key=lambda x: x.characteristic())
+		#chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and\
+		#	(x.race.name=='sorcerers'), visibleBadges)
 		if not len(chosenBadge): return False
 		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge[0].pos})
 		if result['result'] != 'ok':
@@ -383,10 +383,9 @@ class AI(threading.Thread):
 				req['heroes'][reg.id] = 1
 				n -= 1
 				if reg in borders:
-					print 'this is the part where region would be removed'
 					borders.remove(reg)
 				if not n: break
-		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortified, regions)) < 6:
+		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortress, regions)) < 6:
 			reg = borders[0]
 			req['fortified'][reg.id] = 1
 			borders.remove(reg)

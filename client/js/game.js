@@ -565,7 +565,6 @@ canBeginRedeploy = function()
 canRedeploy = function(region)
 {
 	var regions = user().currentTokenBadge.regions();
-	console.log(regions);
 	return regions.some(function(x){return x.id === region.id;});
 }
 

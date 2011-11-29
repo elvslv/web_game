@@ -35,14 +35,19 @@ Graphics.freeTokens = {
 	ui : {}
 };
 
-Graphics.deleteBadge = function(badge){
+Graphics.deleteBadge = function(badge, reg){
 	if (badge){
+		if (reg){
+			if (badge === reg.ui.race) reg.ui.race = undefined;
+			else reg.ui.power = undefined;
+		}
 		if (!badge.removed){
 			badge.num.remove();
 			delete badge.num;
 			badge.remove();
 		}
-		delete badge;
+
+			
 	}
 };
 
@@ -55,7 +60,8 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		badge;
 	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
 		return previousBadge;
-	Graphics.deleteBadge(previousBadge);
+	console.log(previousBadge);
+	Graphics.deleteBadge(previousBadge, reg);
 	if (!num) return;
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"});
@@ -112,22 +118,13 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 					that.attr({x: that.ox, y: that.oy}); 
 					that.num.attr({x: that.num.ox, y: that.num.oy});
 				}, 
-				deleteBadge = function(reg){
-					if (reg){
-						if (badgeType.race) reg.ui.race = undefined;
-						else reg.ui.power = undefined;
-					}
-					that.num.remove();
-					delete that.num;
-					that.remove();
-				},
 				onSuccess = function(oldRegion, newRegion){
 					badgeType.onDropSuccess(oldRegion, newRegion);
 					if (!last()) {
 						that.num.n--;
 						restore();
 					} else 
-						deleteBadge(oldRegion);
+						Graphics.deleteBadge(that, oldRegion);
 				};
 
 			if (element) newRegion = element.r ? element.r : element; 
@@ -192,7 +189,6 @@ Graphics.drawRegionBadges = function(region){
 
 Graphics.drawFreeBadges = function(){
 	Graphics.freeTokens.ui.race = Graphics.drawTokenBadge(null, user().race(), user().freeTokens);
-	console.log(user().freePowerTokens)
 	Graphics.freeTokens.ui.power = Graphics.drawTokenBadge(null, user().specPower(), user().freePowerTokens);
 };	
 

@@ -140,7 +140,7 @@ RaceAmazons = $.inherit(BaseRace, {
 						n--;
 						lbl.n--;
 						if (!lbl.n) {
-							Graphics.deleteBadge(regions[i].ui.race);
+							Graphics.deleteBadge(regions[i].ui.race, regions[i]);
 						} else
 							lbl.attr({"text" : lbl.n});
 					}
@@ -151,7 +151,7 @@ RaceAmazons = $.inherit(BaseRace, {
 			m = --Graphics.freeTokens.ui.race.num.n;
 			Graphics.freeTokens.ui.race.num.attr({text : m});
 		} else
-			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race, Graphics.freeTokens.ui);
 		loop(true);
 		while (n) loop(false);
 	}
