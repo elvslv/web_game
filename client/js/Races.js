@@ -471,7 +471,7 @@ SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 
 	canDrop : function(region)
 	{
-		return canRedeploy(region);
+		return canRedeploy(region) && !region.fortress;
 	}
 	
 });

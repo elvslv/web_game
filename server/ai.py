@@ -82,7 +82,7 @@ class Game:
 	
 class TokenBadge:
 	def __init__(self, id, raceName, specPowerName, pos, bonusMoney, inDecline = None,
-			totalTokensNum = None, specPowNum = None):
+			totalTokensNum = None, specPowNum = None, owner=None):
 		self.id = id
 		for race in races.racesList:
 			if race.name == raceName:
@@ -97,6 +97,7 @@ class TokenBadge:
 		self.inDecline = inDecline
 		self.totalTokensNum = totalTokensNum
 		self.specPowNum = specPowNum
+		self.owner = owner
 
 	def getRegions(self, defReg = None):
 		return filter(lambda x: x.tokenBadgeId == self.id and (not defReg or not x.isAdjacent(defReg)),
@@ -124,9 +125,9 @@ def createMap(mapState):
 			*curReg))
 	return Map(mapState['mapId'], mapState['playersNum'], mapState['turnsNum'], regions)
 
-def createTokenBadge(tokenBadge, declined):
+def createTokenBadge(tokenBadge, declined, owner=None):
 	return TokenBadge(tokenBadge['tokenBadgeId'], tokenBadge['raceName'], 
-		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'])
+		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'], owner)
 	
 class AI(threading.Thread):
 	def __init__(self, host, game, sid, id ):
@@ -178,14 +179,17 @@ class AI(threading.Thread):
 		tokenBadgesInGame = list()	
 		for player in gameState['players']:
 			if 'currentTokenBadge' in player:
-				tokenBadge = createTokenBadge(player['currentTokenBadge'], False)
+				tokenBadge = createTokenBadge(player['currentTokenBadge'], False, player['id'])
 				tokenBadgesInGame.append(tokenBadge);
 				if player['id'] == self.id: self.currentTokenBadge = tokenBadge
-			elif 'declinedTokenBadge' in player:
-				tokenBadge = createTokenBadge(player['declinedTokenBadge'], True)
+			else: 
+				self.currentTokenBadge = None
+			if 'declinedTokenBadge' in player:
+				tokenBadge = createTokenBadge(player['declinedTokenBadge'], True, player['id'])
 				tokenBadgesInGame.append(tokenBadge);
 				if player['id'] == self.id: self.declinedTokenBadge = tokenBadge
-				
+			else: 
+				self.declinedTokenBadge = None				
 			if player['id'] == self.id:
 				self.coins = player['coins']
 				self.tokensInHand = player['tokensInHand']
@@ -213,10 +217,9 @@ class AI(threading.Thread):
 			
 	def selectRace(self):
 		visibleBadges = self.game.visibleTokenBadges
-	#	chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
-	#		key=lambda x: x.characteristic())
-		chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and x.specPower.name=='Diplomat', visibleBadges) 
-		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge[0].pos})
+		chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
+				key=lambda x: x.characteristic())
+		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge.pos})
 		if result['result'] != 'ok':
 			raise BadFieldException('unknown error in select race %s' % result['result'])
 		return True
@@ -227,7 +230,7 @@ class AI(threading.Thread):
 		tokensNum = defInfo['tokensNum']
 		defRegion = self.game.map.getRegion(defInfo['regionId'])
 		regionsToRetreat = tokenBadge.getRegions(defRegion) or tokenBadge.getRegions()
-		findRegionsInDanger(self, regionsToRetreat)
+		self.findRegionsInDanger(regionsToRetreat)
 		request = {}
 		for region in regionsToRetreat: request[region.id] = 0
 		distributeUnits(regionsToRetreat, tokensNum, request)
@@ -242,7 +245,7 @@ class AI(threading.Thread):
 		return tBadge and tBadge.specPower.canDecline(self, False) and\
 			self.game.checkStage(GAME_DECLINE, self) and\
 				(not len (self.getConquerableRegions()) or\
-				tBadge.totalTokensNum - len(tokenBadge.getRegions()) < 4)
+				tBadge.totalTokensNum - len(tBadge.getRegions()) < 4)
 				
 
 	def decline(self):
@@ -295,7 +298,7 @@ class AI(threading.Thread):
 			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in select friend: %s' % data['result'])
-		self.slaveId = players[0]
+		self.slaveId = chosenPlayer
 
 	def canConquer(self, region):
 		f1 = region.ownerId != self.id or region.ownerId == self.id and region.inDecline
@@ -304,6 +307,7 @@ class AI(threading.Thread):
 		f3 = self.currentTokenBadge.race.canConquer(region, self.currentTokenBadge)
 		f4 = self.currentTokenBadge.specPower.canConquer(region, self.currentTokenBadge)
 		f5 = not region.isImmune(False)
+		f6 = self.tokensInHand > 0
 		return f1 and f2 and f3 and f4 and f5
 
 	def canThrowDice(self):
@@ -364,6 +368,47 @@ class AI(threading.Thread):
 		return len(filter(lambda x: 'currentTokenBadge' not in x or\
 			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions()), 
 				self.game.players))
+
+	def mostDangerousPlayer(self):
+		theKey = lambda x: x['currentTokenBadge']['totalTokensNum'] if 'currentTokenBadge' in x else 0
+		return max(filter(lambda x: x['id'] not in (self.id, self.slaveId), self.game.players), key=theKey)
+			
+
+	def needDefendAgainst(self, mdPlayer, abilityName, race):
+		return (len(self.game.players)== 2 and\
+				not 'currentTokenBadge' in 
+					filter(lambda x: x['id'] != self.id, self.game.players)[0] and\
+				len(filter(lambda x: (x.race.name if race else x.specPower.name) == abilityName, 
+					self.game.visibleTokenBadges))) or\
+			mdPlayer and\
+			'currentTokenBadge' in mdPlayer and\
+			mdPlayer['currentTokenBadge']['raceName' if race else 'specialPowerName'] == abilityName
+					
+	def findRegionsInDanger(self, regions):
+		dangerous = lambda x: x.ownerId and not x.inDecline and x.ownerId not in (self.id, self.slaveId)
+		invaders = self.invadersExist()
+		mdPlayer = self.mostDangerousPlayer()
+		hobbitsAreEnemies =  self.needDefendAgainst(mdPlayer, 'Hobbits', True)
+		for region in regions:
+			if invaders and (region.border or hobbitsAreEnemies):
+				region.inDanger = True
+				continue				
+			for reg in region.adjacent:
+				if dangerous(reg):
+					region.inDanger = True
+					break
+		
+		if mdPlayer:
+			if self.needDefendAgainst(mdPlayer, 'Underworld', False):
+				if not mdPlayer['currentTokenBadge'] or\
+					len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
+							not x.inDecline and\
+							x.cavern, 
+						self.game.map.regions)):
+					for region in regions:
+						if region.cavern: region.inDanger = True
+			elif self.needDefendAgainst(mdPlayer, 'Flying', False):
+				for region in regions: region.inDanger = not region.inDanger
 		
 
 	def redeploy(self):
@@ -384,8 +429,8 @@ class AI(threading.Thread):
 				req['encampments'][region.id] = 0
 			req['redeployment'][region.id] = 1
 			freeUnits -= 1
-		findRegionsInDanger(self, regions)
-		borders = filter(lambda x: x.inDanger and not x.dragon, regions)
+		self.findRegionsInDanger(regions)
+		borders = filter(lambda x: x.inDanger and not x.dragon and not x.holeInTheGround, regions)
 		if code == HERO_CODE:
 			n = 2
 			for reg in sorted(regions, key=lambda x: int(x.inDanger), reverse=True):

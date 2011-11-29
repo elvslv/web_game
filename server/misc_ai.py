@@ -6,17 +6,7 @@ FORTRESS_CODE = 6
 ENCAMPMENTS_CODE = 7
 
 
-def findRegionsInDanger(user, regions):
-	invaders = user.invadersExist()
-	for region in regions:
-		if invaders and region.border:
-			region.inDanger = True
-			continue				
-		for reg in region.adjacent:
-			if reg.ownerId and not reg.inDecline and reg.ownerId != user.id:
-				region.inDanger = True
-				break
-			
+		
 def distributeUnits(regions, unitsNum, req):
 	if unitsNum:
 		(div, mod) = divmod(unitsNum, len(regions))
