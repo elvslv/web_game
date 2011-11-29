@@ -4,7 +4,7 @@ import threading
 import time
 import races
 
-
+from copy import copy as copy
 from misc_ai import *
 from misc import *
 from gameExceptions import BadFieldException
@@ -215,7 +215,7 @@ class AI(threading.Thread):
 		visibleBadges = self.game.visibleTokenBadges
 	#	chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
 	#		key=lambda x: x.characteristic())
-		chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and x.specPower.name=='Berserk', visibleBadges) 
+		chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and x.specPower.name=='Diplomat', visibleBadges) 
 		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge[0].pos})
 		if result['result'] != 'ok':
 			raise BadFieldException('unknown error in select race %s' % result['result'])
@@ -253,7 +253,6 @@ class AI(threading.Thread):
 	def enchant(self):
 		data = self.sendCmd({'action': 'enchant', 'sid': self.sid, 
 			'regionId': self.enchantableRegions[0].id})
-		print self.enchantableRegions[0].id
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in enchant %s' % data['result'])
 		self.enchantUsed = True
@@ -276,27 +275,27 @@ class AI(threading.Thread):
 		self.dragonUsed = False #regions
 		self.enchantUsed = False
 		self.slaveId = None
+
+	def canSelectFriend(self):
+		return not self.slaveId and self.currentTokenBadge.specPower.canSelectFriend()
 	
 	def shouldSelectFriend(self):
-		f1 = self.game.checkStage(GAME_CHOOSE_FRIEND, self)
-		f2 = not self.slaveId
-		f3 = self.currentTokenBadge and self.currentTokenBadge.specPower.canSelectFriend()
-		return f1 and f2 and f3
+		if self.game.checkStage(GAME_CHOOSE_FRIEND, self) and self.canSelectFriend():
+			players = filter(lambda x: x != self.id, map(lambda x: x['id'], self.game.players))
+			for region in self.conqueredRegions:
+				if region.ownerId in players: 
+					players.remove(region.ownerId)
+			self.friendCandidates = players
+			return len(players)
+		return False
 
 	def selectFriend(self):
-		players = [player['id'] for player in self.game.players]
-		for region in self.conqueredRegions:
-			try:
-				players.remove(region.owner)
-			except:
-				pass
-
-		if len(players):
-			data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
-				'friendId': players[0]})
-			if data['result'] != 'ok':
-				raise BadFieldException('unknown error in select friend: %s' % data['result'])
-			self.slaveId = players[0]
+		chosenPlayer = max(self.friendCandidates, key=lambda x: x.totalTokensNum) 
+		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
+			'friendId': chosenPlayer})
+		if data['result'] != 'ok':
+			raise BadFieldException('unknown error in select friend: %s' % data['result'])
+		self.slaveId = players[0]
 
 	def canConquer(self, region):
 		f1 = region.ownerId != self.id or region.ownerId == self.id and region.inDecline
@@ -352,11 +351,12 @@ class AI(threading.Thread):
 					found = True
 					break
 		if not found: chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x))
-		chosenRegion.nonEmpty = chosenRegion.tokensNum > 0
+		conqdReg = copy(chosenRegion)
+		conqdReg.nonEmpty = chosenRegion.tokensNum > 0
+		self.conqueredRegions.append(conqdReg)
 		if self.canThrowDice(): self.sendCmd({'action': 'throwDice', 'sid': self.sid})
 		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': chosenRegion.id})
 		ok = data['result'] == 'ok'
-		if ok: self.conqueredRegions.append(chosenRegion)
 		if not(ok or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 

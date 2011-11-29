@@ -151,7 +151,7 @@ RaceAmazons = $.inherit(BaseRace, {
 			m = --Graphics.freeTokens.ui.race.num.n;
 			Graphics.freeTokens.ui.race.num.attr({text : m});
 		} else
-			Graphics.deleteBadge(Graphics.freeTokens.ui.race, Graphics.freeTokens.ui);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race, Graphics.freeTokens);
 		loop(true);
 		while (n) loop(false);
 	}
