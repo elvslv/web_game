@@ -263,7 +263,7 @@ class BaseSpecialPower:
 		return leaveGame or user.game.getLastState() == GAME_FINISH_TURN
 
 	def decline(self, user, leaveGame):
-		if self.canDecline(user, leaveGame):
+		if not self.canDecline(user, leaveGame):
 			raise BadFieldException('badStage')
 
 	def turnFinished(self, tokenBadgeId):
@@ -293,6 +293,9 @@ class BaseSpecialPower:
 	def setHero(self, tokenBadgeId, heroes):
 		raise BadFieldException('badSpecialPower')
 
+	def canThrowDice(self):
+		return False
+
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
@@ -306,6 +309,9 @@ class SpecialPowerBerserk(BaseSpecialPower):
 
 	def throwDice(self, game):
 		return misc_game.throwDice(game)
+
+	def canThrowDice(self):
+		return True
 
 
 class SpecialPowerBivouacking(BaseSpecialPower):

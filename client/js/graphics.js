@@ -60,7 +60,6 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		badge;
 	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
 		return previousBadge;
-	console.log(previousBadge);
 	Graphics.deleteBadge(previousBadge, reg);
 	if (!num) return;
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)

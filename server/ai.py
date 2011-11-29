@@ -213,11 +213,9 @@ class AI(threading.Thread):
 			
 	def selectRace(self):
 		visibleBadges = self.game.visibleTokenBadges
-		chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
-			key=lambda x: x.characteristic())
-		#chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and\
-		#	(x.race.name=='sorcerers'), visibleBadges)
-		if not len(chosenBadge): return False
+	#	chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
+	#		key=lambda x: x.characteristic())
+		chosenBadge = filter(lambda x: self.coins >= 5 - x.pos and x.specPower.name=='Berserk', visibleBadges) 
 		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge[0].pos})
 		if result['result'] != 'ok':
 			raise BadFieldException('unknown error in select race %s' % result['result'])
@@ -240,9 +238,12 @@ class AI(threading.Thread):
 		
 		
 	def shouldDecline(self):
-		return self.currentTokenBadge and self.currentTokenBadge.specPower.canDecline(self, False) and\
+		tBadge = self.currentTokenBadge
+		return tBadge and tBadge.specPower.canDecline(self, False) and\
 			self.game.checkStage(GAME_DECLINE, self) and\
-			self.currentTokenBadge.totalTokensNum - len(self.currentTokenBadge.getRegions()) < 4
+				(not len (self.getConquerableRegions()) or\
+				tBadge.totalTokensNum - len(tokenBadge.getRegions()) < 4)
+				
 
 	def decline(self):
 		data = self.sendCmd({'action': 'decline', 'sid': self.sid})
@@ -250,7 +251,9 @@ class AI(threading.Thread):
 			raise BadFieldException('unknown error in decline %s' % data['result'])
 
 	def enchant(self):
-		data = self.sendCmd({'action': 'enchant', 'sid': self.enchantableRegions[0]})
+		data = self.sendCmd({'action': 'enchant', 'sid': self.sid, 
+			'regionId': self.enchantableRegions[0].id})
+		print self.enchantableRegions[0].id
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in enchant %s' % data['result'])
 		self.enchantUsed = True
@@ -304,10 +307,15 @@ class AI(threading.Thread):
 		f5 = not region.isImmune(False)
 		return f1 and f2 and f3 and f4 and f5
 
+	def canThrowDice(self):
+		return self.currentTokenBadge.specPower.canThrowDice() and\
+			self.game.checkStage(GAME_THROW_DICE, self)
+
 	def canUseDragon(self):
 		return self.currentTokenBadge.specPower.canUseDragon() and not self.dragonUsed and\
 			self.tokensInHand > 0 and\
 			not len(filter(lambda x: x.dragon, self.currentTokenBadge.getRegions()))
+
 
 	def getConquerableRegions(self):
 		result = list()
@@ -340,11 +348,12 @@ class AI(threading.Thread):
 			cur = filter(lambda x: x.ownerId == player['id'], regions)
 			if len(cur): 
 				chosenRegion = min(cur, key=lambda x: self.getRegionPrice(x))
-				if self.tokensInHand >= self.getRegionPrice(chosenRegion):
+				if self.tokensInHand * 1.5  > self.getRegionPrice(chosenRegion):
 					found = True
 					break
 		if not found: chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x))
 		chosenRegion.nonEmpty = chosenRegion.tokensNum > 0
+		if self.canThrowDice(): self.sendCmd({'action': 'throwDice', 'sid': self.sid})
 		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': chosenRegion.id})
 		ok = data['result'] == 'ok'
 		if ok: self.conqueredRegions.append(chosenRegion)
