@@ -11,6 +11,7 @@ import traceback
 import optparse
 import actions
 import misc_game
+import misc
 
 STATIC_FILES_ROOT = join("./client/")
 PORT = 8080
@@ -35,10 +36,10 @@ def serve_ajax():
 		return e
 
 def main():
-	LOG_FILE = open(LOG_FILE_NAME, 'w')
+	misc.LOG_FILE = open(LOG_FILE_NAME, 'w')
 	actions.doAction({'action': 'startAI'}, False)
 	run(host='localhost', port=PORT)
-	LOG_FILE.close()
+	misc.LOG_FILE.close()
 	return 0
 
 if __name__ == '__main__':

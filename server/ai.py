@@ -4,6 +4,7 @@ import threading
 import time
 import races
 import Queue
+import misc
 
 from copy import copy as copy
 from misc_ai import *
@@ -280,9 +281,7 @@ class AI(threading.Thread):
 		for statistics in data['statistics']:
 			result += '%s: %d\n' % (statistics[0], statistics[1])
 		result += 'Total coins number: %d\n\n\n' % data['coins']
-		LOG_FILE = open(LOG_FILE_NAME, 'w')
-		LOG_FILE.write(result)
-		LOG_FILE.close()
+		misc.LOG_FILE.write(result)
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
 		self.enchantUsed = False
