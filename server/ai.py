@@ -176,19 +176,19 @@ class AI(threading.Thread):
 				i, visibleBadge['bonusMoney'])
 			tokenBadges.append(tokenBadge)
 		tokenBadgesInGame = list()	
+		self.currentTokenBadge = None
+		self.declinedTokenBadge = None
 		for player in gameState['players']:
 			if 'currentTokenBadge' in player:
 				tokenBadge = createTokenBadge(player['currentTokenBadge'], False, player['id'])
 				tokenBadgesInGame.append(tokenBadge);
 				if player['id'] == self.id: self.currentTokenBadge = tokenBadge
-			else: 
-				self.currentTokenBadge = None
+				
 			if 'declinedTokenBadge' in player:
 				tokenBadge = createTokenBadge(player['declinedTokenBadge'], True, player['id'])
 				tokenBadgesInGame.append(tokenBadge);
 				if player['id'] == self.id: self.declinedTokenBadge = tokenBadge
-			else: 
-				self.declinedTokenBadge = None				
+			
 			if player['id'] == self.id:
 				self.coins = player['coins']
 				self.tokensInHand = player['tokensInHand']
@@ -273,14 +273,16 @@ class AI(threading.Thread):
 		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in finish turn %s' % data['result'])
-		result = 'Game: %d, turn: %d\n' % (self.gameState.id, self.gameState.turn)
-		result += 'Players: %d\n' % self.id
+		result = 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
+		result += 'Player id: %d\n' % self.id
 		result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
 		result += 'Statistics: \n'
 		for statistics in data['statistics']:
 			result += '%s: %d\n' % (statistics[0], statistics[1])
 		result += 'Total coins number: %d\n\n\n' % data['coins']
+		LOG_FILE = open(LOG_FILE_NAME, 'w')
 		LOG_FILE.write(result)
+		LOG_FILE.close()
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
 		self.enchantUsed = False
@@ -326,7 +328,6 @@ class AI(threading.Thread):
 			self.tokensInHand > 0 and\
 			not len(filter(lambda x: x.dragon, self.currentTokenBadge.getRegions()))
 
-
 	def getConquerableRegions(self):
 		result = list()
 		if not(self.game.checkStage(GAME_CONQUER, self) and self.currentTokenBadge and self.tokensInHand):
@@ -335,7 +336,6 @@ class AI(threading.Thread):
 			if self.canConquer(region):
 				result.append(region)
 		return result
-
 	
 	def getRegionPrice(self, reg):
 		tokenBadge = self.game.getTokenBadgeById(reg.tokenBadgeId)
@@ -407,7 +407,7 @@ class AI(threading.Thread):
 		
 		if mdPlayer:
 			if self.needDefendAgainst(mdPlayer, 'Underworld', False):
-				if not mdPlayer['currentTokenBadge'] or\
+				if not 'currentTokenBadge' in mdPlayer or\
 					len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
 							not x.inDecline and\
 							x.cavern, 

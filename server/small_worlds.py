@@ -35,7 +35,6 @@ def serve_ajax():
 		return e
 
 def main():
-	global LOG_FILE
 	LOG_FILE = open(LOG_FILE_NAME, 'w')
 	actions.doAction({'action': 'startAI'}, False)
 	run(host='localhost', port=PORT)
