@@ -80,8 +80,8 @@ class Game:
 
 	
 class TokenBadge:
-	def __init__(self, id, raceName, specPowerName, owner, pos, bonusMoney, inDecline = None,
-			totalTokensNum = None, specPowNum = None):
+	def __init__(self, id, raceName, specPowerName, pos, bonusMoney, inDecline = None,
+			totalTokensNum = None, specPowNum = None, owner = None):
 		self.id = id
 		self.owner = owner
 		for race in races.racesList:
