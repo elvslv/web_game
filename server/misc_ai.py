@@ -1,4 +1,5 @@
 from Queue import Queue as Queue
+import math
 
 REDEPLOYMENT_CODE = 4
 HERO_CODE = 5
@@ -8,12 +9,24 @@ ENCAMPMENTS_CODE = 7
 
 		
 def distributeUnits(regions, unitsNum, req):
-	if unitsNum:
-		(div, mod) = divmod(unitsNum, len(regions))
+	sum = reduce(lambda x, y: x + y, map(lambda x: x.needDef, regions))
+	unitsRest = unitsNum
+	for reg in regions:
+		print (reg.needDef, sum, unitsNum)
+		share = math.floor(unitsNum * (float(reg.needDef) / sum))
+		print (reg.id, share)
+		if not share: break
+		else: unitsRest -= int(share)
+		req[reg.id] += int(share) 
+		reg.needDef = max(reg.needDef - share, 1)
+	if unitsRest:
+		priorityRegs=filter(lambda x: x.needDef ==(max(regions, key=lambda x: x.needDef)).needDef, regions)
+		print map(lambda x: x.id, priorityRegs)
+		(div, mod) = divmod(unitsRest, len(priorityRegs))
 		if div:
-			for region in regions: req[region.id] += div
+			for region in priorityRegs: req[region.id] += div
 		if mod:
-			for region in regions:
+			for region in priorityRegs:
 				mod -= 1
 				req[region.id] += 1
 				if not mod: break
@@ -29,6 +42,7 @@ def convertRedeploymentRequest(req, code):
 	res = []
 	for rec in req.items():
 		res.append(nextRecMaker(rec))
+	print res
 	return res[0] if code == FORTRESS_CODE else res
 		
 	
