@@ -351,19 +351,15 @@ class AI(threading.Thread):
 		return len(filter(lambda x: x.nonEmpty,  self.conqueredRegions))
 
 	def conquer(self):
-		players = sorted(self.game.players, key=lambda x: x['coins'])
 		regions = self.conquerableRegions
-		chosenRegion = None
-		cur = None
-		found = False
-		for player in players:
-			cur = filter(lambda x: x.ownerId == player['id'], regions)
-			if len(cur): 
-				chosenRegion = min(cur, key=lambda x: self.getRegionPrice(x))
-				if self.tokensInHand * 1.5  > self.getRegionPrice(chosenRegion):
-					found = True
-					break
-		if not found: chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x))
+		self.calcDistances(regions)
+		if self.currentTokenBadge and\
+				not len(filter(lambda x : x.distFromEnemy < 2, self.currentTokenBadge.getRegions())):
+			chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x) - (1 if x.tokenBadgeId else 0))
+		else:
+			farawayRegs = filter(lambda x: x.distFromEnemy > 2, regions)
+			chosenRegion = min(farawayRegs if len(farawayRegs) else regions, 
+				key=lambda x: self.getRegionPrice(x))
 		conqdReg = copy(chosenRegion)
 		conqdReg.nonEmpty = chosenRegion.tokensNum > 0
 		self.conqueredRegions.append(conqdReg)
@@ -387,7 +383,8 @@ class AI(threading.Thread):
 		return (len(self.game.players)== 2 and\
 				not 'currentTokenBadge' in 
 					filter(lambda x: x['id'] != self.id, self.game.players)[0] and\
-				len(filter(lambda x: (x.race.name if race else x.specPower.name) == abilityName, 
+				len(filter(lambda x: (x.race.name if race else x.specPower.name) == abilityName and\
+					x.owner != self.id and x.owner != self.slaveId, 
 					self.game.visibleTokenBadges))) or\
 			mdPlayer and\
 			'currentTokenBadge' in mdPlayer and\
@@ -420,7 +417,7 @@ class AI(threading.Thread):
 			region.distFromEnemy = cur.d
 		maxDist = max(regions, key=lambda x: x.distFromEnemy).distFromEnemy
 		flyingEnemy = self.needDefendAgainst(mdPlayer, 'Flying', False)
-		for reg in regions:
+		for reg in self.currentTokenBadge.getRegions():
 			if flyingEnemy:
 				reg.needDef = reg.distFromEnemy
 			if reg.dragon or reg.holeInTheGround or reg.fortress:
@@ -429,14 +426,13 @@ class AI(threading.Thread):
 				reg.needDef = maxDist - reg.distFromEnemy + 1
 			reg.needDef += self.currentTokenBadge.regBonus(reg) 
 			reg.needDef += self.declinedTokenBadge.regBonus(reg) if self.declinedTokenBadge else 0
-		print map(lambda x: (x.id, x.needDef), regions)
 		if mdPlayer and self.needDefendAgainst(mdPlayer, 'Underworld', False) and\
 				not 'currentTokenBadge' in mdPlayer or\
 				len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
 					not x.inDecline and x.cavern, self.game.map.regions)):
 				for region in regions:
-					if region.cavern: region.closenessToEnemy = maxDist
-		##
+					if region.cavern: region.needDef = maxDist
+		
 
 	def redeploy(self):
 		codeTable = {
@@ -454,7 +450,7 @@ class AI(threading.Thread):
 		for region in regions: 
 			if code == ENCAMPMENTS_CODE:
 				req['encampments'][region.id] = 0
-			req['redeployment'][region.id] = 0
+			req['redeployment'][region.id] = 1
 			freeUnits -= 1
 		self.calcDistances(regions)
 		if code == HERO_CODE:
