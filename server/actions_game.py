@@ -20,22 +20,7 @@ def act_setReadinessStatus(data):
 	maxPlayersNum = game.map.playersNum
 	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
 	if maxPlayersNum == readyPlayersNum:
-		# Starting
-		game.activePlayerId = min(game.players, key=lambda x: x.priority).id
-		game.state = GAME_START
-		dbi.flush(game)
-		#generate first 6 races
-		if misc.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
-			vRaces = data['visibleRaces']
-			vSpecialPowers = data['visibleSpecialPowers']
-			for i in range(misc.VISIBLE_RACES):
-				showNextRace(game, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], 
-				vSpecialPowers[misc.VISIBLE_RACES-i-1])
-		else:
-			for i in range(misc.VISIBLE_RACES):
-				showNextRace(game, misc.VISIBLE_RACES - 1)
-	dbi.updateHistory(user, GAME_START, None)
-	dbi.updateGameHistory(user.game, data)
+		misc_game.startGame(game, user, data)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):
@@ -195,9 +180,6 @@ def act_finishTurn(data):
 	user.coins += incomeCoins['totalCoinsNum']
 	user.tokensInHand = 0
 	nextPlayer = game.getNextPlayer()
-#	for rec in races:
-#		callRaceMethod(rec.raceId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
-#		callSpecialPowerMethod(rec.specPowId, 'updateBonusStateAtTheEndOfTurn', user.currentTokenBadge.id)
 
 	dbi.updateHistory(user, GAME_FINISH_TURN, None)
 	dbi.updateGameHistory(game, data)

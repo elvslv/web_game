@@ -67,6 +67,10 @@ possiblePrevCmd = {
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
+LOG_FILE_NAME = 'ai_results.txt'
+global LOG_FILE
+LOG_FILE = None
+
 def generateSidForTest():
 	global LAST_SID
 	LAST_SID = LAST_SID + 1

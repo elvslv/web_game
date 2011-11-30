@@ -1,10 +1,10 @@
 from utils.path import join
 from bottle import route, run, static_file, request
 from sqlalchemy.exc import DatabaseError, DBAPIError, OperationalError
+from misc import *
 
 import bottle
 import parseJson
-import misc
 import sys
 import json
 import traceback
@@ -35,8 +35,11 @@ def serve_ajax():
 		return e
 
 def main():
+	global LOG_FILE
+	LOG_FILE = open(LOG_FILE_NAME, 'w')
 	actions.doAction({'action': 'startAI'}, False)
 	run(host='localhost', port=PORT)
+	LOG_FILE.close()
 	return 0
 
 if __name__ == '__main__':

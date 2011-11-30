@@ -109,6 +109,6 @@ $(function() {
 	$('#login').show();
 	$('#refreshChat').show();
 	$('#tabs').show();
-	sendQuery({'action': 'login', 'username': 'user', 'password': '123456'},
-			loginResponse, false, true);
+	//sendQuery({'action': 'login', 'username': 'user', 'password': '123456'},
+	//		loginResponse, false, true);
 });

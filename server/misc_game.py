@@ -9,6 +9,29 @@ from sqlalchemy.sql.expression import asc
 import random
 import math
 import time
+from ai import AI
+
+def startGame(game, user, data):
+	game.activePlayerId = min(game.players, key=lambda x: x.priority).id
+	game.state = misc.GAME_START
+	dbi.flush(game)
+	#generate first 6 races
+	if misc.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
+		vRaces = data['visibleRaces']
+		vSpecialPowers = data['visibleSpecialPowers']
+		for i in range(misc.VISIBLE_RACES):
+			showNextRace(game, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], 
+			vSpecialPowers[misc.VISIBLE_RACES-i-1])
+	else:
+		for i in range(misc.VISIBLE_RACES):
+			showNextRace(game, misc.VISIBLE_RACES - 1)
+			
+	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
+	for inst in ai:
+		ai = AI('localhost:8080', game, inst.sid, inst.id)
+
+	dbi.updateHistory(user, misc.GAME_START, None)
+	dbi.updateGameHistory(user.game, data)
 
 def getSid():
 	if not misc.TEST_MODE:

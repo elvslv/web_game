@@ -95,17 +95,23 @@ def act_createGame(data):
 	randseed = math.trunc(time.time())
 	if 'randseed' in data:
 		randseed = data['randseed']
+	ai = data['ai'] if 'ai' in data else None
+	if ai > map_.playersNum:
+		raise BadFieldException('tooManyPlayersForMap')
 	newGame = Game(data['gameName'], descr, map_, randseed, data['ai'] if 'ai' in\
 		data else None)
 	dbi.addUnique(newGame, 'gameName')
 	initRegions(map_, newGame)
-	user.game = newGame
-	user.priority = 1
-	user.inGame = True
-	dbi.flush(user)
-	if not misc.TEST_MODE:
-		data['randseed'] = randseed
-	dbi.updateGameHistory(user.game, data)
+	
+	if ai < map_.playersNum:
+		user.game = newGame
+		user.priority = 1
+		user.inGame = True
+		dbi.flush(user)
+		if not misc.TEST_MODE:
+			data['randseed'] = randseed
+		dbi.updateGameHistory(user.game, data)
+		
 	return {'result': 'ok', 'gameId': newGame.id}
 
 def act_joinGame(data):
@@ -240,7 +246,7 @@ def act_aiJoin(data):
 	maxPlayersNum = game.map.playersNum
 	if len(game.players) >= maxPlayersNum:
 		raise BadFieldException('tooManyPlayers')
-	maxPriority = max(game.players, key=lambda x: x.priority).priority
+	maxPriority = max(game.players, key=lambda x: x.priority).priority if len(game.players) else 0
 	aiCnt = len(filter(lambda x: x.isAI == True, game.players))
 	ai = User('AI%d' % aiCnt, None, True)
 	ai.sid = getSid()
@@ -250,7 +256,9 @@ def act_aiJoin(data):
 	ai.inGame = True
 	dbi.add(ai)
 	dbi.flush(ai)
-	ai1 = AI('localhost:8080', game, ai.sid, ai.id)
+	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
+	if maxPlayersNum == readyPlayersNum:
+		misc_game.startGame(game, ai, data)
 	return {'result': 'ok'}
 
 def act_startAI(data):

@@ -8,7 +8,6 @@ import Queue
 from misc import *
 from gameExceptions import BadFieldException
 
-
 class Region:
 	def __init__(self, id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
 		encampment, dragon, fortress, hero, inDecline):
@@ -260,6 +259,14 @@ class AI(threading.Thread):
 		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in finish turn %s' % data['result'])
+		result = 'Game: %d, turn: %d\n' % (self.gameState.id, self.gameState.turn)
+		result += 'Players: %d\n' % self.id
+		result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
+		result += 'Statistics: \n'
+		for statistics in data['statistics']:
+			result += '%s: %d\n' % (statistics[0], statistics[1])
+		result += 'Total coins number: %d\n\n\n' % data['coins']
+		LOG_FILE.write(result)
 		self.conqueredRegions = list()
 		self.dragon = None #regions
 		self.enchant = None
