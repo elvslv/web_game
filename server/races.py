@@ -41,8 +41,8 @@ class BaseRace:
 	def needRedeployment(self):
 		return False
 	
-	def incomeBonus(self, user):
-		return 0
+	def incomeBonus(self, tokenBadge):
+		return len(filter(lambda x: self.regBonus(x), tokenBadge.regions))
 
 	def defenseBonus(self):
 		return 0
@@ -69,6 +69,9 @@ class BaseRace:
 		
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
+
+	def regBonus(self, reg):
+		return 0
 
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -117,15 +120,17 @@ class RaceDwarves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
-	def incomeBonus(self, tokenBadge):
-		return len(filter(lambda x: x.region.mine, tokenBadge.regions))
+	def regBonus(self, reg):
+		return reg.region.mine if hasattr(reg, 'region') else reg.mine
+
 
 class RaceHumans(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
-	def incomeBonus(self, tokenBadge):
-		return len(filter(lambda x: x.region.farmland, tokenBadge.regions))
+	def regBonus(self, reg):
+		return reg.region.farmland if hasattr(reg, 'region') else reg.farmland
+
 
 class RaceOrcs(BaseRace):
 	def __init__(self):
@@ -138,8 +143,8 @@ class RaceWizards(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
-	def incomeBonus(self, tokenBadge):
-		return len(filter(lambda x: x.region.magic, tokenBadge.regions))
+	def regBonus(self, reg):
+		return reg.region.magic if hasattr(reg, 'region') else reg.magic
 		
 class RaceAmazons(BaseRace):
 	def __init__(self):
@@ -295,6 +300,12 @@ class BaseSpecialPower:
 
 	def canThrowDice(self):
 		return False
+
+	def incomeBonus(self, tokenBadge):
+		return len(filter(lambda x: self.regBonus(x), tokenBadge.regions))
+
+	def regBonus(self, reg):
+		return 0
 
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
@@ -498,8 +509,9 @@ class SpecialPowerHill(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
-	def incomeBonus(self, tokenBadge):
-		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.region.hill, tokenBadge.regions))
+
+	def regBonus(self, reg):
+		return reg.region.hill if hasattr(reg, 'region') else reg.hill
 
 class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
@@ -543,8 +555,8 @@ class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
-	def incomeBonus(self, tokenBadge): 
-		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.region.swamp, tokenBadge.regions))
+	def regBonus(self, reg):
+		return reg.region.swamp if hasattr(reg, 'region') else reg.swamp
 
 class SpecialPowerUnderworld(BaseSpecialPower):
 	def __init__(self):

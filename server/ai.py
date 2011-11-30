@@ -24,7 +24,7 @@ class Region:
 		self.dragon = dragon
 		self.fortress = fortress
 		self.hero = hero
-		self.inDanger = False
+		self.distFromEnemy = 0
 		self.inDecline = inDecline
 		for prop in possibleLandDescription[:11]:
 			setattr(self, prop, False)
@@ -107,7 +107,9 @@ class TokenBadge:
 
 	def characteristic(self):
 		return self.race.initialNum + self.specPower.tokensNum + self.race.turnStartReinforcements()
-	
+
+	def regBonus(self, reg):
+		return self.race.regBonus(reg) + self.specPower.regBonus(reg)
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
 	'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
@@ -229,7 +231,7 @@ class AI(threading.Thread):
 		tokensNum = defInfo['tokensNum']
 		defRegion = self.game.map.getRegion(defInfo['regionId'])
 		regionsToRetreat = tokenBadge.getRegions(defRegion) or tokenBadge.getRegions()
-		self.findRegionsInDanger(regionsToRetreat)
+		self.calcDistances(regionsToRetreat)
 		request = {}
 		for region in regionsToRetreat: request[region.id] = 0
 		distributeUnits(regionsToRetreat, tokensNum, request)
@@ -317,7 +319,7 @@ class AI(threading.Thread):
 		f4 = self.currentTokenBadge.specPower.canConquer(region, self.currentTokenBadge)
 		f5 = not region.isImmune(False)
 		f6 = self.tokensInHand > 0
-		return f1 and f2 and f3 and f4 and f5
+		return f1 and f2 and f3 and f4 and f5 and f6
 
 	def canThrowDice(self):
 		return self.currentTokenBadge.specPower.canThrowDice() and\
@@ -391,32 +393,50 @@ class AI(threading.Thread):
 			'currentTokenBadge' in mdPlayer and\
 			mdPlayer['currentTokenBadge']['raceName' if race else 'specialPowerName'] == abilityName
 					
-	def findRegionsInDanger(self, regions):
+	def calcDistances(self, regions):
 		dangerous = lambda x: x.ownerId and not x.inDecline and x.ownerId not in (self.id, self.slaveId)
 		invaders = self.invadersExist()
 		mdPlayer = self.mostDangerousPlayer()
 		hobbitsAreEnemies =  self.needDefendAgainst(mdPlayer, 'Hobbits', True)
 		for region in regions:
 			if invaders and (region.border or hobbitsAreEnemies):
-				region.inDanger = True
-				continue				
-			for reg in region.adjacent:
-				if dangerous(reg):
-					region.inDanger = True
-					break
-		
-		if mdPlayer:
-			if self.needDefendAgainst(mdPlayer, 'Underworld', False):
-				if not 'currentTokenBadge' in mdPlayer or\
-					len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
-							not x.inDecline and\
-							x.cavern, 
-						self.game.map.regions)):
-					for region in regions:
-						if region.cavern: region.inDanger = True
-			elif self.needDefendAgainst(mdPlayer, 'Flying', False):
-				for region in regions: region.inDanger = not region.inDanger
-		
+				region.distFromEnemy = 1
+				continue
+			for reg in self.game.map.regions: reg.d = 0
+			q = Queue()
+			cur = None
+			q.put(region)
+			region.d = 1
+			stop = False
+			while not (q.empty() or stop):              
+				cur = q.get()
+				for reg in cur.adjacent:
+					if reg.d: continue
+					if reg.ownerId and not reg.inDecline and reg.ownerId != self.id:
+						stop = True
+						break
+					reg.d = cur.d + 1
+					q.put(reg)
+			region.distFromEnemy = cur.d
+		maxDist = max(regions, key=lambda x: x.distFromEnemy).distFromEnemy
+		flyingEnemy = self.needDefendAgainst(mdPlayer, 'Flying', False)
+		for reg in regions:
+			if flyingEnemy:
+				reg.needDef = reg.distFromEnemy
+			if reg.dragon or reg.holeInTheGround or reg.fortress:
+				reg.needDef = 1
+			else:
+				reg.needDef = maxDist - reg.distFromEnemy + 1
+			reg.needDef += self.currentTokenBadge.regBonus(reg) 
+			reg.needDef += self.declinedTokenBadge.regBonus(reg) if self.declinedTokenBadge else 0
+		print map(lambda x: (x.id, x.needDef), regions)
+		if mdPlayer and self.needDefendAgainst(mdPlayer, 'Underworld', False) and\
+				not 'currentTokenBadge' in mdPlayer or\
+				len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
+					not x.inDecline and x.cavern, self.game.map.regions)):
+				for region in regions:
+					if region.cavern: region.closenessToEnemy = maxDist
+		##
 
 	def redeploy(self):
 		codeTable = {
@@ -434,26 +454,26 @@ class AI(threading.Thread):
 		for region in regions: 
 			if code == ENCAMPMENTS_CODE:
 				req['encampments'][region.id] = 0
-			req['redeployment'][region.id] = 1
+			req['redeployment'][region.id] = 0
 			freeUnits -= 1
-		self.findRegionsInDanger(regions)
-		borders = filter(lambda x: x.inDanger and not x.dragon and not x.holeInTheGround, regions)
+		self.calcDistances(regions)
 		if code == HERO_CODE:
 			n = 2
-			for reg in sorted(regions, key=lambda x: int(x.inDanger), reverse=True):
+			for reg in sorted(regions, key=lambda x: x.needDef):
 				req['heroes'][reg.id] = 1
 				n -= 1
-				if reg in borders:
-					borders.remove(reg)
+				reg.needDef = 1
 				if not n: break
 		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortress, regions)) < 6:
-			reg = borders[0]
+			reg = max(regions, key=lambda x: x.needDef)
 			req['fortified'][reg.id] = 1
-			borders.remove(reg)
+			reg.needDef = 1
+		stratRegions = filter(lambda x : x.needDef > 1, regions)
+		if len(stratRegions) > 2: regions = stratRegions
 		if freeUnits:
-			distributeUnits(borders if len(borders) else regions, freeUnits, req['redeployment'])
+			distributeUnits(regions, freeUnits, req['redeployment'])
 		if code == ENCAMPMENTS_CODE:
-			distributeUnits(borders, 5, req['encampments'])
+			distributeUnits(regions, 5, req['encampments'])
 		redeployRequest = convertRedeploymentRequest(req['redeployment'], REDEPLOYMENT_CODE)
 		cmd = {'action': 'redeploy', 'sid': self.sid, 'regions': redeployRequest}
 		if code: 
