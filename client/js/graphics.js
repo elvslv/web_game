@@ -35,14 +35,19 @@ Graphics.freeTokens = {
 	ui : {}
 };
 
-Graphics.deleteBadge = function(badge){
+Graphics.deleteBadge = function(badge, reg){
 	if (badge){
+		if (reg){
+			if (badge === reg.ui.race) reg.ui.race = undefined;
+			else reg.ui.power = undefined;
+		}
 		if (!badge.removed){
 			badge.num.remove();
 			delete badge.num;
 			badge.remove();
 		}
-		delete badge;
+
+			
 	}
 };
 
@@ -55,11 +60,11 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		badge;
 	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
 		return previousBadge;
-	Graphics.deleteBadge(previousBadge);
+	Graphics.deleteBadge(previousBadge, reg);
 	if (!num) return;
 	badge = Graphics.paper.rect(coords[0], coords[1], 50, 50)
 				.attr({fill : "url(" + pic +")"});
-	badge.num = Graphics.paper.text(coords[0] + 36, coords[1] + 14, num)
+	badge.num = Graphics.paper.text(coords[0] + 32, coords[1] + 14, num)
 		.attr({"font": '100 14px "Helvetica Neue", Helvetica', "fill" : "red",
 			"text-anchor": "start"});
 	badge.num.n = num;
@@ -69,7 +74,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 			return (!reg || (reg.ownerId === user().id && !reg.inDecline)) && 
 				((game().defendStarted && !badgeType.power && !reg) ||
 				(game().redeployStarted && badgeType.canStartRedeploy(reg)) ||
-				(badgeType.name === 'DragonMaster'));
+				(badgeType.name === 'DragonMaster') && !reg);
 		};	
 	}(badgeType));
 
@@ -112,21 +117,13 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 					that.attr({x: that.ox, y: that.oy}); 
 					that.num.attr({x: that.num.ox, y: that.num.oy});
 				}, 
-				deleteBadge = function(reg){
-					if (reg){
-						if (badgeType.race) reg.ui.race = undefined;
-						else reg.ui.power = undefined;
-					}
-					that.num.remove();
-					that.remove();
-				},
 				onSuccess = function(oldRegion, newRegion){
 					badgeType.onDropSuccess(oldRegion, newRegion);
 					if (!last()) {
 						that.num.n--;
 						restore();
 					} else 
-						deleteBadge(oldRegion);
+						Graphics.deleteBadge(that, oldRegion);
 				};
 
 			if (element) newRegion = element.r ? element.r : element; 
@@ -139,9 +136,10 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 			else restore(); 
 
 			if (!last()) {
-				this.tempCopy.remove();
+				Graphics.deleteBadge(this.tempCopy);
 				delete this.tempCopy;
 			}
+							
 			Graphics.dragging = false;
 		});
 	if (reg){
@@ -210,6 +208,11 @@ Graphics.update = function(map){
 	Graphics.drawFreeBadges();
 	Graphics.cnt++;
 };
+
+Graphics.resetHighlight = function(map){
+	map.regions.forEach(function(x){x.ui.attr({'fill-opacity' : 0})});
+};
+		
 
 Graphics.assignColors = function(){
 	if (Graphics.colors.length) return;

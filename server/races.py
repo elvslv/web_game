@@ -35,7 +35,7 @@ class BaseRace:
 	def turnEndReinforcements(self, user):
 		return 0
 
-	def turnStartReinforcements(self, user):		
+	def turnStartReinforcements(self):		
 		return 0
 
 	def needRedeployment(self):
@@ -50,23 +50,25 @@ class BaseRace:
 	def conquered(self, regionId, tokenBadgeId):
 		pass
 
+	def canEnchant(self):
+		return False
+
 	def enchant(self, tokenBadgeId, regionId):
 		return BadFieldException('badRace')
 
 	def clearRegion(self, tokenBadge, region):
-		region.encampent = 0
+		region.encampment = 0
 		region.fortress = False
 		region.dragon = False
 		region.holeInTheGround = False
 		region.hero = False
 		return -1
 
-	def sufferCasualties_(self, tokenBadge):
-		return -1
+	def getCasualties(self):
+		return 1
 		
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
-		return -1
 
 class RaceHalflings(BaseRace):
 	def __init__(self):
@@ -96,9 +98,10 @@ class RaceGiants(BaseRace):
 
 	def attackBonus(self, region, tokenBadge):
 		res = 0
-		lands = filter(lambda x: x.region.mountain, tokenBadge.regions)
+		lands = filter(lambda x: x.region.mountain if hasattr(x, 'region') else x.mountain, 
+					tokenBadge.regions)
 		for  land in lands:
-			if region.adjacent(land.region):					#Need better names
+			if region.isAdjacent(land.region if hasattr(land, 'region') else land):					
 					res = -1
 					break
 		return res
@@ -142,7 +145,7 @@ class RaceAmazons(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Amazons', 6, 15)
 
-	def turnStartReinforcements(self, user):
+	def turnStartReinforcements(self):
 		return 4
 
 	def needRedeployment(self):
@@ -160,10 +163,10 @@ class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
 
-	def sufferCasualties(self, tokenBadge):
+	def getCasualties(self):
 		return 0
 
-	def sufferCasualties_(self, tokenBadge):
+	def sufferCasualties(self, tokenBadge):
 		return 0
 
 	def clearRegion(self, tokenBadge, region):
@@ -184,6 +187,9 @@ class RaceSorcerers(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Sorcerers', 5, 18)
 
+	def canEnchant(self):
+		return True
+	
 	def enchant(self, tokenBadge, regState):
 		game =  tokenBadge.owner.game
 		victimBadge = regState.tokenBadge
@@ -231,10 +237,11 @@ for i in range(len(racesList)):
 	racesList[i].setId(i)
 
 class BaseSpecialPower:
-	def __init__(self, name, tokensNum, bonusNum=None):
+	def __init__(self, name, tokensNum, bonusNum=None, redeployReqName=None):
 		self.name = name
 		self.tokensNum = tokensNum
 		self.bonusNum = bonusNum
+		self.redeployReqName = redeployReqName
 
 	def setId(self, id):
 		self.specialPowerId = id
@@ -242,6 +249,9 @@ class BaseSpecialPower:
 	def canConquer(self, region, tokenBadge):
 		return (tokenBadge.isNeighbor(region) or not tokenBadge.regions) and\
 			not region.sea
+
+	def canUseDragon(self):
+		return False
 		
 	def attackBonus(self, regionId, tokenBadgeId):
 		return 0
@@ -253,7 +263,7 @@ class BaseSpecialPower:
 		return leaveGame or user.game.getLastState() == GAME_FINISH_TURN
 
 	def decline(self, user, leaveGame):
-		if self.canDecline(user, leaveGame):
+		if not self.canDecline(user, leaveGame):
 			raise BadFieldException('badStage')
 
 	def turnFinished(self, tokenBadgeId):
@@ -283,6 +293,9 @@ class BaseSpecialPower:
 	def setHero(self, tokenBadgeId, heroes):
 		raise BadFieldException('badSpecialPower')
 
+	def canThrowDice(self):
+		return False
+
 class SpecialPowerAlchemist(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Alchemist', 4)
@@ -297,10 +310,13 @@ class SpecialPowerBerserk(BaseSpecialPower):
 	def throwDice(self, game):
 		return misc_game.throwDice(game)
 
+	def canThrowDice(self):
+		return True
+
 
 class SpecialPowerBivouacking(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Bivouacking', 5, 5)
+		BaseSpecialPower.__init__(self, 'Bivouacking', 5, 5, 'encampments')
 	
 	def decline(self, user, leaveGame):
 		BaseSpecialPower.decline(self, user, leaveGame)
@@ -371,8 +387,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 			
 		misc_game.clearFromRace(regState)
 		if attackedTokenBadge:
-			attackedTokenBadge.totalTokensNum += racesList[attackedTokenBadge.raceId].sufferCasualties(
-				attackedTokenBadge)
+			racesList[attackedTokenBadge.raceId].sufferCasualties(attackedTokenBadge)
 		else:
 			attackedTokensNum = 0
 		##check anything else?
@@ -391,6 +406,9 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def clearRegion(self, tokenBadge, region):
 		tokenBadge.specPowNum -= 1
 		region.dragon = False
+
+	def canUseDragon(self):
+		return True
 		
 	def decline(self, user, leaveGame):
 		BaseSpecialPower.decline(self, user, leaveGame)
@@ -413,7 +431,7 @@ class SpecialPowerForest(BaseSpecialPower):
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Fortified', 3, 6)
+		BaseSpecialPower.__init__(self, 'Fortified', 3, 6, 'fortified')
 		self.maxNum = 6
 
 	def clearRegion(self, tokenBadge, region):
@@ -445,7 +463,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
-		BaseSpecialPower.__init__(self, 'Heroic', 5, 2)
+		BaseSpecialPower.__init__(self, 'Heroic', 5, 2, 'heroes')
 
  	def setHero(self, tokenBadge, heroes):
 		checkObjectsListCorrection(heroes, 
@@ -519,7 +537,7 @@ class SpecialPowerStout(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Stout', 4) 
 
 	def canDecline(self, user, leaveGame):
-		return true
+		return True
 
 class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
@@ -537,9 +555,10 @@ class SpecialPowerUnderworld(BaseSpecialPower):
 			return True
 		cav = False
 		for reg in tokenBadge.regions:
-			if reg.region and reg.region.cavern or reg.cavern:			### For AI compatibility
-				cav = True												### Of course by tommorow
-				break													### It won't be here
+			if hasattr(reg, 'cavern') and reg.cavern or \
+					hasattr(reg, 'region') and reg.region.cavern:### For AI compatibility
+				cav = True												
+				break													
 
 		return (region.cavern and cav)
 		

@@ -247,7 +247,6 @@ User = $.inherit({
 											
 		this.freeTokens = this.currentTokenBadge.totalTokensNum;
 		this.freePowerTokens = this.specPower().redeployReqName && specPower.bonusNum;
-		
 		game().redeployRegions = {};
 		rdRegs = game().redeployRegions;
 		for (var i = 0; i < regions.length; ++i)
@@ -268,7 +267,7 @@ User = $.inherit({
 		if (this.race().deleteAdditionalUnits)
 			this.race().deleteAdditionalUnits();
 		Graphics.drawFreeBadges();
-	
+		
 	},
 
 	specPower : function()
@@ -481,8 +480,7 @@ canSelectRace = function(i)
 
 canDecline = function()
 {
-	return isActivePlayer() && user().currentTokenBadge && 
-		getSpecPowByName(user().currentTokenBadge.specPowName).canDecline(user());
+	return isActivePlayer() && user().currentTokenBadge && getSpecPowByName(user().currentTokenBadge.specPowName).canDecline(user());
 }
 
 canFinishTurn = function()
@@ -493,7 +491,8 @@ canFinishTurn = function()
 canBeginConquer = function()
 {
 	return isActivePlayer() && user().currentTokenBadge &&
-		checkStage(GAME_CONQUER) && user().tokensInHand > 0;
+		checkStage(GAME_CONQUER) && user().tokensInHand > 0 && 
+		!game().redeployStarted;
 }
 
 canConquer = function(region)
@@ -566,10 +565,7 @@ canBeginRedeploy = function()
 canRedeploy = function(region)
 {
 	var regions = user().currentTokenBadge.regions();
-	for (var i = 0; i < regions.length; ++i)
-		if (regions[i].id == region.id)
-			return true;
-	return false;
+	return regions.some(function(x){return x.id === region.id;});
 }
 
 canBeginDefend = function()

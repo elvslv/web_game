@@ -33,6 +33,7 @@ changeRedeployStatusClick = function()
 		return;
 	}
 	game().redeployStarted = true;
+	Graphics.resetHighlight(game().map);
 	user().startRedeploy();
 	$('#changeRedeployStatus').html('Cancel redeploy');
 	$('#redeploy').show();
@@ -52,7 +53,6 @@ redeployClick = function()
 		specPower = user().specPower(),
 		code = table[specPower.regPropName];
 	if (code) {
-		console.log(specPower);
 		cmds.push(specPower.redeployReqName);
 		params.push(convertRedeploymentRequest(
 			game().redeployRegions[specPower.regPropName], code));

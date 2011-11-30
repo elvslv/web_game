@@ -28,14 +28,14 @@ def act_selectRace(data):
 	if user.currentTokenBadge:
 		raise BadFieldException('badStage')
 	game = user.game	
-	game.checkStage(GAME_SELECT_RACE, user)
+	checkStage(GAME_SELECT_RACE, user)
 	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
 	price = dbi.query(TokenBadge).filter(TokenBadge.pos > position).count()
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId
-	addUnits = callRaceMethod(raceId, 'turnStartReinforcements', user)
+	addUnits = callRaceMethod(raceId, 'turnStartReinforcements')
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum					
 	user.coins += chosenBadge.bonusMoney - price
 	user.currentTokenBadge = chosenBadge
@@ -55,7 +55,7 @@ def act_conquer(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
 	game = user.game
-	game.checkStage(GAME_CONQUER, user)
+	checkStage(GAME_CONQUER, user)
 	region = game.map.getRegion(data['regionId'])
 	regState = region.getState(game.id)
 	owner = regState.owner
@@ -108,7 +108,7 @@ def act_conquer(data):
 def act_decline(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	user.game.checkStage(GAME_DECLINE, user)
+	checkStage(GAME_DECLINE, user)
 	makeDecline(user)
 	dbi.updateHistory(user, GAME_DECLINE, user.declinedTokenBadge.id)
 	dbi.updateGameHistory(user.game, data)
@@ -118,7 +118,7 @@ def act_redeploy(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	tokenBadge = user.currentTokenBadge
 	if not tokenBadge: raise BadFieldException('badStage')
-	user.game.checkStage(GAME_REDEPLOY, user)
+	checkStage(GAME_REDEPLOY, user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
 	tokenBadge.totalTokensNum += callRaceMethod(raceId, 'turnEndReinforcements', user)
 	unitsNum = tokenBadge.totalTokensNum
@@ -170,7 +170,7 @@ def act_redeploy(data):
 def act_finishTurn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
-	game.checkStage(GAME_FINISH_TURN, user)
+	checkStage(GAME_FINISH_TURN, user)
 	tokenBadge = user.currentTokenBadge
 	if tokenBadge and callRaceMethod(tokenBadge.raceId, 'needRedeployment') and\
 		game.getLastState() != GAME_REDEPLOY and game.getLastState() != GAME_CHOOSE_FRIEND :  
@@ -195,10 +195,11 @@ def act_defend(data):			## Should be renamed to retreat
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	tokenBadge = user.currentTokenBadge
 	if not tokenBadge: raise BadFieldException('badStage')
-	user.game.checkStage(GAME_DEFEND, user)
+	checkStage(GAME_DEFEND, user)
 	attackedRegion = user.game.getDefendingRegion(user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	tokensNum = user.game.history[-1].warHistory.victimTokensNum + callRaceMethod(raceId, 'sufferCasualties', tokenBadge)
+	callRaceMethod(raceId, 'sufferCasualties', tokenBadge)
+	tokensNum = user.game.history[-1].warHistory.victimTokensNum - callRaceMethod(raceId, 'getCasualties')
 	notAdjacentRegions = []
 	for terr in tokenBadge.regions:
 		if terr.region.id not in attackedRegion.getNeighbors():##~~
@@ -228,7 +229,7 @@ def act_defend(data):			## Should be renamed to retreat
 def act_dragonAttack(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
-	user.game.checkStage(GAME_CONQUER, user, ATTACK_DRAGON)
+	checkStage(GAME_CONQUER, user, ATTACK_DRAGON)
 	callSpecialPowerMethod(user.currentTokenBadge.specPowId, 'dragonAttack', 
 		user.currentTokenBadge, user.game.map.getRegion(data['regionId']).getState(
 		user.game.id))
@@ -239,7 +240,7 @@ def act_enchant(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadge: 
 		raise BadFieldException('badStage')
-	user.game.checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
+	checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
 	
 	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
 	victimBadgeId = reg.tokenBadge.id
@@ -256,7 +257,7 @@ def act_selectFriend(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadgeId : 
 		raise BadFieldException('badStage')
-	user.game.checkStage(GAME_CHOOSE_FRIEND, user)
+	checkStage(GAME_CHOOSE_FRIEND, user)
 	callSpecialPowerMethod(user.currentTokenBadge.specPowId, 'selectFriend',
 		user, data)
 	dbi.updateGameHistory(user.game, data)
@@ -266,7 +267,7 @@ def act_selectFriend(data):
 def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not user.currentTokenBadgeId : raise BadFieldException('badStage')
-	user.game.checkStage(GAME_THROW_DICE, user)
+	checkStage(GAME_THROW_DICE, user)
 	if misc.TEST_MODE: 
 		dice = data['dice'] if 'dice' in data else 0
 	else:

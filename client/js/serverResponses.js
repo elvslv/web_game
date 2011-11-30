@@ -279,8 +279,8 @@ function declineResponse(data)
 	switch(data['result'])
 	{
 		case 'ok':
-			Graphics.deleteBadge(Graphics.freeTokens.ui.power);
-			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.power, Graphics.freeTokens);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race, Graphics.freeTokens);
 			finishTurnClick();
 			break;
 		default:
@@ -427,8 +427,8 @@ function redeployResponse(data)
 			game().redeployStarted = false;
 			user().freePowerTokens = 0;
 			console.log(Graphics.freeTokens.ui.power);
-			Graphics.deleteBadge(Graphics.freeTokens.ui.power);
-			Graphics.deleteBadge(Graphics.freeTokens.ui.race);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.power, Graphics.freeTokens);
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race, Graphics.freeTokens);
 			$('#changeRedeployStatus').html('Start redeploy');
 			if (!user().specPower().canActAfterRedeployment())
 				finishTurnClick();
@@ -456,6 +456,8 @@ function defendResponse(data)
 			break;
 		case 'ok':
 			game().defendStarted = false;
+			Graphics.deleteBadge(Graphics.freeTokens.ui.race, Graphics.freeTokens);
+			Graphics.resetHighlight(game().map)
 			break; //state will be changed on the next getGameState()
 		default:
 			console.error('Unknown server response' + data);

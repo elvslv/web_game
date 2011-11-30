@@ -213,8 +213,8 @@ Interface.updateGameTab = function()
 
 		
 	}).appendTo('#usersInCurGame');	
-	Graphics.update(game().map);
 	Interface.prepareForActions();
+	Graphics.update(game().map);
 }
 
 Interface.prepareForSetReadinessStatus = function()

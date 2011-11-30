@@ -63,8 +63,7 @@ def throwDice(game):
 def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
 	if newActPlayer.currentTokenBadge:
-		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId,
-			'turnStartReinforcements', newActPlayer)
+		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId, 'turnStartReinforcements')
 		newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum
 		for region in newActPlayer.currentTokenBadge.regions:
 			region.tokensNum = 1
@@ -137,9 +136,8 @@ def getDefendingInfo(game):
 		return 
 	result = dict()
 	lastAttack = game.history[-1].warHistory
-	tokensNum = lastAttack.victimTokensNum + callRaceMethod(lastAttack.victimBadge.raceId, 
-		'sufferCasualties_', lastAttack.victimBadge)
-	if not tokensNum:
+	tokensNum = lastAttack.victimTokensNum - callRaceMethod(lastAttack.victimBadge.raceId, 'getCasualties')
+	if not (tokensNum and len(lastAttack.victimBadge.regions)):
 		return
 	result['playerId'] = lastAttack.victimBadge.owner.id
 	result['tokensNum'] = tokensNum
@@ -314,4 +312,25 @@ def makeDecline(user, leaveGame = False):
 def clearGameStateAtTheEndOfTurn(gameId):
 	pass
 
+def checkStage(state, user, attackType = None):
+	game = user.game
+	lastEvent = game.history[-1]
+	badStage = not (lastEvent.state in misc.possiblePrevCmd[state]) 
+	if attackType:
+		curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
+			x.userId == user.id and x.state == misc.GAME_CONQUER, 
+			game.history)
+		if curTurnHistory:
+			if filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory):
+				badStage = True
+	if lastEvent.state == misc.GAME_CONQUER:
+		battle = lastEvent.warHistory
+		victim = battle.victimBadge
+		canDefend = victim != None  and\
+			not victim.inDecline and\
+			battle.attackType != misc.ATTACK_ENCHANT and\
+			battle.victimTokensNum > callRaceMethod(victim.raceId, 'getCasualties')
+		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
+	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):
+		raise BadFieldException('badStage')
 
