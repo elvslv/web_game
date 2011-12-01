@@ -295,10 +295,12 @@ class AI(threading.Thread):
 	
 	def shouldSelectFriend(self):
 		if self.game.checkStage(GAME_CHOOSE_FRIEND, self) and self.canSelectFriend():
-			players = filter(lambda x: x != self.id, map(lambda x: x['id'], self.game.players))
+			players = filter(lambda x: x['id'] != self.id, self.game.players)
 			for region in self.conqueredRegions:
-				if region.ownerId in players: 
-					players.remove(region.ownerId)
+				for player in players:
+					if region.ownerId == player['id']
+						players.remove(players)
+			print players
 			self.friendCandidates = players
 			return len(players)
 		return False

@@ -332,7 +332,9 @@ def checkStage(state, user, attackType = None):
 			not victim.inDecline and\
 			battle.attackType != misc.ATTACK_ENCHANT and\
 			battle.victimTokensNum > callRaceMethod(victim.raceId, 'getCasualties')
-		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
+		print canDefend
+		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
+			(state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
 	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):
 		raise BadFieldException('badStage')
 

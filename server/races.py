@@ -491,7 +491,7 @@ class SpecialPowerHeroic(BaseSpecialPower):
 			regState = user.game.map.getRegion(hero['regionId']).getState(
 				user.game.id)
 			
-			if regState.Owner().currentTokenBadge != tokenBadge:
+			if regState.owner.currentTokenBadge != tokenBadge:
 				raise BadFieldException('badRegion')
 
 			regState.hero = True

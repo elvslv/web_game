@@ -269,7 +269,7 @@ class Game(Base):
 		else:
 			result = list()
 			for player in self.players:
-				append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
+				result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
 			self.resetPlayersState()
 			dbi.delete(self)
 			return {'result': 'ok', 'gameState': result}
