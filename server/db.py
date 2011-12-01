@@ -271,7 +271,6 @@ class Game(Base):
 			for player in self.players:
 				result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
 			self.resetPlayersState()
-			dbi.delete(self)
 			return {'result': 'ok', 'statistics': result, 'ended': True}
 
 

@@ -278,17 +278,19 @@ class AI(threading.Thread):
 		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in finish turn %s' % data['result'])
-		result = 'Game id: %d' % (self.game.id)
+		result = ''
 		if 'ended' in data: #game ended
-			result += '\n'
+			result += '***FINISH GAME***\n'
+			result += 'Game id: %d\n' % self.game.id
 			statistics = data['statistics']
 			statistics = sorted(statistics, key = itemgetter('coins', 'regions'), 
 				reverse = True)
 			for stat in statistics:
-				result += 'Name: %s, coins: %d, regions: %d' % (stat['name'], 
+				result += 'Name: %s, coins: %d, regions: %d\n' % (stat['name'], 
 					stat['coins'], stat['regions'])
+			result += '**************\n'
 		else:
-			result += ', turn: %d\n' % (self.game.turn)
+			result == 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
 			result += 'Player id: %d\n' % self.id
 			result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
 			result += 'Statistics: \n'
@@ -532,6 +534,8 @@ class AI(threading.Thread):
 		time.sleep(10)
 		while True:
 			self.getGameState()
+			if self.game.state == GAME_ENDED:
+				break
 			activePlayer = self.game.activePlayerId
 			defendingPlayer = self.game.defendingInfo['playerId'] if self.game.defendingInfo else None
 			if self.game.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\

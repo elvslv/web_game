@@ -312,6 +312,10 @@ createMap = function(mapState, hratio, vratio)
 
 createGameByState = function(gameState)
 {
+	if (gameState.state == GAME_ENDED)
+	{
+		
+	}
 	var mapState = gameState.map,
 		conqueredRegion,
 		defendingPlayerIndex,
