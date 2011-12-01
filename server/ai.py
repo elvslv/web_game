@@ -329,7 +329,7 @@ class AI(threading.Thread):
 			if 'currentTokenBadge' in player and player['currentTokenBadge']['totalTokensNum'] > best:
 				best = player['currentTokenBadge']['totalTokensNum']
 				bestCand = player
-		chosenPlayer = bestCand.id if bestCand else self.friendCandidates[0].id
+		chosenPlayer = bestCand['id'] if bestCand else self.friendCandidates[0]['id']
 		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
 			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
