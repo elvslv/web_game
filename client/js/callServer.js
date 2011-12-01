@@ -1,8 +1,8 @@
 function sendQuery(query, callback, readonly, param)
 {
 	$.ajax({
-		type: "POST",
-		url: "/ajax",
+		type: 'POST',
+		url: '/ajax',
 		data: $.toJSON(query),
 		success: function(data)
 		{

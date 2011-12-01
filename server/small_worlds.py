@@ -1,5 +1,5 @@
 from utils.path import join
-from bottle import route, run, static_file, request
+from bottle import route, run, static_file, request, redirect
 from sqlalchemy.exc import DatabaseError, DBAPIError, OperationalError
 from misc import *
 
