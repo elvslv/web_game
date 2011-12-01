@@ -167,6 +167,9 @@ class AI(threading.Thread):
 	def getGameState(self):
 		data = self.sendCmd({'action': 'getGameState', 'gameId': self.gameId})
 		gameState = data['gameState']
+		if 'ended' in gameState:
+			self.game.state = GAME_ENDED
+			return
 		map_ = None
 		if not self.game:
 			map_ = createMap(data['gameState']['map'])

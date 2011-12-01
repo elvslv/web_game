@@ -10,6 +10,7 @@ import random
 import math
 import time
 from ai import AI
+import json
 
 def startGame(game, user, data):
 	game.activePlayerId = min(game.players, key=lambda x: x.priority).id
@@ -165,6 +166,10 @@ def getFriendsInfo(game):
 			return {'masterId': histEntry[0].userId, 'slaveId': histEntry[0].friend} 
 	
 def getGameState(game):
+	if game.state == misc.GAME_ENDED:
+		return {'result': 'ok', 'statistics': json.loads(game.gameHistory[-2].action),
+			'ended': True}
+		
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
 	gameNameAttrs = ['gameId', 'gameName', 'gameDescription', 'state', 
 		'currentTurn', 'activePlayerId']
