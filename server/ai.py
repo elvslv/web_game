@@ -76,7 +76,11 @@ class Game:
 
 	def getTokenBadgeById(self, id):
 		res = filter(lambda x: x.id == id, self.tokenBadgesInGame)
-		return res[0] if res else None
+		return res[0] if len(res) else None
+
+	def getUserInfo(self, id):
+		res = filter(lambda x: x['id'] == id, self.players)
+		return res[0] if len(res) else None
 
 	
 class TokenBadge:
@@ -299,14 +303,16 @@ class AI(threading.Thread):
 			for region in self.conqueredRegions:
 				if region.ownerId in players: 
 					players.remove(region.ownerId)
-			self.friendCandidates = players
+			self.friendCandidates = map(lambda x: self.game.getUserInfo(x), players)
+			print self.friendCandidates
 			return len(players)
 		return False
 
 	def selectFriend(self):
-		chosenPlayer = max(self.friendCandidates, key=lambda x: x.totalTokensNum) 
+		theKey = lambda x: x['currentTokenBadge']['totalTokensNum'] if 'currentTokenBadge' in x else 0
+		chosenPlayer = max(self.friendCandidates, key=theKey) 
 		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
-			'friendId': chosenPlayer})
+			'friendId': chosenPlayer.id})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in select friend: %s' % data['result'])
 		self.slaveId = chosenPlayer
@@ -352,14 +358,14 @@ class AI(threading.Thread):
 
 	def conquer(self):
 		regions = self.conquerableRegions
+		calcRegPrior = lambda x: self.getRegionPrice(x) + 5*(x.ownerId == self.id) - self.currentTokenBadge.regBonus(x)
 		self.calcDistances(regions)
-		if self.currentTokenBadge and\
+		if self.currentTokenBadge and len(self.currentTokenBadge.getRegions()) and\
 				not len(filter(lambda x : x.distFromEnemy < 2, self.currentTokenBadge.getRegions())):
-			chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x) - (1 if x.tokenBadgeId else 0))
+			chosenRegion = min(regions, key=lambda x: calcRegPrior(x) - int(x.tokenBadgeId or 0))
 		else:
 			farawayRegs = filter(lambda x: x.distFromEnemy > 2, regions)
-			chosenRegion = min(farawayRegs if len(farawayRegs) else regions, 
-				key=lambda x: self.getRegionPrice(x))
+			chosenRegion = min(farawayRegs if len(farawayRegs) else regions, key=calcRegPrior)
 		conqdReg = copy(chosenRegion)
 		conqdReg.nonEmpty = chosenRegion.tokensNum > 0
 		self.conqueredRegions.append(conqdReg)
@@ -370,8 +376,8 @@ class AI(threading.Thread):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
 
 	def invadersExist(self):
-		return len(filter(lambda x: 'currentTokenBadge' not in x or\
-			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions()), 
+		return len(filter(lambda x: x['id'] != self.id and ('currentTokenBadge' not in x or\
+			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions())), 
 				self.game.players))
 
 	def mostDangerousPlayer(self):
@@ -417,15 +423,17 @@ class AI(threading.Thread):
 			region.distFromEnemy = cur.d
 		maxDist = max(regions, key=lambda x: x.distFromEnemy).distFromEnemy
 		flyingEnemy = self.needDefendAgainst(mdPlayer, 'Flying', False)
+		print map(lambda x: (x.id, x.distFromEnemy), regions) 
 		for reg in self.currentTokenBadge.getRegions():
 			if flyingEnemy:
 				reg.needDef = reg.distFromEnemy
-			if reg.dragon or reg.holeInTheGround or reg.fortress:
+			if reg.dragon or reg.holeInTheGround or reg.fortress or reg.sea:
 				reg.needDef = 1
 			else:
 				reg.needDef = maxDist - reg.distFromEnemy + 1
 			reg.needDef += self.currentTokenBadge.regBonus(reg) 
 			reg.needDef += self.declinedTokenBadge.regBonus(reg) if self.declinedTokenBadge else 0
+		print map(lambda x: (x.id, x.needDef), self.currentTokenBadge.getRegions()) 
 		if mdPlayer and self.needDefendAgainst(mdPlayer, 'Underworld', False) and\
 				not 'currentTokenBadge' in mdPlayer or\
 				len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
@@ -466,6 +474,7 @@ class AI(threading.Thread):
 			reg.needDef = 1
 		stratRegions = filter(lambda x : x.needDef > 1, regions)
 		if len(stratRegions) > 2: regions = stratRegions
+		print map(lambda x: (x.id, x.needDef), self.currentTokenBadge.getRegions()) 
 		if freeUnits:
 			distributeUnits(regions, freeUnits, req['redeployment'])
 		if code == ENCAMPMENTS_CODE:
