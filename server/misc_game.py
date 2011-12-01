@@ -331,9 +331,10 @@ def checkStage(state, user, attackType = None):
 		canDefend = victim != None  and\
 			not victim.inDecline and\
 			battle.attackType != misc.ATTACK_ENCHANT and\
-			battle.victimTokensNum > callRaceMethod(victim.raceId, 'getCasualties')
-		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
-			(state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
+			battle.victimTokensNum > callRaceMethod(victim.raceId, 'getCasualties') and\
+			len(victim.regions) > 0 
+			
+		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or (state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
 	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):
 		raise BadFieldException('badStage')
 

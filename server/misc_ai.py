@@ -16,19 +16,16 @@ def distributeUnits(regions, unitsNum, req):
 		if not share: break
 		else: unitsRest -= int(share)
 		req[reg.id] += int(share) 
-		reg.needDef = max(reg.needDef - share, 1)
 	if unitsRest:
 		priorityRegs=filter(lambda x: x.needDef ==(max(regions, key=lambda x: x.needDef)).needDef, regions)
 		(div, mod) = divmod(unitsRest, len(priorityRegs))
 		if div:
 			for region in priorityRegs: 
 				req[region.id] += div
-				region.needDef = max(reg.needDef - div, 1)
 		if mod:
 			for region in priorityRegs:
 				mod -= 1
 				req[region.id] += 1
-				reg.needDef = max(reg.needDef - 1, 1)
 				if not mod: break
 
 
