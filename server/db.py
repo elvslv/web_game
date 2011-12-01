@@ -11,6 +11,7 @@ import misc
 import checkFields
 import sys
 import json
+import misc_game
 
 Base = declarative_base()
 
@@ -258,7 +259,7 @@ class Game(Base):
 				return nextPlayer
 		self.turn += 1
 		if (self.turn == self.map.turnsNum):
-			return endOfGame(self, activePlayer.coins)
+			return misc_game.endOfGame(self, activePlayer.coins)
 		
 		return filter(lambda x: x.priority >= 0 and x.inGame == True, self.players)[0]
 

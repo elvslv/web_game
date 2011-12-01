@@ -36,7 +36,7 @@ def serve_ajax():
 		return e
 
 def main():
-	misc.LOG_FILE = open(LOG_FILE_NAME, 'w')
+	misc.LOG_FILE = open(LOG_FILE_NAME, 'a')
 	actions.doAction({'action': 'startAI'}, False)
 	run(host='localhost', port=PORT)
 	misc.LOG_FILE.close()

@@ -121,6 +121,8 @@ def countCoins(user):
 	statistics = list()
 	income = len(user.regions)
 	statistics.append(['Regions', income])
+	print user.currentTokenBadge.owner if user.currentTokenBadge else None,\
+		user.declinedTokenBadge.owner if user.declinedTokenBadge else None
 	tokenBadges = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
 	for race in tokenBadges:
 		m = callRaceMethod(race.raceId, 'incomeBonus', race)

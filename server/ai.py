@@ -205,8 +205,9 @@ class AI(threading.Thread):
 			self.game.visibleTokenBadges = tokenBadges
 			self.game.tokenBadgesInGame = tokenBadgesInGame
 			self.game.players = gameState['players']
-			self.game.activePlayerId = gameState['activePlayerId'];
-			self.game.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state'];
+			self.game.activePlayerId = gameState['activePlayerId']
+			self.game.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state']
+			self.game.turn = gameState['currentTurn']
 		self.game.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
 		if 'friendsInfo' in gameState and 'slaveId' in gameState['friendsInfo'] and\
 				gameState['friendsInfo']['slaveId']== self.id:
@@ -303,7 +304,9 @@ class AI(threading.Thread):
 		return False
 
 	def selectFriend(self):
-		chosenPlayer = max(self.friendCandidates, key=lambda x: x.totalTokensNum) 
+		print self.game.players
+		print self.friendCandidates
+		chosenPlayer = max(self.friendCandidates, key=lambda x: x['totalTokensNum']) 
 		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
 			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
