@@ -366,11 +366,13 @@ createGameByState = function(gameState)
 	var tokenBadgesInGame = [],
 		players = [], activePlayerIndex,
 		userFields = ['isReady', 'coins', 'tokensInHand', 'priority', 'inGame'],
-		player;
+		player,
+		inGame = false;
 	for (var i = 0; i < gameState.players.length; ++i)
 	{
 		if (gameState.players[i].id == gameState.activePlayerId)
 			activePlayerIndex = i;
+		inGame = inGame || gameState.players[i].id === user().id;
 		player = (gameState.players[i].id === user().id) ? user(): 
 			new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
 		for (var j = 0; j < userFields.length; ++j)
@@ -398,6 +400,8 @@ createGameByState = function(gameState)
 			defendingPlayerIndex = i;
 		}
 	}
+	if (!inGame)
+		$('#leaveGame, #saveGame').hide();
 	var result;
 	if (!Client.currGameState)
 	{
