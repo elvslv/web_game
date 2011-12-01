@@ -317,7 +317,7 @@ class AI(threading.Thread):
 			for region in self.conqueredRegions:
 				for player in players:
 					if region.ownerId == player['id']:
-						players.remove(players)
+						players.remove(player)
 			self.friendCandidates = players
 			return len(players)
 		return False
@@ -444,7 +444,7 @@ class AI(threading.Thread):
 		flyingEnemy = self.needDefendAgainst(mdPlayer, 'Flying', False)
 		for reg in self.currentTokenBadge.getRegions():
 			if flyingEnemy:
-				reg.needDef = reg.distFromEnemy
+				reg.needDef = 1 if reg.distFromEnemy == 1 else 2 
 			if reg.dragon or reg.holeInTheGround or reg.fortress  or reg.sea:
 				reg.needDef = 1
 			else:
@@ -452,9 +452,9 @@ class AI(threading.Thread):
 			reg.needDef += self.currentTokenBadge.regBonus(reg) 
 			reg.needDef += self.declinedTokenBadge.regBonus(reg) if self.declinedTokenBadge else 0
 		if mdPlayer and self.needDefendAgainst(mdPlayer, 'Underworld', False) and\
-				not 'currentTokenBadge' in mdPlayer or\
+				(not 'currentTokenBadge' in mdPlayer or\
 				len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
-					not x.inDecline and x.cavern, self.game.map.regions)):
+					not x.inDecline and x.cavern, self.game.map.regions))):
 				for region in regions:
 					if region.cavern: region.needDef = maxDist
 		
