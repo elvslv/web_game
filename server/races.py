@@ -162,7 +162,7 @@ class RaceSkeletons(BaseRace):
 
 	def turnEndReinforcements(self, user):
 		bonus = user.getNonEmptyConqueredRegions()
-		print bouns
+		print bonus
 		return bonus / 2
 
 class RaceElves(BaseRace):

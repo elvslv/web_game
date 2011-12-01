@@ -268,7 +268,7 @@ class Game(Base):
 			return {'result': 'ok', 'coins': coins}
 		else:
 			result = list()
-			for player in players:
+			for player in self.players:
 				append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
 			self.resetPlayersState()
 			dbi.delete(self)
@@ -352,6 +352,7 @@ class User(Base):
 		for declinedRegion in self.declinedTokenBadge.regions:
 			declinedRegion.owner = None
 			declinedRegion.inDecline = False
+			declinedRegion.tokensNum = 0
 
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 

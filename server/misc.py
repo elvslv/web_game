@@ -519,7 +519,7 @@ defaultMaps = [
 				'coordinates' : [[0, 0], [0, 158], [46, 146], [126, 151], [104, 0]],
 	 			'adjacent' : [2, 6],
 				'raceCoords': [15, 15],
-				'powerCoords' : [156, 80]
+				'powerCoords' : [69, 102]
 	 		},
 
 			{	
