@@ -45,8 +45,8 @@ function loginResponse(data, param)
 			if (param)
 			{
 				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId', 'ai'],
-					['createGame', sid, '1', '', 1, 1]);
-				sendQuery(query, createGameResponse, false, 1);
+					['createGame', sid, '1', '', 1, 2]);
+				sendQuery(query, createGameResponse, false, 2);
 			}
 			break;
 		default:

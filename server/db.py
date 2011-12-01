@@ -258,9 +258,20 @@ class Game(Base):
 				return nextPlayer
 		self.turn += 1
 		if (self.turn == self.map.turnsNum):
-			return endOfGame(self, activePlayer.coins)
+			return self.end(activePlayer.coins)
 		
 		return filter(lambda x: x.priority >= 0 and x.inGame == True, self.players)[0]
+
+	def end(self, coins):
+		self.state = misc.GAME_ENDED
+		if misc.TEST_MODE:
+			return {'result': 'ok', 'coins': coins}
+		else:
+			result = list()
+			for player in self.players:
+				result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
+			self.resetPlayersState()
+			return {'result': 'ok', 'statistics': result, 'ended': True}
 
 
 class TokenBadge(Base):
@@ -288,6 +299,9 @@ class TokenBadge(Base):
 			if region.isAdjacent(reg.region):
 				return True
 		return False
+
+	def Owner(self):
+		return self.owner if self.owner else self.owner_
         
 class User(Base):
 	__tablename__ = 'users'
@@ -311,6 +325,7 @@ class User(Base):
 		backref=backref('owner', uselist=False), 
 		primaryjoin=currentTokenBadgeId==TokenBadge.id)
 	declinedTokenBadge = relationship(TokenBadge, cascade="all,delete", 
+			backref=backref('owner_', uselist=False),
 			primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
 	def __init__(self, username, password, ai = False):
@@ -336,6 +351,7 @@ class User(Base):
 		for declinedRegion in self.declinedTokenBadge.regions:
 			declinedRegion.owner = None
 			declinedRegion.inDecline = False
+			declinedRegion.tokensNum = 0
 
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 

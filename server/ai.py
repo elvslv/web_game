@@ -279,16 +279,26 @@ class AI(threading.Thread):
 		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in finish turn %s' % data['result'])
-		result = 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
+		result = ''
+		if 'ended' in data: #game ended
+			result += '***FINISH GAME***\n'
+			result += 'Game id: %d\n' % self.game.id
+			statistics = data['statistics']
+			statistics = sorted(statistics, key = itemgetter('coins', 'regions'), 
+				reverse = True)
+			for stat in statistics:
+				result += 'Name: %s, coins: %d, regions: %d\n' % (stat['name'], 
+					stat['coins'], stat['regions'])
+			result += '**************\n'
+		else:
+			result == 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
 		result += 'Player id: %d\n' % self.id
 		result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
 		result += 'Statistics: \n'
 		for statistics in data['statistics']:
 			result += '%s: %d\n' % (statistics[0], statistics[1])
 		result += 'Total coins number: %d\n\n\n' % data['coins']
-		LOG_FILE = open(LOG_FILE_NAME, 'w')
-		LOG_FILE.write(result)
-		LOG_FILE.close()
+		misc.LOG_FILE.write(result)
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
 		self.enchantUsed = False
@@ -299,19 +309,26 @@ class AI(threading.Thread):
 	
 	def shouldSelectFriend(self):
 		if self.game.checkStage(GAME_CHOOSE_FRIEND, self) and self.canSelectFriend():
-			players = filter(lambda x: x != self.id, map(lambda x: x['id'], self.game.players))
+			players = filter(lambda x: x['id'] != self.id, 
+				self.game.players)
 			for region in self.conqueredRegions:
-				if region.ownerId in players: 
-					players.remove(region.ownerId)
-			self.friendCandidates = map(lambda x: self.game.getUserInfo(x), players)
+				for player in players:
+					if region.ownerId == player['id']:
+						players.remove(players)
+			self.friendCandidates = players
 			return len(players)
 		return False
 
 	def selectFriend(self):
-		theKey = lambda x: x['currentTokenBadge']['totalTokensNum'] if 'currentTokenBadge' in x else 0
-		chosenPlayer = max(self.friendCandidates, key=theKey) 
+		best = 0
+		bestCand = None
+		for player in self.friendCandidates:
+			if 'currentTokenBadge' in player and player['currentTokenBadge']['totalTokensNum'] > best:
+				best = player['currentTokenBadge']['totalTokensNum']
+				bestCand = player
+		chosenPlayer = bestCand.id if bestCand else self.friendCandidates[0].id
 		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
-			'friendId': chosenPlayer.id})
+			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in select friend: %s' % data['result'])
 		self.slaveId = chosenPlayer
@@ -367,12 +384,12 @@ class AI(threading.Thread):
 			chosenRegion = min(farawayRegs if len(farawayRegs) else regions, key=calcRegPrior)
 		conqdReg = copy(chosenRegion)
 		conqdReg.nonEmpty = chosenRegion.tokensNum > 0
-		self.conqueredRegions.append(conqdReg)
 		if self.canThrowDice(): self.sendCmd({'action': 'throwDice', 'sid': self.sid})
 		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': chosenRegion.id})
 		ok = data['result'] == 'ok'
 		if not(ok or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
+		if ok: self.conqueredRegions.append(conqdReg)
 
 	def invadersExist(self):
 		return len(filter(lambda x: x['id'] != self.id and ('currentTokenBadge' not in x or\
@@ -422,7 +439,6 @@ class AI(threading.Thread):
 			region.distFromEnemy = cur.d
 		maxDist = max(regions, key=lambda x: x.distFromEnemy).distFromEnemy
 		flyingEnemy = self.needDefendAgainst(mdPlayer, 'Flying', False)
-		print map(lambda x: (x.id, x.distFromEnemy), regions) 
 		for reg in self.currentTokenBadge.getRegions():
 			if flyingEnemy:
 				reg.needDef = 1 if reg.distFromEnemy == 1 else 2 
@@ -432,7 +448,6 @@ class AI(threading.Thread):
 				reg.needDef = maxDist - reg.distFromEnemy + 1
 			reg.needDef += self.currentTokenBadge.regBonus(reg) 
 			reg.needDef += self.declinedTokenBadge.regBonus(reg) if self.declinedTokenBadge else 0
-		print map(lambda x: (x.id, x.needDef), self.currentTokenBadge.getRegions()) 
 		if mdPlayer and self.needDefendAgainst(mdPlayer, 'Underworld', False) and\
 				(not 'currentTokenBadge' in mdPlayer or\
 				len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
@@ -468,12 +483,17 @@ class AI(threading.Thread):
 				reg.needDef = 1
 				if not n: break
 		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortress, regions)) < 6:
-			reg = max(regions, key=lambda x: x.needDef)
-			req['fortified'][reg.id] = 1
-			reg.needDef = 1
+			maxNeedDef = 0
+			reg = None
+			for region in regions:
+				if region.needDef > maxNeedDef and not region.fortress:
+					reg = region
+					maxNeedDef = region.needDef
+			if reg:
+				req['fortified'][reg.id] = 1
+				reg.needDef = 1
 		stratRegions = filter(lambda x : x.needDef > 1, regions)
 		if len(stratRegions) > 2: regions = stratRegions
-		print map(lambda x: (x.id, x.needDef), self.currentTokenBadge.getRegions()) 
 		if freeUnits:
 			distributeUnits(regions, freeUnits, req['redeployment'])
 		if code == ENCAMPMENTS_CODE:
@@ -515,10 +535,12 @@ class AI(threading.Thread):
 		time.sleep(10)
 		while True:
 			self.getGameState()
+			if self.game.state == GAME_ENDED:
+				break
 			activePlayer = self.game.activePlayerId
 			defendingPlayer = self.game.defendingInfo['playerId'] if self.game.defendingInfo else None
 			if self.game.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\
 				(self.id == activePlayer and defendingPlayer):
-				time.sleep(5)
+				time.sleep(1)
 				continue
 			self.getNextAct()()

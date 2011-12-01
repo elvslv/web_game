@@ -8,6 +8,7 @@ import sys
 import random
 import json
 import misc_game
+import misc 
 
 from gameExceptions import BadFieldException
 from sqlalchemy import func 
