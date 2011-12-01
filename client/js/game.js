@@ -419,6 +419,7 @@ createGameByState = function(gameState)
 		game().activePlayerIndex = activePlayerIndex;
 		game().state = gameState.state === GAME_START ? 
 			gameState.lastEvent : gameState.state;
+		game().turn = gameState.currentTurn;
 		result = Client.currGameState;
 	}											//Redo as quickly as possible
 	result.defendingPlayerIndex = defendingPlayerIndex;
@@ -434,6 +435,7 @@ createGameByState = function(gameState)
 			
 	} else if (!(game() && game().redeployStarted && game().defendStarted))
 		user().freeTokens = user().tokensInHand;
+	$('#turn').html('Turn: ' + result.turn);
 	return result;
 };
 

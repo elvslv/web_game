@@ -86,6 +86,11 @@ HtmlBlocks.gameTab = function()
 	return '<table>' +
 			'<tr>' +
 				'<td colspan = "2">' +
+					'<p id = "turn"></p>' +
+				'</td>' +
+			'</tr>' +
+			'<tr>' +
+				'<td colspan = "2">' +
 					'<button id = "leaveGame">leave</button>' +
 				'</td>' +
 				'<td rowspan = "10" valign = "top" width = "100%">' +

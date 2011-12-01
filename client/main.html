@@ -129,7 +129,6 @@
 			<tr>
 				<td class = {{html ''.concat($item.data.currentTokenBadge.raceName)}}></td>
 				<td class =  {{html ''.concat($item.data.currentTokenBadge.specPowName)}}></td>
-				<td valign = "top">{{html $item.data.currentTokenBadge.totalTokensNum}}</td>
 				{{if $item.data.id === $item.currentUser()}}
 					<td>
 						<button id = "decline" style = "display: none">Decline</button>
@@ -141,7 +140,6 @@
 			<tr>
 				<td class = {{html ''.concat($item.data.declinedTokenBadge.raceName)}}></td>
 				<td class =  {{html ''.concat($item.data.declinedTokenBadge.specPowName)}}></td>
-				<td>{{html $item.data.declinedTokenBadge.totalTokensNum}}</td>
 			<tr>
 			{{/if}}
 		</table>
