@@ -121,8 +121,6 @@ def countCoins(user):
 	statistics = list()
 	income = len(user.regions)
 	statistics.append(['Regions', income])
-	print user.currentTokenBadge.Owner() if user.currentTokenBadge else None,\
-		user.declinedTokenBadge.Owner() if user.declinedTokenBadge else None
 	tokenBadges = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
 	for race in tokenBadges:
 		m = callRaceMethod(race.raceId, 'incomeBonus', race)
@@ -138,6 +136,8 @@ def getDefendingInfo(game):
 		return 
 	result = dict()
 	lastAttack = game.history[-1].warHistory
+	if lastAttack.attackType == misc.ATTACK_ENCHANT or lastAttack.victimBadge.inDecline:
+		return
 	tokensNum = lastAttack.victimTokensNum - callRaceMethod(lastAttack.victimBadge.raceId, 'getCasualties')
 	if not (tokensNum and len(lastAttack.victimBadge.regions)):
 		return
@@ -332,7 +332,6 @@ def checkStage(state, user, attackType = None):
 			not victim.inDecline and\
 			battle.attackType != misc.ATTACK_ENCHANT and\
 			battle.victimTokensNum > callRaceMethod(victim.raceId, 'getCasualties')
-		print canDefend
 		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
 			(state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
 	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):

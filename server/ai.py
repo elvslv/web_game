@@ -10,6 +10,7 @@ from copy import copy as copy
 from misc_ai import *
 from misc import *
 from gameExceptions import BadFieldException
+from operator import itemgetter
 
 class Region:
 	def __init__(self, id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
@@ -277,13 +278,23 @@ class AI(threading.Thread):
 		data = self.sendCmd({'action': 'finishTurn', 'sid': self.sid})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in finish turn %s' % data['result'])
-		result = 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
-		result += 'Player id: %d\n' % self.id
-		result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
-		result += 'Statistics: \n'
-		for statistics in data['statistics']:
-			result += '%s: %d\n' % (statistics[0], statistics[1])
-		result += 'Total coins number: %d\n\n\n' % data['coins']
+		result = 'Game id: %d' % (self.game.id)
+		if 'ended' in data: #game ended
+			result += '\n'
+			statistics = data['statistics']
+			statistics = sorted(statistics, key = itemgetter('coins', 'regions'), 
+				reverse = True)
+			for stat in statistics:
+				result += 'Name: %s, coins: %d, regions: %d' % (stat['name'], 
+					stat['coins'], stat['regions'])
+		else:
+			result += ', turn: %d\n' % (self.game.turn)
+			result += 'Player id: %d\n' % self.id
+			result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
+			result += 'Statistics: \n'
+			for statistics in data['statistics']:
+				result += '%s: %d\n' % (statistics[0], statistics[1])
+			result += 'Total coins number: %d\n\n\n' % data['coins']
 		misc.LOG_FILE.write(result)
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
@@ -295,20 +306,24 @@ class AI(threading.Thread):
 	
 	def shouldSelectFriend(self):
 		if self.game.checkStage(GAME_CHOOSE_FRIEND, self) and self.canSelectFriend():
-			players = filter(lambda x: x['id'] != self.id, self.game.players)
+			players = filter(lambda x: x['id'] != self.id, 
+				self.game.players)
 			for region in self.conqueredRegions:
 				for player in players:
-					if region.ownerId == player['id']
+					if region.ownerId == player['id']:
 						players.remove(players)
-			print players
 			self.friendCandidates = players
 			return len(players)
 		return False
 
 	def selectFriend(self):
-		print self.game.players
-		print self.friendCandidates
-		chosenPlayer = max(self.friendCandidates, key=lambda x: x['totalTokensNum']) 
+		best = 0
+		bestCand = None
+		for player in self.friendCandidates:
+			if 'currentTokenBadge' in player and player['currentTokenBadge']['totalTokensNum'] > best:
+				best = player['currentTokenBadge']['totalTokensNum']
+				bestCand = player
+		chosenPlayer = bestCand.id if bestCand else self.friendCandidates[0].id
 		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
 			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
@@ -352,10 +367,7 @@ class AI(threading.Thread):
 			self.currentTokenBadge.specPower.attackBonus(reg, self.currentTokenBadge), 1)
 
 	def getNonEmptyConqueredRegions(self):
-		print 'gfjk'
-		regs = filter(lambda x: x.nonEmpty,  self.conqueredRegions)
-		print self.conqueredRegions, regs
-		return len(regs)
+		return len(filter(lambda x: x.nonEmpty,  self.conqueredRegions))
 
 	def conquer(self):
 		regions = self.conquerableRegions
@@ -374,7 +386,7 @@ class AI(threading.Thread):
 		ok = data['result'] == 'ok'
 		if not(ok or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
-		self.conqueredRegions.append(conqdReg)
+		if ok: self.conqueredRegions.append(conqdReg)
 
 	def invadersExist(self):
 		return len(filter(lambda x: 'currentTokenBadge' not in x or\

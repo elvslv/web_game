@@ -272,7 +272,7 @@ class Game(Base):
 				result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
 			self.resetPlayersState()
 			dbi.delete(self)
-			return {'result': 'ok', 'gameState': result}
+			return {'result': 'ok', 'statistics': result, 'ended': True}
 
 
 class TokenBadge(Base):

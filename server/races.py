@@ -161,9 +161,7 @@ class RaceSkeletons(BaseRace):
 		BaseRace.__init__(self, 'Skeletons', 6, 18)
 
 	def turnEndReinforcements(self, user):
-		bonus = user.getNonEmptyConqueredRegions()
-		print bonus
-		return bonus / 2
+		return user.getNonEmptyConqueredRegions() / 2
 
 class RaceElves(BaseRace):
 	def __init__(self):

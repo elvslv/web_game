@@ -112,7 +112,6 @@ def act_decline(data):
 	makeDecline(user)
 	dbi.updateHistory(user, GAME_DECLINE, user.declinedTokenBadge.id)
 	dbi.updateGameHistory(user.game, data)
-	print user.declinedTokenBadge, user.declinedTokenBadge.Owner()
 	return {'result': 'ok'}
 
 def act_redeploy(data):
@@ -184,12 +183,15 @@ def act_finishTurn(data):
 
 	dbi.updateHistory(user, GAME_FINISH_TURN, None)
 	dbi.updateGameHistory(game, data)
-	prepareForNextTurn(game, nextPlayer)
-	if misc.TEST_MODE:
-		result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins}
-	else:	
-		result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins, 
-		'incomeCoins':incomeCoins['totalCoinsNum'], 'statistics': incomeCoins['statistics']}
+	if isinstance(nextPlayer, dict):
+		result = nextPlayer
+	else:
+		prepareForNextTurn(game, nextPlayer)
+		if misc.TEST_MODE:
+			result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins}
+		else:	
+			result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins, 
+			'incomeCoins':incomeCoins['totalCoinsNum'], 'statistics': incomeCoins['statistics']}
 	return result
 
 def act_defend(data):			## Should be renamed to retreat
