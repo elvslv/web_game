@@ -12,23 +12,23 @@ def distributeUnits(regions, unitsNum, req):
 	sum = reduce(lambda x, y: x + y, map(lambda x: x.needDef, regions))
 	unitsRest = unitsNum
 	for reg in regions:
-		print (reg.needDef, sum, unitsNum)
 		share = math.floor(unitsNum * (float(reg.needDef) / sum))
-		print (reg.id, share)
 		if not share: break
 		else: unitsRest -= int(share)
 		req[reg.id] += int(share) 
 		reg.needDef = max(reg.needDef - share, 1)
 	if unitsRest:
 		priorityRegs=filter(lambda x: x.needDef ==(max(regions, key=lambda x: x.needDef)).needDef, regions)
-		print map(lambda x: x.id, priorityRegs)
 		(div, mod) = divmod(unitsRest, len(priorityRegs))
 		if div:
-			for region in priorityRegs: req[region.id] += div
+			for region in priorityRegs: 
+				req[region.id] += div
+				region.needDef = max(reg.needDef - div, 1)
 		if mod:
 			for region in priorityRegs:
 				mod -= 1
 				req[region.id] += 1
+				reg.needDef = max(reg.needDef - 1, 1)
 				if not mod: break
 
 
