@@ -312,9 +312,20 @@ createMap = function(mapState, hratio, vratio)
 
 createGameByState = function(gameState)
 {
-	if (gameState.state == GAME_ENDED)
+	if (gameState.ended == true)
 	{
-		
+		Client.currGameState = undefined;
+		Interface.changeOnLeave();
+		msg = '***FINISH GAME***\n';
+		statistics = gameState['statistics'];
+		statistics.sort(function(a, b) { 
+			return (a.coins > b.coins || a.coins == b.coins && a.regions > b.regions) ? -1 : 1});
+		for (var  i = 0; i < statistics.length; ++i)
+			msg += 'Name: %s, coins: %d, regions: %d\n' % (statistics[i]['name'], 
+				statistics[i]['coins'], statistics[i]['regions']);
+		msg += '**************\n';
+		alert(msg);
+		return;
 	}
 	var mapState = gameState.map,
 		conqueredRegion,
