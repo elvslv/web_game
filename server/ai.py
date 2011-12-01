@@ -78,7 +78,11 @@ class Game:
 
 	def getTokenBadgeById(self, id):
 		res = filter(lambda x: x.id == id, self.tokenBadgesInGame)
-		return res[0] if res else None
+		return res[0] if len(res) else None
+
+	def getUserInfo(self, id):
+		res = filter(lambda x: x['id'] == id, self.players)
+		return res[0] if len(res) else None
 
 	
 class TokenBadge:
@@ -373,14 +377,14 @@ class AI(threading.Thread):
 
 	def conquer(self):
 		regions = self.conquerableRegions
+		calcRegPrior = lambda x: self.getRegionPrice(x) + 5*(x.ownerId == self.id) - self.currentTokenBadge.regBonus(x)
 		self.calcDistances(regions)
-		if self.currentTokenBadge and\
+		if self.currentTokenBadge and len(self.currentTokenBadge.getRegions()) and\
 				not len(filter(lambda x : x.distFromEnemy < 2, self.currentTokenBadge.getRegions())):
-			chosenRegion = min(regions, key=lambda x: self.getRegionPrice(x) - (1 if x.tokenBadgeId else 0))
+			chosenRegion = min(regions, key=lambda x: calcRegPrior(x) - int(x.tokenBadgeId or 0))
 		else:
 			farawayRegs = filter(lambda x: x.distFromEnemy > 2, regions)
-			chosenRegion = min(farawayRegs if len(farawayRegs) else regions, 
-				key=lambda x: self.getRegionPrice(x))
+			chosenRegion = min(farawayRegs if len(farawayRegs) else regions, key=calcRegPrior)
 		conqdReg = copy(chosenRegion)
 		conqdReg.nonEmpty = chosenRegion.tokensNum > 0
 		if self.canThrowDice(): self.sendCmd({'action': 'throwDice', 'sid': self.sid})
@@ -391,8 +395,8 @@ class AI(threading.Thread):
 		if ok: self.conqueredRegions.append(conqdReg)
 
 	def invadersExist(self):
-		return len(filter(lambda x: 'currentTokenBadge' not in x or\
-			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions()), 
+		return len(filter(lambda x: x['id'] != self.id and ('currentTokenBadge' not in x or\
+			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions())), 
 				self.game.players))
 
 	def mostDangerousPlayer(self):
@@ -441,7 +445,7 @@ class AI(threading.Thread):
 		for reg in self.currentTokenBadge.getRegions():
 			if flyingEnemy:
 				reg.needDef = reg.distFromEnemy
-			if reg.dragon or reg.holeInTheGround or reg.fortress:
+			if reg.dragon or reg.holeInTheGround or reg.fortress  or reg.sea:
 				reg.needDef = 1
 			else:
 				reg.needDef = maxDist - reg.distFromEnemy + 1
