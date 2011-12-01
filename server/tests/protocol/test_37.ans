@@ -15,6 +15,6 @@
 	},
 	{
 		"result": "ok",
-		"messages": [{"id": 1, "text": "hello!", "time": 1, "userId": 1}]
+		"messages": [{"id": 1, "text": "hello!", "time": 1, "name": "user1"}]
 	}
 ]

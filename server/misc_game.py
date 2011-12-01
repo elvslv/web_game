@@ -32,7 +32,6 @@ def startGame(game, user, data):
 		ai = AI('localhost:8080', game, inst.sid, inst.id)
 
 	dbi.updateHistory(user, misc.GAME_START, None)
-	dbi.updateGameHistory(user.game, data)
 
 def getSid():
 	if not misc.TEST_MODE:

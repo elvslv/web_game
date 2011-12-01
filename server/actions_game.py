@@ -21,6 +21,7 @@ def act_setReadinessStatus(data):
 	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
 	if maxPlayersNum == readyPlayersNum:
 		misc_game.startGame(game, user, data)
+	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}
 	
 def act_selectRace(data):

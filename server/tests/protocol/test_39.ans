@@ -26,7 +26,7 @@
 	},
 	{
 		"result": "ok",
-		"messages": [{"id": 1, "text": "hello user2!", "time": 1, "userId": 1}, 
-				{"id": 2, "text": "hello user1!", "time": 2, "userId": 2}]
+		"messages": [{"id": 1, "text": "hello user2!", "time": 1, "name": "user1"}, 
+				{"id": 2, "text": "hello user1!", "time": 2, "name": "user2"}]
 	}
 ]
