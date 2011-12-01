@@ -11,7 +11,6 @@ import misc
 import checkFields
 import sys
 import json
-import misc_game
 
 Base = declarative_base()
 
@@ -259,9 +258,21 @@ class Game(Base):
 				return nextPlayer
 		self.turn += 1
 		if (self.turn == self.map.turnsNum):
-			return misc_game.endOfGame(self, activePlayer.coins)
+			return self.end(activePlayer.coins)
 		
 		return filter(lambda x: x.priority >= 0 and x.inGame == True, self.players)[0]
+
+	def end(self, coins):
+		self.state = misc.GAME_ENDED
+		if misc.TEST_MODE:
+			return {'result': 'ok', 'coins': coins}
+		else:
+			result = list()
+			for player in players:
+				append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
+			self.resetPlayersState()
+			dbi.delete(self)
+			return {'result': 'ok', 'gameState': result}
 
 
 class TokenBadge(Base):
@@ -289,6 +300,9 @@ class TokenBadge(Base):
 			if region.isAdjacent(reg.region):
 				return True
 		return False
+
+	def Owner(self):
+		return self.owner if self.owner else self.owner_
         
 class User(Base):
 	__tablename__ = 'users'
@@ -312,6 +326,7 @@ class User(Base):
 		backref=backref('owner', uselist=False), 
 		primaryjoin=currentTokenBadgeId==TokenBadge.id)
 	declinedTokenBadge = relationship(TokenBadge, cascade="all,delete", 
+			backref=backref('owner_', uselist=False),
 			primaryjoin=declinedTokenBadgeId==TokenBadge.id)
 
 	def __init__(self, username, password, ai = False):

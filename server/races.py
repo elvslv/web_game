@@ -137,7 +137,7 @@ class RaceOrcs(BaseRace):
 		BaseRace.__init__(self, 'Orcs', 5, 10)
 
 	def incomeBonus(self, tokenBadge):
-		return 0 if tokenBadge.inDecline else tokenBadge.owner.getNonEmptyConqueredRegions()
+		return 0 if tokenBadge.inDecline else tokenBadge.Owner().getNonEmptyConqueredRegions()
 
 class RaceWizards(BaseRace):
 	def __init__(self):
@@ -161,9 +161,10 @@ class RaceSkeletons(BaseRace):
 		BaseRace.__init__(self, 'Skeletons', 6, 18)
 
 	def turnEndReinforcements(self, user):
-		return user.getNonEmptyConqueredRegions() / 2
-		
-			
+		bonus = user.getNonEmptyConqueredRegions()
+		print bouns
+		return bonus / 2
+
 class RaceElves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Elves', 6, 11)
@@ -196,7 +197,7 @@ class RaceSorcerers(BaseRace):
 		return True
 	
 	def enchant(self, tokenBadge, regState):
-		game =  tokenBadge.owner.game
+		game =  tokenBadge.Owner().game
 		victimBadge = regState.tokenBadge
 		regState.checkIfImmune(True)
 		if not (self.canConquer(regState.region, tokenBadge) and 
@@ -218,7 +219,7 @@ class RaceSorcerers(BaseRace):
 		tokenBadge.totalTokensNum += 1
 		raceId, specialPowerId  = victimBadge.raceId, victimBadge.specPowId
 		regState.tokenBadge = tokenBadge
-		regState.owner = tokenBadge.owner
+		regState.owner = tokenBadge.Owner()
 		regState.tokensNum = 1
 
 racesList = [
@@ -338,7 +339,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
-		game = tokenBadge.owner.game
+		game = tokenBadge.Owner().game
 		freeEncampments = 5
 		for encampment in encampments:
 			region = game.map.getRegion(encampment['regionId']).getState(game.id)
@@ -407,10 +408,10 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		regState.tokenBadge = tokenBadge
 		regState.dragon = True
 		regState.tokensNum = 1
-		regState.owner = tokenBadge.owner
+		regState.owner = tokenBadge.Owner()
 		regState.inDecline = False
-		tokenBadge.owner.tokensInHand -= 1
-		dbi.updateWarHistory(tokenBadge.owner, attackedTokenBadge.id if 
+		tokenBadge.Owner().tokensInHand -= 1
+		dbi.updateWarHistory(tokenBadge.Owner(), attackedTokenBadge.id if 
 			attackedTokenBadge else None, tokenBadge.id, None, regState.regionId,
 			attackedTokensNum, ATTACK_DRAGON)
 
@@ -452,11 +453,11 @@ class SpecialPowerFortified(BaseSpecialPower):
 	def setFortified(self, tokenBadge, fortified):
 		if not('regionId' in fortified and isinstance(fortified['regionId'], int)):
 			raise BadFieldException('badRegionId')
-		user = tokenBadge.owner
+		user = tokenBadge.Owner()
 		regionId = fortified['regionId']
 		regState = user.game.map.getRegion(regionId).getState(user.game.id)
 
-		if regState.ownerId != tokenBadge.owner.id:
+		if regState.ownerId != tokenBadge.Owner().id:
 			raise BadFieldException('badRegion')
 
 		if regState.fortress:
@@ -485,12 +486,12 @@ class SpecialPowerHeroic(BaseSpecialPower):
 		
 		for region in tokenBadge.regions:
 			region.hero = False
-		user = tokenBadge.owner
+		user = tokenBadge.Owner()
 		for hero in heroes:
 			regState = user.game.map.getRegion(hero['regionId']).getState(
 				user.game.id)
 			
-			if regState.owner.currentTokenBadge != tokenBadge:
+			if regState.Owner().currentTokenBadge != tokenBadge:
 				raise BadFieldException('badRegion')
 
 			regState.hero = True
@@ -518,7 +519,7 @@ class SpecialPowerMerchant(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
 
 	def incomeBonus(self, tokenBadge):
-		return len(tokenBadge.owner.regions)
+		return len(tokenBadge.Owner().regions)
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
@@ -533,7 +534,7 @@ class SpecialPowerPillaging(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Pillaging', 5)
 	
 	def incomeBonus(self, tokenBadge): 
-		return tokenBadge.owner.getNonEmptyConqueredRegions()
+		return tokenBadge.Owner().getNonEmptyConqueredRegions()
 
 class SpecialPowerSeafaring(BaseSpecialPower):
 	def __init__(self):

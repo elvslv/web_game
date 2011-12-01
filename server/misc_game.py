@@ -95,7 +95,7 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	raceId, specPowerId = getNextRaceAndPowerFromStack(game, vRace, vSpecialPower)
 	tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
-	tokenBadgesInStack = filter(lambda x: not x.owner and not x.inDecline and x.pos < lastIndex, tokenBadges) 
+	tokenBadgesInStack = filter(lambda x: not x.Owner() and not x.inDecline and x.pos < lastIndex, tokenBadges) 
 	for tokenBadge in tokenBadgesInStack: 
 		tokenBadge.pos += 1
 		dbi.flush(tokenBadge)
@@ -121,8 +121,8 @@ def countCoins(user):
 	statistics = list()
 	income = len(user.regions)
 	statistics.append(['Regions', income])
-	print user.currentTokenBadge.owner if user.currentTokenBadge else None,\
-		user.declinedTokenBadge.owner if user.declinedTokenBadge else None
+	print user.currentTokenBadge.Owner() if user.currentTokenBadge else None,\
+		user.declinedTokenBadge.Owner() if user.declinedTokenBadge else None
 	tokenBadges = filter (lambda x: x, (user.currentTokenBadge, user.declinedTokenBadge))
 	for race in tokenBadges:
 		m = callRaceMethod(race.raceId, 'incomeBonus', race)
@@ -141,7 +141,7 @@ def getDefendingInfo(game):
 	tokensNum = lastAttack.victimTokensNum - callRaceMethod(lastAttack.victimBadge.raceId, 'getCasualties')
 	if not (tokensNum and len(lastAttack.victimBadge.regions)):
 		return
-	result['playerId'] = lastAttack.victimBadge.owner.id
+	result['playerId'] = lastAttack.victimBadge.Owner().id
 	result['tokensNum'] = tokensNum
 	result['regionId'] = lastAttack.conqRegion.id
 	return result
@@ -284,7 +284,7 @@ def leave(user):
 			if user.currentTokenBadge:
 				makeDecline(user, True)
 			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
-					endOfGame(user.game)
+					user.game.endOfGame()
 
 def getVisibleTokenBadges(gameId):
 	rows = dbi.query(TokenBadge).filter(and_(TokenBadge.gameId == gameId, TokenBadge.pos >= 0)).order_by(asc(TokenBadge.pos))

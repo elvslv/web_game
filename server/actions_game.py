@@ -112,6 +112,7 @@ def act_decline(data):
 	makeDecline(user)
 	dbi.updateHistory(user, GAME_DECLINE, user.declinedTokenBadge.id)
 	dbi.updateGameHistory(user.game, data)
+	print user.declinedTokenBadge, user.declinedTokenBadge.Owner()
 	return {'result': 'ok'}
 
 def act_redeploy(data):

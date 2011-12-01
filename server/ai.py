@@ -350,7 +350,10 @@ class AI(threading.Thread):
 			self.currentTokenBadge.specPower.attackBonus(reg, self.currentTokenBadge), 1)
 
 	def getNonEmptyConqueredRegions(self):
-		return len(filter(lambda x: x.nonEmpty,  self.conqueredRegions))
+		print 'gfjk'
+		regs = filter(lambda x: x.nonEmpty,  self.conqueredRegions)
+		print self.conqueredRegions, regs
+		return len(regs)
 
 	def conquer(self):
 		regions = self.conquerableRegions
@@ -364,12 +367,12 @@ class AI(threading.Thread):
 				key=lambda x: self.getRegionPrice(x))
 		conqdReg = copy(chosenRegion)
 		conqdReg.nonEmpty = chosenRegion.tokensNum > 0
-		self.conqueredRegions.append(conqdReg)
 		if self.canThrowDice(): self.sendCmd({'action': 'throwDice', 'sid': self.sid})
 		data = self.sendCmd({'action': 'conquer', 'sid': self.sid, 'regionId': chosenRegion.id})
 		ok = data['result'] == 'ok'
 		if not(ok or data['result'] == 'badTokensNum'):
 				raise BadFieldException('unknown error in conquer: %s' % data['result'])
+		self.conqueredRegions.append(conqdReg)
 
 	def invadersExist(self):
 		return len(filter(lambda x: 'currentTokenBadge' not in x or\
@@ -463,9 +466,15 @@ class AI(threading.Thread):
 				reg.needDef = 1
 				if not n: break
 		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortress, regions)) < 6:
-			reg = max(regions, key=lambda x: x.needDef)
-			req['fortified'][reg.id] = 1
-			reg.needDef = 1
+			maxNeedDef = 0
+			reg = None
+			for region in regions:
+				if region.needDef > maxNeedDef and not region.fortress:
+					reg = region
+					maxNeedDef = region.needDef
+			if reg:
+				req['fortified'][reg.id] = 1
+				reg.needDef = 1
 		stratRegions = filter(lambda x : x.needDef > 1, regions)
 		if len(stratRegions) > 2: regions = stratRegions
 		if freeUnits:
@@ -513,6 +522,6 @@ class AI(threading.Thread):
 			defendingPlayer = self.game.defendingInfo['playerId'] if self.game.defendingInfo else None
 			if self.game.state == GAME_WAITING or not (self.id in (activePlayer, defendingPlayer)) or\
 				(self.id == activePlayer and defendingPlayer):
-				time.sleep(5)
+				time.sleep(1)
 				continue
 			self.getNextAct()()
