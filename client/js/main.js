@@ -59,6 +59,7 @@ $(function() {
 			$('#createGameOutput span').empty();
 			$('#createGameOutput').hide();
 			updateMapList(true);
+			$('#createGameForm').dialog('open');
 		});
 	$('#browseMaps')
 		.button()
