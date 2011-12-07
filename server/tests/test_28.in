@@ -105,7 +105,7 @@
 		{
 			"action": "selectRace",
 			"sid": 2,
-			"position" : 1
+			"position" : 0
 		},
 		{
 			"action": "conquer",

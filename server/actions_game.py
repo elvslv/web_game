@@ -32,7 +32,7 @@ def act_selectRace(data):
 	checkStage(GAME_SELECT_RACE, user)
 	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
-	price = dbi.query(TokenBadge).filter(TokenBadge.pos > position).count()
+	price = dbi.query(TokenBadge).filter(TokenBadge.pos < position).count()
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId

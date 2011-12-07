@@ -32,7 +32,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 6
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"
@@ -46,11 +46,11 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 1
+		"coins" : 6
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 2
 	},
 	{
 		"result": "ok"
@@ -61,7 +61,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 4
+		"coins" : 7
 	},
 	{
 		"result": "ok"
@@ -69,7 +69,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 2
+		"coins" : 7
 	},
 	{
 		"result": "ok"

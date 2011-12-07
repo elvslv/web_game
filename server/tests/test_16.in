@@ -69,7 +69,7 @@
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 1, "tokensNum": 5}, {"regionId": 2, "tokensNum": 5}]
+			"regions": [{"regionId": 1, "tokensNum": 4}, {"regionId": 2, "tokensNum": 6}]
 		},
 		{
 			"action": "finishTurn",
@@ -90,12 +90,12 @@
 		{
 			"action": "defend",
 			"sid": 1,
-			"regions": [{"regionId": 2, "tokensNum": 4}]
+			"regions": [{"regionId": 2, "tokensNum": 3}]
 		},
 		{
 			"action": "defend",
 			"sid": 1,
-			"regions": [{"regionId": 2, "tokensNum": 5}]
+			"regions": [{"regionId": 2, "tokensNum": 4}]
 		}
 
 

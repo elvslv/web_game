@@ -33,7 +33,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 6
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"
@@ -47,36 +47,14 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 2
+		"coins" : 7
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 2
 	},
 	{
 		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 4
-	},
-	{
-		"result": "regionIsImmune"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 3
 	},
 	{
 		"result": "ok"
@@ -90,8 +68,30 @@
 		"coins" : 7
 	},
 	{
+		"result": "regionIsImmune"
+	},
+	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
-		"tokenBadgeId": 4
+		"nextPlayer" : 2,
+		"coins" : 8
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 1,
+		"coins" : 10
+	},
+	{
+		"result": "ok",
+		"tokenBadgeId": 3
 	},
 	{
 		"result": "ok"

@@ -46,28 +46,20 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 2,
-			"isReady": 1
+			"isReady": 1,
+			"visibleRaces": ["Amazons", "Dwarves", "Elves", "Giants", "Halflings", "Humans"],
+			"visibleSpecialPowers": ["Forest", "Berserk", "Bivouacking", "Commando", "Diplomat", "DragonMaster"]
 		},
-		
-		
-	
 		{	
 			"action": "selectRace",
 			"sid": 2,
 			"position" : 1
 		},
-		
-		
-		
 		{
 			"action": "selectRace",
 			"sid": 1,
 			"position" : 6
 		},
-		
-		
-
-		
 		{
 			"action": "selectRace",
 			"sid": 1,
@@ -118,7 +110,7 @@
 		{
 			"action": "redeploy",
 			"sid": 1,
-			"regions": [{"regionId": 3, "tokensNum": 5}, {"regionId": 1, "tokensNum": 4}]
+			"regions": [{"regionId": 3, "tokensNum": 5}, {"regionId": 1, "tokensNum": 5}]
 		},
 		{
 			"action": "finishTurn",

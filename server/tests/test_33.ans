@@ -32,7 +32,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 6
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"
@@ -50,33 +50,11 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 2
+		"coins" : 7
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 4
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok"
-	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 4
+		"tokenBadgeId": 2
 	},
 	{
 		"result": "ok"
@@ -98,7 +76,29 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 7
+		"coins" : 9
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 1,
+		"coins" : 10
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok"
+	},
+	{
+		"result": "ok",
+		"nextPlayer" : 2,
+		"coins" : 12
 	},
 	{
 		"result": "ok"

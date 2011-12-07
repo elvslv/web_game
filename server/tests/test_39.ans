@@ -32,7 +32,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 6
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"
@@ -50,7 +50,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 1
+		"coins" : 6
 	},
 	{
 		"result": "ok",

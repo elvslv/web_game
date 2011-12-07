@@ -21,11 +21,10 @@ def startGame(game, user, data):
 		vRaces = data['visibleRaces']
 		vSpecialPowers = data['visibleSpecialPowers']
 		for i in range(misc.VISIBLE_RACES):
-			showNextRace(game, misc.VISIBLE_RACES - 1, vRaces[misc.VISIBLE_RACES-i-1], 
-			vSpecialPowers[misc.VISIBLE_RACES-i-1])
+			showNextRace(game, 0, vRaces[i], vSpecialPowers[i])
 	else:
 		for i in range(misc.VISIBLE_RACES):
-			showNextRace(game, misc.VISIBLE_RACES - 1)
+			showNextRace(game, 0)
 			
 	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
 	for inst in ai:
@@ -95,9 +94,9 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	raceId, specPowerId = getNextRaceAndPowerFromStack(game, vRace, vSpecialPower)
 	tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
-	tokenBadgesInStack = filter(lambda x: not x.Owner() and not x.inDecline and x.pos < lastIndex, tokenBadges) 
+	tokenBadgesInStack = filter(lambda x: not x.Owner() and not x.inDecline and x.pos > lastIndex, tokenBadges) 
 	for tokenBadge in tokenBadgesInStack: 
-		tokenBadge.pos += 1
+		tokenBadge.pos -= 1
 		dbi.flush(tokenBadge)
 	tokBadge = TokenBadge(raceId, specPowerId, game.id)
 	dbi.add(tokBadge)
@@ -105,7 +104,7 @@ def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
-	for tokenBadge in filter(lambda x: x.pos > position, game.tokenBadges):
+	for tokenBadge in filter(lambda x: x.pos < position, game.tokenBadges):
 		tokenBadge.bonusMoney += 1
 	return showNextRace(game, position)
 

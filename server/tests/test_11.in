@@ -46,7 +46,9 @@
 		{
 			"action": "setReadinessStatus",
 			"sid": 2,
-			"isReady": 1
+			"isReady": 1,
+			"visibleRaces": ["Amazons", "Dwarves", "Elves", "Giants", "Halflings", "Humans"],
+			"visibleSpecialPowers": ["Forest", "Berserk", "Bivouacking", "Commando", "Diplomat", "DragonMaster"]
 		},
 		{
 			"action": "selectRace",
@@ -91,7 +93,7 @@
 				},
 				{
 					"regionId" : 1,
-					"tokensNum" : 2
+					"tokensNum" : 4
 				}
 			]
 		},
