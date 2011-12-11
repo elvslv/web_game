@@ -59,7 +59,7 @@
 	
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 3
 	},
 	{
 		"result": "ok"
@@ -69,6 +69,9 @@
 	},
 	{
 		"result": "badStage"
+	},
+	{
+		"result": "thereAreTokensInTheHand"
 	},
 	{
 		"result": "ok"

@@ -34,7 +34,7 @@
 	
 	{
 		"result": "ok",
-		"tokenBadgeId": 4
+		"tokenBadgeId": 3
 	},
 	
 	{
@@ -54,12 +54,12 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 3
+		"coins" : 4
 	},
 	
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 4
 	}
 		
 	

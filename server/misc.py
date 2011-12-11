@@ -573,7 +573,7 @@ defaultMaps = [
 	 		
 			{
 				'population': 1,
-	 			'landDescription' : ['mountain', 'coast', 'hill'], 							#8
+	 			'landDescription' : ['coast', 'hill'], 							#8
 	 			'adjacent' : [3, 4, 7, 9, 12, 13],
 				'coordinates' : [[297, 143], [392, 113], [444, 235], [388, 277], [350, 247], [308, 254], [268, 222], [305, 172]],
 				'raceCoords': [300, 191],
@@ -607,7 +607,7 @@ defaultMaps = [
 	 		},
 
 			{																		#12
-	 			'landDescription' : ['coast', 'farmland', 'border'], 
+	 			'landDescription' : ['coast', 'farmland'], 
 				'coordinates' : [[217, 339], [281, 331], [312, 290], [308, 254], [268, 222], [191, 247], [160, 255], [155, 342]],
 	 			'adjacent' : [7, 8, 11, 13, 15, 17],
 				'raceCoords': [214, 253],

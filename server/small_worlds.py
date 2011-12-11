@@ -22,7 +22,7 @@ def application(environ, start_response):
             request_body = environ['wsgi.input'].read(request_body_size)
         except BaseException, e:
             return 'Cannot read request body %s' % e
-        try:
+	try:
             print 3
             misc.LAST_SID = 0
             print 4

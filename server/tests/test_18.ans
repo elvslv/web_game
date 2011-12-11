@@ -33,7 +33,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 6
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"
@@ -53,11 +53,11 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 4
+		"coins" : 9
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 2
 	},
 	{
 		"result": "cannotEnchantMoreThanOneToken"
@@ -77,7 +77,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 3
+		"coins" : 6
 	},
 	{
 		"result": "ok"
@@ -88,7 +88,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 8
+		"coins" : 13
 	},
 	{
 		"result": "ok"

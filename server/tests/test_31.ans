@@ -32,7 +32,7 @@
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 6
+		"tokenBadgeId": 1
 	},
 	{
 		"result": "ok"
@@ -49,11 +49,11 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 2,
-		"coins" : 1
+		"coins" : 6
 	},
 	{
 		"result": "ok",
-		"tokenBadgeId": 5
+		"tokenBadgeId": 2
 	},
 	{
 		"result": "ok"
@@ -67,7 +67,7 @@
 	{
 		"result": "ok",
 		"nextPlayer" : 1,
-		"coins" : 5
+		"coins" : 8
 	},
 	{
 		"result": "ok"
