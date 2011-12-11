@@ -1,46 +1,47 @@
-from utils.path import join
-from bottle import route, run, static_file, request, redirect
-from sqlalchemy.exc import DatabaseError, DBAPIError, OperationalError
-from misc import *
-
-import bottle
-import parseJson
 import sys
+import os
 import json
-import traceback
-import optparse
-import actions
-import misc_game
+
+#from twisted.web.wsgi import WSGIResource
+#from twisted.internet import reactor
+
+path = os.path.dirname(__file__)
+sys.path.append(path)
+os.chdir(path)
+
+import parseJson
 import misc
 
-STATIC_FILES_ROOT = join("./client/")
-PORT = 8080
+def application(environ, start_response):
+    print 'fhsjghjs'
+    if environ['REQUEST_METHOD'] == 'POST':
+        try:
+            print 1
+            request_body_size = int(environ['CONTENT_LENGTH'])
+            print 2
+            request_body = environ['wsgi.input'].read(request_body_size)
+        except BaseException, e:
+            return 'Cannot read request body %s' % e
+        try:
+            print 3
+            misc.LAST_SID = 0
+            print 4
+            print request_body
+            response_body = parseJson.parseJsonObj(json.loads(request_body))
+            print 5
+        except BaseException, e:
+            response_body = 'An error %s occured while trying parse json: %s' % (e, request_body)
+        status = '200 OK'
+        headers = [('Content-type', 'text/plain')]
+        start_response(status, headers)
+        print response_body
+        return json.dumps(response_body)
+    else:
+        response_body = ''
+        status = '200 OK'
+        headers = [('Content-type', 'text/html'),
+                   ('Content-Length', str(len(response_body)))]
+        start_response(status, headers)
+        return [response_body]
 
-app = bottle.app()
-app.catchall = False
-
-@route('/')
-def serve_main():
-    return static_file('main.html', STATIC_FILES_ROOT)
-
-@route('/:root#css.*|images.*|js.*|maps.*#/:filename')
-def serve_dirs(root,filename):
-	return static_file(filename, join(STATIC_FILES_ROOT, root))
-
-@route('/ajax', method='POST')
-def serve_ajax():
-	try:
-		return parseJson.parseJsonObj(json.load(request.body))
-	except Exception, e:
-		traceback.print_exc()
-		return e
-
-def main():
-	misc.LOG_FILE = open(LOG_FILE_NAME, 'a')
-	actions.doAction({'action': 'startAI'}, False)
-	run(host='localhost', port=PORT)
-	misc.LOG_FILE.close()
-	return 0
-
-if __name__ == '__main__':
-	sys.exit(main())
+#resource = WSGIResource(reactor, reactor.getThreadPool(), application)

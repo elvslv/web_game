@@ -1,0 +1,316 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<head>
+		<script type="text/javascript" src="client/js/jquery/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="client/js/jquery/jquery-ui-1.8.12.custom.min.js"></script> 
+		<script type="text/javascript" src="client/js/jquery/jquery.tmpl.js"></script>
+		<script type="text/javascript" src="client/js/jquery/jquery.fancybox-1.3.4.pack.js"></script> 
+		<script type="text/javascript" src="client/js/jquery/jquery.blockUI.js"></script>
+		<script type="text/javascript" src="client/js/scripts/menu-collapsed.js"></script>
+		<script type="text/javascript" src="client/js/scripts/jquery.form.js"></script>
+		<script type="text/javascript" src="client/js/scripts/raphael.js"></script> 
+		<script type="text/javascript" src="client/js/scripts/raphaelle.js"></script> 
+		<script type="text/javascript" src="client/js/scripts/jquery.json-2.3.min.js"></script>
+		<script type="text/javascript" src="client/js/scripts/jquery.inherit-1.3.2.M.js"></script>
+		<script type="text/javascript" src="client/js/scripts/jquery.maphilight.min.js"></script>
+		<script type="text/javascript" src="client/js/scripts/jquery.simplemodal-1.4.1.js"></script>
+		<script type="text/javascript" src="client/js/scripts/ui.spinner.js"></script>
+		<script type="text/javascript" src="client/js/utils.js"></script> 
+		<script type="text/javascript" src="client/js/graphics.js"></script> 
+		<script type="text/javascript" src="client/js/data.js"></script> 
+		<script type="text/javascript" src="client/js/game.js"></script> 
+		<script type="text/javascript" src="client/js/races.js"></script> 
+		<script type="text/javascript" src="client/js/handlers.js"></script> 
+		<script type="text/javascript" src="client/js/htmlBlocks.js"></script> 
+		<script type="text/javascript" src="client/js/main.js"></script> 
+		<script type="text/javascript" src="client/js/interface.js"></script> 
+		<script type="text/javascript" src="client/js/callServer.js"></script> 
+		<script type="text/javascript" src="client/js/serverResponses.js"></script> 
+		<link rel="stylesheet" type="text/css" href="client/css/jquery-ui-1.8.12.custom.css">
+		<link rel="stylesheet" type="text/css" href="client/css/styles.css">
+		<link rel="stylesheet" type="text/css" href="client/css/ui.spinner.css">
+		<link rel="stylesheet" type="text/css" href="client/css/jquery.fancybox-1.3.4.css" media="screen" />
+</head>
+
+<body> 
+<script id="gameListTemplate" type="text/x-jquery-tmpl"> 
+	<li><a href="#">${gameName}</a>
+		<ul>
+			{{if $item.data.gameDescr != undefined}}<p>Game description: ${gameDescr}</p>{{/if}}
+			<p>Map Id: ${mapId}</p>
+			<p>State: ${state}</p>
+			<p>Turn: ${turn}</p>
+			<p>Number of turns: ${turnsNum}</p>
+			<p>Maximum players number: ${maxPlayersNum}</p>
+			<p>Players:</p>
+			{{tmpl(players, {activePlayer: $item.data.activePlayerId}) "#userListTemplate"}}
+			<button id = {{html 'join'.concat($item.data.gameId)}} style = "display: none">
+				Join
+			</button>
+			<button id = {{html 'leave'.concat($item.data.gameId)}} style = "display: none">
+				Leave
+			</button>
+			<button id = {{html 'setReadinesStatus'.concat($item.data.gameId)}} style = "display: none">
+				I am ready
+			</button>
+		</ul>
+	</li>
+</script>
+<script id="mapListTemplate" type="text/x-jquery-tmpl"> 
+	<li><a href="#">${mapName}</a>
+		<ul>
+			<p>Number of turns: ${turnsNum}</p>
+			<p>Maximum players number: ${playersNum}</p>
+			<div id = {{html 'mapPict'.concat($item.data.mapId)}} style = "width: 100px; height: 100px;"></div>
+			<button id = {{html 'chooseMap'.concat($item.data.mapId)}}>
+				Choose map
+			</button>
+		</ul>
+	</li>
+</script>
+<script id="userListTemplate" type="text/x-jquery-tmpl"> 
+	<div class = "user">
+		<p>${username}{{if $item.data.userId == $item.activePlayer}} -- active player{{/if}}</p>
+		{{if $item.data.isReady}}<p style="margin: 10px;">Ready</p>{{/if}}
+		{{if !$item.data.inGame}}<p style="margin: 10px;">Not in game</p>{{/if}}
+	</div>
+</script>
+<script id="chatTemplate" type="text/x-jquery-tmpl"> 
+	<div class = "ui-widget-content ui-corner-all">
+		<table>
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<td>
+								<i>${name}</i>, 
+							</td>
+							<td>
+								{{html $item.UTC($item.data.time)}}:
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan = "2">
+						${text}
+				</td>
+			</tr>
+		</table>
+	</div>
+</script>
+<script id="mapChooseTemplate" type="text/x-jquery-tmpl"> 
+	<option id = {{html 'map'.concat($item.data.mapId)}} mapId = {{html $item.data.mapId}}>${mapName}</option>
+</script>
+<script id="usersInCurGameTemplate" type="text/x-jquery-tmpl"> 
+	<div class = "user" style=${$item.color($item.data.id)}>
+		<p>
+		</p>
+		<table>
+			<tr>
+				<td colspan = "2">
+					{{if $item.data.id == $item.currentUser()}}<i><b>{{/if}}
+					${username}
+					{{if $item.data.id == $item.currentUser()}}</b></i>{{/if}}
+					{{if $item.data.id == $item.activePlayer()}} -- active player {{else}}
+						{{if $item.data.id == $item.defendingPlayer()}} -- defending player {{/if}}
+					{{/if}}
+					{{if !$item.gameStarted}}
+						{{if $item.data.isReady}}<p style="margin: 10px;">, ready</p>{{/if}}
+					{{/if}}
+					{{if !$item.data.inGame}}<p style="margin: 10px;">, not in game</p>{{/if}}
+				</td>
+				<td class = "Money">
+					<span>${coins}</span>
+				</td>
+			</tr>
+			{{if $item.data.currentTokenBadge}}
+			<tr>
+				<td class = {{html ''.concat($item.data.currentTokenBadge.raceName)}}></td>
+				<td class =  {{html ''.concat($item.data.currentTokenBadge.specPowName)}}></td>
+				{{if $item.data.id === $item.currentUser()}}
+					<td>
+						<button id = "decline" style = "display: none">Decline</button>
+					</td>
+				{{/if}}
+			<tr>
+			{{/if}}
+			{{if $item.data.declinedTokenBadge != undefined}}
+			<tr>
+				<td class = {{html ''.concat($item.data.declinedTokenBadge.raceName)}}></td>
+				<td class =  {{html ''.concat($item.data.declinedTokenBadge.specPowName)}}></td>
+			<tr>
+			{{/if}}
+		</table>
+		<button id = "{{html 'selectFriend'.concat($item.data.id)}}" style = "display: none">
+			Select as friend
+		</button>
+	</div>
+</script>
+<script id="visibleTokenBadgesTemplate" type="text/x-jquery-tmpl"> 
+	<div>  
+		<table>
+			<tr>
+				<td rowspan = "2" class = {{html ''.concat($item.data.raceName)}}></td>
+				<td rowspan = "2" class =  {{html ''.concat($item.data.specPowName)}}></td>
+				<td class = "Money"><span>${bonusMoney}</span></td>
+			</tr>
+			<tr>
+				<td>
+					<button id={{html 'select'.concat($item.data.pos)}} pos={{html $item.data.pos}} style = "display: none"></button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</script>
+
+	<div id = 'tabs'>
+		<ul>
+	    </ul>	
+	</div>
+	<div id = "registerLoginForm" style = "display: none">
+		<p>Please enter unique username and valid password</p>
+		<table>
+			<tr>
+				<td>
+					<label for="username">Username</label>
+				</td>
+				<td>
+					<input type="text" name="username" id = "username" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="password">Password</label>
+				</td>
+				<td>
+					<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+		</table>
+		<div id = "registerLoginOutput" class = "dialogError ui-state-error ui-corner-all"><span></span></div>
+	</div>
+	<div id = "createGameForm" style = "display: none">
+		<p>Please enter game info</p>
+		<table>
+			<tr>
+				<td>
+					<label for="gameName">Game name</label>
+				</td>
+				<td>
+					<input type="text" name="gameName" id = "gameName" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="gameDescription">Game description</label>
+				</td>
+				<td>
+					<input type="text" name="gameDescription" id="gameDescription" value="" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="mapList">Map</label>
+				</td>
+				<td>
+					<select id = "mapList" class="text ui-widget-content ui-corner-all" ></select>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Number of artificial intelligences
+				</td>
+				<td>
+					<input type="number" id="aiCnt" value="0" />				
+				</td>
+			</tr>
+		</table>
+		<button id = "browseMaps">Browse maps</button>
+		<div id = "createGameOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
+	</div>
+	<div id = "loadGameForm" style = "display: none">
+		<p>Please enter game actions</p>
+		<table>
+			<tr>
+				<td>
+					<label for="gameName">Game actions</label>
+				</td>
+				<td>
+					<textarea name="gameActions" id = "gameActions" 
+						class="text ui-widget-content ui-corner-all" style = "min-height: 150px;overflow-y: auto;">
+					</textarea>
+				</td>
+			</tr>
+		</table>
+		<div id = "loadGameOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
+	</div>
+	<div id = "saveGameForm" style = "display: none">
+		<table>
+			<tr>
+				<td>
+					<label for="gameName">Game actions</label>
+				</td>
+				<td>
+					<textarea name="savedGameActions" id = "savedGameActions" 
+						class="text ui-widget-content ui-corner-all" style = "min-height: 150px; overflow-y: auto;">
+					</textarea>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id = "browseMapsForm" style = "display: none">
+		<p id = "dialogInfo">Maps:</p>
+		<div id = "browseMapsList"></div>
+	</div>
+	<div id = "confirm" style = "display: none">
+		<div id = "confirmInfo"></div>
+		<div id = "confirmOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
+	</div>
+    <div id = "uploadMap" style = "display: none">
+    		<table>
+			<tr>
+				<td>
+					<label for="mapName">Map name</label>
+				</td>
+				<td>
+					<input type="text" name="mapName" id = "mapName" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="playersNum">Number of players</label>
+				</td>
+				<td>
+					<input type="text" name="playersNum" id="playersNum" value="" class="text ui-widget-content ui-corner-all" />			
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="turnsNum">Number of turns</label>
+				</td>
+				<td>
+					<input type="text" name="turnsNum" id="turnsNum" value="" class="text ui-widget-content ui-corner-all" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="regionsList">Regions description</label>
+				</td>
+				<td>
+					<textarea id="regionsList" value="" class="text ui-widget-content ui-corner-all" 
+						style = "min-height: 150px; overflow-y: auto;"></textarea>
+				</td>
+			</tr>
+		</table>
+		<div id = "uploadMapOutput" class = "ui-state-error ui-corner-all dialogError"><span>&nbsp</span></div>
+    </div>
+	<div id = "mapPreview" class = "mapPreview" style = "display: none">
+	</div>
+	<div id = "showVisibleTokenBadgesDialog" style = "display: none">
+		<div id = "visibleTokenBadges">
+		</div>
+	</div>
+</body>
+</html>

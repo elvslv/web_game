@@ -2,10 +2,13 @@ function sendQuery(query, callback, readonly, param)
 {
 	$.ajax({
 		type: 'POST',
-		url: '/ajax',
-		data: $.toJSON(query),
+		url: 'client/script.php',
+		//url: '/small_worlds',
+		//data: $.toJSON(query),
+		data: "url='http://localhost/small_worlds/'&data=" + $.toJSON(query),
 		success: function(data)
 		{
+			data = $.evalJSON(data);
 			if (!data['result'])
 			{
 				console.error("Unknown server response: " + data);

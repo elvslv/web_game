@@ -2,7 +2,7 @@ HtmlBlocks = {};
 
 HtmlBlocks.mainTab = function()
 { 
-	return "<div style = \"background: url(css/images/bg.jpg) no-repeat; background-position: 40% center;\">"+
+	return "<div style = \"background: url(client/css/images/bg.jpg) no-repeat; background-position: 40% center;\">"+
 			"<table id = \"tmain\" height = \"100%\" width = \"100%\" style=\"ui-widget\">"+
 				"<tr>"+
 					"<td rowspan = 4 valign = \"top\">"+
