@@ -446,7 +446,6 @@ class Database:
 		meta = MetaData()
 		meta.reflect(bind=self.engine)
 		for table in reversed(meta.sorted_tables):
-		#	if misc.TEST_MODE and table.name !=  'adjacentregions' and table.name !=  'maps' and table.name != 'regions':
 			self.engine.drop(table)
 		Base.metadata.create_all(self.engine)
 

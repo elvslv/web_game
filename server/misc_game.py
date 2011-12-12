@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import asc
 import random
 import math
 import time
-from ai import AI
+#from ai import AI
 import json
 
 def startGame(game, user, data):
@@ -26,9 +26,9 @@ def startGame(game, user, data):
 		for i in range(misc.VISIBLE_RACES):
 			showNextRace(game, 0)
 			
-	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
-	for inst in ai:
-		ai = AI('localhost:8080', game, inst.sid, inst.id)
+#	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
+#	for inst in ai:
+#		ai = AI('localhost:8080', game, inst.sid, inst.id)
 
 	dbi.updateHistory(user, misc.GAME_START, None)
 

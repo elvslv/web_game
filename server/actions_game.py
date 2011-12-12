@@ -88,7 +88,7 @@ def act_conquer(data):
 	dice = user.game.getLastState() == GAME_THROW_DICE and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = misc_game.throwDice(game)
-	unitPrice -= dice if dice else 0				# How do I turn None into 0? int() doesn't seem to work
+	unitPrice -= (dice or 0)
 	unitPrice = max(unitPrice, 1)
 	if unitsNum < unitPrice:
 		dbi.updateHistory(user, GAME_UNSUCCESSFULL_CONQUER, user.currentTokenBadge.id)

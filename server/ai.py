@@ -137,9 +137,9 @@ def createTokenBadge(tokenBadge, declined, owner=None):
 		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'], owner)
 	
 class AI(threading.Thread):
-	def __init__(self, host, game, sid, id ):
+	def __init__(self, host, gameId, sid, id):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
-		self.gameId = game.id 
+		self.gameId = gameId 
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
 		self.enchantUsed = False
@@ -153,7 +153,7 @@ class AI(threading.Thread):
 		self.start()
 		
 	def sendCmd(self, obj):
-		self.conn.request("POST", "/ajax", json.dumps(obj))
+		self.conn.request("POST", "/small_worlds", json.dumps(obj))
 		r1 = self.conn.getresponse()
 		res = r1.read()
 		data = json.loads(res)
