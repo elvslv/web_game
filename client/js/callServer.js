@@ -2,10 +2,10 @@ function sendQuery(query, callback, readonly, param)
 {
 	$.ajax({
 		type: 'POST',
-		url: 'client/script.php',
-		//url: '/small_worlds',
-		//data: $.toJSON(query),
-		data: "url='http://localhost/small_worlds/'&data=" + $.toJSON(query),
+	//	url: 'client/script.php',
+		url: 'http://localhost:80/small_worlds',
+		data: $.toJSON(query),
+	//	data: "url='http://localhost/small_worlds/'&data=" + $.toJSON(query),
 		success: function(data)
 		{
 			data = $.evalJSON(data);

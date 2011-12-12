@@ -2,9 +2,6 @@ import sys
 import os
 import json
 
-#from twisted.web.wsgi import WSGIResource
-#from twisted.internet import reactor
-
 path = os.path.dirname(__file__)
 sys.path.append(path)
 os.chdir(path)
@@ -32,7 +29,7 @@ def application(environ, start_response):
         except BaseException, e:
             response_body = 'An error %s occured while trying parse json: %s' % (e, request_body)
         status = '200 OK'
-        headers = [('Content-type', 'text/plain')]
+        headers = [('Content-type', 'text/plain'), ('Access-Control-Allow-Origin', '*')]
         start_response(status, headers)
         print response_body
         return json.dumps(response_body)
@@ -40,8 +37,7 @@ def application(environ, start_response):
         response_body = ''
         status = '200 OK'
         headers = [('Content-type', 'text/html'),
-                   ('Content-Length', str(len(response_body)))]
+                   ('Content-Length', str(len(response_body))),
+                    ('Access-Control-Allow-Origin', '*')]
         start_response(status, headers)
         return [response_body]
-
-#resource = WSGIResource(reactor, reactor.getThreadPool(), application)
