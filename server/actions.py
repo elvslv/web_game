@@ -205,9 +205,9 @@ def act_getGameList(data):
 	result['games'] = list()
 
 	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
-		'mapId']
+		'mapId', 'ai']
 	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescr', 'state', 
-		'turn', 'mapId']
+		'turn', 'mapId', 'ai']
 
 	playerAttrs = ['id', 'name', 'isReady', 'inGame']
 	playerAttrNames = ['userId', 'username', 'isReady', 'inGame']

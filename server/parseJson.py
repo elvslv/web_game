@@ -21,7 +21,7 @@ def parseInputData(data):
 	try:
 		object = json.loads(data)
 	except (TypeError, ValueError), e:
-		return {"result": "badJson"}
+		return {"result": "badJson"}				## Redo by friday
 	if isinstance(object, list):
 		return {"result": "badJson"}
 	else:

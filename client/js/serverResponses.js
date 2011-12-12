@@ -10,7 +10,7 @@ function registerResponse(data)
 			$('#registerLoginOutput span').text('Invalid username');
 			break;
 		case 'usernameTaken':
-			$('#registerLoginOutput span').text('User with the same name have already registered');
+			$('#registerLoginOutput span').text('User with the same name has already registered');
 			break;
 		case 'ok':
 			$('#registerLoginOutput').hide();
@@ -394,13 +394,13 @@ function redeployResponse(data)
 	switch(data['result'])
 	{
 		case 'notEnoughTokensForRedeployment':
-			alert('notEnoughTokensForRedeployment'); 
+			alert('not enough tokens for redeployment'); 
 			break;
 		case 'noTokensForRedeployment':
-			alert('noTokensForRedeployment'); 
+			alert('no tokens for redeployment'); 
 			break;
 		case 'userHasNoRegions':
-			alert('userHasNoRegions'); 
+			alert('user has no regions'); 
 			break;
 		case 'badTokensNum':
 			alert('badTokensNum'); 
@@ -443,16 +443,16 @@ function defendResponse(data)
 	switch(data['result'])
 	{
 		case 'noTokensForRedeployment':
-			alert('noTokensForRedeployment'); 
+			alert('no tokens for redeployment'); 
 			break;
 		case 'badTokensNum':
 			alert('badTokensNum'); 
 			break;
 		case 'notEnoughTokens':
-			alert('notEnoughTokens');
+			alert('not enough tokens');
 			break;
 		case 'thereAreTokensInTheHand':
-			alert('thereAreTokensInTheHand'); 
+			alert('there are tokens in the hand'); 
 			break;
 		case 'ok':
 			game().defendStarted = false;
