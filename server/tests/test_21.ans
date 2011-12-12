@@ -48,9 +48,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 9
+		"statistics": [["Regions", 3], ["Orcs", 1], ["Bivouacking", 0]], 
+		"result": "ok"
 	}
 
 ]

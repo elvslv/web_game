@@ -45,9 +45,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
+		"statistics": [["Regions", 1], ["Skeletons", 0], ["Bivouacking", 0]], 
+		"result": "ok"
 	}
 
 ]

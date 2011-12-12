@@ -52,9 +52,9 @@
 	},
 
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 4
+		"statistics": 
+			[["Regions", 2], ["Giants", 0], ["Commando", 0]], 
+		"result": "ok"
 	},
 	
 	{

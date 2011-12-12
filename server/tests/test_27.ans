@@ -48,10 +48,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 8
-	},
+		"statistics": [["Regions", 3], ["Trolls", 0], ["Bivouacking", 0]], 
+		"result": "ok"},
 	{
 		"result": "ok",
 		"tokenBadgeId": 2
@@ -67,17 +65,13 @@
 	},
 	{
 		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 7
-	},
+		"statistics": [["Regions", 1], ["Dwarves", 1], ["DragonMaster", 0]]},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 10
-	},
+		"statistics": [["Regions", 2], ["Trolls", 0], ["Bivouacking", 0]]},
 	{
 		"result": "ok"
 	},

@@ -25,6 +25,15 @@ def checkObjectsListCorrection(data, fields):
 				if obj[field['name']] < field['min']:
 					raise BadFieldException(msg)
 
+def constructMsg(field):
+	if field['name'] == 'sid':
+		msg = 'badUser' + field['name'][0].upper() + field['name'][1:]
+	elif field['name'] == 'text':
+		msg = 'badMessage' + field['name'][0].upper() + field['name'][1:]
+	else:
+		msg = 'bad' + field['name'][0].upper() + field['name'][1:]
+	return msg
+
 def checkFieldsCorrectness(data):
 	fields = misc.actionFields[data['action']]
 	if not fields:
@@ -32,18 +41,12 @@ def checkFieldsCorrectness(data):
 	for field in fields:
 		if not field['name'] in data:
 			if field['mandatory']:
-				raise BadFieldException('badJson')
-			continue
+				raise BadFieldException(constructMsg(field))
 
 	for field in fields:
 		if not field['name'] in data:
 			continue
-		if field['name'] == 'sid':
-                        msg = 'badUser' + field['name'][0].upper() + field['name'][1:]
-                elif field['name'] == 'text':
-                        msg = 'badMessage' + field['name'][0].upper() + field['name'][1:]
-                else:
-                        msg = 'bad' + field['name'][0].upper() + field['name'][1:]
+		msg = constructMsg(field)
 		if not isinstance(data[field['name']], field['type']):
 			raise BadFieldException(msg)
 		minValue = field['min'] if 'min' in field else 0

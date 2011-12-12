@@ -51,9 +51,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 9
+		"statistics": [["Regions", 4], ["Amazons", 0], ["Forest", 0]], 
+		"result": "ok"
 	},
 	{
 		"result": "ok",
@@ -75,20 +74,18 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 6
-	},
-	{
+		"statistics": [["Regions", 1], ["Sorcerers", 0], ["Berserk", 0]], 
 		"result": "ok"
 	},
 	{
 		"result": "ok"
 	},
 	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 13
+		"statistics": [["Regions", 4], ["Amazons", 0], ["Forest", 0]]
 	},
 	{
 		"result": "ok"

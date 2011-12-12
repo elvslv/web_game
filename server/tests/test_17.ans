@@ -42,9 +42,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 7
+		"statistics": [["Regions", 1], ["Dwarves", 1], ["Forest", 0]], 
+		"result": "ok"
 	}
 
 ]

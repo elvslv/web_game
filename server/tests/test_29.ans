@@ -50,11 +50,7 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
-	},
+	{"statistics": [["Regions", 1], ["Ratmen", 0], ["Bivouacking", 0]], "result": "ok"},
 	{
 		"result": "ok",
 		"tokenBadgeId": 2
@@ -65,19 +61,13 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 7
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Dwarves", 1], ["Forest", 0]]},
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 7
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Ratmen", 0], ["Bivouacking", 0]]},
 	{
 		"result": "ok"
 	}

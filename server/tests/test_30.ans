@@ -50,11 +50,7 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
-	},
+	{"statistics": [["Regions", 1], ["Amazons", 0], ["Diplomat", 0]], "result": "ok"},
 	{
 		"result": "ok",
 		"tokenBadgeId": 2
@@ -68,11 +64,8 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 6
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Dwarves", 0], ["Forest", 0]]},
 	{
 		"result": "ok"
 	},
@@ -82,11 +75,8 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 8
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 2], ["Amazons", 0], ["Diplomat", 0]]},
 	{
 		"result": "usersAreFriends"
 	},
@@ -96,22 +86,16 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 9
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 2], ["Dwarves", 1], ["Forest", 0]]},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 11
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 3], ["Amazons", 0], ["Diplomat", 0]]},
 	{
 		"result": "ok"
 	}

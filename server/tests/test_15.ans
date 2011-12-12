@@ -71,9 +71,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
+		"statistics": [["Regions", 1], ["Dwarves", 1], ["Berserk", 0]], 
+		"result": "ok"
 	}
 
 ]

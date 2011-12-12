@@ -48,9 +48,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
-	}
+		"statistics": 
+			[["Regions", 1], ["Tritons", 0], ["Forest", 0]], 
+		"result": "ok"}
 
 ]

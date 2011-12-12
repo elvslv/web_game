@@ -85,9 +85,11 @@
 	},
 	
 	{
-		"result" : "ok",
-		"nextPlayer" : 2,
-		"coins" : 5
+		"statistics": 
+		[
+			["Regions", 2], ["Elves", 0], ["Bivouacking", 0]
+		], 
+		"result": "ok"
 	}
 	
 		

@@ -44,11 +44,8 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 7
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 2], ["Ratmen", 0], ["Forest", 0]]},
 	{
 		"result": "ok",
 		"tokenBadgeId": 2
@@ -62,33 +59,24 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 7
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Dwarves", 1], ["DragonMaster", 0]]},
 	{
 		"result": "regionIsImmune"
 	},
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 8
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Ratmen", 0], ["Forest", 0]]},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 10
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 2], ["Dwarves", 1], ["DragonMaster", 0]]},
 	{
 		"result": "ok",
 		"tokenBadgeId": 3

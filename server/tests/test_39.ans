@@ -47,11 +47,8 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 6
-	},
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Ratmen", 0], ["Heroic", 0]]},
 	{
 		"result": "ok",
 		"actions": 

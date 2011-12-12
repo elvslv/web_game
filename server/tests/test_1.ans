@@ -2,7 +2,7 @@
 		"result": "ok"
 	},
 	{
-		"result": "badJson"
+		"result": "badPlayersNum"
 	},
 	{
 		"result": "badMapName"

@@ -45,9 +45,8 @@
 		"result": "ok"
 	},
 	{
-		"result": "ok",
-		"nextPlayer" : 2,
-		"coins" : 7
+		"statistics": [["Regions", 2], ["Elves", 0], ["Forest", 0]], 
+		"result": "ok"
 	},
 	{
 		"result": "ok",

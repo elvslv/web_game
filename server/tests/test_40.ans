@@ -31,9 +31,6 @@
 	{
 		"result": "ok"
 	},
-	{
-		"result": "ok",
-		"nextPlayer" : 1,
-		"coins" : 7
-	}
+	{"result": "ok",
+ "statistics": [["Regions", 1], ["Wizards", 1], ["Forest", 0]]}
 ]
