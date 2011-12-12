@@ -2,16 +2,16 @@ Graphics = {};
 
 
 Graphics.landscapePictures = {
-	"forest" : "url('css/images/forest.jpg')",
-	"swamp" : "url('css/images/swamp.jpg')",
-	"sea" : "url('css/images/sea.jpg')",
-	"hill" : "url('css/images/hill.jpg')",
-	"mountain" : "url('css/images/mountain.jpg')",
-	"farmland" : "url('css/images/farmland.jpg')",
-	"magic" : "url('css/images/magic.jpg')",
-	"cavern" : "url('css/images/cavern.jpg')",
-	"mine" : "url('css/images/mine.jpg')",
-	"natives" : "url('css/images/races/elves small.jpg')"
+	"forest" : "url('client/css/images/forest.jpg')",
+	"swamp" : "url('client/css/images/swamp.jpg')",
+	"sea" : "url('client/css/images/sea.jpg')",
+	"hill" : "url('client/css/images/hill.jpg')",
+	"mountain" : "url('client/css/images/mountain.jpg')",
+	"farmland" : "url('client/css/images/farmland.jpg')",
+	"magic" : "url('client/css/images/magic.jpg')",
+	"cavern" : "url('client/css/images/cavern.jpg')",
+	"mine" : "url('client/css/images/mine.jpg')",
+	"natives" : "url('client/css/images/races/elves small.jpg')"
 };
 
 
@@ -58,7 +58,7 @@ Graphics.drawTokenBadge = function(reg, badgeType, num){
 		previousBadge = badgeType.race ? place.ui.race : place.ui.power,
 		pic = badgeType.getPic(reg && reg.inDecline),
 		badge;
-	if (Graphics.cnt >= 2 && previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
+	if (previousBadge && previousBadge.pic == pic && previousBadge.num.n == num) 
 		return previousBadge;
 	Graphics.deleteBadge(previousBadge, reg);
 	if (!num) return;

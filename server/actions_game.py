@@ -188,11 +188,7 @@ def act_finishTurn(data):
 		result = nextPlayer
 	else:
 		prepareForNextTurn(game, nextPlayer)
-		if misc.TEST_MODE:
-			result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins}
-		else:	
-			result = {'result': 'ok', 'nextPlayer' : nextPlayer.id, 'coins': user.coins, 
-			'incomeCoins':incomeCoins['totalCoinsNum'], 'statistics': incomeCoins['statistics']}
+		result = {'result': 'ok', 'statistics': incomeCoins['statistics']}
 	return result
 
 def act_defend(data):			## Should be renamed to retreat

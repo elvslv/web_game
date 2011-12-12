@@ -28,7 +28,7 @@ def startGame(game, user, data):
 			
 	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
 	for inst in ai:
-		ai = AI('localhost:8080', game, inst.sid, inst.id)
+		ai = AI('localhost:80', game, inst.sid, inst.id)
 
 	dbi.updateHistory(user, misc.GAME_START, None)
 
@@ -150,18 +150,47 @@ def hasDragonAttacked(game):
 		x.warHistory.attackType == misc.ATTACK_DRAGON, game.history)
 	return True if len(histEntry) > 0 else False 
 
+def hasEnchanted(game):
+	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc.GAME_CONQUER and 
+		x.warHistory.attackType == misc.ATTACK_ENCHANT, game.history)
+	return True if len(histEntry) > 0 else False 
+
+def countHolesNum(game):
+	if game.activePlayer().currentTokenBadge.raceId != 5:
+		return None
+	return min(len(filter(lambda x : x.state == misc.GAME_CONQUER and\
+		x.warHistory.agressorBadgeId == game.activePlayer().currentTokenBadgeId, 
+		game.history)), 2)
+
+def getBerserkDice(game):
+	if game.activePlayer().currentTokenBadge.specPowId != 1:
+		return None
+	return game.getLastState() == GAME_THROW_DICE and game.history[-1].dice
+
+def usedStout(game):
+	if game.activePlayer().currentTokenBadge.specPowId != 15:
+		return None
+	return True if len(filter(lambda x : x.turn == game.turn and x.state == misc.GAME_DECLINE and\
+		x.userId == game.activePlayerId, game.history)) else False
+
+def gotWealth(game):
+	if game.activePlayer().currentTokenBadge.specPowId != 18:
+		return None
+	return True if len(filter(lambda x : x.tokenBadgeId == game.activePlayer().currentTokenBadge.id and\
+		x.state == misc.GAME_FINISH_TURN, game.history)) else False
+
 def getFriendsInfo(game):
 	turn = game.turn
 	histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND,
 		game.history)
 	if histEntry:
-		return {'masterId': histEntry[0].userId, 'slaveId': histEntry[0].friend}
+		return {'diplomatId': histEntry[0].userId, 'friendId': histEntry[0].friend}
 	histEntry = filter(lambda x : x.turn == turn - 1 and x.state == misc.GAME_CHOOSE_FRIEND,
 		game.history)
 	if histEntry:
 		attackedUser = dbi.getXbyY('User', 'id', histEntry[0].friend)
 		if histEntry[0].user.priority > attackedUser.priority:
-			return {'masterId': histEntry[0].userId, 'slaveId': histEntry[0].friend} 
+			return {'diplomatId': histEntry[0].userId, 'friendId': histEntry[0].friend} 
 	
 def getGameState(game):
 	if game.state == misc.GAME_ENDED:
@@ -175,6 +204,11 @@ def getGameState(game):
 	if game.history:
 		result['lastEvent'] = game.getLastState()
 	result['dragonAttacked'] = hasDragonAttacked(game)
+	result['enchanted'] = hasEnchanted(game)
+	result['holesNum'] = countHolesNum(game)
+	result['berserkDice'] = getBerserkDice(game)
+	result['usedStout'] = usedStout(game)
+	result['gotWealth'] = gotWealth(game)
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 
@@ -296,7 +330,6 @@ def getVisibleTokenBadges(gameId):
 		result.append({
 			'raceName': races.racesList[tokenBadge.raceId].name, 
 			'specialPowerName': races.specialPowerList[tokenBadge.specPowId].name,
-			'position': tokenBadge.pos,
 			'bonusMoney': tokenBadge.bonusMoney})
 	return result
 

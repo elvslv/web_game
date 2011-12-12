@@ -104,7 +104,10 @@ class Game(Base):
 			player.declinedTokenBadge = None
 			player.coins = misc.INIT_COINS_NUM
 			player.priority = None
-		
+
+
+	def activePlayer(self):
+		return dbi.getXbyY('User', 'id', self.activePlayerId)
 
 	def getLastState(self):
 		if (len(self.history)):
@@ -134,15 +137,12 @@ class Game(Base):
 
 	def end(self, coins):
 		self.state = misc.GAME_ENDED
-		if misc.TEST_MODE:
-			return {'result': 'ok', 'coins': coins}
-		else:
-			result = list()
-			for player in self.players:
-				result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
-			self.resetPlayersState()
-			dbi.updateGameHistory(self, result)
-			return {'result': 'ok', 'statistics': result, 'ended': True}
+		result = list()
+		for player in self.players:
+			result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
+		self.resetPlayersState()
+		dbi.updateGameHistory(self, result)
+		return {'result': 'ok', 'statistics': result, 'ended': True}
 
 
 class TokenBadge(Base):

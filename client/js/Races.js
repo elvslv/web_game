@@ -26,7 +26,7 @@ BaseRace = $.inherit({
 	getPic : function(declined)
 	{
 		n = this.name ? this.name + ' ' : ''; 
-		return "css/images/races/" + n + "small" + 
+		return "client/css/images/races/" + n + "small" + 
 			(declined ? " decline.jpg" : ".jpg"); 
 	},
 	canDrop : function(region)
@@ -282,7 +282,7 @@ BaseSpecialPower = $.inherit({
 	},
 	getPic : function()
 	{
-		return this.regPropName && "css/images/specialPowers/" + this.regPropName.toLowerCase() + ".jpg"; 
+		return this.regPropName && "client/css/images/specialPowers/" + this.regPropName.toLowerCase() + ".jpg"; 
 	},
 	canDrop: function(region) 
 	{

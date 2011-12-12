@@ -266,7 +266,7 @@ def act_startAI(data):
 	result = dbi.query(User).filter(User.isAI == True).all()
 	for inst in result:
 		game = dbi.getXbyY('Game', 'id', inst.gameId)
-		ai = AI('localhost:8080', game, inst.sid, inst.id)
+		ai = AI('localhost:80', game, inst.sid, inst.id)
 
 def doAction(data, check = True):
 	try:

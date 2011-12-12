@@ -393,8 +393,8 @@ createGameByState = function(gameState)
 			tokenBadgesInGame[player.declinedTokenBadge.id] = player.declinedTokenBadge;
 		} else
 			player.declinedTokenBadge = undefined;
-		if (gameState['friendsInfo'] && gameState['friendsInfo']['slaveId'] == player.id)
-			player.friendId = gameState['friendsInfo']['masterId']
+		if (gameState['friendsInfo'] && gameState['friendsInfo']['friendId'] == player.id)
+			player.friendId = gameState['friendsInfo']['diplomatId']
 		players.push(player);
 		if (gameState.defendingInfo && player.id === gameState.defendingInfo.playerId){
 			defendingPlayerIndex = i;

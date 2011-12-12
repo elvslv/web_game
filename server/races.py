@@ -78,7 +78,7 @@ class RaceHalflings(BaseRace):
 		BaseRace.__init__(self, 'Halflings', 6, 11)
 	
 	def conquered(self, region, tokenBadge):	
-		if len(filter(lambda x: x.holeInTheGround, tokenBadge.regions)) >= 2:
+		if len(dbi.query(WarHistoryEntry).filter(WarHistoryEntry.agressorBadgeId == tokenBadge.id).all()) >= 2:
 			return
 		for region in tokenBadge.regions: region.holeInTheGround = True
 

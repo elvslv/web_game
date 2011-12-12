@@ -50,14 +50,14 @@ def parseDataFromFile(fileName):
 		random.seed(misc.TEST_RANDSEED)
 	object = object['test']
 	result = list()
-	conn = httplib.HTTPConnection("localhost:8080", timeout = 10000)
+	conn = httplib.HTTPConnection("localhost:80", timeout = 10000)
 	if isinstance(object, list):
 		for obj in object:
-			conn.request("POST", "/ajax", json.dumps(obj))
+			conn.request("POST", "/small_worlds/", json.dumps(obj))
 			r1 = conn.getresponse()
 			result.append(json.loads(r1.read()))
 	else:
-		conn.request("POST", "/ajax", json.dumps(object))
+		conn.request("POST", "/small_worlds/", json.dumps(object))
 		r1 = conn.getresponse()
 		return {'result': [r1.read()], 'description': description}
 
