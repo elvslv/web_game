@@ -1,7 +1,9 @@
 import httplib
 import json
+
 from ai import AI
 from httplib import HTTPException
+from time import sleep
 
 aiCnt = 0
 url = 'localhost:80'
@@ -35,6 +37,7 @@ def main():
 				aiNum = game['ai'] or 0
 				for i in range(0, aiNum):
 					dispatch(conn, game['id'])
+			sleep(5)
 	except HTTPException, e:
 		print e
 		conn.close()
