@@ -261,12 +261,6 @@ def act_aiJoin(data):
 		misc_game.startGame(game, ai, data)
 	return {'result': 'ok', 'sid' : ai.sid, 'id' : ai.id}
 
-def act_startAI(data):
-	result = dbi.query(User).filter(User.isAI == True).all()
-	for inst in result:
-		game = dbi.getXbyY('Game', 'id', inst.gameId)
-		ai = AI('localhost:80', game, inst.sid, inst.id)
-
 def doAction(data, check = True):
 	try:
 		dbi.session = dbi.Session()

@@ -137,7 +137,7 @@ def createTokenBadge(tokenBadge, declined, owner=None):
 		tokenBadge['specialPowerName'], None, None, declined, tokenBadge['totalTokensNum'], owner)
 	
 class AI(threading.Thread):
-	def __init__(self, host, gameId, sid, id):
+	def __init__(self, host, gameId, sid, id, logFile):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
 		self.gameId = gameId 
 		self.conqueredRegions = list()
@@ -146,6 +146,7 @@ class AI(threading.Thread):
 		self.friendId = None
 		self.sid = sid
 		self.id = id
+		self.logFile = logFile
 		self.game = None
 		self.currentTokenBadge = None
 		self.declinedTokenBadge = None
@@ -166,6 +167,7 @@ class AI(threading.Thread):
 
 	def getGameState(self):
 		data = self.sendCmd({'action': 'getGameState', 'gameId': self.gameId})
+		print data
 		gameState = data['gameState']
 		if 'ended' in gameState:
 			self.game.state = GAME_ENDED
@@ -217,9 +219,9 @@ class AI(threading.Thread):
 			self.game.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state']
 			self.game.turn = gameState['currentTurn']
 		self.game.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
-		if 'friendsInfo' in gameState and 'slaveId' in gameState['friendsInfo'] and\
-				gameState['friendsInfo']['slaveId']== self.id:
-				self.masterId = gameState['friendsInfo']['masterId']
+		if 'friendsInfo' in gameState and 'friendId' in gameState['friendsInfo'] and\
+				gameState['friendsInfo']['friendId']== self.id:
+				self.masterId = gameState['friendsInfo']['diplomatId']
 		else:
 			self.masterId = None 
 
@@ -297,21 +299,23 @@ class AI(threading.Thread):
 					stat['coins'], stat['regions'])
 			result += '**************\n'
 		else:
-			result == 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
+			result = 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
 			result += 'Player id: %d\n' % self.id
 			result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
 			result += 'Statistics: \n'
+			totalCoins = 0
 			for statistics in data['statistics']:
 				result += '%s: %d\n' % (statistics[0], statistics[1])
-			result += 'Total coins number: %d\n\n\n' % data['coins']
-		misc.LOG_FILE.write(result)
+				totalCoins += statistics[1]
+			result += 'Total coins number: %d\n\n\n' % totalCoins
+		self.logFile.write(result)
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
 		self.enchantUsed = False
-		self.slaveId = None
+		self.friendId = None
 
 	def canSelectFriend(self):
-		return not self.slaveId and self.currentTokenBadge.specPower.canSelectFriend()
+		return not self.friendId and self.currentTokenBadge.specPower.canSelectFriend()
 	
 	def shouldSelectFriend(self):
 		if self.game.checkStage(GAME_CHOOSE_FRIEND, self) and self.canSelectFriend():
@@ -337,7 +341,7 @@ class AI(threading.Thread):
 			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
 			raise BadFieldException('unknown error in select friend: %s' % data['result'])
-		self.slaveId = chosenPlayer
+		self.friendId = chosenPlayer
 
 	def canConquer(self, region):
 		f1 = region.ownerId != self.id or region.ownerId == self.id and region.inDecline
@@ -404,7 +408,7 @@ class AI(threading.Thread):
 
 	def mostDangerousPlayer(self):
 		theKey = lambda x: x['currentTokenBadge']['totalTokensNum'] if 'currentTokenBadge' in x else 0
-		return max(filter(lambda x: x['id'] not in (self.id, self.slaveId), self.game.players), key=theKey)
+		return max(filter(lambda x: x['id'] not in (self.id, self.friendId), self.game.players), key=theKey)
 			
 
 	def needDefendAgainst(self, mdPlayer, abilityName, race):
@@ -412,14 +416,14 @@ class AI(threading.Thread):
 				not 'currentTokenBadge' in 
 					filter(lambda x: x['id'] != self.id, self.game.players)[0] and\
 				len(filter(lambda x: (x.race.name if race else x.specPower.name) == abilityName and\
-					x.owner != self.id and x.owner != self.slaveId, 
+					x.owner != self.id and x.owner != self.friendId, 
 					self.game.visibleTokenBadges))) or\
 			mdPlayer and\
 			'currentTokenBadge' in mdPlayer and\
 			mdPlayer['currentTokenBadge']['raceName' if race else 'specialPowerName'] == abilityName
 					
 	def calcDistances(self, regions):
-		dangerous = lambda x: x.ownerId and not x.inDecline and x.ownerId not in (self.id, self.slaveId)
+		dangerous = lambda x: x.ownerId and not x.inDecline and x.ownerId not in (self.id, self.friendId)
 		invaders = self.invadersExist()
 		mdPlayer = self.mostDangerousPlayer()
 		hobbitsAreEnemies =  self.needDefendAgainst(mdPlayer, 'Hobbits', True)
@@ -542,6 +546,7 @@ class AI(threading.Thread):
 		while True:
 			self.getGameState()
 			if self.game.state == GAME_ENDED:
+				if not self.logFile.closed: self.logFile.close()
 				break
 			activePlayer = self.game.activePlayerId
 			defendingPlayer = self.game.defendingInfo['playerId'] if self.game.defendingInfo else None

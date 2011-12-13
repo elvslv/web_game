@@ -25,7 +25,7 @@ C = 0
 M = 2 << 31 - 1
 
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=True
+TEST_MODE=False
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -66,10 +66,6 @@ possiblePrevCmd = {
 
 usrnameRegexp = r'^[a-z]+[\w_-]{%s,%s}$' % (MIN_USERNAME_LEN - 1, MAX_USERNAME_LEN - 1)
 pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
-
-LOG_FILE_NAME = 'ai_results.txt'
-global LOG_FILE
-LOG_FILE = None
 
 def generateSidForTest():
 	global LAST_SID

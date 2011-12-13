@@ -6,7 +6,6 @@ HERO_CODE = 5
 FORTRESS_CODE = 6
 ENCAMPMENTS_CODE = 7
 
-
 		
 def distributeUnits(regions, unitsNum, req):
 	sum = reduce(lambda x, y: x + y, map(lambda x: x.needDef, regions))

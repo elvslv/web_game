@@ -9,7 +9,6 @@ from sqlalchemy.sql.expression import asc
 import random
 import math
 import time
-#from ai import AI
 import json
 
 def startGame(game, user, data):
@@ -28,10 +27,6 @@ def startGame(game, user, data):
 		for i in range(misc.VISIBLE_RACES):
 			showNextRace(game, 0)
 			
-#	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
-#	for inst in ai:
-#		ai = AI('localhost:8080', game, inst.sid, inst.id)
-
 	dbi.updateHistory(user, misc.GAME_START, None)
 
 def getSid():
@@ -217,7 +212,6 @@ def getGameState(game):
 	result['gotWealth'] = gotWealth(game)
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
-	print 'beforeDef'
 	defendingInfo = getDefendingInfo(game)
 	if defendingInfo:
 		result['defendingInfo'] = defendingInfo
@@ -233,7 +227,6 @@ def getGameState(game):
 	players = game.players
 	resPlayers = list()
 	priority = 0
-	print 'lalala'
 	for player in players:
 		curPlayer = dict()
 		for i in range(len(playerAttrs)):
