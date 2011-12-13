@@ -203,17 +203,15 @@ def act_getGameList(data):
 	result = {'result': 'ok'}
 	games = dbi.query(Game).filter(Game.state != GAME_ENDED).all()
 	result['games'] = list()
-
 	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
-		'mapId', 'ai']
+		'mapId', 'aiRequiredNum']
 	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescr', 'state', 
-		'turn', 'mapId', 'ai']
+		'turn', 'mapId', 'aiRequiredNum']
 
 	playerAttrs = ['id', 'name', 'isReady', 'inGame']
 	playerAttrNames = ['userId', 'username', 'isReady', 'inGame']
 	for game in games:
 		curGame = dict()
-
 		for i in range(len(gameAttrs)):
 			if gameAttrs[i] == 'descr':
 				continue
@@ -257,10 +255,11 @@ def act_aiJoin(data):
 	ai.inGame = True
 	dbi.add(ai)
 	dbi.flush(ai)
-	readyPlayersNum = dbi.query(User).filter(User.game==game).filter(User.isReady==True).count()
+	game.aiRequiredNum -= 1
+	readyPlayersNum = dbi.query(User).filter(User.gameId == game.id).filter(User.isReady==True).count()
 	if maxPlayersNum == readyPlayersNum:
 		misc_game.startGame(game, ai, data)
-	return {'result': 'ok'}
+	return {'result': 'ok', 'sid' : ai.sid, 'id' : ai.id}
 
 def act_startAI(data):
 	result = dbi.query(User).filter(User.isAI == True).all()

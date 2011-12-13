@@ -13,7 +13,9 @@ import time
 import json
 
 def startGame(game, user, data):
+	print map(lambda x: x.id, game.players)
 	game.activePlayerId = min(game.players, key=lambda x: x.priority).id
+	print game.activePlayerId
 	game.state = misc.GAME_START
 	dbi.flush(game)
 	#generate first 6 races
@@ -156,25 +158,29 @@ def hasEnchanted(game):
 	return True if len(histEntry) > 0 else False 
 
 def countHolesNum(game):
-	if game.activePlayer().currentTokenBadge.raceId != 5:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.raceId != 5:
 		return None
 	return min(len(filter(lambda x : x.state == misc.GAME_CONQUER and\
 		x.warHistory.agressorBadgeId == game.activePlayer().currentTokenBadgeId, 
 		game.history)), 2)
 
 def getBerserkDice(game):
-	if game.activePlayer().currentTokenBadge.specPowId != 1:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.specPowId != 1:
 		return None
 	return game.getLastState() == GAME_THROW_DICE and game.history[-1].dice
 
 def usedStout(game):
-	if game.activePlayer().currentTokenBadge.specPowId != 15:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.specPowId != 15:
 		return None
 	return True if len(filter(lambda x : x.turn == game.turn and x.state == misc.GAME_DECLINE and\
 		x.userId == game.activePlayerId, game.history)) else False
 
 def gotWealth(game):
-	if game.activePlayer().currentTokenBadge.specPowId != 18:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.specPowId != 18:
 		return None
 	return True if len(filter(lambda x : x.tokenBadgeId == game.activePlayer().currentTokenBadge.id and\
 		x.state == misc.GAME_FINISH_TURN, game.history)) else False
@@ -211,7 +217,7 @@ def getGameState(game):
 	result['gotWealth'] = gotWealth(game)
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
-
+	print 'beforeDef'
 	defendingInfo = getDefendingInfo(game)
 	if defendingInfo:
 		result['defendingInfo'] = defendingInfo
@@ -227,6 +233,7 @@ def getGameState(game):
 	players = game.players
 	resPlayers = list()
 	priority = 0
+	print 'lalala'
 	for player in players:
 		curPlayer = dict()
 		for i in range(len(playerAttrs)):

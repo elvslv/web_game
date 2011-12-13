@@ -10,22 +10,16 @@ import parseJson
 import misc
 
 def application(environ, start_response):
-    print 'fhsjghjs'
     if environ['REQUEST_METHOD'] == 'POST':
         try:
-            print 1
             request_body_size = int(environ['CONTENT_LENGTH'])
-            print 2
             request_body = environ['wsgi.input'].read(request_body_size)
         except BaseException, e:
             return 'Cannot read request body %s' % e
 	try:
-            print 3
             misc.LAST_SID = 0
-            print 4
             print request_body
             response_body = parseJson.parseJsonObj(json.loads(request_body))
-            print 5
         except BaseException, e:
             response_body = 'An error %s occured while trying parse json: %s' % (e, request_body)
         status = '200 OK'

@@ -5,7 +5,6 @@ from ai import AI
 from httplib import HTTPException
 from time import sleep
 
-aiCnt = 0
 url = 'localhost:80'
 
 
@@ -15,17 +14,8 @@ def sendCmd(conn, data):
 	
 
 def dispatch(conn, gameId):
-	freeNameFound = False
-	name = None
-	while not freeNameFound:
-		name = 'AI%d' % aiCnt
-		r = sendCmd(conn, {'action' : 'register', 'username' : name, 'password' : '12345'})
-		aiCnt += 1
-		if r['result'] == 'ok': freeNameFound = True
-	userInfo = sendCmd(conn, {'action' : 'login', 'username' : name, 'password' : '12345'})
-	sendCmd(conn, {'action' : 'joinGame', 'sid' : userInfo['sid'], 'gameId' : gameId})
-	ai = AI(url, gameId, userInfo['sid'], userInfo['id'])
-	sendCmd(conn, {'action' : 'setReadinessStatus', 'sid' : userInfo['sid'], 'isReady' : True})
+	userInfo = sendCmd(conn, {'action' : 'aiJoin', 'gameId' : gameId})
+	return AI(url, gameId, userInfo['sid'], userInfo['id'])
 		
 def main():	
 	try:
@@ -34,9 +24,10 @@ def main():
 			gameList = sendCmd(conn, {'action' : 'getGameList'})['games']
 			print gameList
 			for game in gameList:
-				aiNum = game['ai'] or 0
-				for i in range(0, aiNum):
-					dispatch(conn, game['id'])
+				aiNum = game['aiRequiredNum'] or 0
+				for i in range(aiNum):
+					print 'addiing up'
+					dispatch(conn, game['gameId'])
 			sleep(5)
 	except HTTPException, e:
 		print e
