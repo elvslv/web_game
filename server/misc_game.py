@@ -9,7 +9,6 @@ from sqlalchemy.sql.expression import asc
 import random
 import math
 import time
-#from ai import AI
 import json
 
 def startGame(game, user, data):
@@ -26,10 +25,6 @@ def startGame(game, user, data):
 		for i in range(misc.VISIBLE_RACES):
 			showNextRace(game, 0)
 			
-#	ai = dbi.query(User).filter(User.gameId == game.id).filter(User.isAI == True).all()
-#	for inst in ai:
-#		ai = AI('localhost:8080', game, inst.sid, inst.id)
-
 	dbi.updateHistory(user, misc.GAME_START, None)
 
 def getSid():
@@ -156,25 +151,29 @@ def hasEnchanted(game):
 	return True if len(histEntry) > 0 else False 
 
 def countHolesNum(game):
-	if game.activePlayer().currentTokenBadge.raceId != 5:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.raceId != 5:
 		return None
 	return min(len(filter(lambda x : x.state == misc.GAME_CONQUER and\
 		x.warHistory.agressorBadgeId == game.activePlayer().currentTokenBadgeId, 
 		game.history)), 2)
 
 def getBerserkDice(game):
-	if game.activePlayer().currentTokenBadge.specPowId != 1:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.specPowId != 1:
 		return None
 	return game.getLastState() == GAME_THROW_DICE and game.history[-1].dice
 
 def usedStout(game):
-	if game.activePlayer().currentTokenBadge.specPowId != 15:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.specPowId != 15:
 		return None
 	return True if len(filter(lambda x : x.turn == game.turn and x.state == misc.GAME_DECLINE and\
 		x.userId == game.activePlayerId, game.history)) else False
 
 def gotWealth(game):
-	if game.activePlayer().currentTokenBadge.specPowId != 18:
+	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
+		game.activePlayer().currentTokenBadge.specPowId != 18:
 		return None
 	return True if len(filter(lambda x : x.tokenBadgeId == game.activePlayer().currentTokenBadge.id and\
 		x.state == misc.GAME_FINISH_TURN, game.history)) else False
@@ -211,7 +210,6 @@ def getGameState(game):
 	result['gotWealth'] = gotWealth(game)
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
-
 	defendingInfo = getDefendingInfo(game)
 	if defendingInfo:
 		result['defendingInfo'] = defendingInfo

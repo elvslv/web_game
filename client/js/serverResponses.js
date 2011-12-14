@@ -163,8 +163,6 @@ function createGameResponse(data, ai)
 			Client.currentUser.gameId = data.gameId;
 			Interface.changeOnCreateGame(data);
 			$('#createGameForm').dialog('close');
-			for (var i = 0; i < ai; ++i)
-				sendQuery({'action': 'aiJoin', 'gameId': data.gameId}, true)
 			break;
 		default:
 			console.error('Unknown server response' + data.toString());

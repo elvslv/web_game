@@ -66,7 +66,6 @@ def act_conquer(data):
 	regState = region.getState(game.id)
 	owner = regState.owner
 	if owner == user and not regState.inDecline: 
-		print 1, 'badRegion'
 		raise BadFieldException('badRegion')
 	tokenBadge = user.currentTokenBadge
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
@@ -74,7 +73,6 @@ def act_conquer(data):
 	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
 	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
 	if not (f1 and f2):
-		print 2, 'badRegion'
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
 	attackedRace = None

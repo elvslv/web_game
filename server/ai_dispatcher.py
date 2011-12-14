@@ -5,38 +5,29 @@ from ai import AI
 from httplib import HTTPException
 from time import sleep
 
-aiCnt = 0
 url = 'localhost:80'
-
 
 def sendCmd(conn, data):
 	conn.request("POST", "/small_worlds", json.dumps(data))
 	return json.loads(conn.getresponse().read()) 
 	
 
-def dispatch(conn, gameId):
-	freeNameFound = False
-	name = None
-	while not freeNameFound:
-		name = 'AI%d' % aiCnt
-		r = sendCmd(conn, {'action' : 'register', 'username' : name, 'password' : '12345'})
-		aiCnt += 1
-		if r['result'] == 'ok': freeNameFound = True
-	userInfo = sendCmd(conn, {'action' : 'login', 'username' : name, 'password' : '12345'})
-	sendCmd(conn, {'action' : 'joinGame', 'sid' : userInfo['sid'], 'gameId' : gameId})
-	ai = AI(url, gameId, userInfo['sid'], userInfo['id'])
-	sendCmd(conn, {'action' : 'setReadinessStatus', 'sid' : userInfo['sid'], 'isReady' : True})
+def dispatch(conn, gameId, logFile):
+	userInfo = sendCmd(conn, {'action' : 'aiJoin', 'gameId' : gameId})
+	return AI(url, gameId, userInfo['sid'], userInfo['id'], logFile)
 		
 def main():	
+	logFilesCnt = 0
 	try:
 		conn = httplib.HTTPConnection(url)
 		while 1:
 			gameList = sendCmd(conn, {'action' : 'getGameList'})['games']
-			print gameList
 			for game in gameList:
-				aiNum = game['ai'] or 0
-				for i in range(0, aiNum):
-					dispatch(conn, game['id'])
+				aiNum = game['aiRequiredNum'] or 0
+				if aiNum:
+					logFile = open('logs\\ai_results%d.log' % logFilesCnt, 'w')
+					logFilesCnt += 1
+					for i in range(aiNum):	dispatch(conn, game['gameId'], logFile)
 			sleep(5)
 	except HTTPException, e:
 		print e

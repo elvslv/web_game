@@ -64,7 +64,7 @@ class Game(Base):
 	mapId = fkey('maps.id')
 	randseed = Column(Integer)
 	prevGeneratedNum = Column(Integer)
-	ai = Column(Integer)
+	aiRequiredNum = Column(Integer)
 	
 	map = relationship(Map)
 	
@@ -80,7 +80,7 @@ class Game(Base):
 		self.map = map
 		self.randseed = randseed
 		self.prevGeneratedNum = randseed
-		self.ai = ai
+		self.aiRequiredNum = ai
 		
 	def playersInGame(self):
 		return filter(lambda x: x.inGame == True, self.players)
@@ -107,7 +107,7 @@ class Game(Base):
 
 
 	def activePlayer(self):
-		return dbi.getXbyY('User', 'id', self.activePlayerId)
+		return self.activePlayerId and dbi.getXbyY('User', 'id', self.activePlayerId)
 
 	def getLastState(self):
 		if (len(self.history)):

@@ -16,7 +16,7 @@ def application(environ, start_response):
             request_body = environ['wsgi.input'].read(request_body_size)
         except BaseException, e:
             return 'Cannot read request body %s' % e
-	try:
+        try:
             misc.LAST_SID = 0
             response_body = parseJson.parseJsonObj(json.loads(request_body))
         except BaseException, e:
