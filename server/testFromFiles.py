@@ -29,11 +29,13 @@ class TestFromFile(unittest.TestCase):
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
 		self.testDescr = out['description']
+		#print out['result']
 		self.assertListEqual(out['result'], json.loads(ans))
 		                
 def suite():
 	suite = unittest.TestSuite()
 	suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
+	#suite.addTests(TestFromFile('%s\\t0%d._in' % (testDir, i), '%s\\t0%d.ans' % (testDir, i)) for i in range(begin, end))
 	return suite
 
 def main(a, b, c):

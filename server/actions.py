@@ -58,13 +58,11 @@ def act_uploadMap(data):
 	name = data['mapName']
 	playersNum = int(data['playersNum'])
 	result = list()
-	if not misc.TEST_MODE:
-		if not data['thumbnail']:
-			data['thumbnail'] = misc.DEFAULT_THUMB
-		if not data['picture']:
-			data['picture'] = misc.DEFAULT_MAP_PICTURE
 			
-	checkFiles(data['thumbnail'], data['picture'])
+	#checkFiles(data['thumbnail'], data['picture'])
+	data['thumbnail'] = data['thumbnail']if 'thumbnail' in data else  misc.DEFAULT_THUMB
+	data['picture'] = data['picture']if 'picture' in data else  misc.DEFAULT_MAP_PICTURE
+
 	newMap = Map(name, playersNum, data['turnsNum'], data['thumbnail'], 
 		data['picture'])
 	dbi.addUnique(newMap, 'mapName')
@@ -134,7 +132,7 @@ def act_joinGame(data):
 def act_leaveGame(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
-	if not user.inGame: raise BadFieldException('notInGame')
+	if not (game and user.inGame): raise BadFieldException('notInGame')
 	misc_game.leave(user)
 	dbi.updateGameHistory(game, data)
 	return {'result': 'ok'}
@@ -205,9 +203,9 @@ def act_getGameList(data):
 	result['games'] = list()
 
 	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
-		'mapId', 'ai']
+		'mapId']
 	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescr', 'state', 
-		'turn', 'mapId', 'ai']
+		'turn', 'mapId']
 
 	playerAttrs = ['id', 'name', 'isReady', 'inGame']
 	playerAttrNames = ['userId', 'username', 'isReady', 'inGame']

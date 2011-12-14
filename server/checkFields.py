@@ -4,21 +4,23 @@ import sys
 import os
 
 def checkListCorrectness(data, field, type):
-	if not field in data:
-		raise BadFieldException('badJson')
-
 	msg = 'bad' + field[0].upper() + field[1:]
+	if not field in data:
+		raise BadFieldException(msg)
+	
 	for t in data[field]:
 		if not isinstance(t, type):
-			raise BadFieldException(msg)
+			if type is str and not isinstance(t, unicode):
+				raise BadFieldException(msg)
 	#checkObjectsListCorrection(data, [{'name': field, 'type': type}])
 			
 def checkObjectsListCorrection(data, fields):
 	for obj in data:
 		for field in fields:
-			if not(field['name'] in obj):
-				raise BadFieldException('badJson')
 			msg = 'bad' + field['name'][0].upper() + field['name'][1:]
+			if not(field['name'] in obj):
+				raise BadFieldException(msg)
+			
 			if not isinstance(obj[field['name']], field['type']):
 				raise BadFieldException(msg)
 			if 'min' in field:

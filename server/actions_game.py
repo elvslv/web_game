@@ -9,8 +9,9 @@ from sqlalchemy import func
 def act_setReadinessStatus(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	game = user.game
-	if not game:
+	if not (game and user.inGame): 
 		raise BadFieldException('notInGame')
+
 	
 	if game.state != GAME_WAITING:
 		raise BadFieldException('badGameState')
@@ -28,7 +29,9 @@ def act_selectRace(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.currentTokenBadge:
 		raise BadFieldException('badStage')
-	game = user.game	
+	game = user.game
+	if not (game and user.inGame): 
+		raise BadFieldException('notInGame')
 	checkStage(GAME_SELECT_RACE, user)
 	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
@@ -54,13 +57,16 @@ def act_selectRace(data):
 
 def act_conquer(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
-	if not user.currentTokenBadge: raise BadFieldException('badStage')
 	game = user.game
+	if not (game and user.inGame): 
+		raise BadFieldException('notInGame')
+	if not user.currentTokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_CONQUER, user)
 	region = game.map.getRegion(data['regionId'])
 	regState = region.getState(game.id)
 	owner = regState.owner
 	if owner == user and not regState.inDecline: 
+		print 1, 'badRegion'
 		raise BadFieldException('badRegion')
 	tokenBadge = user.currentTokenBadge
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
@@ -68,6 +74,7 @@ def act_conquer(data):
 	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
 	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
 	if not (f1 and f2):
+		print 2, 'badRegion'
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
 	attackedRace = None
@@ -108,6 +115,8 @@ def act_conquer(data):
 
 def act_decline(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_DECLINE, user)
 	makeDecline(user)
@@ -117,6 +126,8 @@ def act_decline(data):
 
 def act_redeploy(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	tokenBadge = user.currentTokenBadge
 	if not tokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_REDEPLOY, user)
@@ -170,6 +181,8 @@ def act_redeploy(data):
 
 def act_finishTurn(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	game = user.game
 	checkStage(GAME_FINISH_TURN, user)
 	tokenBadge = user.currentTokenBadge
@@ -193,6 +206,8 @@ def act_finishTurn(data):
 
 def act_defend(data):			## Should be renamed to retreat
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	tokenBadge = user.currentTokenBadge
 	if not tokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_DEFEND, user)
@@ -228,6 +243,8 @@ def act_defend(data):			## Should be renamed to retreat
 
 def act_dragonAttack(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	if not user.currentTokenBadge: raise BadFieldException('badStage')
 	checkStage(GAME_CONQUER, user, ATTACK_DRAGON)
 	callSpecialPowerMethod(user.currentTokenBadge.specPowId, 'dragonAttack', 
@@ -238,6 +255,8 @@ def act_dragonAttack(data):
 
 def act_enchant(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	if not user.currentTokenBadge: 
 		raise BadFieldException('badStage')
 	checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
@@ -255,6 +274,8 @@ def act_enchant(data):
 
 def act_selectFriend(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	if not user.currentTokenBadgeId : 
 		raise BadFieldException('badStage')
 	checkStage(GAME_CHOOSE_FRIEND, user)
@@ -266,6 +287,8 @@ def act_selectFriend(data):
 
 def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	if not (user.game and user.inGame): 
+		raise BadFieldException('notInGame')
 	if not user.currentTokenBadgeId : raise BadFieldException('badStage')
 	checkStage(GAME_THROW_DICE, user)
 	if misc.TEST_MODE: 
