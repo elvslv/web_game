@@ -32,6 +32,8 @@ def constructMsg(field):
 		msg = 'badUser' + field['name'][0].upper() + field['name'][1:]
 	elif field['name'] == 'text':
 		msg = 'badMessage' + field['name'][0].upper() + field['name'][1:]
+	elif field['name'] == 'isReady':
+		msg = 'badReadinessStatus'
 	else:
 		msg = 'bad' + field['name'][0].upper() + field['name'][1:]
 	return msg

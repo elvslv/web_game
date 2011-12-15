@@ -60,7 +60,8 @@ def act_conquer(data):
 	game = user.game
 	if not (game and user.inGame): 
 		raise BadFieldException('notInGame')
-	if not user.currentTokenBadge: raise BadFieldException('badStage')
+	if not user.currentTokenBadge or not user.tokensInHand: 
+		raise BadFieldException('badStage')
 	checkStage(GAME_CONQUER, user)
 	region = game.map.getRegion(data['regionId'])
 	regState = region.getState(game.id)
@@ -123,6 +124,14 @@ def act_decline(data):
 	return {'result': 'ok'}
 
 def act_redeploy(data):
+	for rec in data['regions']:
+		if not ('regionId' in rec and 'tokensNum' in rec):
+			raise BadFieldException('badRegionId' if not 'regionId' in rec else 'badTokensNum')
+		if not isinstance(rec['regionId'], int) or rec['regionId'] <= 0:
+			raise BadFieldException('badRegionId')
+		if not isinstance(rec['tokensNum'], int) or rec['tokensNum'] < 0:
+			raise BadFieldException('badTokensNum')
+			
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not (user.game and user.inGame): 
 		raise BadFieldException('notInGame')
@@ -137,13 +146,6 @@ def act_redeploy(data):
 		raise BadFieldException('userHasNoRegions')
 	for region in tokenBadge.regions: region.tokensNum = 0
 	for rec in data['regions']:
-		if not ('regionId' in rec and 'tokensNum' in rec):
-			raise BadFieldException('badJson')							## Shouldn't it be in some sort of
-																	## ``check everything'' function?
-		if not isinstance(rec['regionId'], int):
-			raise BadFieldException('badRegionId')
-		if not isinstance(rec['tokensNum'], int):
-			raise BadFieldException('badTokensNum')
 		regState = user.game.map.getRegion(rec['regionId']).getState(user.game.id)
 		tokensNum = rec['tokensNum']
 		if  regState.tokenBadge != user.currentTokenBadge: raise BadFieldException('badRegion')
@@ -219,9 +221,9 @@ def act_defend(data):			## Should be renamed to retreat
 			notAdjacentRegions.append(terr.region.id)
 	for region in data['regions']:
 		if not 'regionId' in region:
-			raise BadFieldException('badJson')				
+			raise BadFieldException('badRegionId')				
 		if not 'tokensNum' in region:	
-			raise BadFieldException('badJson')
+			raise BadFieldException('badTokensNum')
 		if not isinstance(region['regionId'], int):
 			raise BadFieldException('badRegionId')
 		if not isinstance(region['tokensNum'], int):
@@ -287,7 +289,8 @@ def act_throwDice(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not (user.game and user.inGame): 
 		raise BadFieldException('notInGame')
-	if not user.currentTokenBadgeId : raise BadFieldException('badStage')
+	if not user.currentTokenBadge or not user.tokensInHand: 
+		raise BadFieldException('badStage')
 	checkStage(GAME_THROW_DICE, user)
 	if misc.TEST_MODE: 
 		dice = data['dice'] if 'dice' in data else 0

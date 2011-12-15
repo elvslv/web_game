@@ -1,6 +1,8 @@
 [	
 	{
 		"result": "ok"
+	},{
+		"result": "ok"
 	},
 	{
 		"result": "ok"
@@ -48,7 +50,7 @@
 		"result": "badRegion"
 	},
 	{
-		"result": "notEnoughEncampentsForRedeployment"
+		"result": "notEnoughEncampmentsForRedeployment"
 	},
 	{
 		"result": "ok"

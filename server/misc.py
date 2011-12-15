@@ -25,7 +25,7 @@ C = 0
 M = 2 << 31 - 1
 
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=False
+TEST_MODE=True
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -69,6 +69,7 @@ pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
 def generateSidForTest():
 	global LAST_SID
+	print LAST_SID
 	LAST_SID = LAST_SID + 1
 	return LAST_SID
 
@@ -178,7 +179,7 @@ actionFields = {
 		},
 		{'name': 'mapId', 'type': int, 'mandatory': True},
 		{
-			'name': 'gameDescr', 
+			'name': 'gameDescription', 
 			'type': unicode, 
 			'mandatory': False,
 			'max': MAX_GAMEDESCR_LEN	
@@ -291,6 +292,7 @@ possibleLandDescription = [
 	'hill',
 	'swamp',
 	'cavern',
+	
 	'holeInTheGround',
 	'encampment', 
 	'dragon', 

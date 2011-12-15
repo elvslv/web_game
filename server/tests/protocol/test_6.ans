@@ -2,9 +2,9 @@
 		"result": "ok"
 	}, 
 	{
-		"result": "badJson"
+		"result": "badPassword"
 	}, 
 	{
-		"result": "badJson"
+		"result": "badUsername"
 	}
 ]

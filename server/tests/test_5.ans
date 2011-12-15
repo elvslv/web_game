@@ -6,6 +6,9 @@
 		"result": "ok"
 	},
 	{
+		"result": "ok"
+	},
+	{
 		"result": "ok",
 		"sid": 1,  "userId": 1
 	},
@@ -30,7 +33,7 @@
 		"sid": 2,  "userId": 2
 	},
 	{
-		"result": "badGameDescr"
+		"result": "badGameDescription"
 	},
 	{
 		"result": "gameNameTaken"

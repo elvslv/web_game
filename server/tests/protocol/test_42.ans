@@ -15,14 +15,14 @@
 	},
 	{
 		"result": "ok",
-		"messages": [{"id": 1, "text": "hello!", "time": 1, "name": "user1"}]
+		"messages": [{"id": 1, "text": "hello!", "time": 1, "username": "user1"}]
 	},
 	{
 		"result": "ok"
 	},
 	{
 		"result": "ok",
-		"messages": [{"id": 1, "text": "hello!", "time": 1, "name": "user1"}, 
-				{"id": 2, "text": "hello again!", "time": 2, "name": "user1"}]
+		"messages": [{"id": 1, "text": "hello!", "time": 1, "username": "user1"}, 
+				{"id": 2, "text": "hello again!", "time": 2, "username": "user1"}]
 	}
 ]

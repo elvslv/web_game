@@ -19,7 +19,7 @@ def startGame(game, user, data):
 	if misc.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
 		vRaces = data['visibleRaces']
 		vSpecialPowers = data['visibleSpecialPowers']
-		for i in range(misc.VISIBLE_RACES):
+		for i in range(min(len(vRaces), len(vSpecialPowers))):
 			showNextRace(game, 0, vRaces[i], vSpecialPowers[i])
 	else:
 		for i in range(misc.VISIBLE_RACES):
@@ -202,12 +202,31 @@ def getGameState(game):
 	result = dict()
 	if game.history:
 		result['lastEvent'] = game.getLastState()
-	result['dragonAttacked'] = hasDragonAttacked(game)
-	result['enchanted'] = hasEnchanted(game)
-	result['holesNum'] = countHolesNum(game)
-	result['berserkDice'] = getBerserkDice(game)
-	result['usedStout'] = usedStout(game)
-	result['gotWealth'] = gotWealth(game)
+		
+	f = hasDragonAttacked(game)
+	if f is not None:
+		result['dragonAttacked'] = f
+
+	f = hasEnchanted(game)
+	if f is not None:
+		result['enchanted'] = f
+
+	f = countHolesNum(game)
+	if f is not None:
+		result['holesNum'] = f
+
+	f = getBerserkDice(game)
+	if f is not None:
+		result['berserkDice'] = f
+
+	f = usedStout(game)
+	if f is not None:
+		result['usedStout'] = f
+
+	f = gotWealth(game)
+	if f is not None:
+		result['gotWealth'] = f
+
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
 	defendingInfo = getDefendingInfo(game)

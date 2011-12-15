@@ -345,7 +345,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 			if region.tokenBadge != tokenBadge:
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
-				raise BadFieldException('notEnoughEncampentsForRedeployment')
+				raise BadFieldException('notEnoughEncampmentsForRedeployment')
 			region.encampment = encampmentsNum
 			freeEncampments -= encampmentsNum
 

@@ -3,6 +3,8 @@
 	[
 		{
 			"action": "resetServer"
+		},		{
+			"action": "createDefaultMaps"
 		},
 		{
 			"action": "register",

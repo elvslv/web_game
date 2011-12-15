@@ -2,6 +2,8 @@
 	"test": [
 		{
 			"action": "resetServer"
+		},{
+			"action": "createDefaultMaps"
 		},
 		{
 			"action": "uploadMap",

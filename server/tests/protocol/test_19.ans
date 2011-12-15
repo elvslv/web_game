@@ -11,6 +11,6 @@
 		"userId": 1
 	}, 
 	{
-		"result": "badJson"
+		"result": "badUserSid"
 	}
 ]

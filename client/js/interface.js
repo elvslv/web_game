@@ -40,7 +40,7 @@ Interface.dialogs = [
 				mapId = Client.mapList[$('#mapList').prop('selectedIndex')].mapId,
 				sid = Client.currentUser.sid,
 				ai = parseInt($('#aiCnt').spinner('value')),
-				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId', 'ai'],
+				query = makeQuery(['action', 'sid', 'gameName', 'gameDescription', 'mapId', 'ai'],
 					['createGame', sid, gameName.val(), gameDescription.val(), mapId, ai]);
 			sendQuery(query, createGameResponse, false, ai);
 		}

@@ -81,7 +81,7 @@ class Game:
 		return res[0] if len(res) else None
 
 	def getUserInfo(self, id):
-		res = filter(lambda x: x['id'] == id, self.players)
+		res = filter(lambda x: x['userId'] == id, self.players)
 		return res[0] if len(res) else None
 
 	
@@ -192,16 +192,16 @@ class AI(threading.Thread):
 		self.declinedTokenBadge = None
 		for player in gameState['players']:
 			if 'currentTokenBadge' in player:
-				tokenBadge = createTokenBadge(player['currentTokenBadge'], False, player['id'])
+				tokenBadge = createTokenBadge(player['currentTokenBadge'], False, player['userId'])
 				tokenBadgesInGame.append(tokenBadge);
-				if player['id'] == self.id: self.currentTokenBadge = tokenBadge
+				if player['userId'] == self.id: self.currentTokenBadge = tokenBadge
 				
 			if 'declinedTokenBadge' in player:
-				tokenBadge = createTokenBadge(player['declinedTokenBadge'], True, player['id'])
+				tokenBadge = createTokenBadge(player['declinedTokenBadge'], True, player['userId'])
 				tokenBadgesInGame.append(tokenBadge);
-				if player['id'] == self.id: self.declinedTokenBadge = tokenBadge
+				if player['userId'] == self.id: self.declinedTokenBadge = tokenBadge
 			
-			if player['id'] == self.id:
+			if player['userId'] == self.id:
 				self.coins = player['coins']
 				self.tokensInHand = player['tokensInHand']
 				self.priority = player['priority']
@@ -300,13 +300,12 @@ class AI(threading.Thread):
 		else:
 			result = 'Game id: %d, turn: %d\n' % (self.game.id, self.game.turn)
 			result += 'Player id: %d\n' % self.id
-			result += 'Income coins: %d\n' % (data['incomeCoins'] if 'incomeCoins' in data else 0)
 			result += 'Statistics: \n'
 			totalCoins = 0
 			for statistics in data['statistics']:
 				result += '%s: %d\n' % (statistics[0], statistics[1])
 				totalCoins += statistics[1]
-			result += 'Total coins number: %d\n\n\n' % totalCoins
+			result += 'Income coins: %d\n\n\n' % totalCoins
 		self.logFile.write(result)
 		self.conqueredRegions = list()
 		self.dragonUsed = False #regions
@@ -318,11 +317,11 @@ class AI(threading.Thread):
 	
 	def shouldSelectFriend(self):
 		if self.game.checkStage(GAME_CHOOSE_FRIEND, self) and self.canSelectFriend():
-			players = filter(lambda x: x['id'] != self.id, 
+			players = filter(lambda x: x['userId'] != self.id, 
 				self.game.players)
 			for region in self.conqueredRegions:
 				for player in players:
-					if region.ownerId == player['id']:
+					if region.ownerId == player['userId']:
 						players.remove(player)
 			self.friendCandidates = players
 			return len(players)
@@ -335,7 +334,7 @@ class AI(threading.Thread):
 			if 'currentTokenBadge' in player and player['currentTokenBadge']['totalTokensNum'] > best:
 				best = player['currentTokenBadge']['totalTokensNum']
 				bestCand = player
-		chosenPlayer = bestCand['id'] if bestCand else self.friendCandidates[0]['id']
+		chosenPlayer = bestCand['userId'] if bestCand else self.friendCandidates[0]['userId']
 		data = self.sendCmd({'action': 'selectFriend', 'sid': self.sid, 
 			'friendId': chosenPlayer})
 		if data['result'] != 'ok':
@@ -401,19 +400,19 @@ class AI(threading.Thread):
 		if ok: self.conqueredRegions.append(conqdReg)
 
 	def invadersExist(self):
-		return len(filter(lambda x: x['id'] != self.id and ('currentTokenBadge' not in x or\
+		return len(filter(lambda x: x['userId'] != self.id and ('currentTokenBadge' not in x or\
 			not len(self.game.getTokenBadgeById(x['currentTokenBadge']['tokenBadgeId']).getRegions())), 
 				self.game.players))
 
 	def mostDangerousPlayer(self):
 		theKey = lambda x: x['currentTokenBadge']['totalTokensNum'] if 'currentTokenBadge' in x else 0
-		return max(filter(lambda x: x['id'] not in (self.id, self.friendId), self.game.players), key=theKey)
+		return max(filter(lambda x: x['userId'] not in (self.id, self.friendId), self.game.players), key=theKey)
 			
 
 	def needDefendAgainst(self, mdPlayer, abilityName, race):
 		return (len(self.game.players)== 2 and\
 				not 'currentTokenBadge' in 
-					filter(lambda x: x['id'] != self.id, self.game.players)[0] and\
+					filter(lambda x: x['userId'] != self.id, self.game.players)[0] and\
 				len(filter(lambda x: (x.race.name if race else x.specPower.name) == abilityName and\
 					x.owner != self.id and x.owner != self.friendId, 
 					self.game.visibleTokenBadges))) or\
@@ -459,7 +458,7 @@ class AI(threading.Thread):
 			reg.needDef += self.declinedTokenBadge.regBonus(reg) if self.declinedTokenBadge else 0
 		if mdPlayer and self.needDefendAgainst(mdPlayer, 'Underworld', False) and\
 				(not 'currentTokenBadge' in mdPlayer or\
-				len(filter(lambda x: x.ownerId == mdPlayer['id'] and\
+				len(filter(lambda x: x.ownerId == mdPlayer['userId'] and\
 					not x.inDecline and x.cavern, self.game.map.regions))):
 				for region in regions:
 					if region.cavern: region.needDef = maxDist

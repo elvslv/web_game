@@ -14,7 +14,7 @@ def sendCmd(conn, data):
 
 def dispatch(conn, gameId, logFile):
 	userInfo = sendCmd(conn, {'action' : 'aiJoin', 'gameId' : gameId})
-	return AI(url, gameId, userInfo['sid'], userInfo['id'], logFile)
+	return AI(url, gameId, userInfo['sid'], userInfo['userId'], logFile)
 		
 def main():	
 	logFilesCnt = 0

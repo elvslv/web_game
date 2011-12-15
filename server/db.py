@@ -139,7 +139,7 @@ class Game(Base):
 		self.state = misc.GAME_ENDED
 		result = list()
 		for player in self.players:
-			result.append({'name': player.name, 'coins': player.coins, 'regions': len(player.regions)})
+			result.append({'username': player.name, 'coins': player.coins, 'regions': len(player.regions)})
 		self.resetPlayersState()
 		dbi.updateGameHistory(self, result)
 		return {'result': 'ok', 'statistics': result, 'ended': True}
@@ -469,6 +469,8 @@ class Database:
     
 	def addRegion(self, id, map_, regInfo):
 		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
+		if not ('adjacent' in regInfo and isinstance(regInfo['adjacent'], list)):
+			raise BadFieldException('badRegions')
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
 		coords = None
 		

@@ -44,7 +44,7 @@ function loginResponse(data, param)
 			Interface.changeOnLogin();
 			if (param)
 			{
-				query = makeQuery(['action', 'sid', 'gameName', 'gameDescr', 'mapId', 'ai'],
+				query = makeQuery(['action', 'sid', 'gameName', 'gameDescription', 'mapId', 'ai'],
 					['createGame', sid, '1', '', 1, 2]);
 				sendQuery(query, createGameResponse, false, 2);
 			}
@@ -415,8 +415,8 @@ function redeployResponse(data)
 		case 'tooManyFortifields':
 			alert('tooManyFortifields');
 			break;
-		case 'notEnoughEncampentsForRedeployment':
-			alert('notEnoughEncampentsForRedeployment');
+		case 'notEnoughEncampmentsForRedeployment':
+			alert('notEnoughEncampmentsForRedeployment');
 			break;
 		case 'badSetHeroCommand':
 			alert('badSetHeroCommand');

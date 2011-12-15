@@ -2,6 +2,8 @@
 	"test":[
 		{
 			"action": "resetServer"
+		},		{
+			"action": "createDefaultMaps"
 		},
 		{
 			"action": "register", 
@@ -57,14 +59,14 @@
 			"action": "createGame", 
 			"sid": 6,
 			"gameName": "game1",
-			"gameDescr": "game1",
+			"gameDescription": "game1",
 			"mapId": 3			
 		},
 		{
 			"action": "createGame", 
 			"sid": 1,
 			"gameName": "game1",
-			"gameDescr": "game1",
+			"gameDescription": "game1",
 			"mapId": 9			
 		},
 		{
@@ -108,7 +110,7 @@
 			"sid": 3,
 			"gameName": "game2",
 			"mapId": 2,
-			"gameDescr": "game description"
+			"gameDescription": "game description"
 		}
 	], 
 	"description": "test createGame function"

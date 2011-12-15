@@ -36,7 +36,9 @@ def act_login(data):
 	return {'result': 'ok', 'sid': user.sid, 'userId': user.id}
 
 def act_logout(data):
-	leave(dbi.getXbyY('User', 'sid', data['sid']))
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	leave(user)
+	user.sid = None
 	return {'result': 'ok'}
 
 def act_sendMessage(data):
@@ -51,7 +53,7 @@ def act_getMessages(data):
 	records =  dbi.query(Message).filter(Message.id > since).order_by(Message.id).all()[-100:]
 	messages = []
 	for rec in records:
-		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 'name': rec.senderUser.name})
+		messages.append({'id': rec.id , 'text': rec.text, 'time': rec.time, 'username': rec.senderUser.name})
 	return {'result': 'ok', 'messages': messages}
 
 def act_uploadMap(data):
@@ -78,7 +80,9 @@ def act_uploadMap(data):
 			curId += 1
 		i = 0
 		for reg in newMap.regions:			
-			regInfo = data['regions'][i]			
+			regInfo = data['regions'][i]
+			if reg.id in regInfo['adjacent']:
+				raise BadFieldException('badRegion')
 			dbi.addAll(map(lambda x: Adjacency(reg.id, x, mapId), regInfo['adjacent']))
 			i += 1
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
@@ -89,8 +93,8 @@ def act_createGame(data):
 	if user.gameId: raise BadFieldException('alreadyInGame')
 	map_ = dbi.getXbyY('Map', 'id', data['mapId'])
 	descr = None
-	if 'gameDescr' in data:
-		descr = data['gameDescr']
+	if 'gameDescription' in data:
+		descr = data['gameDescription']
 	randseed = math.trunc(time.time())
 	if 'randseed' in data:
 		randseed = data['randseed']
@@ -148,6 +152,10 @@ def createDefaultMaps():
 	else:
 		act_uploadMap(misc.defaultMaps[7])
 
+def act_createDefaultMaps(data):
+	createDefaultMaps()
+	return {'result': 'ok'}
+
 def act_resetServer(data):
 	misc.LAST_SID = 0
 	misc.LAST_TIME = 0
@@ -157,7 +165,7 @@ def act_resetServer(data):
 		misc.TEST_RANDSEED = 21425364547
 	random.seed(misc.TEST_RANDSEED)
 	dbi.clear()
-	createDefaultMaps()
+	#createDefaultMaps()
 	#user = User('user', '123456')
 	#dbi.add(user)
 	return {'result': 'ok'}
@@ -202,10 +210,14 @@ def act_getGameList(data):
 	games = dbi.query(Game).filter(Game.state != GAME_ENDED).all()
 	result['games'] = list()
 	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
-		'mapId', 'aiRequiredNum']
-	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescr', 'state', 
-		'turn', 'mapId', 'aiRequiredNum']
-
+		'mapId']
+	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescription', 'state', 
+		'turn', 'mapId']
+		
+	if not misc.TEST_MODE:
+		qameAttrs.append('aiRequiredNum')
+		gameAttrNames.append('aiRequiredNum')
+		
 	playerAttrs = ['id', 'name', 'isReady', 'inGame']
 	playerAttrNames = ['userId', 'username', 'isReady', 'inGame']
 	for game in games:

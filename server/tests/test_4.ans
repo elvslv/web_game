@@ -1,6 +1,8 @@
 [	
 	{
 		"result": "ok"
+	},{
+		"result": "ok"
 	},
 	{
 		"result": "badUserSid"
@@ -31,13 +33,13 @@
 		"gameId": 1
 	},
 	{
-		"result": "badIsReady"
+		"result": "badReadinessStatus"
 	},
 	{
-		"result": "badIsReady"
+		"result": "badReadinessStatus"
 	},
 	{
-		"result": "badIsReady"
+		"result": "badReadinessStatus"
 	},
 	{
 		"result": "ok"
