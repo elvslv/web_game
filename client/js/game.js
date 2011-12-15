@@ -370,11 +370,11 @@ createGameByState = function(gameState)
 		inGame = false;
 	for (var i = 0; i < gameState.players.length; ++i)
 	{
-		if (gameState.players[i].id == gameState.activePlayerId)
+		if (gameState.players[i].userId == gameState.activePlayerId)
 			activePlayerIndex = i;
-		inGame = inGame || gameState.players[i].id === user().id;
-		player = (gameState.players[i].id === user().id) ? user(): 
-			new User(gameState.players[i].id, gameState.players[i].name, undefined, gameState.gameId);
+		inGame = inGame || gameState.players[i].userId === user().id;
+		player = (gameState.players[i].userId === user().id) ? user(): 
+			new User(gameState.players[i].userId, gameState.players[i].username, undefined, gameState.gameId);
 		for (var j = 0; j < userFields.length; ++j)
 			player[userFields[j]] = gameState.players[i][userFields[j]];
 		if (gameState.players[i].currentTokenBadge)

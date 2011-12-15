@@ -229,7 +229,7 @@ class AI(threading.Thread):
 			
 	def selectRace(self):
 		visibleBadges = self.game.visibleTokenBadges
-		chosenBadge = max(filter(lambda x: self.coins >= 5 - x.pos, visibleBadges), 
+		chosenBadge = max(filter(lambda x: self.coins >= x.pos, visibleBadges), 
 				key=lambda x: x.characteristic())
 		result = self.sendCmd({'action': 'selectRace', 'sid': self.sid, 'position': chosenBadge.pos})
 		if result['result'] != 'ok':

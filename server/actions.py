@@ -165,7 +165,7 @@ def act_resetServer(data):
 		misc.TEST_RANDSEED = 21425364547
 	random.seed(misc.TEST_RANDSEED)
 	dbi.clear()
-	#createDefaultMaps()
+	if not misc.TEST_MODE: createDefaultMaps()
 	#user = User('user', '123456')
 	#dbi.add(user)
 	return {'result': 'ok'}
@@ -215,7 +215,7 @@ def act_getGameList(data):
 		'turn', 'mapId']
 		
 	if not misc.TEST_MODE:
-		qameAttrs.append('aiRequiredNum')
+		gameAttrs.append('aiRequiredNum')
 		gameAttrNames.append('aiRequiredNum')
 		
 	playerAttrs = ['id', 'name', 'isReady', 'inGame']

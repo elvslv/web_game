@@ -29,7 +29,6 @@ class TestFromFile(unittest.TestCase):
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
 		self.testDescr = out['description']
-		#print out['result']
 		self.assertListEqual(out['result'], json.loads(ans))
 		                
 def suite():

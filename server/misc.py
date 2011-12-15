@@ -25,7 +25,7 @@ C = 0
 M = 2 << 31 - 1
 
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=True
+TEST_MODE=False
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -69,7 +69,6 @@ pwdRegexp = r'^.{%s,%s}$' % (MIN_PASSWORD_LEN, MAX_PASSWORD_LEN)
 
 def generateSidForTest():
 	global LAST_SID
-	print LAST_SID
 	LAST_SID = LAST_SID + 1
 	return LAST_SID
 

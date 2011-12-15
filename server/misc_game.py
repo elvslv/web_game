@@ -239,16 +239,18 @@ def getGameState(game):
 		
 	result['map'] = getMapState(game.map.id, game.id)
 	playerAttrs = ['id', 'name', 'isReady', 'inGame', 'coins', 'tokensInHand']
-	playerAttrNames = ['userId', 'username', 'isReady', 'inGame' 'coins', 
+	playerAttrNames = ['userId', 'username', 'isReady', 'inGame', 'coins', 
 		'tokensInHand']
 	players = game.players
 	resPlayers = list()
 	priority = 0
 	for player in players:
 		curPlayer = dict()
+		print len(playerAttrs)
 		for i in range(len(playerAttrs)):
-			curPlayer[playerAttrs[i]] = getattr(player, playerAttrs[i])
-
+			print playerAttrNames[i], playerAttrs[i]
+			curPlayer[playerAttrNames[i]] = getattr(player, playerAttrs[i])
+		print 'gggg'
 		priority += 1	
 		curPlayer['priority'] = priority
 		
@@ -342,8 +344,10 @@ def leave(user):
 
 def getVisibleTokenBadges(gameId):
 	rows = dbi.query(TokenBadge).filter(and_(TokenBadge.gameId == gameId, TokenBadge.pos >= 0)).order_by(asc(TokenBadge.pos))
+	print 'a'
 	result = list()
 	for tokenBadge in rows:
+		print 'b'
 		result.append({
 			'raceName': races.racesList[tokenBadge.raceId].name, 
 			'specialPowerName': races.specialPowerList[tokenBadge.specPowId].name,
