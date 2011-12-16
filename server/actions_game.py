@@ -112,11 +112,9 @@ def act_conquer(data):
 	regState.tokenBadge = user.currentTokenBadge
 	regState.inDecline = False
 	regState.tokensNum = unitPrice
-	
 	if victimTokenBadge:
 		callRaceMethod(victimTokenBadge.raceId, 'sufferCasualties', victimTokenBadge)
 		owner.tokensInHand += defense - callRaceMethod(victimTokenBadge.raceId, 'getCasualties')
-		
 	callRaceMethod(raceId, 'conquered', regState, tokenBadge)
 	dbi.updateWarHistory(user, victimBadgeId, tokenBadge.id, dice, 
 		region.id, defense, ATTACK_CONQUER)

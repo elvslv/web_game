@@ -61,7 +61,7 @@
 			"gameName": "game2",
 			"mapId": 1,
 			"playersNum": 2,
-			"gameDescr": "fjjjjjjjjjjjjjjjfgahdsgjfsjjjjjjjjjjjjjjjjjasggggggggggggsaddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddekjthjrettttttttttttttervvvvvvvvvvvvvvvvvvvvvvvkjassssssssssssljkkjkje46547777777777774634fnnnnnnnnnnnnnwe5457777335666666666663235555555555555fsn564n67k45k7jkdfsngdfkdhjkfjhkfjk46374686585678578e7658785654fgkfjfkdjkgjjjjjjjjjjjjjjjjjjjjhhhhhskddddddddddddddddddddddddddddddddddddddddddewrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+			"gameDescription": "fjjjjjjjjjjjjjjjfgahdsgjfsjjjjjjjjjjjjjjjjjasggggggggggggsaddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddekjthjrettttttttttttttervvvvvvvvvvvvvvvvvvvvvvvkjassssssssssssljkkjkje46547777777777774634fnnnnnnnnnnnnnwe5457777335666666666663235555555555555fsn564n67k45k7jkdfsngdfkdhjkfjhkfjk46374686585678578e7658785654fgkfjfkdjkgjjjjjjjjjjjjjjjjjjjjhhhhhskddddddddddddddddddddddddddddddddddddddddddewrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
 		},
 		{
 			"action": "createGame",
@@ -69,7 +69,7 @@
 			"gameName": "game1",
 			"mapId": 1,
 			"playersNum": 2,
-			"gameDescr": "game description"
+			"gameDescription": "game description"
 		}
 	],
 	"description": "test creating game function"

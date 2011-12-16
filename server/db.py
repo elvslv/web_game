@@ -152,7 +152,7 @@ class TokenBadge(Base):
 	gameId = fkey('games.id')
 	raceId = Column(Integer)
 	specPowId = Column(Integer)
-	pos = Column(Integer, default = 12)
+	pos = Column(Integer, default = 5) ##12
 	bonusMoney = Column(Integer, default = 0)
 	inDecline = Column(Boolean, default = False)
 	totalTokensNum = Column(Integer, default = 0)
@@ -268,7 +268,7 @@ class Region(Base):
 	def isCoast(self):
 		cnt = 0
 		for neigh in self.getNeighbors():
-			reg = dbi.getXbyY('Region', 'id', neigh)
+			reg = self.map.regions[neigh - 1]
 			if reg.sea:
 				cnt += 1
 		return cnt

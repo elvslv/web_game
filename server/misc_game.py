@@ -202,8 +202,7 @@ def getFriendsInfo(game):
 	
 def getGameState(game):
 	if game.state == misc.GAME_ENDED:
-		return {'result': 'ok', 'statistics': json.loads(game.gameHistory[-2].action),
-			'ended': True}
+		return {'result': 'ok', 'statistics': json.loads(game.gameHistory[-2].action),'ended': True}
 		
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
 	gameNameAttrs = ['gameId', 'gameName', 'gameDescription', 'state', 
@@ -278,8 +277,9 @@ def getGameState(game):
 			
 		resPlayers.append(curPlayer)
 	result['players'] = resPlayers
-	#result['visibleTokenBadges'] = getVisibleTokenBadges(game.id)
+	result['visibleTokenBadges'] = getVisibleTokenBadges(game.id)
 	return result
+
 
 def endOfGame(game, coins = None): 
 	game.state = GAME_ENDED
@@ -303,39 +303,38 @@ def getShortMapState(map_):
 
 def getMapState(mapId, gameId = None):
 	map_ = dbi.getXbyY('Map', 'id', mapId)
-	#result = getShortMapState(map_)
-	result = dict()
+	result = getShortMapState(map_)
 	result['regions'] = list()
 	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
-	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 'encampment']
+	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
+		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
 	for region in map_.regions:
 		curReg = dict()
-		#curReg['raceCoords'] = region.raceCoords
-		#curReg['powerCoords'] = region.powerCoords
-		#curReg['coordinates'] = region.coordinates
-		#curReg['constRegionState'] = list()
+		curReg['raceCoords'] = region.raceCoords
+		curReg['powerCoords'] = region.powerCoords
+		curReg['coordinates'] = region.coordinates
+		curReg['constRegionState'] = list()
 		
 		for i in range(len(constRegionAttrs)):
 			attr = getattr(region, constRegionAttrs[i])
 			if not attr: continue
-			#if constRegionAttrs[i] in ('mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland'):
-			#	curReg['landscape'] = constRegionAttrs[i]
-			#elif constRegionAttrs[i] in ('mine', 'cavern', 'magic'):
-			#	curReg['bonus'] = constRegionAttrs[i]
-			#curReg['constRegionState'].append(constRegionAttrs[i])
+			if constRegionAttrs[i] in ('mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland'):
+				curReg['landscape'] = constRegionAttrs[i]
+			elif constRegionAttrs[i] in ('mine', 'cavern', 'magic'):
+				curReg['bonus'] = constRegionAttrs[i]
+			curReg['constRegionState'].append(constRegionAttrs[i])
 			 
 				
-		#curReg['adjacentRegions'] = region.getNeighbors()
+		curReg['adjacentRegions'] = region.getNeighbors()
 		if gameId:
 			curRegState = region.getState(gameId)
 			curReg['currentRegionState'] = dict()
 			for i in range(len(curRegionAttrs)):
-				t = getattr(curRegState, curRegionAttrs[i])
-				if t is not None:
-					curReg['currentRegionState'][curRegionAttrs[i]] = t
+				curReg['currentRegionState'][curRegionAttrs[i]] = getattr(curRegState, curRegionAttrs[i])
 		result['regions'].append(curReg)
 	return result
+
 
 def leave(user):
 	user.inGame = False;

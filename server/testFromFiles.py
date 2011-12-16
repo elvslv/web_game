@@ -34,8 +34,8 @@ class TestFromFile(unittest.TestCase):
 
 def suite():
 	suite = unittest.TestSuite()
-	#suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
-	suite.addTests(TestFromFile('%s\\t%d._in' % (testDir, i), '%s\\t%d.ans' % (testDir, i)) for i in range(begin, end))
+	suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
+	#suite.addTests(TestFromFile('%s\\t%d._in' % (testDir, i), '%s\\t%d.ans' % (testDir, i)) for i in range(begin, end))
 	return suite
 
 def main(a, b, c):
@@ -53,5 +53,5 @@ if __name__=='__main__':
 		sys.exit("Format: python TestFromFiles.py [begin] end [directory]")
 	fin = int(sys.argv[1]) if argc == 2 else int(sys.argv[2])
 	start =  int (sys.argv[1]) if argc >= 3 else 0
-	directory = sys.argv[3] if argc == 4 else "02_GameLogic"
+	directory = sys.argv[3] if argc == 4 else "tests"
 	main(start, fin, directory)

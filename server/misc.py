@@ -178,7 +178,7 @@ actionFields = {
 		},
 		{'name': 'mapId', 'type': int, 'mandatory': True},
 		{
-			'name': 'gameDescr', 
+			'name': 'gameDescription', 
 			'type': unicode, 
 			'mandatory': False,
 			'max': MAX_GAMEDESCR_LEN	

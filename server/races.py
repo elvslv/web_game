@@ -208,7 +208,7 @@ class RaceSorcerers(BaseRace):
 			raise BadFieldException('badRegion')
 			
 		if not regState.inDecline:
-			tokenBadge.Owner().checkForFriends(regState.owner())
+			tokenBadge.Owner().checkForFriends(regState.owner)
 			
 		if victimBadge == tokenBadge: 
 			raise BadFieldException('badAttackedRace')			

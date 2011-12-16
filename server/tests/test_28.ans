@@ -67,11 +67,10 @@
 		"result": "ok"
 	},
 	{
-		"dice": 0,
 		"result": "badTokensNum"
 	},
 	{
-		"result": "badSpecialPower"
+		"result": "badStage"
 	}
 
 ]

@@ -98,7 +98,7 @@ def act_createGame(data):
 	randseed = math.trunc(time.time())
 	if 'randseed' in data:
 		randseed = data['randseed']
-	ai = data['ai'] if 'ai' in data else None
+	ai = data['ai'] if 'ai' in data else 0
 	if ai > map_.playersNum:
 		raise BadFieldException('tooManyPlayersForMap')
 	newGame = Game(data['gameName'], descr, map_, randseed, data['ai'] if 'ai' in\
@@ -209,8 +209,9 @@ def act_getGameList(data):
 	result = {'result': 'ok'}
 	games = dbi.query(Game).filter(Game.state != GAME_ENDED).all()
 	result['games'] = list()
-	gameAttrs = [ 'activePlayerId', 'turn']
-	gameAttrNames = [ 'activePlayerId', 'turn']
+	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId', 'mapId']
+	gameAttrNames = ['gameId', 'gameName', 'gameDescription', 'state', 
+		'turn', 'activePlayerId', 'mapId']
 		
 	if not misc.TEST_MODE:
 		gameAttrs.append('aiRequiredNum')
