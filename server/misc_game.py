@@ -308,7 +308,7 @@ def getMapState(mapId, gameId = None):
 	result['regions'] = list()
 	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
-	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 'holeInTheGround']
+	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 'encampment']
 	for region in map_.regions:
 		curReg = dict()
 		#curReg['raceCoords'] = region.raceCoords
@@ -400,6 +400,5 @@ def checkStage(state, user, attackType = None):
 		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
 			(state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
 	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):
-		print 2
 		raise BadFieldException('badStage')
 

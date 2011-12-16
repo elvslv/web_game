@@ -414,6 +414,9 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 		regState.owner = tokenBadge.Owner()
 		regState.inDecline = False
 		tokenBadge.Owner().tokensInHand -= 1
+		if attackedTokenBadge:
+			racesList[attackedTokenBadge.raceId].sufferCasualties(attackedTokenBadge)
+			attackedTokenBadge.Owner().tokensInHand += attackedTokensNum - racesList[attackedTokenBadge.raceId].getCasualties()
 		dbi.updateWarHistory(tokenBadge.Owner(), attackedTokenBadge.id if 
 			attackedTokenBadge else None, tokenBadge.id, None, regState.regionId,
 			attackedTokensNum, ATTACK_DRAGON)

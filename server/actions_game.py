@@ -28,7 +28,6 @@ def act_setReadinessStatus(data):
 def act_selectRace(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.currentTokenBadge:
-		print 'fshdjghjdghj'
 		raise BadFieldException('badStage')
 	game = user.game
 	if not (game and user.inGame): 
@@ -115,10 +114,8 @@ def act_conquer(data):
 	regState.tokensNum = unitPrice
 	
 	if victimTokenBadge:
-		print 'hand, def, ', owner.tokensInHand, defense
 		callRaceMethod(victimTokenBadge.raceId, 'sufferCasualties', victimTokenBadge)
 		owner.tokensInHand += defense - callRaceMethod(victimTokenBadge.raceId, 'getCasualties')
-		print 'tok ', owner.tokensInHand
 		
 	callRaceMethod(raceId, 'conquered', regState, tokenBadge)
 	dbi.updateWarHistory(user, victimBadgeId, tokenBadge.id, dice, 
