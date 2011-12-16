@@ -348,7 +348,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		for encampment in encampments:
 			region = game.map.getRegion(encampment['regionId']).getState(game.id)
 			encampmentsNum = encampment['encampmentsNum']
-			if region.tokenBadge != tokenBadge:
+			if region.tokenBadge != tokenBadge or not region.tokensNum:
 				raise BadFieldException('badRegion')
 			if encampmentsNum > freeEncampments:
 				raise BadFieldException('notEnoughEncampmentsForRedeployment')
@@ -460,7 +460,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 		regionId = fortified['regionId']
 		regState = user.game.map.getRegion(regionId).getState(user.game.id)
 
-		if regState.ownerId != tokenBadge.Owner().id:
+		if regState.ownerId != tokenBadge.Owner().id or not region.tokensNum:
 			raise BadFieldException('badRegion')
 
 		if regState.fortress:
@@ -494,7 +494,8 @@ class SpecialPowerHeroic(BaseSpecialPower):
 			regState = user.game.map.getRegion(hero['regionId']).getState(
 				user.game.id)
 			
-			if not regState.owner or regState.owner.currentTokenBadge != tokenBadge:
+			if not regState.owner or regState.owner.currentTokenBadge != tokenBadge or\
+				not region.tokensNum:
 				raise BadFieldException('badRegion')
 
 			regState.hero = True
