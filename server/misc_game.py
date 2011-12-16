@@ -58,7 +58,7 @@ def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
 	if newActPlayer.currentTokenBadge:
 		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId, 'turnStartReinforcements')
-		newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) #+ newActPlayer.currentTokenBadge.totalTokensNum
+		newActPlayer.tokensInHand = addUnits - len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum
 		for region in newActPlayer.currentTokenBadge.regions:
 			region.tokensNum = 1
 		
