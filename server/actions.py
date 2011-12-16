@@ -209,10 +209,8 @@ def act_getGameList(data):
 	result = {'result': 'ok'}
 	games = dbi.query(Game).filter(Game.state != GAME_ENDED).all()
 	result['games'] = list()
-	gameAttrs = [ 'activePlayerId', 'id', 'name', 'descr', 'state', 'turn', 
-		'mapId']
-	gameAttrNames = [ 'activePlayerId', 'gameId', 'gameName', 'gameDescription', 'state', 
-		'turn', 'mapId']
+	gameAttrs = [ 'activePlayerId', 'turn']
+	gameAttrNames = [ 'activePlayerId', 'turn']
 		
 	if not misc.TEST_MODE:
 		gameAttrs.append('aiRequiredNum')

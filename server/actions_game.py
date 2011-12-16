@@ -28,6 +28,7 @@ def act_setReadinessStatus(data):
 def act_selectRace(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if user.currentTokenBadge:
+		print 'fshdjghjdghj'
 		raise BadFieldException('badStage')
 	game = user.game
 	if not (game and user.inGame): 
@@ -38,13 +39,11 @@ def act_selectRace(data):
 	tokenBadges = dbi.query(TokenBadge).order_by(TokenBadge.pos).all()
 	tokenBadges = tokenBadges[:6]
 	price = position
-	print 'coins, price', user.coins, price
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId
 	addUnits = callRaceMethod(raceId, 'turnStartReinforcements')
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum					
-	print 'bonus', chosenBadge.bonusMoney
 	user.coins += chosenBadge.bonusMoney - price
 	user.currentTokenBadge = chosenBadge
 	user.tokensInHand = tokensNum + addUnits
@@ -64,23 +63,24 @@ def act_conquer(data):
 	game = user.game
 	if not (game and user.inGame): 
 		raise BadFieldException('notInGame')
-	if not user.currentTokenBadge or not user.tokensInHand: 
-		raise BadFieldException('badStage')
+	if not user.currentTokenBadge:
+		raise BadFieldException('badStage') 
+	if not user.tokensInHand:
+		raise BadFieldException('badTokensNum') 
 	checkStage(GAME_CONQUER, user)
 	region = game.map.getRegion(data['regionId'])
 	regState = region.getState(game.id)
 	victimTokenBadge = regState.tokenBadge
 	owner = regState.owner
 	if owner == user and not regState.inDecline: 
-		print 'bad 1'
 		raise BadFieldException('badRegion')
 	tokenBadge = user.currentTokenBadge
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	user.checkForFriends(owner)
+	if not regState.inDecline:
+		user.checkForFriends(owner)
 	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
 	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
 	if not (f1 and f2):
-		print 'bad 2', f1, f2, 
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
 	attackedRace = None
@@ -97,8 +97,9 @@ def act_conquer(data):
 		callRaceMethod(raceId, 'attackBonus', region, tokenBadge) + 
 		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
 			, 1)
-	
 	unitsNum = user.tokensInHand
+	if unitsNum + 3 < unitPrice:
+		raise BadFieldException('badTokensNum') 
 	t = user.game.getLastState() == misc.GAME_THROW_DICE
 	dice = t and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
@@ -116,8 +117,10 @@ def act_conquer(data):
 	regState.tokensNum = unitPrice
 	
 	if victimTokenBadge:
+		print 'hand, def, ', owner.tokensInHand, defense
 		callRaceMethod(victimTokenBadge.raceId, 'sufferCasualties', victimTokenBadge)
-		#owner.tokensInHand += defense - callRaceMethod(victimTokenBadge.raceId, 'getCasualties')
+		owner.tokensInHand += defense - callRaceMethod(victimTokenBadge.raceId, 'getCasualties')
+		print 'tok ', owner.tokensInHand
 		
 	callRaceMethod(raceId, 'conquered', regState, tokenBadge)
 	dbi.updateWarHistory(user, victimBadgeId, tokenBadge.id, dice, 
@@ -231,7 +234,6 @@ def act_defend(data):			## Should be renamed to retreat
 	checkStage(GAME_DEFEND, user)
 	attackedRegion = user.game.getDefendingRegion(user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	tokensNum = user.game.history[-1].warHistory.victimTokensNum - callRaceMethod(raceId, 'getCasualties')
 	notAdjacentRegions = []
 	for terr in tokenBadge.regions:
 		if terr.region.id not in attackedRegion.getNeighbors():##~~
@@ -245,15 +247,15 @@ def act_defend(data):			## Should be renamed to retreat
 			raise BadFieldException('badRegionId')
 		if not isinstance(region['tokensNum'], int):
 			raise BadFieldException('badTokensNum')
-		if tokensNum < region['tokensNum']:
+		if user.tokensInHand < region['tokensNum']:
 			raise BadFieldException('notEnoughTokens')
 		destination = user.game.map.getRegion(region['regionId'])
 		destState = destination.getState(user.game.id)
 		if  notAdjacentRegions and destination.id not in notAdjacentRegions  or destState.owner.id != user.id:
 			raise BadFieldException('badRegion')
 		destState.tokensNum += region['tokensNum']
-		tokensNum -= region['tokensNum']
-	if tokensNum:  raise BadFieldException('thereAreTokensInTheHand')
+		user.tokensInHand -= region['tokensNum']
+	if user.tokensInHand:  raise BadFieldException('thereAreTokensInTheHand')
 	dbi.updateHistory(user, GAME_DEFEND, tokenBadge.id)
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok'}

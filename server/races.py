@@ -42,7 +42,6 @@ class BaseRace:
 		return False
 	
 	def incomeBonus(self, tokenBadge):
-		print 'spec', tokenBadge.specPowId, 'dec', tokenBadge.inDecline
 		return len(filter(lambda x: self.regBonus(x, not tokenBadge.inDecline), tokenBadge.regions))
 
 	def defenseBonus(self):
@@ -486,7 +485,9 @@ class SpecialPowerHeroic(BaseSpecialPower):
 
 		if len(heroes) > 2:
 			raise BadFieldException('badSetHeroCommand')
-		
+		if len(heroes) < 2 and len(tokenBadge.regions) > 1:
+			return 'badHeroes' #???
+			
 		for region in tokenBadge.regions:
 			region.hero = False
 		user = tokenBadge.Owner()
@@ -515,11 +516,9 @@ class SpecialPowerHill(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
 	def regBonus(self, reg, tok = None):
-		print tok
 		if not tok:
 			return 0
 		f = reg.region.hill if hasattr(reg, 'region') else reg.hill
-		print f
 		return f
 
 class SpecialPowerMerchant(BaseSpecialPower):

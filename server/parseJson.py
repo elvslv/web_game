@@ -48,16 +48,25 @@ def parseDataFromFile(fileName):
 	else:
 		misc.TEST_RANDSEED = 21425364547
 		random.seed(misc.TEST_RANDSEED)
-	object = object['test']
+	conn = httplib.HTTPConnection("localhost:80", timeout = 10000)
+	if 'include' in object:
+		f1 = open('02_GameLogic/%s' % object['include'][0], 'r')
+		incl = json.loads(f1.read())
+		for obj in incl:
+			conn.request("POST", "/small_worlds/", json.dumps(obj))
+			r1 = conn.getresponse()
+			ans = json.loads(r1.read())
+			if not('result' in ans) or ans['result'] != 'ok':
+				return {'result': 'include failed', 'description': description}
+	object = object['test']			
 	result = list()
-	conn = httplib.HTTPConnection("server.smallworld:80", timeout = 10000)
 	if isinstance(object, list):
 		for obj in object:
-			conn.request("POST", "/", json.dumps(obj))
+			conn.request("POST", "/small_worlds/", json.dumps(obj))
 			r1 = conn.getresponse()
 			result.append(json.loads(r1.read()))
 	else:
-		conn.request("POST", "/", json.dumps(object))
+		conn.request("POST", "/small_worlds/", json.dumps(object))
 		r1 = conn.getresponse()
 		return {'result': [r1.read()], 'description': description}
 

@@ -30,11 +30,12 @@ class TestFromFile(unittest.TestCase):
 		out = parseJson.parseDataFromFile(self.inFile)
 		self.testDescr = out['description']
 		self.assertListEqual(out['result'], json.loads(ans))
-		                
+		
+
 def suite():
 	suite = unittest.TestSuite()
-	suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
-	#suite.addTests(TestFromFile('%s\\t0%d._in' % (testDir, i), '%s\\t0%d.ans' % (testDir, i)) for i in range(begin, end))
+	#suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
+	suite.addTests(TestFromFile('%s\\t0%d._in' % (testDir, i), '%s\\t0%d.ans' % (testDir, i)) for i in range(begin, end))
 	return suite
 
 def main(a, b, c):
@@ -52,5 +53,5 @@ if __name__=='__main__':
 		sys.exit("Format: python TestFromFiles.py [begin] end [directory]")
 	fin = int(sys.argv[1]) if argc == 2 else int(sys.argv[2])
 	start =  int (sys.argv[1]) if argc >= 3 else 0
-	directory = sys.argv[3] if argc == 4 else "tests"
+	directory = sys.argv[3] if argc == 4 else "02_GameLogic"
 	main(start, fin, directory)

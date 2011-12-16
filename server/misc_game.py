@@ -58,14 +58,15 @@ def prepareForNextTurn(game, newActPlayer):
 	game.activePlayerId = newActPlayer.id
 	if newActPlayer.currentTokenBadge:
 		addUnits =  callRaceMethod(newActPlayer.currentTokenBadge.raceId, 'turnStartReinforcements')
-		newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) + newActPlayer.currentTokenBadge.totalTokensNum
+		newActPlayer.tokensInHand += addUnits -len(newActPlayer.regions) #+ newActPlayer.currentTokenBadge.totalTokensNum
 		for region in newActPlayer.currentTokenBadge.regions:
 			region.tokensNum = 1
 		
 def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 	if vRace != None and vSpecialPower !=None:
 		race = filter(lambda x: x.name == vRace, races.racesList) 
-		if not race: raise BadFieldException('badRace')
+		if not race: 
+			raise BadFieldException('badRace')
 		raceId = races.racesList.index(race[0])
 		specialPower = filter(lambda x: x.name == vSpecialPower, races.specialPowerList) 
 		if not specialPower: 
@@ -99,7 +100,6 @@ def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
-	print 'pos', position
 	for tokenBadge in filter(lambda x: x.pos < position, game.tokenBadges):
 		tokenBadge.bonusMoney += 1
 	if len(filter(lambda x: x.pos is not None, game.tokenBadges)) < 6:
@@ -145,7 +145,7 @@ def getDefendingInfo(game):
 	if not (tokensNum and len(lastAttack.victimBadge.regions)):
 		return
 	result['playerId'] = lastAttack.victimBadge.Owner().id
-	result['tokensNum'] = tokensNum
+	#result['tokensNum'] = tokensNum
 	result['regionId'] = lastAttack.conqRegion.id
 	return result
 
@@ -303,35 +303,37 @@ def getShortMapState(map_):
 
 def getMapState(mapId, gameId = None):
 	map_ = dbi.getXbyY('Map', 'id', mapId)
-	result = getShortMapState(map_)
+	#result = getShortMapState(map_)
+	result = dict()
 	result['regions'] = list()
 	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
-	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
-		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
+	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum']
 	for region in map_.regions:
 		curReg = dict()
-		curReg['raceCoords'] = region.raceCoords
-		curReg['powerCoords'] = region.powerCoords
-		curReg['coordinates'] = region.coordinates
-		curReg['constRegionState'] = list()
+		#curReg['raceCoords'] = region.raceCoords
+		#curReg['powerCoords'] = region.powerCoords
+		#curReg['coordinates'] = region.coordinates
+		#curReg['constRegionState'] = list()
 		
 		for i in range(len(constRegionAttrs)):
 			attr = getattr(region, constRegionAttrs[i])
 			if not attr: continue
-			if constRegionAttrs[i] in ('mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland'):
-				curReg['landscape'] = constRegionAttrs[i]
-			elif constRegionAttrs[i] in ('mine', 'cavern', 'magic'):
-				curReg['bonus'] = constRegionAttrs[i]
-			curReg['constRegionState'].append(constRegionAttrs[i])
+			#if constRegionAttrs[i] in ('mountain', 'forest', 'hill', 'swamp', 'sea', 'farmland'):
+			#	curReg['landscape'] = constRegionAttrs[i]
+			#elif constRegionAttrs[i] in ('mine', 'cavern', 'magic'):
+			#	curReg['bonus'] = constRegionAttrs[i]
+			#curReg['constRegionState'].append(constRegionAttrs[i])
 			 
 				
-		curReg['adjacentRegions'] = region.getNeighbors()
+		#curReg['adjacentRegions'] = region.getNeighbors()
 		if gameId:
 			curRegState = region.getState(gameId)
 			curReg['currentRegionState'] = dict()
 			for i in range(len(curRegionAttrs)):
-				curReg['currentRegionState'][curRegionAttrs[i]] = getattr(curRegState, curRegionAttrs[i])
+				t = getattr(curRegState, curRegionAttrs[i])
+				if t is not None:
+					curReg['currentRegionState'][curRegionAttrs[i]] = t
 		result['regions'].append(curReg)
 	return result
 
@@ -398,5 +400,6 @@ def checkStage(state, user, attackType = None):
 		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
 			(state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
 	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):
+		print 2
 		raise BadFieldException('badStage')
 
