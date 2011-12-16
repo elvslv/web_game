@@ -177,7 +177,7 @@ def act_redeploy(data):
 	for specAbility in specAbilities:
 		if specAbility['name'] in data:
 			callSpecialPowerMethod(specialPowerId, specAbility['cmd'], tokenBadge, 
-				data[specAbility['name']])
+				data[specAbility['name']], data)
 
 			
 	if unitsNum: 

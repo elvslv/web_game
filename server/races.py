@@ -287,10 +287,10 @@ class BaseSpecialPower:
 	def throwDice(self, game):
 		raise BadFieldException('badStage')
 
-	def setEncampments(self, tokenBadge, encampments):
+	def setEncampments(self, tokenBadge, encampments, data):
 		raise BadFieldException('badStage')
 
-	def setFortified(self, tokenBadge, fortified):
+	def setFortified(self, tokenBadge, fortified, data):
 		raise BadFieldException('badStage')
 
 	def canSelectFriend(self):
@@ -299,7 +299,7 @@ class BaseSpecialPower:
 	def selectFriend(self, user, data):
 		raise BadFieldException('badStage')
 
-	def setHero(self, tokenBadgeId, heroes):
+	def setHero(self, tokenBadgeId, heroes, data):
 		raise BadFieldException('badStage')
 
 	def canThrowDice(self):
@@ -338,7 +338,7 @@ class SpecialPowerBivouacking(BaseSpecialPower):
 		for region in user.regions:
 			region.encampment = False
 		
-	def setEncampments(self, tokenBadge, encampments):
+	def setEncampments(self, tokenBadge, encampments, data):
 		checkObjectsListCorrection(encampments, 
 			[{'name': 'regionId', 'type': int, 'min': 1}, 
 			{'name': 'encampmentsNum', 'type': int, 'min': 0}])
@@ -455,14 +455,14 @@ class SpecialPowerFortified(BaseSpecialPower):
 		if region.fortress:
 			tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 
-	def setFortified(self, tokenBadge, fortified):
+	def setFortified(self, tokenBadge, fortified, data):
 		if not('regionId' in fortified and isinstance(fortified['regionId'], int)):
 			raise BadFieldException('badRegionId')
 		user = tokenBadge.Owner()
 		regionId = fortified['regionId']
 		regState = user.game.map.getRegion(regionId).getState(user.game.id)
 
-		if regState.ownerId != tokenBadge.Owner().id or not region.tokensNum:
+		if regState.ownerId != tokenBadge.Owner().id or not regState.tokensNum:
 			raise BadFieldException('badRegion')
 
 		if regState.fortress:
@@ -482,14 +482,14 @@ class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Heroic', 5, 2, 'heroes')
 
- 	def setHero(self, tokenBadge, heroes):
+ 	def setHero(self, tokenBadge, heroes, data):
 		checkObjectsListCorrection(heroes, 
 			[{'name': 'regionId', 'type': int, 'min': 1}])
 
 		if len(heroes) > 2:
 			raise BadFieldException('badSetHeroCommand')
-		if len(heroes) < 2 and len(tokenBadge.regions) > 1:
-			return 'badHeroes' #???
+		if len(heroes) < 2 and len(data['regions']) > 1:
+			raise BadFieldException('badSetHeroCommand')
 			
 		for region in tokenBadge.regions:
 			region.hero = False
