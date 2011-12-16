@@ -265,6 +265,9 @@ class Region(Base):
 		self.powerCoords = str(powerCoords)
 		self.coordinates = str(coordinates)
 
+	def isCoast(self):
+		return len(filter(lambda x: x.sea == True, self.getNeighbors()))
+
 	def getState(self, gameId):
 		state = filter(lambda x : x.gameId == gameId, self.states)
 		if not state: raise BadFieldException('badGameId')

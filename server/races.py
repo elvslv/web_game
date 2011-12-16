@@ -115,7 +115,7 @@ class RaceTritons(BaseRace):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
 	def attackBonus(self, region, tokenBadge):
-		return -1 if region.coast else 0
+		return -1 if region.isCoast() else 0
 
 class RaceDwarves(BaseRace):
 	def __init__(self):
