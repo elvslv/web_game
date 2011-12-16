@@ -266,7 +266,12 @@ class Region(Base):
 		self.coordinates = str(coordinates)
 
 	def isCoast(self):
-		return len(filter(lambda x: x.sea == True, self.getNeighbors()))
+		cnt = 0
+		for neigh in self.getNeighbors():
+			reg = dbi.getXbyY('Region', 'id', neigh)
+			if reg.sea:
+				cnt += 1
+		return cnt
 
 	def getState(self, gameId):
 		state = filter(lambda x : x.gameId == gameId, self.states)
