@@ -25,7 +25,7 @@ C = 0
 M = 2 << 31 - 1
 
 global TEST_MODE, TEST_RANDSEED
-TEST_MODE=False
+TEST_MODE=True
 TEST_RANDSEED = 12345
 global LAST_SID, LAST_TIME
 
@@ -57,7 +57,7 @@ possiblePrevCmd = {
 	GAME_THROW_DICE, GAME_DEFEND],
 	GAME_DECLINE: [GAME_FINISH_TURN, GAME_REDEPLOY],
 	GAME_REDEPLOY: [GAME_CONQUER, GAME_THROW_DICE, GAME_DEFEND, 
-	GAME_UNSUCCESSFULL_CONQUER],
+	GAME_UNSUCCESSFULL_CONQUER, GAME_FINISH_TURN],
 	GAME_THROW_DICE: [GAME_SELECT_RACE, GAME_FINISH_TURN, GAME_CONQUER, 
 	GAME_DEFEND],
 	GAME_DEFEND: [GAME_CONQUER],
@@ -178,7 +178,7 @@ actionFields = {
 		},
 		{'name': 'mapId', 'type': int, 'mandatory': True},
 		{
-			'name': 'gameDescription', 
+			'name': 'gameDescr', 
 			'type': unicode, 
 			'mandatory': False,
 			'max': MAX_GAMEDESCR_LEN	

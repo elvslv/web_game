@@ -35,12 +35,16 @@ def act_selectRace(data):
 	checkStage(GAME_SELECT_RACE, user)
 	chosenBadge = game.getTokenBadge(data['position'])
 	position = chosenBadge.pos
-	price = dbi.query(TokenBadge).filter(TokenBadge.pos < position).count()
+	tokenBadges = dbi.query(TokenBadge).order_by(TokenBadge.pos).all()
+	tokenBadges = tokenBadges[:6]
+	price = position
+	print 'coins, price', user.coins, price
 	if user.coins < price : 
 		raise BadFieldException('badMoneyAmount')
 	raceId, specialPowerId = chosenBadge.raceId, chosenBadge.specPowId
 	addUnits = callRaceMethod(raceId, 'turnStartReinforcements')
 	tokensNum = races.racesList[raceId].initialNum + races.specialPowerList[specialPowerId].tokensNum					
+	print 'bonus', chosenBadge.bonusMoney
 	user.coins += chosenBadge.bonusMoney - price
 	user.currentTokenBadge = chosenBadge
 	user.tokensInHand = tokensNum + addUnits
@@ -65,8 +69,10 @@ def act_conquer(data):
 	checkStage(GAME_CONQUER, user)
 	region = game.map.getRegion(data['regionId'])
 	regState = region.getState(game.id)
+	victimTokenBadge = regState.tokenBadge
 	owner = regState.owner
 	if owner == user and not regState.inDecline: 
+		print 'bad 1'
 		raise BadFieldException('badRegion')
 	tokenBadge = user.currentTokenBadge
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
@@ -74,6 +80,7 @@ def act_conquer(data):
 	f1 = callRaceMethod(raceId, 'canConquer', region, tokenBadge)
 	f2 = callSpecialPowerMethod(specialPowerId, 'canConquer',  region,  tokenBadge)
 	if not (f1 and f2):
+		print 'bad 2', f1, f2, 
 		raise BadFieldException('badRegion')
 	regState.checkIfImmune()
 	attackedRace = None
@@ -90,8 +97,10 @@ def act_conquer(data):
 		callRaceMethod(raceId, 'attackBonus', region, tokenBadge) + 
 		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
 			, 1)
+	
 	unitsNum = user.tokensInHand
-	dice = user.game.getLastState() == GAME_THROW_DICE and user.game.history[-1].dice
+	t = user.game.getLastState() == misc.GAME_THROW_DICE
+	dice = t and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = misc_game.throwDice(game)
 	unitPrice -= (dice or 0)
@@ -105,12 +114,17 @@ def act_conquer(data):
 	regState.tokenBadge = user.currentTokenBadge
 	regState.inDecline = False
 	regState.tokensNum = unitPrice
+	
+	if victimTokenBadge:
+		callRaceMethod(victimTokenBadge.raceId, 'sufferCasualties', victimTokenBadge)
+		#owner.tokensInHand += defense - callRaceMethod(victimTokenBadge.raceId, 'getCasualties')
+		
 	callRaceMethod(raceId, 'conquered', regState, tokenBadge)
 	dbi.updateWarHistory(user, victimBadgeId, tokenBadge.id, dice, 
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
 	dbi.updateGameHistory(game, data)
-	return {'result': 'ok', 'dice': dice} if dice else {'result': 'ok'}
+	return {'result': 'ok', 'dice': dice} if (dice and not t) else {'result': 'ok'}
 
 def act_decline(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
@@ -145,13 +159,17 @@ def act_redeploy(data):
 	if not tokenBadge.regions:
 		raise BadFieldException('userHasNoRegions')
 	for region in tokenBadge.regions: region.tokensNum = 0
+	usedRegions = []
 	for rec in data['regions']:
+		if rec['regionId'] in usedRegions:
+			raise BadFieldException('badRegion')
 		regState = user.game.map.getRegion(rec['regionId']).getState(user.game.id)
 		tokensNum = rec['tokensNum']
 		if  regState.tokenBadge != user.currentTokenBadge: raise BadFieldException('badRegion')
 		if tokensNum > unitsNum: raise BadFieldException('notEnoughTokensForRedeployment')
 		regState.tokensNum = tokensNum		
 		unitsNum -= tokensNum
+		usedRegions.append(rec['regionId'])
 
 	specAbilities = [
 	{'name': 'encampments', 'cmd': 'setEncampments'},
@@ -213,7 +231,6 @@ def act_defend(data):			## Should be renamed to retreat
 	checkStage(GAME_DEFEND, user)
 	attackedRegion = user.game.getDefendingRegion(user)
 	raceId, specialPowerId = tokenBadge.raceId, tokenBadge.specPowId
-	callRaceMethod(raceId, 'sufferCasualties', tokenBadge)
 	tokensNum = user.game.history[-1].warHistory.victimTokensNum - callRaceMethod(raceId, 'getCasualties')
 	notAdjacentRegions = []
 	for terr in tokenBadge.regions:
@@ -257,11 +274,12 @@ def act_enchant(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
 	if not (user.game and user.inGame): 
 		raise BadFieldException('notInGame')
-	if not user.currentTokenBadge: 
+	if not user.currentTokenBadge or user.currentTokenBadge.raceId != 9: 
 		raise BadFieldException('badStage')
 	checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
-	
 	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
+	if not reg.tokenBadge:
+		raise BadFieldException('nothingToEnchant')
 	victimBadgeId = reg.tokenBadge.id
 	reg.checkIfImmune(True)
 	clearFromRace(reg)

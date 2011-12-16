@@ -59,14 +59,14 @@
 			"action": "createGame", 
 			"sid": 6,
 			"gameName": "game1",
-			"gameDescription": "game1",
+			"gameDescr": "game1",
 			"mapId": 3			
 		},
 		{
 			"action": "createGame", 
 			"sid": 1,
 			"gameName": "game1",
-			"gameDescription": "game1",
+			"gameDescr": "game1",
 			"mapId": 9			
 		},
 		{
@@ -107,10 +107,10 @@
 		},
 		{
 			"action": "createGame", 
-			"sid": 3,
+			"sid": 2,
 			"gameName": "game2",
 			"mapId": 2,
-			"gameDescription": "game description"
+			"gameDescr": "game description"
 		}
 	], 
 	"description": "test createGame function"

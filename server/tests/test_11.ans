@@ -51,10 +51,10 @@
 		"result": "badRegion"
 	},
 	{
-		"result": "ok"
+		"result": "badRegion"
 	},
 	{
-		"result": "badStage"
+		"result": "ok"
 	}
 
 	

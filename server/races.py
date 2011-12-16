@@ -42,7 +42,8 @@ class BaseRace:
 		return False
 	
 	def incomeBonus(self, tokenBadge):
-		return len(filter(lambda x: self.regBonus(x), tokenBadge.regions))
+		print 'spec', tokenBadge.specPowId, 'dec', tokenBadge.inDecline
+		return len(filter(lambda x: self.regBonus(x, not tokenBadge.inDecline), tokenBadge.regions))
 
 	def defenseBonus(self):
 		return 0
@@ -70,7 +71,7 @@ class BaseRace:
 	def sufferCasualties(self, tokenBadge):
 		tokenBadge.totalTokensNum -= 1
 
-	def regBonus(self, reg):
+	def regBonus(self, reg, tok = None):
 		return 0
 
 class RaceHalflings(BaseRace):
@@ -120,7 +121,7 @@ class RaceDwarves(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Dwarves', 3, 8)
 
-	def regBonus(self, reg):
+	def regBonus(self, reg, tok = None):
 		return reg.region.mine if hasattr(reg, 'region') else reg.mine
 
 
@@ -128,7 +129,9 @@ class RaceHumans(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Humans', 5, 10)
 
-	def regBonus(self, reg):
+	def regBonus(self, reg, tok = None):
+		if not tok:
+			return 0
 		return reg.region.farmland if hasattr(reg, 'region') else reg.farmland
 
 
@@ -143,7 +146,9 @@ class RaceWizards(BaseRace):
 	def __init__(self):
 		BaseRace.__init__(self, 'Wizards', 5, 10)
 
-	def regBonus(self, reg):
+	def regBonus(self, reg, tok = None):
+		if not tok:
+			return 0
 		return reg.region.magic if hasattr(reg, 'region') else reg.magic
 		
 class RaceAmazons(BaseRace):
@@ -260,9 +265,6 @@ class BaseSpecialPower:
 	def attackBonus(self, regionId, tokenBadgeId):
 		return 0
 
-	def incomeBonus(self, tokenBadge):
-		return 0
-
 	def canDecline(self, user, leaveGame):
 		return leaveGame or user.game.getLastState() == GAME_FINISH_TURN
 
@@ -273,37 +275,37 @@ class BaseSpecialPower:
 	def turnFinished(self, tokenBadgeId):
 		pass
 
-	def dragonAttack(self, tokenBadgeId, regionId, tokensNum):
-		raise BadFieldException('badAction') 
+	def dragonAttack(self, tokenBadgeId, regionId):
+		raise BadFieldException('badStage') 
 
 	def clearRegion(self, tokenBadge, region):
 		pass
 
 	def throwDice(self, game):
-		raise BadFieldException('badAction')
+		raise BadFieldException('badStage')
 
 	def setEncampments(self, tokenBadge, encampments):
-		raise BadFieldException('badSpecialPower')
+		raise BadFieldException('badStage')
 
 	def setFortified(self, tokenBadge, fortified):
-		raise BadFieldException('badSpecialPower')
+		raise BadFieldException('badStage')
 
 	def canSelectFriend(self):
 		return False
 
 	def selectFriend(self, user, data):
-		raise BadFieldException('badSpecialPower')
+		raise BadFieldException('badStage')
 
 	def setHero(self, tokenBadgeId, heroes):
-		raise BadFieldException('badSpecialPower')
+		raise BadFieldException('badStage')
 
 	def canThrowDice(self):
 		return False
 
 	def incomeBonus(self, tokenBadge):
-		return len(filter(lambda x: self.regBonus(x), tokenBadge.regions))
+		return len(filter(lambda x: self.regBonus(x, not tokenBadge.inDecline), tokenBadge.regions))
 
-	def regBonus(self, reg):
+	def regBonus(self, reg, tok = None):
 		return 0
 
 class SpecialPowerAlchemist(BaseSpecialPower):
@@ -387,7 +389,7 @@ class SpecialPowerDragonMaster(BaseSpecialPower):
 	def dragonAttack(self, tokenBadge, regState):
 		regState.checkIfImmune()
 		if not(racesList[tokenBadge.raceId].canConquer(regState.region, tokenBadge) 
-			or self.canConquer(regState.region, tokenBadge)):
+			and self.canConquer(regState.region, tokenBadge)):
 			raise BadFieldException('badRegion')
 			
 		attackedTokenBadge = regState.tokenBadge
@@ -429,8 +431,7 @@ class SpecialPowerFlying(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Flying', 5)
 
 	def canConquer(self, region, tokenBadge):
-		return ((not tokenBadge.isNeighbor(region) and tokenBadge.regions) or\
-			not tokenBadge.regions) and not region.sea
+		return not region.sea
 
 class SpecialPowerForest(BaseSpecialPower):
 	def __init__(self):
@@ -489,7 +490,7 @@ class SpecialPowerHeroic(BaseSpecialPower):
 			regState = user.game.map.getRegion(hero['regionId']).getState(
 				user.game.id)
 			
-			if regState.owner.currentTokenBadge != tokenBadge:
+			if not regState.owner or regState.owner.currentTokenBadge != tokenBadge:
 				raise BadFieldException('badRegion')
 
 			regState.hero = True
@@ -508,16 +509,20 @@ class SpecialPowerHill(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Hill', 4)
 
-
-	def regBonus(self, reg):
-		return reg.region.hill if hasattr(reg, 'region') else reg.hill
+	def regBonus(self, reg, tok = None):
+		print tok
+		if not tok:
+			return 0
+		f = reg.region.hill if hasattr(reg, 'region') else reg.hill
+		print f
+		return f
 
 class SpecialPowerMerchant(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Merchant', 2) 
 
 	def incomeBonus(self, tokenBadge):
-		return len(tokenBadge.Owner().regions)
+		return len(tokenBadge.regions)
 
 class SpecialPowerMounted(BaseSpecialPower):
 	def __init__(self):
@@ -554,7 +559,9 @@ class SpecialPowerSwamp(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Swamp', 4) 
 	
-	def regBonus(self, reg):
+	def regBonus(self, reg, tok = None):
+		if not tok:
+			return 0
 		return reg.region.swamp if hasattr(reg, 'region') else reg.swamp
 
 class SpecialPowerUnderworld(BaseSpecialPower):

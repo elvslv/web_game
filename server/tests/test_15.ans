@@ -42,24 +42,21 @@
 		"dice": 1
 	},
 	{
-		"result": "ok",
-		"dice": 1
+		"result": "ok"
 	},
 	{
 		"result": "ok",
 		"dice": 1
 	},
 	{
-		"result": "ok",
-		"dice": 1
+		"result": "ok"
 	},
 	{
 		"result": "ok",
 		"dice": 1
 	},	
 	{
-		"result": "ok",
-		"dice": 1
+		"result": "ok"
 	},	
 	{
 		"result": "badStage"

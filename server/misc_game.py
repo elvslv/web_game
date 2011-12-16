@@ -69,7 +69,7 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 		raceId = races.racesList.index(race[0])
 		specialPower = filter(lambda x: x.name == vSpecialPower, races.specialPowerList) 
 		if not specialPower: 
-			raise BadFieldException('badSpecialPower')
+			raise BadFieldException('badStage')
 		specialPowerId = races.specialPowerList.index(specialPower[0])
 	else:
 		racesInStack = range(0, misc.RACE_NUM)
@@ -99,9 +99,18 @@ def showNextRace(game, lastIndex, vRace = None, vSpecialPower = None):
 	return races.racesList[raceId].name, races.specialPowerList[specPowerId].name, 
 	
 def updateRacesOnDesk(game, position):
+	print 'pos', position
 	for tokenBadge in filter(lambda x: x.pos < position, game.tokenBadges):
 		tokenBadge.bonusMoney += 1
-	return showNextRace(game, position)
+	if len(filter(lambda x: x.pos is not None, game.tokenBadges)) < 6:
+		return showNextRace(game, position)
+	else:
+		tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
+		tokenBadgesInStack = filter(lambda x: not x.Owner() and not x.inDecline and x.pos > position, tokenBadges) 
+		for tokenBadge in tokenBadgesInStack: 
+			tokenBadge.pos -= 1
+			dbi.flush(tokenBadge)
+
 
 def callRaceMethod(raceId, methodName, *args):			
 	race = races.racesList[raceId]
@@ -162,7 +171,7 @@ def getBerserkDice(game):
 	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
 		game.activePlayer().currentTokenBadge.specPowId != 1:
 		return None
-	return game.getLastState() == GAME_THROW_DICE and game.history[-1].dice
+	return game.getLastState() == misc.GAME_THROW_DICE and game.history[-1].dice
 
 def usedStout(game):
 	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
@@ -246,11 +255,8 @@ def getGameState(game):
 	priority = 0
 	for player in players:
 		curPlayer = dict()
-		print len(playerAttrs)
 		for i in range(len(playerAttrs)):
-			print playerAttrNames[i], playerAttrs[i]
 			curPlayer[playerAttrNames[i]] = getattr(player, playerAttrs[i])
-		print 'gggg'
 		priority += 1	
 		curPlayer['priority'] = priority
 		
@@ -344,11 +350,10 @@ def leave(user):
 
 def getVisibleTokenBadges(gameId):
 	rows = dbi.query(TokenBadge).filter(and_(TokenBadge.gameId == gameId, TokenBadge.pos >= 0)).order_by(asc(TokenBadge.pos))
-	print 'a'
 	result = list()
-	for tokenBadge in rows:
-		print 'b'
+	for tokenBadge in rows[:6]:
 		result.append({
+			'tokenBadgeId': tokenBadge.id,
 			'raceName': races.racesList[tokenBadge.raceId].name, 
 			'specialPowerName': races.specialPowerList[tokenBadge.specPowId].name,
 			'bonusMoney': tokenBadge.bonusMoney})

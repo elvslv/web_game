@@ -152,7 +152,7 @@ class TokenBadge(Base):
 	gameId = fkey('games.id')
 	raceId = Column(Integer)
 	specPowId = Column(Integer)
-	pos = Column(Integer, default = VISIBLE_RACES - 1)
+	pos = Column(Integer, default = 12)
 	bonusMoney = Column(Integer, default = 0)
 	inDecline = Column(Boolean, default = False)
 	totalTokensNum = Column(Integer, default = 0)
