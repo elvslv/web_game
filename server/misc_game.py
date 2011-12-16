@@ -278,7 +278,7 @@ def getGameState(game):
 			
 		resPlayers.append(curPlayer)
 	result['players'] = resPlayers
-	result['visibleTokenBadges'] = getVisibleTokenBadges(game.id)
+	#result['visibleTokenBadges'] = getVisibleTokenBadges(game.id)
 	return result
 
 def endOfGame(game, coins = None): 
@@ -308,7 +308,7 @@ def getMapState(mapId, gameId = None):
 	result['regions'] = list()
 	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
-	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum']
+	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 'holeInTheGround']
 	for region in map_.regions:
 		curReg = dict()
 		#curReg['raceCoords'] = region.raceCoords

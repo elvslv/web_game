@@ -35,7 +35,7 @@ class TestFromFile(unittest.TestCase):
 def suite():
 	suite = unittest.TestSuite()
 	#suite.addTests(TestFromFile('%s\\test_%d.in' % (testDir, i), '%s\\test_%d.ans' % (testDir, i)) for i in range(begin, end))
-	suite.addTests(TestFromFile('%s\\t0%d._in' % (testDir, i), '%s\\t0%d.ans' % (testDir, i)) for i in range(begin, end))
+	suite.addTests(TestFromFile('%s\\t%d._in' % (testDir, i), '%s\\t%d.ans' % (testDir, i)) for i in range(begin, end))
 	return suite
 
 def main(a, b, c):

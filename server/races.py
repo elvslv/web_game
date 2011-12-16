@@ -441,7 +441,7 @@ class SpecialPowerForest(BaseSpecialPower):
 		BaseSpecialPower.__init__(self, 'Forest', 4)
 
 	def incomeBonus(self, tokenBadge):
-		return len(filter(lambda x: x.region.forest, tokenBadge.regions))
+		return len(filter(lambda x: x.region.forest, tokenBadge.regions)) if not tokenBadge.inDecline else 0
 
 class SpecialPowerFortified(BaseSpecialPower):
 	def __init__(self):
