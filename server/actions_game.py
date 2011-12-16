@@ -63,10 +63,8 @@ def act_conquer(data):
 	game = user.game
 	if not (game and user.inGame): 
 		raise BadFieldException('notInGame')
-	if not user.currentTokenBadge:
+	if not user.currentTokenBadge or  not user.tokensInHand:
 		raise BadFieldException('badStage') 
-	if not user.tokensInHand:
-		raise BadFieldException('badTokensNum') 
 	checkStage(GAME_CONQUER, user)
 	region = game.map.getRegion(data['regionId'])
 	regState = region.getState(game.id)
