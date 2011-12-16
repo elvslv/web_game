@@ -207,6 +207,10 @@ class RaceSorcerers(BaseRace):
 			specialPowerList[tokenBadge.specPowId].canConquer(regState.region, 
 			tokenBadge)):
 			raise BadFieldException('badRegion')
+			
+		if not regState.inDecline:
+			tokenBadge.Owner().checkForFriends(regState.owner())
+			
 		if victimBadge == tokenBadge: 
 			raise BadFieldException('badAttackedRace')			
 		if not regState.tokensNum:
