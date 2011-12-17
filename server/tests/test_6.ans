@@ -91,14 +91,12 @@
 					{
 						"userId": 1,
 						"username": "user1",
-						"isReady": true,
-						"inGame": true
+						"isReady": true
 					},
 					{
 						"userId": 4,
 						"username": "user4",
-						"isReady": true,
-						"inGame": true
+						"isReady": true
 					}
 				],
 				"mapId": 1,

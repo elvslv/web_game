@@ -295,18 +295,18 @@ possibleLandDescription = [
 	'holeInTheGround',
 	'encampment', 
 	'dragon', 
-	'fortress',
+	'fortified',
 	'hero'
 ]
 defaultMaps = [
 	{'mapName': 'defaultMap1', 'playersNum': 2, 'turnsNum': 5, 
-		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE}, 
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE, "regions": []}, 
 	{'mapName': 'defaultMap2', 'playersNum': 3, 'turnsNum': 5, 
-		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE},
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE, "regions": []},
 	{'mapName': 'defaultMap3', 'playersNum': 4, 'turnsNum': 5, 
-		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE},
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE, "regions": []},
 	{'mapName': 'defaultMap4', 'playersNum': 5, 'turnsNum': 5, 
-		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE},
+		'thumbnail': DEFAULT_THUMB, 'picture': DEFAULT_MAP_PICTURE, "regions": []},
 	{
 		'mapName': 'defaultMap5', 
 		'playersNum': 2, 

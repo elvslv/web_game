@@ -108,7 +108,7 @@
 		{
 			"action": "createGame", 
 			"sid": 1,
-			"gameName": "game2",
+			"gameName": "game3",
 			"mapId": 2,
 			"gameDescription": "game description"
 		}

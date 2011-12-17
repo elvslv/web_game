@@ -59,25 +59,6 @@ def checkFieldsCorrectness(data):
 		if not minValue <= value <= maxValue:
 			raise BadFieldException(msg)
 
-def checkRegionCorrectness(data):
-	checkListCorrectness(data, 'landDescription', str)
-	checkListCorrectness(data, 'adjacent', int)
-	if not 'population' in data:
-		data['population'] = 0
-	
-	queryStr = 'INSERT INTO Regions(MapId, RegionId, DefaultTokensNum'
-	num = 0
-	for descr in data['landDescription']:
-		if not descr in misc.possibleLandDescription[:11]:
-			raise BadFieldException('unknownLandDescription')
-		queryStr += ', ' + descr.title()
-		num += 1
-	queryStr += ') VALUES(%s, %s, %s'
-	for i in range(num):
-		queryStr += ', 1'
-	queryStr += ')'
-	return queryStr
-
 def checkFiles(thumbSrc, pictSrc):
 	path = os.path.dirname(__file__)
 	sys.path.append(path)

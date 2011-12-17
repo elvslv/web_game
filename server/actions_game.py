@@ -90,7 +90,7 @@ def act_conquer(data):
 		enemyDefenseBonus = callRaceMethod(attackedRace, 'defenseBonus')
 	defense = regState.tokensNum
 	unitPrice = max(misc.BASIC_CONQUER_COST + defense + region.mountain + 
-		regState.encampment + regState.fortress +  enemyDefenseBonus +
+		regState.encampment + regState.fortified +  enemyDefenseBonus +
 		callRaceMethod(raceId, 'attackBonus', region, tokenBadge) + 
 		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
 			, 1)
@@ -273,13 +273,13 @@ def act_enchant(data):
 		raise BadFieldException('badStage')
 	checkStage(GAME_CONQUER, user, ATTACK_ENCHANT)
 	reg = user.game.map.getRegion(data['regionId']).getState(user.game.id)
+	print 'fff', reg.id, reg.tokenBadgeId
 	if not reg.tokenBadge:
 		raise BadFieldException('nothingToEnchant')
 	victimBadgeId = reg.tokenBadge.id
-	reg.checkIfImmune(True)
-	clearFromRace(reg)
 	callRaceMethod(user.currentTokenBadge.raceId, 'enchant', user.currentTokenBadge,
 		reg)
+	#clearFromRace(reg)
 	dbi.updateWarHistory(user, victimBadgeId, user.currentTokenBadge.id, None, 
 			reg.region.id, 1, ATTACK_ENCHANT)
 	dbi.updateGameHistory(user.game, data)
@@ -305,11 +305,8 @@ def act_throwDice(data):
 	if not user.currentTokenBadge or not user.tokensInHand: 
 		raise BadFieldException('badStage')
 	checkStage(GAME_THROW_DICE, user)
-	if misc.TEST_MODE: 
-		dice = data['dice'] if 'dice' in data else 0
-	else:
-		specialPowerId = user.currentTokenBadge.specPowId
-		dice = callSpecialPowerMethod(specialPowerId, 'throwDice', user.game)
+	specialPowerId = user.currentTokenBadge.specPowId
+	dice = callSpecialPowerMethod(specialPowerId, 'throwDice', user.game, data['dice'] if 'dice' in data else 0)
 	dbi.updateHistory(user, GAME_THROW_DICE, user.currentTokenBadge.id, dice)
 	dbi.updateGameHistory(user.game, data)
 	return {'result': 'ok', 'dice': dice}	

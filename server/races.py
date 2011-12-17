@@ -54,11 +54,11 @@ class BaseRace:
 		return False
 
 	def enchant(self, tokenBadgeId, regionId):
-		return BadFieldException('badRace')
+		raise BadFieldException('badRace')
 
 	def clearRegion(self, tokenBadge, region):
 		region.encampment = 0
-		region.fortress = False
+		region.fortified = False
 		region.dragon = False
 		region.holeInTheGround = False
 		region.hero = False
@@ -104,9 +104,12 @@ class RaceGiants(BaseRace):
 		lands = filter(lambda x: x.region.mountain if hasattr(x, 'region') else x.mountain, 
 					tokenBadge.regions)
 		for  land in lands:
+			if land.region.cavern and tokenBadge.specPowId == 17 and region.cavern:
+				res = -1
+				break
 			if region.isAdjacent(land.region if hasattr(land, 'region') else land):					
-					res = -1
-					break
+				res = -1
+				break
 		return res
 
 class RaceTritons(BaseRace):
@@ -114,7 +117,7 @@ class RaceTritons(BaseRace):
 		BaseRace.__init__(self, 'Tritons', 6, 11)
 
 	def attackBonus(self, region, tokenBadge):
-		return -1 if region.isCoast() else 0
+		return -1 if region.isCoast() and not region.sea else 0
 
 class RaceDwarves(BaseRace):
 	def __init__(self):
@@ -201,7 +204,6 @@ class RaceSorcerers(BaseRace):
 	def enchant(self, tokenBadge, regState):
 		game =  tokenBadge.Owner().game
 		victimBadge = regState.tokenBadge
-		regState.checkIfImmune(True)
 		if not (self.canConquer(regState.region, tokenBadge) and 
 			specialPowerList[tokenBadge.specPowId].canConquer(regState.region, 
 			tokenBadge)):
@@ -209,8 +211,9 @@ class RaceSorcerers(BaseRace):
 			
 		if not regState.inDecline:
 			tokenBadge.Owner().checkForFriends(regState.owner)
-			
-		if victimBadge == tokenBadge: 
+
+		print 'v', victimBadge.id, tokenBadge.id
+		if victimBadge.id == tokenBadge.id: 
 			raise BadFieldException('badAttackedRace')			
 		if not regState.tokensNum:
 			raise BadFieldException('nothingToEnchant')
@@ -218,6 +221,7 @@ class RaceSorcerers(BaseRace):
 			raise BadFieldException('cannotEnchantMoreThanOneToken')
 		if regState.inDecline:
 			raise BadFieldException('cannotEnchantDeclinedRace')
+		regState.checkIfImmune(True)
 		if tokenBadge.totalTokensNum == self.maxNum: 
 			raise BadFieldException('noMoreTokensInStorageTray')
 		
@@ -284,7 +288,7 @@ class BaseSpecialPower:
 	def clearRegion(self, tokenBadge, region):
 		pass
 
-	def throwDice(self, game):
+	def throwDice(self, game, dice = None):
 		raise BadFieldException('badStage')
 
 	def setEncampments(self, tokenBadge, encampments, data):
@@ -322,8 +326,8 @@ class SpecialPowerBerserk(BaseSpecialPower):
 	def __init__(self):
 		BaseSpecialPower.__init__(self, 'Berserk', 4)
 
-	def throwDice(self, game):
-		return misc_game.throwDice(game)
+	def throwDice(self, game, dice = None):
+		return misc_game.throwDice(game, dice)
 
 	def canThrowDice(self):
 		return True
@@ -452,7 +456,7 @@ class SpecialPowerFortified(BaseSpecialPower):
 		self.maxNum = 6
 
 	def clearRegion(self, tokenBadge, region):
-		if region.fortress:
+		if region.fortified:
 			tokenBadge.specPowNum = max(tokenBadge.specPowNum - 1, 0)
 
 	def setFortified(self, tokenBadge, fortified, data):
@@ -465,18 +469,18 @@ class SpecialPowerFortified(BaseSpecialPower):
 		if regState.ownerId != tokenBadge.Owner().id or not regState.tokensNum:
 			raise BadFieldException('badRegion')
 
-		if regState.fortress:
+		if regState.fortified:
 			raise BadFieldException('tooManyFortifiedsInRegion')
 
-		fortifiedsOnMap = len(filter(lambda x: x.fortress == True, tokenBadge.regions))
+		fortifiedsOnMap = len(filter(lambda x: x.fortified == True, tokenBadge.regions))
 		if fortifiedsOnMap >= self.maxNum:
 			raise BadFieldException('tooManyFortifiedsOnMap')
 		if fortifiedsOnMap == tokenBadge.specPowNum:
 			raise BadFieldException('tooManyFortifieds')
-		regState.fortress = True
+		regState.fortified = True
 
 	def incomeBonus(self, tokenBadge):
-		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortress, tokenBadge.regions))
+		return 0 if tokenBadge.inDecline else len(filter(lambda x: x.fortified, tokenBadge.regions))
 
 class SpecialPowerHeroic(BaseSpecialPower):
 	def __init__(self):

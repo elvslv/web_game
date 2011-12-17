@@ -152,7 +152,7 @@ class TokenBadge(Base):
 	gameId = fkey('games.id')
 	raceId = Column(Integer)
 	specPowId = Column(Integer)
-	pos = Column(Integer, default = 5) ##12
+	pos = Column(Integer, default = 12) ##5
 	bonusMoney = Column(Integer, default = 0)
 	inDecline = Column(Boolean, default = False)
 	totalTokensNum = Column(Integer, default = 0)
@@ -216,7 +216,7 @@ class User(Base):
 			x.userId == attackedUser.id, self.game.history)
 		if histEntry:
 			if histEntry[0].friend == self.id:
-				raise BadFieldException('usersAreFriends')
+				raise BadFieldException('badRegion')
 
 	def killRaceInDecline(self):
 		for declinedRegion in self.declinedTokenBadge.regions:
@@ -227,7 +227,12 @@ class User(Base):
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 
 			x.state == misc.GAME_CONQUER and x.userId == self.id, self.game.history)
-		return len(filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist))
+		nonEmptyConqueredRegions = filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist)
+		cnt = 0
+		for reg in nonEmptyConqueredRegions:
+			if reg.warHistory.conqRegion.ownerId == self.id:
+				cnt += 1
+		return cnt
 
 class Region(Base):
 	__tablename__ = 'regions'
@@ -297,7 +302,7 @@ class RegionState(Base):
 	holeInTheGround = Column(Boolean, default = False)
 	encampment = Column(Integer, default = 0)
 	dragon = Column(Boolean, default = False) 
-	fortress = Column(Boolean, default = False) 
+	fortified = Column(Boolean, default = False) 
 	hero = Column(Boolean, default = False) 
 	inDecline = Column(Boolean, default = True) 
 
@@ -318,7 +323,7 @@ class RegionState(Base):
 		if self.holeInTheGround or self.dragon or self.hero:
 			raise BadFieldException('regionIsImmune')
 		if enchanting:
-			if self.encampment: raise BadFieldException('regionIsImmune')
+			if self.encampment: raise BadFieldException('badRegion')
 			if not self.tokensNum: 	raise BadFieldException('nothingToEnchant')
 			if self.tokensNum > 1: 	raise BadFieldException('cannotEnchantMoreThanOneToken')
 			if self.inDecline: raise BadFieldException('cannotEnchantDeclinedRace')
@@ -476,7 +481,8 @@ class Database:
 			raise BadFieldException("""%sTaken""" % name)
     
 	def addRegion(self, id, map_, regInfo):
-		checkFields.checkListCorrectness(regInfo, 'landDescription', str)
+		if 'landDescription' in regInfo:
+			checkFields.checkListCorrectness(regInfo, 'landDescription', str)
 		if not ('adjacent' in regInfo and isinstance(regInfo['adjacent'], list)):
 			raise BadFieldException('badRegions')
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
@@ -486,23 +492,27 @@ class Database:
 			if not('raceCoords' in regInfo and len(regInfo['raceCoords']) == 2 and \
 				'powerCoords' in regInfo and len(regInfo['powerCoords']) == 2 and\
 				len(regInfo['coordinates']) > 2 ):
-				raise BadFieldException('badRegion')
+				raise BadFieldException('badRegions')
 			checkFields.checkListCorrectness(regInfo, 'raceCoords', int)
 			checkFields.checkListCorrectness(regInfo, 'powerCoords', int)
 			checkFields.checkListCorrectness(regInfo, 'coordinates', list)
-			
+
+		if 'population' in regInfo and (not isinstance(regInfo['population'], int) or (regInfo['population'] < 0  or regInfo['population'] > 18)):
+			raise BadFieldException('badRegions')
+		
 		if not 'population' in regInfo:
 			regInfo['population'] = 0
-
 			
 		reg = Region(id, regInfo['population'], map_, 
 			regInfo['raceCoords'] if 'raceCoords' in regInfo else None, 
 			regInfo['powerCoords'] if 'powerCoords' in regInfo else None,
 			regInfo['coordinates'] if 'coordinates' in regInfo else None)
-		for descr in regInfo['landDescription']:
-			if not descr in misc.possibleLandDescription[:11]:
-				raise BadFieldException('unknownLandDescription')
-			setattr(reg, descr, 1)
+		if 'landDescription' in regInfo:
+			for descr in regInfo['landDescription']:
+				if not descr in misc.possibleLandDescription[:11]:
+					print descr
+					raise BadFieldException('badRegions')
+				setattr(reg, descr, 1)
 		self.add(reg)
 		
 

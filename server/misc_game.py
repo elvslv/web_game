@@ -48,8 +48,9 @@ def clearFromRace(reg):
 		callSpecialPowerMethod(reg.tokenBadge.specPowId, 'clearRegion', reg.tokenBadge, reg)
 	return ans
 
-def throwDice(game):
-	if misc.TEST_MODE: return 0
+def throwDice(game, dice = None):
+	if misc.TEST_MODE: 
+		return dice if dice is not None else 0
 	dice = generateNextNum(game) % 6
 	if dice > 2: dice = 0
 	return dice
@@ -237,6 +238,8 @@ def getGameState(game):
 
 	for i in range(len(gameNameAttrs)):
 		result[gameNameAttrs[i]] = getattr(game, gameAttrs[i])
+	if not game.descr:
+		result['gameDescription'] = ''
 	defendingInfo = getDefendingInfo(game)
 	if defendingInfo:
 		result['defendingInfo'] = defendingInfo
@@ -308,7 +311,7 @@ def getMapState(mapId, gameId = None):
 	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
 	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
-		'holeInTheGround', 'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
+		'holeInTheGround', 'encampment', 'dragon', 'fortified', 'inDecline']
 	for region in map_.regions:
 		curReg = dict()
 		curReg['raceCoords'] = region.raceCoords

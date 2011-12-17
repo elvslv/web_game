@@ -76,13 +76,13 @@ def act_uploadMap(data):
 			try:	
 				dbi.addRegion(curId, newMap, regInfo)
 			except KeyError, e:
-				raise BadFieldException('badRegion')
+				raise BadFieldException('badRegions')
 			curId += 1
 		i = 0
 		for reg in newMap.regions:			
 			regInfo = data['regions'][i]
 			if reg.id in regInfo['adjacent']:
-				raise BadFieldException('badRegion')
+				raise BadFieldException('badRegions')
 			dbi.addAll(map(lambda x: Adjacency(reg.id, x, mapId), regInfo['adjacent']))
 			i += 1
 	return {'result': 'ok', 'mapId': mapId, 'regions': result} if len(result) else {'result': 'ok', 'mapId': mapId}
@@ -217,8 +217,8 @@ def act_getGameList(data):
 		gameAttrs.append('aiRequiredNum')
 		gameAttrNames.append('aiRequiredNum')
 		
-	playerAttrs = ['id', 'name', 'isReady', 'inGame']
-	playerAttrNames = ['userId', 'username', 'isReady', 'inGame']
+	playerAttrs = ['id', 'name', 'isReady']
+	playerAttrNames = ['userId', 'username', 'isReady']
 	for game in games:
 		curGame = dict()
 		for i in range(len(gameAttrs)):

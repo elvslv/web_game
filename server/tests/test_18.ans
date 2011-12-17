@@ -61,7 +61,7 @@
 		"tokenBadgeId": 2
 	},
 	{
-		"result": "cannotEnchantMoreThanOneToken"
+		"result": "badRegion"
 	},
 	{
 		"result": "badRegion"

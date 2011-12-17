@@ -81,7 +81,7 @@
 	{"result": "ok",
  "statistics": [["Regions", 2], ["Amazons", 0], ["Diplomat", 0]]},
 	{
-		"result": "usersAreFriends"
+		"result": "badRegion"
 	},
 	{
 		"result": "ok"
