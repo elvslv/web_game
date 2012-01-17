@@ -86,6 +86,7 @@ class Game(Base):
 		return filter(lambda x: x.inGame == True, self.players)
 
 	def getTokenBadge(self, position):
+		print map(lambda x: x.pos, self.tokenBadges)
 		tokenBadge = filter(lambda x: x.pos == position, self.tokenBadges)
 		if not tokenBadge: raise BadFieldException('badPosition')
 		return tokenBadge[0]
@@ -152,7 +153,7 @@ class TokenBadge(Base):
 	gameId = fkey('games.id')
 	raceId = Column(Integer)
 	specPowId = Column(Integer)
-	pos = Column(Integer, default = 12) ##5
+	pos = Column(Integer, default = 12 if misc.TEST_MODE else 5)
 	bonusMoney = Column(Integer, default = 0)
 	inDecline = Column(Boolean, default = False)
 	totalTokensNum = Column(Integer, default = 0)

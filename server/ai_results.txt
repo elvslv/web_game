@@ -1,0 +1,366 @@
+Game id: 1, turn: 0
+Player id: 3
+Income coins: 10
+Statistics: 
+Regions: 9
+Ratmen: 0
+Swamp: 1
+Total coins number: 58
+
+
+Player id: 2
+Income coins: 7
+Statistics: 
+Regions: 7
+Amazons: 0
+Commando: 0
+Total coins number: 18
+
+
+Player id: 3
+Income coins: 8
+Statistics: 
+Regions: 6
+Ratmen: 0
+Alchemist: 2
+Total coins number: 19
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 23
+
+
+Player id: 3
+Income coins: 8
+Statistics: 
+Regions: 6
+Ratmen: 0
+Alchemist: 2
+Total coins number: 27
+
+
+Player id: 2
+Income coins: 10
+Statistics: 
+Regions: 10
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 33
+
+
+Player id: 3
+Income coins: 8
+Statistics: 
+Regions: 6
+Ratmen: 0
+Alchemist: 2
+Total coins number: 35
+
+
+Player id: 2
+Income coins: 8
+Statistics: 
+Regions: 8
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 41
+
+
+Player id: 3
+Income coins: 9
+Statistics: 
+Regions: 7
+Ratmen: 0
+Alchemist: 2
+Total coins number: 44
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 50
+
+
+Player id: 3
+Income coins: 9
+Statistics: 
+Regions: 7
+Ratmen: 0
+Alchemist: 2
+Total coins number: 53
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 59
+
+
+Player id: 3
+Income coins: 8
+Statistics: 
+Regions: 6
+Ratmen: 0
+Alchemist: 2
+Total coins number: 61
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 68
+
+
+Player id: 3
+Income coins: 9
+Statistics: 
+Regions: 7
+Ratmen: 0
+Alchemist: 2
+Total coins number: 70
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 77
+
+
+Player id: 3
+Income coins: 7
+Statistics: 
+Regions: 7
+Ratmen: 0
+Alchemist: 0
+Total coins number: 77
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Underworld: 0
+Amazons: 0
+Commando: 0
+Total coins number: 86
+
+
+Player id: 2
+Income coins: 7
+Statistics: 
+Regions: 7
+Ratmen: 0
+Mounted: 0
+Total coins number: 9
+
+
+Player id: 3
+Income coins: 6
+Statistics: 
+Regions: 6
+Tritons: 0
+Seafaring: 0
+Total coins number: 7
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Ratmen: 0
+Mounted: 0
+Total coins number: 18
+
+
+Player id: 3
+Income coins: 8
+Statistics: 
+Regions: 8
+Tritons: 0
+Seafaring: 0
+Total coins number: 15
+
+
+Player id: 2
+Income coins: 8
+Statistics: 
+Regions: 8
+Ratmen: 0
+Mounted: 0
+Total coins number: 26
+
+
+Player id: 3
+Income coins: 7
+Statistics: 
+Regions: 7
+Tritons: 0
+Seafaring: 0
+Total coins number: 22
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Ratmen: 0
+Mounted: 0
+Total coins number: 35
+
+
+Player id: 3
+Income coins: 10
+Statistics: 
+Regions: 10
+Elves: 0
+Bivouacking: 0
+Tritons: 0
+Seafaring: 0
+Total coins number: 27
+
+
+Player id: 2
+Income coins: 7
+Statistics: 
+Regions: 7
+Ratmen: 0
+Mounted: 0
+Total coins number: 42
+
+
+Player id: 3
+Income coins: 10
+Statistics: 
+Regions: 10
+Elves: 0
+Bivouacking: 0
+Tritons: 0
+Seafaring: 0
+Total coins number: 37
+
+
+Player id: 2
+Income coins: 8
+Statistics: 
+Regions: 8
+Ratmen: 0
+Mounted: 0
+Total coins number: 50
+
+
+Player id: 3
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Bivouacking: 0
+Tritons: 0
+Seafaring: 0
+Total coins number: 46
+
+
+Player id: 2
+Income coins: 10
+Statistics: 
+Regions: 10
+Ratmen: 0
+Mounted: 0
+Total coins number: 60
+
+
+Player id: 3
+Income coins: 9
+Statistics: 
+Regions: 9
+Elves: 0
+Bivouacking: 0
+Tritons: 0
+Seafaring: 0
+Total coins number: 55
+
+
+Player id: 2
+Income coins: 9
+Statistics: 
+Regions: 9
+Ratmen: 0
+Mounted: 0
+Total coins number: 69
+
+
+Player id: 3
+Income coins: 10
+Statistics: 
+Regions: 10
+Elves: 0
+Bivouacking: 0
+Tritons: 0
+Seafaring: 0
+Total coins number: 65
+
+
+Player id: 2
+Income coins: 8
+Statistics: 
+Regions: 8
+Skeletons: 0
+Swamp: 0
+Ratmen: 0
+Mounted: 0
+Total coins number: 78
+
+
+Player id: 3
+Income coins: 11
+Statistics: 
+Regions: 11
+Elves: 0
+Bivouacking: 0
+Tritons: 0
+Seafaring: 0
+Total coins number: 76
+
+
+Player id: 2
+Income coins: 7
+Statistics: 
+Regions: 7
+Skeletons: 0
+Swamp: 0
+Ratmen: 0
+Mounted: 0
+Total coins number: 85
+
+

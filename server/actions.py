@@ -166,8 +166,6 @@ def act_resetServer(data):
 	random.seed(misc.TEST_RANDSEED)
 	dbi.clear()
 	if not misc.TEST_MODE: createDefaultMaps()
-	#user = User('user', '123456')
-	#dbi.add(user)
 	return {'result': 'ok'}
 
 def act_saveGame(data):

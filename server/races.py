@@ -104,10 +104,9 @@ class RaceGiants(BaseRace):
 		lands = filter(lambda x: x.region.mountain if hasattr(x, 'region') else x.mountain, 
 					tokenBadge.regions)
 		for  land in lands:
-			if land.region.cavern and tokenBadge.specPowId == 17 and region.cavern:
-				res = -1
-				break
-			if region.isAdjacent(land.region if hasattr(land, 'region') else land):					
+			r = land.region if hasattr(land, 'region') else land
+			if region.isAdjacent(r) or (r.cavern and tokenBadge.specPowId == 17 and\
+					region.region.cavern if hasattr(region, 'region') else region.cavern):					
 				res = -1
 				break
 		return res
@@ -178,10 +177,10 @@ class RaceElves(BaseRace):
 		return 0
 
 	def sufferCasualties(self, tokenBadge):
-		return 0
+		pass
 
 	def clearRegion(self, tokenBadge, region):
-		return 0
+		pass
 		
 class RaceRatmen(BaseRace):
 	def __init__(self):
@@ -269,7 +268,7 @@ class BaseSpecialPower:
 	def canUseDragon(self):
 		return False
 		
-	def attackBonus(self, regionId, tokenBadgeId):
+	def attackBonus(self, regionId, tokenBadge):
 		return 0
 
 	def canDecline(self, user, leaveGame):

@@ -104,7 +104,7 @@ def updateRacesOnDesk(game, position):
 	for tokenBadge in filter(lambda x: x.pos < position, game.tokenBadges):
 		tokenBadge.bonusMoney += 1
 	if len(filter(lambda x: x.pos is not None, game.tokenBadges)) < 6:
-		return showNextRace(game, position)
+		showNextRace(game, position)
 	else:
 		tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
 		tokenBadgesInStack = filter(lambda x: not x.Owner() and not x.inDecline and x.pos > position, tokenBadges) 
@@ -311,7 +311,7 @@ def getMapState(mapId, gameId = None):
 	constRegionAttrs = ['border', 'coast', 'mountain', 
 		'sea', 'mine', 'farmland', 'magic', 'forest', 'hill', 'swamp', 'cavern']
 	curRegionAttrs = ['tokenBadgeId', 'ownerId', 'tokensNum', 
-		'holeInTheGround', 'encampment', 'dragon', 'fortified', 'inDecline']
+		'holeInTheGround', 'encampment', 'dragon', 'hero', 'fortified', 'inDecline']
 	for region in map_.regions:
 		curReg = dict()
 		curReg['raceCoords'] = region.raceCoords

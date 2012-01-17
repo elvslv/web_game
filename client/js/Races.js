@@ -450,7 +450,7 @@ SpecialPowerForest = $.inherit(BaseSpecialPower, {
 SpecialPowerFortified = $.inherit(BaseSpecialPower, {
 	__constructor: function()
 	{
-		this.__base('Fortified', 3, 6, 'fortress', 'fortified');
+		this.__base('Fortified', 3, 6, 'fortified', 'fortified');
 	},
 	canStartRedeploy : function(reg)
 	{

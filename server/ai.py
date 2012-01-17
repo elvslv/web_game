@@ -14,7 +14,7 @@ from operator import itemgetter
 
 class Region:
 	def __init__(self, id, adjacent, props, ownerId, tokenBadgeId, tokensNum, holeInTheGround,
-		encampment, dragon, fortress, hero, inDecline):
+		encampment, dragon, fortified, hero, inDecline):
 		self.id = id
 		self.adjacentIds = adjacent
 		self.props = props
@@ -24,7 +24,7 @@ class Region:
 		self.holeInTheGround = holeInTheGround
 		self.encampment = encampment
 		self.dragon = dragon
-		self.fortress = fortress
+		self.fortified = fortified
 		self.hero = hero
 		self.distFromEnemy = 0
 		self.inDecline = inDecline
@@ -34,12 +34,21 @@ class Region:
 			setattr(self, prop, True)
 
 	def isAdjacent(self, region):
-		return region.id in map(lambda x: x, self.adjacentIds) 
+		return region.id in self.adjacentIds
 
 	def isImmune(self, enchanting = False):
 		return self.holeInTheGround or self.dragon or self.hero or\
 			(enchanting and (self.encampment or not self.tokensNum or\
 				self.tokensNum > 1 or self.inDecline or not self.tokenBadgeId))
+
+	def isCoast(self):
+		ans = False
+		for reg in self.adjacent:
+			if reg.sea:
+				ans = True
+				break
+		return ans
+		
 class Map:
 	def __init__(self, id, playersNum, turnsNum, regions):
 		self.id = id
@@ -118,7 +127,7 @@ class TokenBadge:
 		return self.race.regBonus(reg) + self.specPower.regBonus(reg)
 
 currentRegionFields = ['ownerId', 'tokenBadgeId', 'tokensNum', 'holeInTheGround', 
-	'encampment', 'dragon', 'fortress', 'hero', 'inDecline']
+	'encampment', 'dragon', 'fortified', 'hero', 'inDecline']
 
 def createMap(mapState):
 	regions = list()
@@ -141,7 +150,7 @@ class AI(threading.Thread):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
 		self.gameId = gameId 
 		self.conqueredRegions = list()
-		self.dragonUsed = False #regions
+		self.dragonUsed = False 
 		self.enchantUsed = False
 		self.friendId = None
 		self.sid = sid
@@ -239,13 +248,12 @@ class AI(threading.Thread):
 	def defend(self):
 		defInfo = self.game.defendingInfo
 		tokenBadge = self.currentTokenBadge
-		tokensNum = defInfo['tokensNum']
 		defRegion = self.game.map.getRegion(defInfo['regionId'])
 		regionsToRetreat = tokenBadge.getRegions(defRegion) or tokenBadge.getRegions()
 		self.calcDistances(regionsToRetreat)
 		request = {}
 		for region in regionsToRetreat: request[region.id] = 0
-		distributeUnits(regionsToRetreat, tokensNum, request)
+		distributeUnits(regionsToRetreat, self.tokensInHand, request)
 		data = self.sendCmd({'action': 'defend', 'sid': self.sid, 
 			'regions': convertRedeploymentRequest(request, REDEPLOYMENT_CODE)})
 		if data['result'] != 'ok':
@@ -293,6 +301,7 @@ class AI(threading.Thread):
 			statistics = data['statistics']
 			statistics = sorted(statistics, key = itemgetter('coins', 'regions'), 
 				reverse = True)
+			print statistics
 			for stat in statistics:
 				result += 'Name: %s, coins: %d, regions: %d\n' % (stat['name'], 
 					stat['coins'], stat['regions'])
@@ -372,8 +381,8 @@ class AI(threading.Thread):
 	def getRegionPrice(self, reg):
 		tokenBadge = self.game.getTokenBadgeById(reg.tokenBadgeId)
 		enemyDefense = tokenBadge.race.defenseBonus() if tokenBadge else 0
-		return max(BASIC_CONQUER_COST + reg.encampment + reg.fortress +
-			reg.encampment + reg.fortress + reg.tokensNum + reg.mountain + enemyDefense +
+		return max(BASIC_CONQUER_COST + reg.encampment +  
+			reg.fortified + reg.tokensNum + reg.mountain + enemyDefense +
 			self.currentTokenBadge.race.attackBonus(reg, self.currentTokenBadge) + 
 			self.currentTokenBadge.specPower.attackBonus(reg, self.currentTokenBadge), 1)
 
@@ -450,7 +459,7 @@ class AI(threading.Thread):
 		for reg in self.currentTokenBadge.getRegions():
 			if flyingEnemy:
 				reg.needDef = 1 if reg.distFromEnemy == 1 else 2 
-			if reg.dragon or reg.holeInTheGround or reg.fortress  or reg.sea:
+			if reg.dragon or reg.holeInTheGround or reg.fortified  or reg.sea:
 				reg.needDef = 1
 			else:
 				reg.needDef = maxDist - reg.distFromEnemy + 1
@@ -490,11 +499,11 @@ class AI(threading.Thread):
 				n -= 1
 				reg.needDef = 1
 				if not n: break
-		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortress, regions)) < 6:
+		elif code == FORTRESS_CODE and len(filter(lambda x: x.fortified, regions)) < 6:
 			maxNeedDef = 0
 			reg = None
 			for region in regions:
-				if region.needDef > maxNeedDef and not region.fortress:
+				if region.needDef > maxNeedDef and not region.fortified:
 					reg = region
 					maxNeedDef = region.needDef
 			if reg:

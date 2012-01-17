@@ -198,7 +198,7 @@ Graphics.update = function(map){
 	
 	for (i = 0; i < regions.length; ++i){
 		cur = regions[i];
-		cur.ui.animate({"stroke" : Graphics.getRegBoundsColor(cur)}, 1000);
+		cur.ui.attr({"stroke" : Graphics.getRegBoundsColor(cur)});
 		attrs = Graphics.getRegColorAndOpacity(cur);
 		cur.ui.attr({fill : attrs[0], 'fill-opacity' : attrs[1]});
 		cur.ui.toFront();
@@ -233,7 +233,7 @@ Graphics.drawMap = function(map) {
 				var attrs = Graphics.getRegColorAndOpacity(reg.model),
 					color = sel? 'red' : attrs[0],
 					opacity = sel ? 0.7 : attrs[1];
-				reg.animate({'fill-opacity': opacity, fill : color}, 300);
+				reg.attr({'fill-opacity': opacity, fill : color});
 				reg.badgesToFront();
 			}
 		},
