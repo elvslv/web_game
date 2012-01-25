@@ -268,15 +268,28 @@ def act_aiJoin(data):
 		misc_game.startGame(game, ai, data)
 	return {'result': 'ok', 'sid' : ai.sid, 'id' : ai.id}
 
-def doAction(data, check = True):
+def act_aiExecute(data):
+	user = dbi.getXbyY('User', 'sid', data['sid'])
+	gameId = user.game.id
+	res = None
+	for act in data['actions']:
+		res = doAction(act, False)
+		if res['result'] != 'ok': break
+	gameState = getGameState(user.game)
+	dbi.rollback()
+	return {'result': res, 'gameState' : gameState}
+	
+
+def doAction(data, force = True):
 	try:
-		dbi.session = dbi.Session()
+		if force:
+			dbi.session = dbi.Session()
 		func = 'act_%s' % data['action'] 
 		if not(func in globals()):
 			raise BadFieldException('badAction')
-		if check: checkFieldsCorrectness(data)
+		if force: checkFieldsCorrectness(data)
 		res = globals()[func](data)
-		dbi.commit()
+		dbi.commit() if force else dbi.flush()
 		return res
 	except BadFieldException, e: 
 		print e
@@ -287,9 +300,6 @@ def doAction(data, check = True):
 		dbi.rollback()
 		return {'result': 'databaseError', 'statement': str(e.statement) if ('statement' in e) else None, 
 			'params': str(e.params) if ('params' in e) else None, 'orig': str(e.orig) if ('orig' in e) else None}
-	except Exception, e:
-		print e
-		dbi.rollback()
-		raise e
 	finally:
-		dbi.Session.remove()
+		if force:
+			dbi.Session.remove()

@@ -59,6 +59,7 @@ def act_selectRace(data):
 
 def act_conquer(data):
 	user = dbi.getXbyY('User', 'sid', data['sid'])
+	print user.currentTokenBadge
 	game = user.game
 	if not (game and user.inGame): 
 		raise BadFieldException('notInGame')
@@ -120,6 +121,8 @@ def act_conquer(data):
 		region.id, defense, ATTACK_CONQUER)
 	user.tokensInHand -= unitPrice
 	dbi.updateGameHistory(game, data)
+	dbi.flush(user)
+	dbi.flush(regState)
 	return {'result': 'ok', 'dice': dice} if (dice and not t) else {'result': 'ok'}
 
 def act_decline(data):

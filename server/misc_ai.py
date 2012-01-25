@@ -1,5 +1,7 @@
 from Queue import Queue as Queue
 import math
+import itertools
+
 
 REDEPLOYMENT_CODE = 4
 HERO_CODE = 5
@@ -26,6 +28,19 @@ def distributeUnits(regions, unitsNum, req):
 				mod -= 1
 				req[region.id] += 1
 				if not mod: break
+
+def generateRegionCombinations(regionIds):
+	r = list()
+	for i in range(1, 7):
+		r += list(itertools.combinations(regionIds, i))
+	return r
+
+
+def mList(el):
+	a = list()
+	a.append(el)
+	return a
+		
 
 
 def convertRedeploymentRequest(req, code):

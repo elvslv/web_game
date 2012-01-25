@@ -276,6 +276,10 @@ False}
 	],
 	'aiJoin': [
 		{'name': 'gameId', 'type': int, 'mandatory': True}
+	],
+	'aiExecute': [
+		{'name': 'sid', 'type': int, 'mandatory': True},
+		{'name': 'actions', 'type': list, 'mandatory': True}
 	]
 }
 

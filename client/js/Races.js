@@ -433,10 +433,7 @@ SpecialPowerFlying = $.inherit(BaseSpecialPower, {
 	},
 	canConquer: function(region, tokenBadge)
 	{
-		var f1 = tokenBadge.isNeighbor(region),
-			f2 = tokenBadge.regions().length,
-			f3 = region.hasProperty('sea');
-		return ((!f1 && f2) || !f2) && !f3;
+		return !region.hasProperty('sea');
 	}
 });
 

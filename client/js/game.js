@@ -332,7 +332,6 @@ createGameByState = function(gameState)
 		conqueredRegion,
 		defendingPlayerIndex,
 		encampmentsRegions = [],
-		victimTokensNum = gameState.defendingInfo && gameState.defendingInfo.tokensNum,
 		map;
 	
 	if (!Client.currGameState)
@@ -425,7 +424,6 @@ createGameByState = function(gameState)
 	result.defendingPlayerIndex = defendingPlayerIndex;
 	if (defendingPlayerIndex !== undefined && !(game() && game().defendStarted)){
 		result.defendingPlayerIndex = defendingPlayerIndex;
-		result.players[defendingPlayerIndex].freeTokens = victimTokensNum;
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
 		if (user().id === result.players[defendingPlayerIndex].id){
@@ -433,7 +431,8 @@ createGameByState = function(gameState)
 			result.defendStarted = true;
 		}
 			
-	} else if (!(game() && game().redeployStarted && game().defendStarted))
+	} 
+	if (!(game() && (game().redeployStarted || game().defendStarted)))
 		user().freeTokens = user().tokensInHand;
 	$('#turn').html('Turn: ' + result.turn);
 	return result;

@@ -16,7 +16,7 @@ class BaseRace:
 		self.raceId = id
 
 	def canConquer(self, region, tokenBadge):
-		ans = (not tokenBadge.regions and region.border) or tokenBadge.regions
+		ans = (not len(tokenBadge.regions) and region.border) or len(tokenBadge.regions)
 		return ans
 					
 	def attackBonus(self, region, tokenBadge):
@@ -262,7 +262,7 @@ class BaseSpecialPower:
 		self.specialPowerId = id
 
 	def canConquer(self, region, tokenBadge):
-		return (tokenBadge.isNeighbor(region) or not tokenBadge.regions) and\
+		return (tokenBadge.isNeighbor(region) or not len(tokenBadge.regions)) and\
 			not region.sea
 
 	def canUseDragon(self):

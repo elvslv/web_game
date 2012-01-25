@@ -2,10 +2,12 @@ import httplib
 import json
 
 from ai import AI
+from advanced_ai import AdvancedAI
 from httplib import HTTPException
 from time import sleep
 
 url = 'localhost:80'
+AI_INST = AI
 
 def sendCmd(conn, data):
 	conn.request("POST", "/small_worlds", json.dumps(data))
@@ -14,7 +16,7 @@ def sendCmd(conn, data):
 
 def dispatch(conn, gameId, logFile):
 	userInfo = sendCmd(conn, {'action' : 'aiJoin', 'gameId' : gameId})
-	return AI(url, gameId, userInfo['sid'], userInfo['id'], logFile)
+	return AI_INST(url, gameId, userInfo['sid'], userInfo['id'], logFile)
 		
 def main():	
 	logFilesCnt = 0

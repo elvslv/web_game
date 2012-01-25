@@ -426,7 +426,7 @@ class WarHistoryEntry(Base):
 class Database:
 	instance = None
 	engine = create_engine(get_db_string(), convert_unicode=True, 
-		encoding="utf-8")
+		encoding="utf-8", echo=False)
 	
 
 	def __init__(self):
@@ -434,9 +434,9 @@ class Database:
 		self.Session = scoped_session(sessionmaker(bind=self.engine, autoflush = True))
 		
 
-	def flush(self, obj):
+	def flush(self, obj=None):
 		self.Session.flush()
-		self.Session.refresh(obj)
+		if obj: self.Session.refresh(obj)
 
 	def commit(self):
 		self.Session.commit()
