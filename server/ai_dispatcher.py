@@ -7,7 +7,7 @@ from httplib import HTTPException
 from time import sleep
 
 url = 'localhost:80'
-AI_INST = AI
+AI_INST = AdvancedAI
 
 def sendCmd(conn, data):
 	conn.request("POST", "/small_worlds", json.dumps(data))

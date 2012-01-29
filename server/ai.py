@@ -64,7 +64,7 @@ class Map:
 				return region
 
 	def adjacent_(self, reg, badge):
-		return reg.adjacent + (filter(lambda x: x.cavern, self.regions) if 	reg.cavern and badge.specPower.name == 'Underworld' else list())
+		return reg.adjacent + (filter(lambda x: x.cavern and x.id != reg.id, self.regions) if 	reg.cavern and badge.specPower.name == 'Underworld' else list())
 
 class Game:
 	def __init__(self, id, tokenBadgesInGame, 
@@ -175,6 +175,7 @@ class AI(threading.Thread):
 		r1 = self.conn.getresponse()
 		res = r1.read()
 		data = json.loads(res)
+		print obj
 		if not 'result' in data:
 			print data
 			raise BadFieldException('Unknown result')
@@ -230,6 +231,8 @@ class AI(threading.Thread):
 				self.coins = player['coins']
 				self.tokensInHand = player['tokensInHand']
 				self.priority = player['priority']
+				self.enchantUsed = gameState['enchanted']
+				self.dragonUsed = gameState['dragonAttacked']
 
 		if not self.game:
 			self.game = Game(gameState['gameId'], tokenBadgesInGame, map_, 
@@ -378,10 +381,11 @@ class AI(threading.Thread):
 		return self.currentTokenBadge.specPower.canThrowDice() and\
 			self.game.checkStage(GAME_THROW_DICE, self)
 
-	def canUseDragon(self):
-		return self.currentTokenBadge.specPower.canUseDragon() and not self.dragonUsed and\
+	def canUseDragon(self, badge=None):
+		tBadge = badge or self.currentTokenBadge
+		return tBadge.specPower.canUseDragon() and not self.dragonUsed and\
 			self.tokensInHand > 0 and\
-			not len(filter(lambda x: x.dragon, self.currentTokenBadge.getRegions()))
+			not len(filter(lambda x: x.dragon, tBadge.getRegions()))
 
 	def getConquerableRegions(self, badge=None):
 		tBadge = badge or self.currentTokenBadge

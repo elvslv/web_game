@@ -40,8 +40,30 @@ def mList(el):
 	a = list()
 	a.append(el)
 	return a
-		
 
+
+def convertStrategy(strat, sid):
+	res = []
+	useDragon = False
+	useEnchantment = False
+	for el in strat:
+		if el == 'e':
+			useEnchantment = True
+		elif el == 'd':
+			useDragon = True
+		else:
+			act = None
+			if useDragon:
+				act = 'dragonAttack'
+				useDragon = False
+			elif useEnchantment:
+				act = 'enchant'
+				useEnchantment = False
+			else:
+				act = 'conquer'
+			res.append({'action' : act, 'sid' : sid, 'regionId' : el.id})
+	print res
+	return res
 
 def convertRedeploymentRequest(req, code):
 	nextRecMaker = {
