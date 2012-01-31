@@ -3,7 +3,6 @@ from sqlalchemy.exc import DatabaseError, DBAPIError, OperationalError
 import re
 import time
 import math
-import MySQLdb
 import sys
 import random
 import json
