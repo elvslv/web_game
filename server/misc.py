@@ -154,16 +154,6 @@ actionFields = {
 			'type': int,
 			'min': 5,
 			'max': 10
-		},
-		{
-			'name': 'thumbnail',
-			'mandatory': False,
-			'type': unicode
-		},
-		{
-			'name': 'picture',
-			'mandatory': False,
-			'type': unicode
 		}
 		
 	],
