@@ -314,9 +314,10 @@ def getMapState(mapId, gameId = None):
 		'holeInTheGround', 'encampment', 'dragon', 'hero', 'fortified', 'inDecline']
 	for region in map_.regions:
 		curReg = dict()
-		curReg['raceCoords'] = region.raceCoords
-		curReg['powerCoords'] = region.powerCoords
-		curReg['coordinates'] = region.coordinates
+		toArray = lambda x: json.loads('{ "a" : ' + x + '}')['a']
+		curReg['raceCoords'] = toArray(region.raceCoords)
+		curReg['powerCoords'] = toArray(region.powerCoords)
+		curReg['coordinates'] = toArray(region.coordinates)
 		curReg['constRegionState'] = list()
 		
 		for i in range(len(constRegionAttrs)):

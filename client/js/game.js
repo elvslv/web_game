@@ -45,11 +45,11 @@ Region = $.inherit({
 		this.fortress = fortress; 
 		this.hero = hero;
 		this.inDecline = inDecline;
-		this.raceCoords = parseArray(raceCoords);
-		this.powerCoords = parseArray(powerCoords);
+		this.raceCoords = raceCoords;
+		this.powerCoords = powerCoords;
 		this.landscape = landscape;
 		this.bonus = bonus;
-		this.coords = toPolygon(parseArray(coords), hratio, vratio);
+		this.coords = toPolygon(coords, hratio, vratio);
 	},
 	htmlRegionInfo: function()
 	{
