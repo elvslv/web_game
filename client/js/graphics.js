@@ -10,8 +10,7 @@ Graphics.landscapePictures = {
 	"farmland" : "url('client/css/images/farmland.jpg')",
 	"magic" : "url('client/css/images/magic.jpg')",
 	"cavern" : "url('client/css/images/cavern.jpg')",
-	"mine" : "url('client/css/images/mine.jpg')",
-	"natives" : "url('client/css/images/races/elves small.jpg')"
+	"mine" : "url('client/css/images/mine.jpg')"
 };
 
 
