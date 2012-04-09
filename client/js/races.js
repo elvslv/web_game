@@ -200,6 +200,7 @@ RaceSorcerers = $.inherit(BaseRace, {
 		return (!(region.isImmune(true) || 
 			!(this.canConquer(region, tokenBadge) && 
 			getSpecPowByName(tokenBadge.specPowName).canConquer(region, tokenBadge)) ||
+			game().enchanted ||
 			region.tokenBadgeId === tokenBadge.id || 
 			!region.tokenBadgeId ||
 			!region.tokensNum ||

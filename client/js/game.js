@@ -10,7 +10,7 @@ var GAME_START = 0,
 	GAME_THROW_DICE = 9,
 	GAME_DEFEND = 12,
 	GAME_CHOOSE_FRIEND = 13,
-	GAME_UNSUCCESSFULL_CONQUER = 14,
+	GAME_LAST_ATTACK = 14,
 	ATTACK_CONQUER = 0,
 	ATTACK_DRAGON = 1,
 	ATTACK_ENCHANT = 2;
@@ -22,10 +22,10 @@ possiblePrevCmd[GAME_CONQUER] = [GAME_CONQUER, GAME_SELECT_RACE, GAME_FINISH_TUR
 	GAME_THROW_DICE, GAME_DEFEND];
 possiblePrevCmd[GAME_DECLINE] = [GAME_FINISH_TURN, GAME_REDEPLOY];
 possiblePrevCmd[GAME_REDEPLOY] = [GAME_CONQUER, GAME_THROW_DICE, GAME_DEFEND, 
-	GAME_UNSUCCESSFULL_CONQUER];
+	GAME_LAST_ATTACK];
 possiblePrevCmd[GAME_THROW_DICE] = [GAME_SELECT_RACE, GAME_FINISH_TURN, GAME_CONQUER, 
 	GAME_DEFEND];
-possiblePrevCmd[GAME_DEFEND] = [GAME_CONQUER];
+possiblePrevCmd[GAME_DEFEND] = [GAME_CONQUER, GAME_LAST_ATTACK];
 possiblePrevCmd[GAME_CHOOSE_FRIEND] = [GAME_REDEPLOY];
 
 Region = $.inherit({
@@ -405,7 +405,7 @@ createGameByState = function(gameState)
 	if (!Client.currGameState)
 	{
 		result = new Game(gameState.gameId, gameState.gameName, gameState.gameDescription, map, 
-			(gameState.state == GAME_START) ? gameState.lastEvent : gameState.state,
+			(gameState.state !== GAME_WAITING) ? gameState.lastEvent : gameState.state,
 			gameState.currentTurn, activePlayerIndex, tokenBadges, players, tokenBadgesInGame,
 			gameState.dragonAttacked)
 	}
@@ -413,10 +413,11 @@ createGameByState = function(gameState)
 	{
 		game().tokenBadges = tokenBadges.copy();
 		game().dragonAttacked = gameState.dragonAttacked;
+	        game().enchanted = gameState.enchanted;
 		game().tokenBadgesInGame = tokenBadgesInGame.copy();
 		game().players = players.copy();
 		game().activePlayerIndex = activePlayerIndex;
-		game().state = gameState.state === GAME_START ? 
+		game().state = gameState.state !== GAME_WAITING ? 
 			gameState.lastEvent : gameState.state;
 		game().turn = gameState.currentTurn;
 		result = Client.currGameState;
@@ -426,6 +427,7 @@ createGameByState = function(gameState)
 		result.defendingPlayerIndex = defendingPlayerIndex;
 		result.redeployRegions = {};
 		result.conqueredRegion = conqueredRegion;
+	        user().freeTokens = user().tokensInHand;
 		if (user().id === result.players[defendingPlayerIndex].id){
 			Graphics.update(result.map);
 			result.defendStarted = true;
@@ -596,7 +598,7 @@ canBeginDefend = function()
 
 canDefend = function(region)
 {
-	return region.ownerId == user().id && !(game().conqueredRegion.isAdjacent(region) && 
+    return region.tokenBadgeId == user().currentTokenBadge.id && !(game().conqueredRegion.isAdjacent(region) && 
 		user().currentTokenBadge.hasNotAdjacentRegions(game().conqueredRegion))
 }
 

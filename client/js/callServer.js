@@ -2,8 +2,9 @@ function sendQuery(query, callback, readonly, param)
 {
 	$.ajax({
 		type: 'POST',
-		url: 'http://localhost:80/small_worlds',
-		data: $.toJSON(query),
+	//	url: 'http://localhost:80/small_worlds',
+	        url: 'http://localhost:5000/engine', 
+	        data: $.toJSON(query),
 		success: function(data)
 		{
 			data = $.evalJSON(data);
