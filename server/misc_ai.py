@@ -67,14 +67,15 @@ def convertStrategy(strat, sid):
 
 def convertRedeploymentRequest(req, code):
 	nextRecMaker = {
-		REDEPLOYMENT_CODE : lambda x: {'regionId' : x[0], 'tokensNum' : x[1]},
+		REDEPLOYMENT_CODE : lambda x:  {'regionId' : x[0], 'tokensNum' : x[1]},
 		HERO_CODE : lambda x: {'regionId' : x[0]},
 		FORTRESS_CODE :  lambda x: {'regionId' : x[0]},
 		ENCAMPMENTS_CODE : lambda x: {'regionId' : x[0], 'encampmentsNum' : x[1]}
 	}[code]
 	res = []
 	for rec in req.items():
-		res.append(nextRecMaker(rec))
+		if len(rec) == 2 and rec[1] > 0:
+			res.append(nextRecMaker(rec))
 	return res[0] if code == FORTRESS_CODE else res
 		
 	

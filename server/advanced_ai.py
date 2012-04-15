@@ -8,8 +8,8 @@ from gameExceptions import BadFieldException
 MIN_ALLOWED_TURN_REWARD = 2
 
 class AdvancedAI(ai.AI):
-	def __init__(self, host, gameId, sid, id, logFile):
-		ai.AI.__init__(self, host, gameId, sid, id, logFile)
+	def __init__(self, host, url, gameId, sid, id, logFile):
+		ai.AI.__init__(self, host, url, gameId, sid, id, logFile)
 
 	def selectRace(self):
 		visibleBadges = self.game.visibleTokenBadges

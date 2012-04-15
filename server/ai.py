@@ -176,7 +176,7 @@ class AI(threading.Thread):
 		r1 = self.conn.getresponse()
 		res = r1.read()
 		print 'cmd', obj
-		print 'res', res
+	#	print 'res', res
 		data = json.loads(res)
 		if not 'result' in data:
 			print data

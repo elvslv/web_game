@@ -8,7 +8,7 @@ from time import sleep
 
 host = 'localhost:5000'
 url = '/engine'
-AI_INST = AI
+AI_INST = AdvancedAI
 
 def sendCmd(conn, data):
 	conn.request("POST", url, json.dumps(data))
