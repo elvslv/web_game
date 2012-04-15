@@ -153,8 +153,9 @@ class Player:
 		self.__dict__.update(entries)
 	
 class AI(threading.Thread):
-	def __init__(self, host, gameId, sid, id, logFile):
+	def __init__(self, host, url, gameId, sid, id, logFile):
 		self.conn = httplib.HTTPConnection(host, timeout = 10000)
+		self.url = url
 		self.gameId = gameId 
 		self.conqueredRegions = list()
 		self.dragonUsed = False 
@@ -171,11 +172,12 @@ class AI(threading.Thread):
 		self.start()
 		
 	def sendCmd(self, obj):
-		self.conn.request("POST", "/small_worlds", json.dumps(obj))
+		self.conn.request("POST", self.url, json.dumps(obj))
 		r1 = self.conn.getresponse()
 		res = r1.read()
+		print 'cmd', obj
+		print 'res', res
 		data = json.loads(res)
-		print obj
 		if not 'result' in data:
 			print data
 			raise BadFieldException('Unknown result')
@@ -188,7 +190,7 @@ class AI(threading.Thread):
 	def getGameState(self):
 		data = self.sendCmd({'action': 'getGameState', 'gameId': self.gameId})
 		gameState = data['gameState']
-		if 'ended' in gameState:
+		if gameState['state'] == GAME_ENDED:
 			self.game.state = GAME_ENDED
 			return
 		map_ = None
@@ -236,14 +238,14 @@ class AI(threading.Thread):
 
 		if not self.game:
 			self.game = Game(gameState['gameId'], tokenBadgesInGame, map_, 
-				gameState['lastEvent'] if (gameState['state'] == GAME_START) else gameState['state'],
+				gameState['lastEvent'] if (gameState['state'] != GAME_WAITING) else gameState['state'],
 				gameState['currentTurn'], gameState['activePlayerId'], tokenBadges, gameState['players'])
 		else:
 			self.game.visibleTokenBadges = tokenBadges
 			self.game.tokenBadgesInGame = tokenBadgesInGame
 			self.game.players = map(lambda x: Player(**x), gameState['players'])
 			self.game.activePlayerId = gameState['activePlayerId']
-			self.game.state = gameState['lastEvent'] if gameState['state'] == GAME_START else gameState['state']
+			self.game.state = gameState['lastEvent'] if gameState['state'] != GAME_WAITING else gameState['state']
 			self.game.turn = gameState['currentTurn']
 		self.game.defendingInfo = gameState['defendingInfo'] if 'defendingInfo' in gameState else None
 		if 'friendsInfo' in gameState and 'friendId' in gameState['friendsInfo'] and\

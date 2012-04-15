@@ -6,22 +6,23 @@ from advanced_ai import AdvancedAI
 from httplib import HTTPException
 from time import sleep
 
-url = 'localhost:80'
-AI_INST = AdvancedAI
+host = 'localhost:5000'
+url = '/engine'
+AI_INST = AI
 
 def sendCmd(conn, data):
-	conn.request("POST", "/small_worlds", json.dumps(data))
+	conn.request("POST", url, json.dumps(data))
 	return json.loads(conn.getresponse().read()) 
 	
 
 def dispatch(conn, gameId, logFile):
 	userInfo = sendCmd(conn, {'action' : 'aiJoin', 'gameId' : gameId})
-	return AI_INST(url, gameId, userInfo['sid'], userInfo['id'], logFile)
+	return AI_INST(host, url, gameId, userInfo['sid'], userInfo['id'], logFile)
 		
 def main():	
 	logFilesCnt = 0
 	try:
-		conn = httplib.HTTPConnection(url)
+		conn = httplib.HTTPConnection(host)
 		while 1:
 			gameList = sendCmd(conn, {'action' : 'getGameList'})['games']
 			for game in gameList:
