@@ -6,8 +6,10 @@ from advanced_ai import AdvancedAI
 from httplib import HTTPException
 from time import sleep
 
-host = 'localhost:5000'
-url = '/engine'
+#host = 'localhost:5000'
+#url = '/engine'
+host = 'localhost'
+url = '/small_worlds'
 AI_INST = AdvancedAI
 
 def sendCmd(conn, data):
