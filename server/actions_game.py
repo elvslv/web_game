@@ -160,6 +160,7 @@ def act_redeploy(data):
 		raise BadFieldException('userHasNoRegions')
 	for region in tokenBadge.regions: region.tokensNum = 0
 	usedRegions = []
+	regState = None
 	for rec in data['regions']:
 		if rec['regionId'] in usedRegions:
 			raise BadFieldException('badRegion')
