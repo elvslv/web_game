@@ -17,7 +17,6 @@ def application(environ, start_response):
         except BaseException, e:
             return 'Cannot read request body %s' % e
         try:
-            #misc.LAST_SID = 0
             response_body = parseJson.parseJsonObj(json.loads(request_body))
         except BaseException, e:
             response_body = 'An error %s occured while trying parse json: %s' % (e, request_body)
