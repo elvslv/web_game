@@ -7,7 +7,7 @@ sys.path.append(path)
 os.chdir(path)
 
 import parseJson
-import misc
+import misc_const
 
 def application(environ, start_response):
     if environ['REQUEST_METHOD'] == 'POST':

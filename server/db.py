@@ -1,4 +1,4 @@
-from misc import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN, VISIBLE_RACES
+from misc_const import MAX_USERNAME_LEN, MAX_PASSWORD_LEN, MAX_MAPNAME_LEN, MAX_GAMENAME_LEN, MAX_GAMEDESCR_LEN, VISIBLE_RACES
 from gameExceptions import BadFieldException
 from sqlalchemy import create_engine, and_, ForeignKeyConstraint, Table, Boolean, Column, Integer, String, MetaData, Date, ForeignKey, DateTime, Text, func
 from sqlalchemy.orm import sessionmaker, relationship, backref, join, scoped_session
@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from path import join
 
-import misc
+import misc_const
 import checkFields
 import sys
 import json
@@ -34,7 +34,7 @@ class Map(Base):
 	pictureSrc = Column(Text)
 	
 	def __init__(self, name, playersNum, turnsNum, thumbSrc, pictureSrc): 
-		if misc.TEST_MODE:
+		if misc_const.TEST_MODE:
 			if dbi.query(Map).filter(Map.name == name).first():
 				raise BadFieldException('mapNameTaken')
 		self.name = name
@@ -70,13 +70,13 @@ class Game(Base):
 	
 	
 	def __init__(self, name, descr, map, randseed, ai): 
-		if misc.TEST_MODE:
+		if misc_const.TEST_MODE:
 			if dbi.query(Game).filter(Game.name == name).filter(Game.state 
-				!= misc.GAME_ENDED).first():
+				!= misc_const.GAME_ENDED).first():
 				raise BadFieldException('gameNameTaken')
 		self.name = name
 		self.descr = descr
-		self.state = misc.GAME_WAITING
+		self.state = misc_const.GAME_WAITING
 		self.map = map
 		self.randseed = randseed
 		self.prevGeneratedNum = randseed
@@ -103,7 +103,7 @@ class Game(Base):
 			player.inGame = False
 			player.currentTokenBadge = None
 			player.declinedTokenBadge = None
-			player.coins = misc.INIT_COINS_NUM
+			player.coins = misc_const.INIT_COINS_NUM
 			player.priority = None
 
 
@@ -137,7 +137,7 @@ class Game(Base):
 		return filter(lambda x: x.priority >= 0 and x.inGame == True, self.players)[0]
 
 	def end(self, coins):
-		self.state = misc.GAME_ENDED
+		self.state = misc_const.GAME_ENDED
 		result = list()
 		for player in self.players:
 			result.append({'username': player.name, 'coins': player.coins, 'regions': len(player.regions)})
@@ -153,7 +153,7 @@ class TokenBadge(Base):
 	gameId = fkey('games.id')
 	raceId = Column(Integer)
 	specPowId = Column(Integer)
-	pos = Column(Integer, default = 12 if misc.TEST_MODE else 5)
+	pos = Column(Integer, default = 12 if misc_const.TEST_MODE else 5)
 	bonusMoney = Column(Integer, default = 0)
 	inDecline = Column(Boolean, default = False)
 	totalTokensNum = Column(Integer, default = 0)
@@ -186,7 +186,7 @@ class User(Base):
 	isReady = Column(Boolean, default=False)
 	currentTokenBadgeId = fkey('tokenBadges.id')
 	declinedTokenBadgeId = fkey('tokenBadges.id')
-	coins = Column(Integer, default=misc.INIT_COINS_NUM)
+	coins = Column(Integer, default=misc_const.INIT_COINS_NUM)
 	tokensInHand = Column(Integer, default = 0)
 	priority = Column(Integer)
 	inGame = Column(Boolean, default=False)
@@ -213,7 +213,7 @@ class User(Base):
 	def checkForFriends(self, attackedUser):			
 		if not attackedUser: return
 		turn = self.game.turn - int(self.priority < attackedUser.priority) 
-		histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND and\
+		histEntry = filter(lambda x : x.turn == turn and x.state == misc_const.GAME_CHOOSE_FRIEND and\
 			x.userId == attackedUser.id, self.game.history)
 		if histEntry:
 			if histEntry[0].friend == self.id:
@@ -227,7 +227,7 @@ class User(Base):
 
 	def getNonEmptyConqueredRegions(self):
 		conqHist = filter(lambda x: x.turn == self.game.turn and 
-			x.state == misc.GAME_CONQUER and x.userId == self.id, self.game.history)
+			x.state == misc_const.GAME_CONQUER and x.userId == self.id, self.game.history)
 		nonEmptyConqueredRegions = filter(lambda x: x.warHistory.victimTokensNum > 0,  conqHist)
 		cnt = 0
 		for reg in nonEmptyConqueredRegions:
@@ -489,7 +489,7 @@ class Database:
 		checkFields.checkListCorrectness(regInfo, 'adjacent', int)
 		coords = None
 		
-		if not misc.TEST_MODE:
+		if not misc_const.TEST_MODE:
 			if not('raceCoords' in regInfo and len(regInfo['raceCoords']) == 2 and \
 				'powerCoords' in regInfo and len(regInfo['powerCoords']) == 2 and\
 				len(regInfo['coordinates']) > 2 ):
@@ -510,7 +510,7 @@ class Database:
 			regInfo['coordinates'] if 'coordinates' in regInfo else None)
 		if 'landDescription' in regInfo:
 			for descr in regInfo['landDescription']:
-				if not descr in misc.possibleLandDescription[:11]:
+				if not descr in misc_const.possibleLandDescription[:11]:
 					print descr
 					raise BadFieldException('badRegions')
 				setattr(reg, descr, 1)
@@ -547,7 +547,7 @@ class Database:
 
 	def updateWarHistory(self, user, victimBadgeId, agressorBadgeId, dice, regionId, 
 		defense, attackType):
-		hist = HistoryEntry(user, misc.GAME_CONQUER, agressorBadgeId, dice)
+		hist = HistoryEntry(user, misc_const.GAME_CONQUER, agressorBadgeId, dice)
 		self.add(hist)
 		self.flush(hist)
 		warHist = WarHistoryEntry(hist.id, agressorBadgeId, regionId, victimBadgeId, 

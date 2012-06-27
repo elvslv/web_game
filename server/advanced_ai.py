@@ -1,7 +1,7 @@
 import ai
 
 from misc_ai import *
-from misc import *
+from misc_const import *
 from copy import copy as copy
 from gameExceptions import BadFieldException
 

@@ -1,5 +1,5 @@
 from gameExceptions import BadFieldException
-import misc
+import misc_const
 import sys
 import os
 
@@ -39,7 +39,7 @@ def constructMsg(field):
 	return msg
 
 def checkFieldsCorrectness(data):
-	fields = misc.actionFields[data['action']]
+	fields = misc_const.actionFields[data['action']]
 	if not fields:
 		raise BadFieldException('actionDoesntExist')
 	for field in fields:

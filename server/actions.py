@@ -7,22 +7,22 @@ import sys
 import random
 import json
 import misc_game
-import misc 
+import misc_const 
 
 from gameExceptions import BadFieldException
 from sqlalchemy import func 
 from sqlalchemy.exc import SQLAlchemyError
 from checkFields import *
 from actions_game import *
-from misc import *
+from misc_const import *
 from ai import AI
 
 def act_register(data):
 	username = data['username']
 	passwd = data['password']
-	if  not re.match(misc.usrnameRegexp, username, re.I):
+	if  not re.match(misc_const.usrnameRegexp, username, re.I):
 		raise BadFieldException('badUsername')
-	if  not re.match(misc.pwdRegexp, passwd, re.I):
+	if  not re.match(misc_const.pwdRegexp, passwd, re.I):
 		raise BadFieldException('badPassword')
 	dbi.addUnique(User(username, passwd), 'username')	
 	return {'result': 'ok'}
@@ -42,7 +42,7 @@ def act_logout(data):
 
 def act_sendMessage(data):
 	userId = dbi.getXbyY('User', 'sid', data['sid']).id
-	msgTime = misc.generateTimeForTest() if misc.TEST_MODE else math.trunc(time.time())
+	msgTime = misc_const.generateTimeForTest() if misc_const.TEST_MODE else math.trunc(time.time())
 	text = data['text']
 	dbi.add(Message(userId, text, msgTime))
 	return {'result': 'ok'}
@@ -61,8 +61,8 @@ def act_uploadMap(data):
 	result = list()
 			
 	#checkFiles(data['thumbnail'], data['picture'])
-	data['thumbnail'] = data['thumbnail']if 'thumbnail' in data else  misc.DEFAULT_THUMB
-	data['picture'] = data['picture']if 'picture' in data else  misc.DEFAULT_MAP_PICTURE
+	data['thumbnail'] = data['thumbnail']if 'thumbnail' in data else  misc_const.DEFAULT_THUMB
+	data['picture'] = data['picture']if 'picture' in data else  misc_const.DEFAULT_MAP_PICTURE
 
 	newMap = Map(name, playersNum, data['turnsNum'], data['thumbnail'], 
 		data['picture'])
@@ -110,7 +110,7 @@ def act_createGame(data):
 		user.priority = 1
 		user.inGame = True
 		dbi.flush(user)
-		if not misc.TEST_MODE:
+		if not misc_const.TEST_MODE:
 			data['randseed'] = randseed
 		dbi.updateGameHistory(user.game, data)
 		
@@ -145,26 +145,26 @@ def act_doSmth(data):
 	return {'result': 'ok'}
 
 def createDefaultMaps():
-	if misc.TEST_MODE:
-		for map_ in misc.defaultMaps:
+	if misc_const.TEST_MODE:
+		for map_ in misc_const.defaultMaps:
 			act_uploadMap(map_)
 	else:
-		act_uploadMap(misc.defaultMaps[7])
+		act_uploadMap(misc_const.defaultMaps[7])
 
 def act_createDefaultMaps(data):
 	createDefaultMaps()
 	return {'result': 'ok'}
 
 def act_resetServer(data):
-	misc.LAST_SID = 0
-	misc.LAST_TIME = 0
+	misc_const.LAST_SID = 0
+	misc_const.LAST_TIME = 0
 	if 'randseed' in data:
-		misc.TEST_RANDSEED = data['randseed']
+		misc_const.TEST_RANDSEED = data['randseed']
 	else:
-		misc.TEST_RANDSEED = 21425364547
-	random.seed(misc.TEST_RANDSEED)
+		misc_const.TEST_RANDSEED = 21425364547
+	random.seed(misc_const.TEST_RANDSEED)
 	dbi.clear()
-	if not misc.TEST_MODE: createDefaultMaps()
+	if not misc_const.TEST_MODE: createDefaultMaps()
 	return {'result': 'ok'}
 
 def act_saveGame(data):
@@ -210,7 +210,7 @@ def act_getGameList(data):
 	gameAttrNames = ['gameId', 'gameName', 'gameDescription', 'state', 
 		'turn', 'activePlayerId', 'mapId']
 		
-	if not misc.TEST_MODE:
+	if not misc_const.TEST_MODE:
 		gameAttrs.append('aiRequiredNum')
 		gameAttrNames.append('aiRequiredNum')
 		

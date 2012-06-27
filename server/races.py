@@ -3,7 +3,7 @@ from db import Database, User, Message, Game, Map, Adjacency, RegionState, Histo
 from gameExceptions import BadFieldException
 from checkFields import  checkObjectsListCorrection
 from misc_game import *
-from misc import *
+from misc_const import *
 from checkFields import *
 
 class BaseRace:

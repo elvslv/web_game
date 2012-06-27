@@ -3,7 +3,7 @@ import parseJson
 import os
 import sys
 import json
-import misc
+import misc_const
 import actions
 import db
 
@@ -19,12 +19,12 @@ class TestFromFile(unittest.TestCase):
 
 	def tearDown(self):
 		print "Test %s description: %s\n" % (self.inFile, self.testDescr)
-		misc.TEST_MODE = False
+		misc_const.TEST_MODE = False
 		
 	def runTest(self):
-		misc.LAST_SID = 0
-		misc.LAST_TIME = 0
-		misc.TEST_MODE = True
+		misc_const.LAST_SID = 0
+		misc_const.LAST_TIME = 0
+		misc_const.TEST_MODE = True
 		f = open(self.ansFile)
 		ans = f.read()
 		out = parseJson.parseDataFromFile(self.inFile)
