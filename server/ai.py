@@ -4,11 +4,11 @@ import threading
 import time
 import races
 import Queue
-import misc
+import misc_const
 
 from copy import copy as copy
 from misc_ai import *
-from misc import *
+from misc_const import *
 from gameExceptions import BadFieldException
 from operator import itemgetter
 

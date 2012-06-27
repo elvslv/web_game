@@ -3,7 +3,7 @@ from db import Database, User, Message, Game, Map, Adjacency, RegionState, Histo
 from checkFields import *
 from misc_game import *
 from gameExceptions import BadFieldException
-from misc import *
+from misc_const import *
 from sqlalchemy import func
 
 def act_setReadinessStatus(data):
@@ -91,7 +91,7 @@ def act_conquer(data):
 	if attackedRace:
 		enemyDefenseBonus = callRaceMethod(attackedRace, 'defenseBonus')
 	defense = regState.tokensNum
-	unitPrice = max(misc.BASIC_CONQUER_COST + defense + region.mountain + 
+	unitPrice = max(misc_const.BASIC_CONQUER_COST + defense + region.mountain + 
 		regState.encampment + regState.fortified +  enemyDefenseBonus +
 		callRaceMethod(raceId, 'attackBonus', region, tokenBadge) + 
 		callSpecialPowerMethod(specialPowerId, 'attackBonus', region, tokenBadge)
@@ -99,7 +99,7 @@ def act_conquer(data):
 	unitsNum = user.tokensInHand
 	if unitsNum + 3 < unitPrice:
 		raise BadFieldException('badTokensNum') 
-	t = user.game.getLastState() == misc.GAME_THROW_DICE
+	t = user.game.getLastState() == misc_const.GAME_THROW_DICE
 	dice = t and user.game.history[-1].dice
 	if not dice and unitsNum < unitPrice : 
 		dice = misc_game.throwDice(game)

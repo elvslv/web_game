@@ -1,6 +1,6 @@
 from db import Database, User, Message, Game, Map, Adjacency, RegionState, HistoryEntry, TokenBadge, dbi
 import races
-import misc
+import misc_const
 from gameExceptions import BadFieldException
 import sys
 import db
@@ -13,31 +13,31 @@ import json
 
 def startGame(game, user, data):
 	game.activePlayerId = min(game.players, key=lambda x: x.priority).id
-	game.state = misc.GAME_START
+	game.state = misc_const.GAME_START
 	dbi.flush(game)
 	#generate first 6 races
-	if misc.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
+	if misc_const.TEST_MODE and 'visibleRaces' in data and 'visibleSpecialPowers' in data:
 		vRaces = data['visibleRaces']
 		vSpecialPowers = data['visibleSpecialPowers']
 		for i in range(min(len(vRaces), len(vSpecialPowers))):
 			showNextRace(game, 0, vRaces[i], vSpecialPowers[i])
 	else:
-		for i in range(misc.VISIBLE_RACES):
+		for i in range(misc_const.VISIBLE_RACES):
 			showNextRace(game, 0)
 			
-	dbi.updateHistory(user, misc.GAME_START, None)
+	dbi.updateHistory(user, misc_const.GAME_START, None)
 
 def getSid():
-	if not misc.TEST_MODE:
+	if not misc_const.TEST_MODE:
 		random.seed(math.trunc(time.time()))
 	sid = None
 	while 1:
-		sid = misc.generateSidForTest() if misc.TEST_MODE else random.getrandbits(30)
+		sid = misc_const.generateSidForTest() if misc_const.TEST_MODE else random.getrandbits(30)
 		if not dbi.getXbyY('User', 'sid', sid, False): break
 	return sid
 
 def generateNextNum(game):
-	game.prevGeneratedNum = (misc.A * game.prevGeneratedNum) % misc.M
+	game.prevGeneratedNum = (misc_const.A * game.prevGeneratedNum) % misc_const.M
 	dbi.flush(game)
 	return game.prevGeneratedNum
 
@@ -49,7 +49,7 @@ def clearFromRace(reg):
 	return ans
 
 def throwDice(game, dice = None):
-	if misc.TEST_MODE: 
+	if misc_const.TEST_MODE: 
 		return dice if dice is not None else 0
 	dice = generateNextNum(game) % 6
 	if dice > 2: dice = 0
@@ -74,13 +74,13 @@ def getNextRaceAndPowerFromStack(game, vRace, vSpecialPower):
 			raise BadFieldException('badStage')
 		specialPowerId = races.specialPowerList.index(specialPower[0])
 	else:
-		racesInStack = range(0, misc.RACE_NUM)
-		specialPowersInStack = range(0, misc.SPECIAL_POWER_NUM)
+		racesInStack = range(0, misc_const.RACE_NUM)
+		specialPowersInStack = range(0, misc_const.SPECIAL_POWER_NUM)
 		tokenBadges = dbi.query(TokenBadge).filter(TokenBadge.gameId == game.id).all()
 		for tokenBadge in tokenBadges:
 			racesInStack.remove(tokenBadge.raceId)
 			specialPowersInStack.remove(tokenBadge.specPowId)
-		if misc.TEST_MODE:
+		if misc_const.TEST_MODE:
 			raceId = random.choice(racesInStack)
 			specialPowerId = random.choice(specialPowersInStack)
 		else:
@@ -140,7 +140,7 @@ def getDefendingInfo(game):
 		return 
 	result = dict()
 	lastAttack = game.history[-1].warHistory
-	if lastAttack.attackType == misc.ATTACK_ENCHANT or lastAttack.victimBadge.inDecline:
+	if lastAttack.attackType == misc_const.ATTACK_ENCHANT or lastAttack.victimBadge.inDecline:
 		return
 	tokensNum = lastAttack.victimTokensNum - callRaceMethod(lastAttack.victimBadge.raceId, 'getCasualties')
 	if not (tokensNum and len(lastAttack.victimBadge.regions)):
@@ -151,20 +151,20 @@ def getDefendingInfo(game):
 	return result
 
 def hasDragonAttacked(game):
-	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc.GAME_CONQUER and 
-		x.warHistory.attackType == misc.ATTACK_DRAGON, game.history)
+	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc_const.GAME_CONQUER and 
+		x.warHistory.attackType == misc_const.ATTACK_DRAGON, game.history)
 	return True if len(histEntry) > 0 else False 
 
 def hasEnchanted(game):
-	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc.GAME_CONQUER and 
-		x.warHistory.attackType == misc.ATTACK_ENCHANT, game.history)
+	histEntry = filter(lambda x : x.turn == game.turn and x.state == misc_const.GAME_CONQUER and 
+		x.warHistory.attackType == misc_const.ATTACK_ENCHANT, game.history)
 	return True if len(histEntry) > 0 else False 
 
 def countHolesNum(game):
 	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
 		game.activePlayer().currentTokenBadge.raceId != 5:
 		return None
-	return min(len(filter(lambda x : x.state == misc.GAME_CONQUER and\
+	return min(len(filter(lambda x : x.state == misc_const.GAME_CONQUER and\
 		x.warHistory.agressorBadgeId == game.activePlayer().currentTokenBadgeId, 
 		game.history)), 2)
 
@@ -172,13 +172,13 @@ def getBerserkDice(game):
 	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
 		game.activePlayer().currentTokenBadge.specPowId != 1:
 		return None
-	return game.getLastState() == misc.GAME_THROW_DICE and game.history[-1].dice
+	return game.getLastState() == misc_const.GAME_THROW_DICE and game.history[-1].dice
 
 def usedStout(game):
 	if not game.activePlayer() or not game.activePlayer().currentTokenBadge or\
 		game.activePlayer().currentTokenBadge.specPowId != 15:
 		return None
-	return True if len(filter(lambda x : x.turn == game.turn and x.state == misc.GAME_DECLINE and\
+	return True if len(filter(lambda x : x.turn == game.turn and x.state == misc_const.GAME_DECLINE and\
 		x.userId == game.activePlayerId, game.history)) else False
 
 def gotWealth(game):
@@ -186,15 +186,15 @@ def gotWealth(game):
 		game.activePlayer().currentTokenBadge.specPowId != 18:
 		return None
 	return True if len(filter(lambda x : x.tokenBadgeId == game.activePlayer().currentTokenBadge.id and\
-		x.state == misc.GAME_FINISH_TURN, game.history)) else False
+		x.state == misc_const.GAME_FINISH_TURN, game.history)) else False
 
 def getFriendsInfo(game):
 	turn = game.turn
-	histEntry = filter(lambda x : x.turn == turn and x.state == misc.GAME_CHOOSE_FRIEND,
+	histEntry = filter(lambda x : x.turn == turn and x.state == misc_const.GAME_CHOOSE_FRIEND,
 		game.history)
 	if histEntry:
 		return {'diplomatId': histEntry[0].userId, 'friendId': histEntry[0].friend}
-	histEntry = filter(lambda x : x.turn == turn - 1 and x.state == misc.GAME_CHOOSE_FRIEND,
+	histEntry = filter(lambda x : x.turn == turn - 1 and x.state == misc_const.GAME_CHOOSE_FRIEND,
 		game.history)
 	if histEntry:
 		attackedUser = dbi.getXbyY('User', 'id', histEntry[0].friend)
@@ -202,7 +202,7 @@ def getFriendsInfo(game):
 			return {'diplomatId': histEntry[0].userId, 'friendId': histEntry[0].friend} 
 	
 def getGameState(game):
-	if game.state == misc.GAME_ENDED:
+	if game.state == misc_const.GAME_ENDED:
 		return {'result': 'ok', 'statistics': json.loads(game.gameHistory[-2].action),'ended': True}
 		
 	gameAttrs = ['id', 'name', 'descr', 'state', 'turn', 'activePlayerId']
@@ -286,7 +286,7 @@ def getGameState(game):
 
 def endOfGame(game, coins = None): 
 	game.state = GAME_ENDED
-	if misc.TEST_MODE:
+	if misc_const.TEST_MODE:
 		return {'result': 'ok', 'coins': coins}
 	else:
 		gameState = getGameState(game)
@@ -343,14 +343,14 @@ def getMapState(mapId, gameId = None):
 def leave(user):
 	user.inGame = False;
 	if user.game:
-		if user.game.state == misc.GAME_WAITING:
+		if user.game.state == misc_const.GAME_WAITING:
 			if len(user.game.playersInGame()) == 0:
-				user.game.state = misc.GAME_ENDED
+				user.game.state = misc_const.GAME_ENDED
 			user.game = None
 		else:
 			if user.currentTokenBadge:
 				makeDecline(user, True)
-			if len(user.game.playersInGame()) == 0 and user.game.state == misc.GAME_PROCESSING:
+			if len(user.game.playersInGame()) == 0 and user.game.state == misc_const.GAME_PROCESSING:
 					user.game.endOfGame()
 
 def getVisibleTokenBadges(gameId):
@@ -384,24 +384,24 @@ def clearGameStateAtTheEndOfTurn(gameId):
 def checkStage(state, user, attackType = None):
 	game = user.game
 	lastEvent = game.history[-1]
-	badStage = not (lastEvent.state in misc.possiblePrevCmd[state]) 
+	badStage = not (lastEvent.state in misc_const.possiblePrevCmd[state]) 
 	if attackType:
 		curTurnHistory = filter(lambda x: x.turn == user.game.turn and 
-			x.userId == user.id and x.state == misc.GAME_CONQUER, 
+			x.userId == user.id and x.state == misc_const.GAME_CONQUER, 
 			game.history)
 		if curTurnHistory:
 			if filter(lambda x: x.warHistory.attackType == attackType, curTurnHistory):
 				badStage = True
-	if lastEvent.state == misc.GAME_CONQUER:
+	if lastEvent.state == misc_const.GAME_CONQUER:
 		battle = lastEvent.warHistory
 		victim = battle.victimBadge
 		canDefend = victim != None  and\
 			not victim.inDecline and\
-			battle.attackType != misc.ATTACK_ENCHANT and\
+			battle.attackType != misc_const.ATTACK_ENCHANT and\
 			battle.victimTokensNum > callRaceMethod(victim.raceId, 'getCasualties') and\
 			len(victim.regions) > 0 
-		badStage |= (canDefend != (state == misc.GAME_DEFEND)) or\
-			(state == misc.GAME_DEFEND and user.currentTokenBadge != victim)
-	if badStage or (user.id != game.activePlayerId and state != misc.GAME_DEFEND):
+		badStage |= (canDefend != (state == misc_const.GAME_DEFEND)) or\
+			(state == misc_const.GAME_DEFEND and user.currentTokenBadge != victim)
+	if badStage or (user.id != game.activePlayerId and state != misc_const.GAME_DEFEND):
 		raise BadFieldException('badStage')
 

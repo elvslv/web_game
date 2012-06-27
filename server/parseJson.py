@@ -1,7 +1,7 @@
 import json
 import actions 
 from gameExceptions import BadFieldException
-import misc
+import misc_const
 import random
 import sys
 import httplib
@@ -44,10 +44,10 @@ def parseDataFromFile(fileName):
 	if 'description' in object:
 		description = object['description']
 	if 'randseed' in object:
-		misc.TEST_RANDSEED = object['randseed']
+		misc_const.TEST_RANDSEED = object['randseed']
 	else:
-		misc.TEST_RANDSEED = 21425364547
-		random.seed(misc.TEST_RANDSEED)
+		misc_const.TEST_RANDSEED = 21425364547
+		random.seed(misc_const.TEST_RANDSEED)
 	conn = httplib.HTTPConnection("localhost:80", timeout = 10000)
 #	conn = httplib.HTTPConnection("server.smallworld:80", timeout = 10000)
 #	if 'include' in object:
