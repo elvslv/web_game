@@ -1,7 +1,8 @@
 INFO
 ========
 
-Web-version of tabletop game "Smallworld". Protocol description lies [here][ref2]
+Web-version of tabletop game "Smallworld". 
+Protocol description lies [here][ref2].
 Group project for "Programming rechnology" university course.  
 Authors: Vasilyeva Elena, Podolsky Leonid, Zemlyannikova Natalya.
 
